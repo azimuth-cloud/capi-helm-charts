@@ -1,0 +1,91 @@
+# Content for the clouds.yaml file
+# Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
+clouds:
+# The name of the cloud to use from the specified clouds
+cloudName: openstack
+# The PEM-encoded CA certificate for the specified cloud
+cloudCACert:
+
+# The image to use for cluster machines
+machineImage:
+
+# The name of the SSH key to inject into cluster machines
+machineSSHKeyName:
+
+# The Kubernetes version to deploy
+# This should match the version of kubelet in the image
+kubernetesVersion:
+
+# The repository to pull Kubernetes system container images from 
+kubeImageRepository: k8s.gcr.io
+
+# Values for the Kubernetes cluster network
+kubeNetwork:
+  # By default, use the private network range 172.16.0.0/12 for the cluster network
+  # We split it into two equally-sized blocks for pods and services
+  # This gives ~500,000 addresses in each block
+  pods:
+    cidrBlocks:
+      - 172.16.0.0/13
+  services:
+    cidrBlocks:
+      - 172.24.0.0/13
+  serviceDomain: cluster.local
+
+# Settings for the OpenStack networking for the cluster
+networking:
+  # The nameservers to use for the hosts
+  # By default, use Google's public DNS servers
+  dnsNameservers: [8.8.8.8, 8.8.4.4]
+  # Indicates if security groups should be managed by the cluster
+  manageSecurityGroups: true
+  # The ID of the external network to use
+  # If not given, the external network will be detected
+  externalNetworkId:
+  # Details of the internal network to use
+  internalNetwork:
+    # Filter to find an existing network for the cluster internal network
+    # See Cluster API documentation for details
+    networkFilter:
+      # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
+      # name: tenant-internal-net
+    # Filter to find an existing subnet for the cluster internal network
+    # See Cluster API documentation for details
+    subnetFilter:
+    # The CIDR to use if creating a cluster network
+    # This is only used if neither of networkFilter and subnetFilter are given
+    nodeCidr: 192.168.3.0/24
+
+# Settings for the Kubernetes API server
+apiServer:
+  # Indicates whether to deploy a load balancer for the API server
+  enableLoadBalancer: true
+  # Indicates whether to associate a floating IP with the API server
+  associateFloatingIP: true
+  # The fixed floating IP to associate with the API server
+  # If not given, a new IP will be allocated if required
+  floatingIP:
+
+# Settings for the control plane
+controlPlane:
+  # The number of control plane machines to deploy
+  # For high-availability, this should be greater than 1
+  # For etcd quorum, it should be odd - usually 3, or 5 for very large clusters
+  machineCount: 3
+  # The flavor to use for control plane machines
+  machineFlavor:
+
+# Defaults for node groups
+# Each of these can be overridden in the node group specification
+nodeGroupDefaults:
+  # The failure domain for the node group
+  failureDomain: nova
+  # The flavor to use for machines in the node group
+  machineFlavor:
+
+# The worker node groups for the cluster
+nodeGroups:
+  - # The name of the node group
+    name: md-0
+    # The number of machines in the node group
+    machineCount: 3

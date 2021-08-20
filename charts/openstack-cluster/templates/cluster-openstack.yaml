@@ -1,0 +1,33 @@
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+kind: OpenStackCluster
+metadata:
+  name: {{ include "openstack-cluster.clusterName" . }}
+  labels: {{ include "openstack-cluster.commonLabels" . | nindent 4 }}
+spec:
+  identityRef:
+    kind: Secret
+    name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
+  cloudName: {{ .Values.cloudName }}
+  dnsNameservers: {{ .Values.networking.dnsNameservers | toYaml | nindent 4 }}
+  managedSecurityGroups: {{ .Values.networking.manageSecurityGroups }}
+  {{- with .Values.networking.externalNetworkID }}
+  externalNetworkId: {{ . }}
+  {{- end }}
+  {{- with .Values.networking.internalNetwork }}
+  {{- if or .networkFilter .subnetFilter }}
+  {{- with .networkFilter }}
+  network: {{ . | toYaml | nindent 4 }}
+  {{- end }}
+  {{- with .subnetFilter }}
+  subnet: {{ . | toYaml | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  nodeCidr: {{ .nodeCidr }}
+  {{- end }}
+  {{- end }}
+  managedAPIServerLoadBalancer: {{ .Values.apiServer.enableLoadBalancer }}
+  disableAPIServerFloatingIP: {{ not .Values.apiServer.associateFloatingIP }}
+  {{- with .Values.apiServer.floatingIP }}
+  apiServerFloatingIP: {{ . }}
+  {{- end }}
