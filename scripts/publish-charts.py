@@ -121,7 +121,7 @@ def get_changed_charts():
         chart_directory = pathlib.Path(__file__).resolve().parent.parent
     charts = [path.parent for path in pathlib.Path(chart_directory).glob('**/Chart.yaml')]
     # Cross-reference the charts against the changed files
-    return [chart for chart in charts if is_changed(chart)]
+    return [chart for chart in charts if is_changed(chart, changed)]
 
 
 def is_changed(path, changed_files):
