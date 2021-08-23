@@ -2,12 +2,12 @@ apiVersion: v1
 entries:
   openstack-cluster:
   - apiVersion: v2
-    created: "2021-08-23T09:59:05.503279+01:00"
+    created: "2021-08-23T10:02:07.564387+01:00"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster API.
-    digest: 0b39e3634a6e16aff39817485dc8005f859506e1c3020829136451e07951a525
+    digest: 02991c8e2bd8ca422d208805b724d591fce14c58750c89b8ec376c9216e15633
     name: openstack-cluster
     type: application
     urls:
     - openstack-cluster-0.1.0-dev.0.main.2.tgz
     version: 0.1.0-dev.0.main.2
-generated: "2021-08-23T09:59:05.50271+01:00"
+generated: "2021-08-23T10:02:07.563862+01:00"
