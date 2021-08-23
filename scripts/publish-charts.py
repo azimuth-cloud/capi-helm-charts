@@ -146,29 +146,30 @@ def main():
     print(f"[INFO] Charts will be published to branch '{publish_branch}'")
     version = get_version()
     print(f"[INFO] Charts will be published with version '{version}'")
-    with tempfile.TemporaryDirectory() as publish_directory:
-        setup_publish_branch(publish_branch, publish_directory)
-        for chart_directory in charts:
-            print(f"[INFO] Packaging chart in {chart_directory}")
-            cmd([
-                "helm",
-                "package",
-                "--dependency-update",
-                "--version",
-                version,
-                "--destination",
-                publish_directory,
-                chart_directory
-            ])
-        # Re-index the publish directory
-        print("[INFO] Generating Helm repository index file")
-        cmd(["helm", "repo", "index", publish_directory])
-        with working_directory(publish_directory):
-            print("[INFO] Committing changed files")
-            cmd(["git", "add", "-A"])
-            cmd(["git", "commit", "-m", f"Publishing charts for {version}"])
-            print(f"[INFO] Pushing changes to branch '{publish_branch}'")
-            cmd(["git", "push", "--set-upstream", "origin", publish_branch])
+    publish_directory = tempfile.mkdtemp()
+#    with tempfile.TemporaryDirectory() as publish_directory:
+    setup_publish_branch(publish_branch, publish_directory)
+    for chart_directory in charts:
+        print(f"[INFO] Packaging chart in {chart_directory}")
+        cmd([
+            "helm",
+            "package",
+            "--dependency-update",
+            "--version",
+            version,
+            "--destination",
+            publish_directory,
+            chart_directory
+        ])
+    # Re-index the publish directory
+    print("[INFO] Generating Helm repository index file")
+    cmd(["helm", "repo", "index", publish_directory])
+    with working_directory(publish_directory):
+        print("[INFO] Committing changed files")
+        cmd(["git", "add", "-A"])
+        cmd(["git", "commit", "-m", f"Publishing charts for {version}"])
+        print(f"[INFO] Pushing changes to branch '{publish_branch}'")
+        cmd(["git", "push", "--set-upstream", "origin", publish_branch])
 
 
 if __name__ == "__main__":
