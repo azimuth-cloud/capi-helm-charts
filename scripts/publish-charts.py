@@ -130,6 +130,12 @@ def setup_publish_branch(branch, publish_directory):
             cmd(['git', 'init'])
             cmd(['git', 'remote', 'add', 'origin', remote])
             cmd(['git', 'checkout', '--orphan', branch])
+    username = os.environ.get('GITHUB_ACTOR', 'github-actions-bot')
+    email = f"{username}@users.noreply.github.com"
+    print(f"[INFO] Configuring git to use username '{username}'")
+    with working_directory(publish_directory):
+        cmd(["git", "config", "user.name", username])
+        cmd(["git", "config", "user.email", email])
 
 
 def main():
