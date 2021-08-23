@@ -25,6 +25,8 @@ import os
 import re
 import subprocess
 import tempfile
+import urllib
+
 
 
 @contextlib.contextmanager
@@ -112,6 +114,13 @@ def setup_publish_branch(branch, publish_directory):
     repository = os.environ.get('GITHUB_REPOSITORY', 'stackhpc/capi-helm-charts')
     remote = f"{server_url}/{repository}.git"
     print(f"[INFO] Cloning {remote}@{branch} into {publish_directory}")
+    # If there is a token in the environment, add it to the remote
+    if 'GITHUB_TOKEN' in os.environ:
+        print("[INFO] Adding authentication token to URL")
+        token = os.environ['GITHUB_TOKEN']
+        remote_parts = urllib.parse.urlsplit(remote)
+        new_remote_parts = remote_parts._replace(netloc = f"{token}@{remote_parts.netloc}")
+        remote = urllib.parse.urlunsplit(new_remote_parts)
     # Try to clone the branch
     # If it fails, create a new empty git repo with the same remote
     try:
