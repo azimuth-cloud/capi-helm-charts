@@ -119,8 +119,9 @@ def setup_publish_branch(branch, publish_directory):
         print("[INFO] Adding authentication token to URL")
         token = os.environ['GITHUB_TOKEN']
         remote_parts = urllib.parse.urlsplit(remote)
-        new_remote_parts = remote_parts._replace(netloc = f"{token}@{remote_parts.netloc}")
+        new_remote_parts = remote_parts._replace(netloc = f"x-access-token:{token}@{remote_parts.netloc}")
         remote = urllib.parse.urlunsplit(new_remote_parts)
+        print(remote)
     # Try to clone the branch
     # If it fails, create a new empty git repo with the same remote
     try:
