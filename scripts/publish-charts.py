@@ -19,6 +19,7 @@ This means that referencing the chart at a particular SHA automatically picks up
 the correct util image for that version.
 """
 
+import base64
 import contextlib
 import pathlib
 import os
@@ -138,11 +139,13 @@ def setup_publish_branch(branch, publish_directory):
         cmd(["git", "config", "user.name", username])
         cmd(["git", "config", "user.email", email])
         print("[INFO] Configuring git to use authentication token")
+        # Basic auth credentials should be base64-encoded
+        basic_auth = f"x-access-token:{os.environ['GITHUB_TOKEN']}"
         cmd([
             "git",
             "config",
             "http.extraheader",
-            f"Authorization: Basic {os.environ['GITHUB_TOKEN']}"
+            f"Authorization: Basic {base64.b64encode(basic_auth.encode()).decode()}"
         ])
 
 
