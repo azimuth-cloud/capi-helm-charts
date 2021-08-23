@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eo pipefail
+
+#####
+# Simple script that selects the correct kubectl version for the target server
+#####
+
+server_version="$(kubectl-latest version -o json | jq '"v" + .serverVersion.major + "." + .serverVersion.minor')"
+exec kubectl-$server_version "$@"

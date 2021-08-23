@@ -60,12 +60,16 @@ SEMVER_REGEX = r"^v?(?P<major>[0-9]+).(?P<minor>[0-9]+).(?P<patch>[0-9]+)(-(?P<p
 
 def get_version():
     """
-    Returns a (version, is_tag) tuple where version is a SemVer-compliant version based on Git information
-    for the current working directory and is_tag is true iff the current commit is a tagged commit.
+    Returns a (version, app_version, is_tag) tuple where version is a SemVer-compliant version based on
+    Git information for the current working directory, app_version is the short-sha as used to tag the
+    utils image and is_tag is true iff the current commit is a tagged commit.
     
     The version is based on the distance from the last tag and includes the name of the branch that the
     commit is on. It is is constructed such that the versions for a particular branch will order correctly.
     """
+    # The app version is always the short SHA
+    app_version = cmd(["git", "rev-parse", "--short", "HEAD"])
+    # Assembling the version is more complicated
     try:
         # Start by trying to find the most recent tag
         last_tag = cmd(["git", "describe", "--tags", "--abbrev=0"])
@@ -106,39 +110,16 @@ def get_version():
         version += f"-{prerelease_vn}"
 
     # The current commit is a tagged commit if the number of commits since the last tag is zero
-    return version, commits == 0
+    return version, app_version, commits == 0
 
 
-def get_charts():
+def is_changed(path, changed_paths):
     """
-    Returns the list of chart directories for the repository.
-    """
-    if 'CHART_DIRECTORY' in os.environ:
-        chart_directory = pathlib.Path(os.environ['CHART_DIRECTORY']).resolve()
-    else:
-        chart_directory = pathlib.Path(__file__).resolve().parent.parent
-    return [path.parent for path in pathlib.Path(chart_directory).glob('**/Chart.yaml')]
-
-
-def get_changed_charts(charts):
-    """
-    Returns the list of chart directories that were changed by the last commit.
-    """
-    # First, get the files that were changed by the last commit
-    commit = cmd(["git", "rev-parse", "HEAD"])
-    commit_files = cmd(["git", "show", "--pretty=", "--name-only", commit])
-    changed = [pathlib.Path(filename).resolve() for filename in commit_files.splitlines()]
-    # Cross-reference the charts against the changed files
-    return [chart for chart in charts if is_changed(chart, changed)]
-
-
-def is_changed(path, changed_files):
-    """
-    Returns true if the given path is in the changed files.
+    Returns true if the given path is in the changed paths.
     """
     return any(
         changed_file.is_relative_to(pathlib.Path(path).resolve())
-        for changed_file in changed_files
+        for changed_file in changed_paths
     )
 
 
@@ -189,22 +170,49 @@ def main():
     """
     Entrypoint for the script.
     """
-    # Get the version to use for deployed charts
-    version, is_tag = get_version()
-    print(f"[INFO] Charts will be published with version '{version}'")
-    # If the commit is a tagged commit, we will publish all the charts, regardless of
-    # whether they have changed
-    charts = get_charts()
-    if is_tag:
-        print("[INFO] Detected tagged commit - publishing all charts")
+    # Get the directories we will be working with
+    repo_root = pathlib.Path(__file__).resolve().parent.parent
+    if 'CHART_DIRECTORY' in os.environ:
+        chart_directory = pathlib.Path(os.environ['CHART_DIRECTORY']).resolve()
     else:
+        chart_directory = repo_root / "charts"
+    if 'IMAGE_DIRECTORY' in os.environ:
+        image_directory = pathlib.Path(os.environ['IMAGE_DIRECTORY']).resolve()
+    else:
+        image_directory = repo_root / "utils"
+
+    # Get the version to use for deployed charts
+    version, app_version, is_tag = get_version()
+    print(f"[INFO] Charts will be published with version '{version}'")
+
+    # Get the paths that were changed by the curent commit
+    commit = cmd(["git", "rev-parse", "HEAD"])
+    commit_files = cmd(["git", "show", "--pretty=", "--name-only", commit])
+    changed_paths = [pathlib.Path(filename).resolve() for filename in commit_files.splitlines()]
+
+    # Get the charts in the repository
+    charts = [path.parent for path in chart_directory.glob('**/Chart.yaml')]
+
+    # Decide which charts we are actually going to publish
+    if is_tag:
+        # If the commit is a tag, publish all the charts regardless of changes
+        # so that they get the version bump
+        print("[INFO] Detected tagged commit - publishing all charts")
+    elif is_changed(image_directory, changed_paths):
+        # If the image was changed, publish all the charts regardless of changes
+        # so that they pick up the new image for any deployment jobs
+        print("[INFO] Image for deploy jobs has changed - publishing all charts")
+    else:
+        # In all other cases, just publish the charts that changed
         print("[INFO] Publishing changed charts only")
-        charts = get_changed_charts(charts)
+        charts = [chart for chart in charts if is_changed(chart, changed_paths)]
     if charts:
         print(f"[INFO] Publishing {len(charts)} charts")
     else:
         print("[INFO] No charts to publish - exiting")
         return
+
+    # Publish the charts and re-generate the repository index
     publish_branch = os.environ.get('PUBLISH_BRANCH', 'gh-pages')
     print(f"[INFO] Charts will be published to branch '{publish_branch}'")
     with tempfile.TemporaryDirectory() as publish_directory:
@@ -217,6 +225,8 @@ def main():
                 "--dependency-update",
                 "--version",
                 version,
+                "--app-version",
+                app_version,
                 "--destination",
                 publish_directory,
                 chart_directory
