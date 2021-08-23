@@ -198,9 +198,11 @@ def main():
     if is_tag:
         print("[INFO] Detected tagged commit - publishing all charts")
     else:
+        print("[INFO] Publishing changed charts only")
         charts = get_changed_charts(charts)
-        print(f"[INFO] Publishing {len(charts)} changed charts only")
-    if not charts:
+    if charts:
+        print(f"[INFO] Publishing {len(charts)} charts")
+    else:
         print("[INFO] No charts to publish - exiting")
         return
     publish_branch = os.environ.get('PUBLISH_BRANCH', 'gh-pages')
