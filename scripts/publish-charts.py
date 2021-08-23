@@ -106,6 +106,34 @@ def get_version():
     return version
 
 
+def get_changed_charts():
+    """
+    Returns the list of chart directories that were changed by the last commit.
+    """
+    # First, get the files that were changed by the last commit
+    commit = cmd(["git", "rev-parse", "HEAD"])
+    commit_files = cmd(["git", "show", "--pretty=", "--name-only", commit])
+    changed = [pathlib.Path(filename).resolve() for filename in commit_files.splitlines()]
+    # Then get the chart directories
+    if 'CHART_DIRECTORY' in os.environ:
+        chart_directory = pathlib.Path(os.environ['CHART_DIRECTORY']).resolve()
+    else:
+        chart_directory = pathlib.Path(__file__).resolve().parent.parent
+    charts = [path.parent for path in pathlib.Path(chart_directory).glob('**/Chart.yaml')]
+    # Cross-reference the charts against the changed files
+    return [chart for chart in charts if is_changed(chart)]
+
+
+def is_changed(path, changed_files):
+    """
+    Returns true if the given path is in the changed files.
+    """
+    return any(
+        changed_file.is_relative_to(pathlib.Path(path).resolve())
+        for changed_file in changed_files
+    )
+
+
 def setup_publish_branch(branch, publish_directory):
     """
     Clones the specified branch into the specified directory.
@@ -153,12 +181,12 @@ def main():
     """
     Entrypoint for the script.
     """
-    if 'CHART_DIRECTORY' in os.environ:
-        chart_directory = pathlib.Path(os.environ['CHART_DIRECTORY']).resolve()
+    charts = get_changed_charts()
+    if charts:
+        print(f"[INFO] Detected {len(charts)} changed charts")
     else:
-        chart_directory = pathlib.Path(__file__).resolve().parent.parent
-    charts = [path.parent for path in pathlib.Path(chart_directory).glob('**/Chart.yaml')]
-    print(f"[INFO] Detected {len(charts)} charts")
+        print("[INFO] No changes to charts detected - exiting")
+        return
     publish_branch = os.environ.get('PUBLISH_BRANCH', 'gh-pages')
     print(f"[INFO] Charts will be published to branch '{publish_branch}'")
     version = get_version()
