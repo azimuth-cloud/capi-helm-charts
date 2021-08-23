@@ -25,7 +25,6 @@ import os
 import re
 import subprocess
 import tempfile
-import urllib
 
 
 
@@ -114,14 +113,6 @@ def setup_publish_branch(branch, publish_directory):
     repository = os.environ.get('GITHUB_REPOSITORY', 'stackhpc/capi-helm-charts')
     remote = f"{server_url}/{repository}.git"
     print(f"[INFO] Cloning {remote}@{branch} into {publish_directory}")
-    # If there is a token in the environment, add it to the remote
-    if 'GITHUB_TOKEN' in os.environ:
-        print("[INFO] Adding authentication token to URL")
-        token = os.environ['GITHUB_TOKEN']
-        remote_parts = urllib.parse.urlsplit(remote)
-        new_remote_parts = remote_parts._replace(netloc = f"x-access-token:{token}@{remote_parts.netloc}")
-        remote = urllib.parse.urlunsplit(new_remote_parts)
-        print(remote)
     # Try to clone the branch
     # If it fails, create a new empty git repo with the same remote
     try:
@@ -142,17 +133,23 @@ def setup_publish_branch(branch, publish_directory):
             cmd(['git', 'checkout', '--orphan', branch])
     username = os.environ.get('GITHUB_ACTOR', 'github-actions-bot')
     email = f"{username}@users.noreply.github.com"
-    print(f"[INFO] Configuring git to use username '{username}'")
     with working_directory(publish_directory):
+        print(f"[INFO] Configuring git to use username '{username}'")
         cmd(["git", "config", "user.name", username])
         cmd(["git", "config", "user.email", email])
+        print("[INFO] Configuring git to use authentication token")
+        cmd([
+            "git",
+            "config",
+            "http.extraheader",
+            f"Authorization: Basic {os.environ['GITHUB_TOKEN']}"
+        ])
 
 
 def main():
     """
     Entrypoint for the script.
     """
-    print(cmd(["git", "config", "--list"]))
     if 'CHART_DIRECTORY' in os.environ:
         chart_directory = pathlib.Path(os.environ['CHART_DIRECTORY']).resolve()
     else:
@@ -163,31 +160,29 @@ def main():
     print(f"[INFO] Charts will be published to branch '{publish_branch}'")
     version = get_version()
     print(f"[INFO] Charts will be published with version '{version}'")
-    publish_directory = tempfile.mkdtemp()
-    print(publish_directory)
-#    with tempfile.TemporaryDirectory() as publish_directory:
-    setup_publish_branch(publish_branch, publish_directory)
-    for chart_directory in charts:
-        print(f"[INFO] Packaging chart in {chart_directory}")
-        cmd([
-            "helm",
-            "package",
-            "--dependency-update",
-            "--version",
-            version,
-            "--destination",
-            publish_directory,
-            chart_directory
-        ])
-    # Re-index the publish directory
-    print("[INFO] Generating Helm repository index file")
-    cmd(["helm", "repo", "index", publish_directory])
-    with working_directory(publish_directory):
-        print("[INFO] Committing changed files")
-        cmd(["git", "add", "-A"])
-        cmd(["git", "commit", "-m", f"Publishing charts for {version}"])
-        print(f"[INFO] Pushing changes to branch '{publish_branch}'")
-        cmd(["git", "push", "--set-upstream", "origin", publish_branch])
+    with tempfile.TemporaryDirectory() as publish_directory:
+        setup_publish_branch(publish_branch, publish_directory)
+        for chart_directory in charts:
+            print(f"[INFO] Packaging chart in {chart_directory}")
+            cmd([
+                "helm",
+                "package",
+                "--dependency-update",
+                "--version",
+                version,
+                "--destination",
+                publish_directory,
+                chart_directory
+            ])
+        # Re-index the publish directory
+        print("[INFO] Generating Helm repository index file")
+        cmd(["helm", "repo", "index", publish_directory])
+        with working_directory(publish_directory):
+            print("[INFO] Committing changed files")
+            cmd(["git", "add", "-A"])
+            cmd(["git", "commit", "-m", f"Publishing charts for {version}"])
+            print(f"[INFO] Pushing changes to branch '{publish_branch}'")
+            cmd(["git", "push", "--set-upstream", "origin", publish_branch])
 
 
 if __name__ == "__main__":
