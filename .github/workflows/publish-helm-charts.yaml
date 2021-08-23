@@ -1,0 +1,18 @@
+name: Publish Helm charts
+# Run the tasks on every push
+on: push
+jobs:
+  publish_charts:
+    name: Publish Helm charts to GitHub pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+        with:
+          # This is important for "git rev-list --count" to work correctly when
+          # determining the number of commits since the last tag
+          fetch-depth: 0
+
+      # This action packages and pushes the chart
+      - name: Publish charts
+        run: ./scripts/publish-charts.py
