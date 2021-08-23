@@ -136,6 +136,7 @@ def main():
     """
     Entrypoint for the script.
     """
+    print(cmd(["git", "config", "--list"]))
     if 'CHART_DIRECTORY' in os.environ:
         chart_directory = pathlib.Path(os.environ['CHART_DIRECTORY']).resolve()
     else:
