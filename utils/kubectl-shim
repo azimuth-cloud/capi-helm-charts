@@ -1,6 +1,0 @@
-#!/bin/sh
-
-set -eo pipefail
-
-server_version="$(kubectl-latest version -o json | jq '"v" + .serverVersion.major + "." + .serverVersion.minor')"
-exec kubectl-$server_version "$@"
