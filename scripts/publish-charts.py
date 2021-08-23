@@ -147,6 +147,7 @@ def main():
     version = get_version()
     print(f"[INFO] Charts will be published with version '{version}'")
     publish_directory = tempfile.mkdtemp()
+    print(publish_directory)
 #    with tempfile.TemporaryDirectory() as publish_directory:
     setup_publish_branch(publish_branch, publish_directory)
     for chart_directory in charts:
