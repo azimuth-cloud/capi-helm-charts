@@ -1,5 +1,5 @@
 ---
-{{- $values := .Values.helmController -}}
+{{- $values := .Values.helmController }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
