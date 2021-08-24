@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   cluster-addons:
   - apiVersion: v2
+    appVersion: 7dabd72
+    created: "2021-08-24T12:58:03.336245478Z"
+    description: Helm chart that deploys cluster addons for a CAPI cluster.
+    digest: 70ff6e33e2e5573beb959ffd52d55cf251f074c54ba4110c5ae5d9175bbb019c
+    name: cluster-addons
+    type: application
+    urls:
+    - cluster-addons-0.1.0-dev.0.main.23.tgz
+    version: 0.1.0-dev.0.main.23
+  - apiVersion: v2
     appVersion: 2a9258f
-    created: "2021-08-24T10:23:40.636782595Z"
+    created: "2021-08-24T12:58:03.335949776Z"
     dependencies:
     - name: tigera-operator
       repository: https://docs.projectcalico.org/charts
@@ -17,7 +27,7 @@ entries:
     version: 0.1.0-dev.0.main.22
   - apiVersion: v2
     appVersion: 58bcf86
-    created: "2021-08-24T10:23:40.631515958Z"
+    created: "2021-08-24T12:58:03.326353313Z"
     description: Helm chart for deploying cluster addons for a CAPI cluster.
     digest: f84739fe8b87f1b42d3c445060314914851b557d52f262da03b427e508f08d27
     name: cluster-addons
@@ -27,7 +37,7 @@ entries:
     version: 0.1.0-dev.0.main.21
   - apiVersion: v2
     appVersion: 1c36f5e
-    created: "2021-08-24T10:23:40.631175255Z"
+    created: "2021-08-24T12:58:03.326025911Z"
     description: Helm chart for deploying cluster addons for a CAPI cluster.
     digest: 26eee5901203b46cd09aa7c61959497f92ec81bc36f064f763ef769bc6548222
     name: cluster-addons
@@ -38,7 +48,7 @@ entries:
   openstack-cluster:
   - apiVersion: v2
     appVersion: a61a283
-    created: "2021-08-24T10:23:40.639284012Z"
+    created: "2021-08-24T12:58:03.337821788Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: a8f5c064a336bf90f1b544816406202aa6a7c9b8afb88548c52c2b533a051e12
@@ -49,7 +59,7 @@ entries:
     version: 0.1.0-dev.0.main.19
   - apiVersion: v2
     appVersion: f46e1fa
-    created: "2021-08-24T10:23:40.638558407Z"
+    created: "2021-08-24T12:58:03.337343385Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7daff31113f1972c8bcfc94c35c3379701250fff75b9d9d1535bae694cf51b69
@@ -59,7 +69,7 @@ entries:
     - openstack-cluster-0.1.0-dev.0.main.18.tgz
     version: 0.1.0-dev.0.main.18
   - apiVersion: v2
-    created: "2021-08-24T10:23:40.637633101Z"
+    created: "2021-08-24T12:58:03.336697681Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 016cc74597d6333a0eda905db7f6fdcf78c5fe6cf20b376dd651cd756383c3e9
@@ -68,4 +78,4 @@ entries:
     urls:
     - openstack-cluster-0.1.0-dev.0.main.12.tgz
     version: 0.1.0-dev.0.main.12
-generated: "2021-08-24T10:23:40.630672552Z"
+generated: "2021-08-24T12:58:03.325596908Z"
