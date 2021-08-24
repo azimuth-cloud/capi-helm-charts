@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   cluster-addons:
   - apiVersion: v2
+    appVersion: 58bcf86
+    created: "2021-08-24T10:05:41.265539359Z"
+    description: Helm chart for deploying cluster addons for a CAPI cluster.
+    digest: f84739fe8b87f1b42d3c445060314914851b557d52f262da03b427e508f08d27
+    name: cluster-addons
+    type: application
+    urls:
+    - cluster-addons-0.1.0-dev.0.main.21.tgz
+    version: 0.1.0-dev.0.main.21
+  - apiVersion: v2
     appVersion: 1c36f5e
-    created: "2021-08-24T09:42:39.870760654Z"
+    created: "2021-08-24T10:05:41.265247357Z"
     description: Helm chart for deploying cluster addons for a CAPI cluster.
     digest: 26eee5901203b46cd09aa7c61959497f92ec81bc36f064f763ef769bc6548222
     name: cluster-addons
@@ -14,7 +24,7 @@ entries:
   openstack-cluster:
   - apiVersion: v2
     appVersion: a61a283
-    created: "2021-08-24T09:42:39.872217064Z"
+    created: "2021-08-24T10:05:41.267111671Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: a8f5c064a336bf90f1b544816406202aa6a7c9b8afb88548c52c2b533a051e12
@@ -25,7 +35,7 @@ entries:
     version: 0.1.0-dev.0.main.19
   - apiVersion: v2
     appVersion: f46e1fa
-    created: "2021-08-24T09:42:39.871753461Z"
+    created: "2021-08-24T10:05:41.266548666Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7daff31113f1972c8bcfc94c35c3379701250fff75b9d9d1535bae694cf51b69
@@ -35,7 +45,7 @@ entries:
     - openstack-cluster-0.1.0-dev.0.main.18.tgz
     version: 0.1.0-dev.0.main.18
   - apiVersion: v2
-    created: "2021-08-24T09:42:39.871262158Z"
+    created: "2021-08-24T10:05:41.266048763Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 016cc74597d6333a0eda905db7f6fdcf78c5fe6cf20b376dd651cd756383c3e9
@@ -44,4 +54,4 @@ entries:
     urls:
     - openstack-cluster-0.1.0-dev.0.main.12.tgz
     version: 0.1.0-dev.0.main.12
-generated: "2021-08-24T09:42:39.870380152Z"
+generated: "2021-08-24T10:05:41.264779954Z"
