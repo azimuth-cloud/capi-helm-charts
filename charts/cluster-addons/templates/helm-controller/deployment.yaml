@@ -1,0 +1,41 @@
+---
+{{- $values := .Values.helmController -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "helm-controller") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "helm-controller") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{ include "cluster-addons.componentSelectorLabels" (list . "helm-controller") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "cluster-addons.componentSelectorLabels" (list . "helm-controller") | nindent 8 }}
+      {{- with $values.podAnnotations }}
+      annotations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      containers:
+        - name: helm-controller
+          image: {{ printf "%s:%s" $values.image.repository $values.image.tag }}
+          imagePullPolicy: {{ $values.image.pullPolicy }}
+          command: ["helm-controller"]
+          {{- with $values.securityContext }}
+          securityContext: {{ toYaml $values.securityContext | nindent 12 }}
+          {{- end }}
+          {{- with $values.resources }}
+          resources: {{ toYaml $values.resources | nindent 12 }}
+          {{- end }}
+      {{- with $values.podSecurityContext }}
+      securityContext: {{ toYaml $values.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- with $values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
