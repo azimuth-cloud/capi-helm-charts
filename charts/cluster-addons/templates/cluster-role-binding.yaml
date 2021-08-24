@@ -2,11 +2,11 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "cluster-addons.fullname" . }}
+  name: "{{ include "cluster-addons.fullname" . }}:deployer"
   labels: {{ include "cluster-addons.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "cluster-addons.fullname" . }}
+    name: {{ include "cluster-addons.componentName" (list . "deployer") }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io

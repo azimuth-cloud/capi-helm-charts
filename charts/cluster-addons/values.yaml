@@ -6,7 +6,7 @@ jobImage:
 # The tolerations to use for jobs that are part of bootstrapping the cluster
 # e.g. CNI, external cloud provider
 bootstrapTolerations:
-  # All the job to run on a control plane node
+  # Allow the job to run on a control plane node if required
   - key: node-role.kubernetes.io/master
     operator: Exists
     effect: NoSchedule
@@ -19,3 +19,43 @@ bootstrapTolerations:
   - key: node.kubernetes.io/not-ready
     operator: Exists
     effect: NoSchedule
+
+# Settings for the CNI addon
+cni:
+  # Indicates if a CNI should be deployed
+  enabled: true
+  # The type of CNI to deploy - support values are calico, weave
+  type: calico
+  # Settings for the calico CNI
+  calico:
+    # The version of Calico to deploy
+    # This is only used in the default manifest URL
+    version: v3.20
+    # The URL of the Calico manifest
+    # This is treated as a template during rendering
+    manifestURL: https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
+  # Settings for the Weave CNI
+  weave:
+    # The base URL of the Weave manifest
+    # The output of "kubectl version" is added as a query parameter, as per the docs
+    manifestURL: https://cloud.weave.works/k8s/net
+
+# Settings for the cloud controller manager for external cloud providers
+ccm:
+  # Indicates if an external cloud controller manager should be deployed
+  enabled: true
+  # The type of the external CCM to deploy - currently only OpenStack is supported
+  type: openstack
+  # Settings for the OpenStack cloud controller manager
+  openstack:
+    # The Helm chart to use to deploy the OpenStack CCM
+    chart:
+      repo: https://kubernetes.github.io/cloud-provider-openstack
+      name: openstack-cloud-controller-manager
+      version: 1.1.2
+    # The release details for the OpenStack CCM
+    release:
+      name: openstack-cloud-controller-manager
+      namespace: capi-system
+      timeout:
+    # All other settings are used as values for the chart

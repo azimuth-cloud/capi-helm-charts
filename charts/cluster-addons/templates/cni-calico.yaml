@@ -1,0 +1,9 @@
+{{- define "cluster-addons.cni-calico.script" -}}
+set -ex
+kubectl apply -f {{ tpl .Values.cni.calico.manifestURL . }}
+kubectl -n kube-system rollout status daemonset/calico-node
+{{- end }}
+
+{{- if and .Values.cni.enabled (eq .Values.cni.type "calico") }}
+{{ include "cluster-addons.job" (list . "cni-calico" (dict "cni" true)) }}
+{{- end }}

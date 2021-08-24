@@ -80,3 +80,94 @@ Component labels
 {{ include "cluster-addons.commonLabels" (index . 0) }}
 {{ include "cluster-addons.componentSelectorLabels" . }}
 {{- end }}
+
+{{/*
+Job specification for deploying an addon.
+*/}}
+{{- define "cluster-addons.job" -}}
+{{- $ctx := index . 0 }}
+{{- $jobName := index . 1 }}
+{{- $jobOpts := index . 2 }}
+{{- $jobType := default "script" $jobOpts.type }}
+{{- $scriptTemplate := default (printf "cluster-addons.%s.script" $jobName) $jobOpts.scriptTemplate }}
+{{- $helmOpts := default dict $jobOpts.helmOpts }}
+{{- $helmValues := omit $helmOpts "chart" "release" }}
+{{- $bootstrap := default false $jobOpts.bootstrap }}
+{{- $cni := default false $jobOpts.cni }}
+{{- if and (eq $jobType "helm") $helmValues }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ctx $jobName) }}
+  labels: {{ include "cluster-addons.componentLabels" (list $ctx $jobName) | nindent 4 }}
+type: Opaque
+stringData:
+  values.yaml: |
+    {{- toYaml $helmValues | nindent 4 }}
+---
+{{- end }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ctx $jobName) }}-{{ $ctx.Release.Revision }}
+  labels: {{ include "cluster-addons.componentLabels" (list $ctx $jobName) | nindent 4 }}
+spec:
+  # Keep trying for a decent amount of time before failing
+  backoffLimit: 1000
+  # Keep succeeded jobs for 5m after finishing
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels: {{ include "cluster-addons.componentSelectorLabels" (list $ctx $jobName) | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "cluster-addons.componentName" (list $ctx "deployer") }}
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ $jobName }}
+          image: {{ printf "%s:%s" $ctx.Values.jobImage.repository (default $ctx.Chart.AppVersion $ctx.Values.jobImage.tag) }}
+          imagePullPolicy: {{ $ctx.Values.jobImage.pullPolicy }}
+          {{- if eq $jobType "helm" }}
+          args:
+            - helm
+            - upgrade
+            - {{ $helmOpts.release.name }}
+            - {{ $helmOpts.chart.name }}
+            - --install
+            - --create-namespace
+            - --namespace
+            - {{ $helmOpts.release.namespace }}
+            - --repo
+            - {{ $helmOpts.chart.repo }}
+            - --version
+            - {{ $helmOpts.chart.version | quote }}
+            - --wait
+            - --timeout
+            - {{ default "5m" $helmOpts.release.timeout | quote }}
+          {{- if $helmValues }}
+            - --values
+            - /config/values.yaml
+          volumeMounts:
+            - name: helm-values
+              mountPath: /config
+              readOnly: true
+          {{- end }}
+          {{- else }}
+          args:
+            - /bin/sh
+            - -c
+            - |
+                {{ include $scriptTemplate $ctx | indent 16 | trim }}
+          {{- end }}
+      {{- if and (eq $jobType "helm") $helmValues }}
+      volumes:
+        - name: helm-values
+          secret:
+            secretName: {{ include "cluster-addons.componentName" (list $ctx $jobName) }}
+      {{- end }}
+      {{- if or $bootstrap $cni }}
+      tolerations: {{ $ctx.Values.bootstrapTolerations | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $cni }}
+      hostNetwork: true
+      {{- end }}
+{{- end }}
