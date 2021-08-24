@@ -1,0 +1,28 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "calico-install") }}-{{ .Release.Revision }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "calico-install") | nindent 4 }}
+spec:
+  # Keep trying for a decent amount of time before failing
+  backoffLimit: 1000
+  # Keep succeeded jobs for 5m after finishing
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels: {{ include "cluster-addons.componentSelectorLabels" (list . "calico-install") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "cluster-addons.fullname" . }}
+      restartPolicy: OnFailure
+      containers:
+        - name: calico-install
+          image: {{ printf "%s:%s" .Values.jobImage.repository (default .Chart.AppVersion .Values.jobImage.tag) }}
+          imagePullPolicy: {{ .Values.jobImage.pullPolicy }}
+          args:
+            - /bin/sh
+            - -c
+            - |
+                set -ex
+                kubectl apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
+                kubectl -n kube-system rollout status daemonset/calico-node

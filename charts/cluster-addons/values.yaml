@@ -1,5 +1,4 @@
-helmController:
-  image:
-    repository: rancher/helm-controller
-    tag: v0.1.2
-    pullPolicy: IfNotPresent
+jobImage:
+  repository: ghcr.io/stackhpc/k8s-utils
+  tag: # defaults to chart appVersion
+  pullPolicy: IfNotPresent
