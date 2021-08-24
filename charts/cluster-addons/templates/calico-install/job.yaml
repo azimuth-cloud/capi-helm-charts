@@ -26,3 +26,6 @@ spec:
                 set -ex
                 kubectl apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
                 kubectl -n kube-system rollout status daemonset/calico-node
+      # This job bootstraps the CNI, so must use host networking
+      hostNetwork: true
+      tolerations: {{ .Values.bootstrapTolerations | toYaml | nindent 8 }}

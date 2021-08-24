@@ -2,3 +2,20 @@ jobImage:
   repository: ghcr.io/stackhpc/k8s-utils
   tag: # defaults to chart appVersion
   pullPolicy: IfNotPresent
+
+# The tolerations to use for jobs that are part of bootstrapping the cluster
+# e.g. CNI, external cloud provider
+bootstrapTolerations:
+  # All the job to run on a control plane node
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  # Allow the job to run on a node awaiting initialisation by an external cloud provider
+  - key: node.cloudprovider.kubernetes.io/uninitialized
+    operator: Equal
+    value: "true"
+    effect: NoSchedule
+  # Allow the job to run on nodes that are not ready
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoSchedule
