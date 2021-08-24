@@ -5,8 +5,7 @@ metadata:
   name: {{ include "cluster-addons.fullname" . }}
   labels: {{ include "cluster-addons.labels" . | nindent 4 }}
 subjects:
-  - apiGroup: rbac.authorization.k8s.io
-    kind: ServiceAccount
+  - kind: ServiceAccount
     name: {{ include "cluster-addons.fullname" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
