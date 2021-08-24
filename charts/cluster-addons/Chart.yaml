@@ -1,5 +1,10 @@
 apiVersion: v2
 name: cluster-addons
-description: Helm chart for deploying cluster addons for a CAPI cluster.
+description: Metachart for deploying cluster addons for a CAPI cluster.
 type: application
 version: 0.1.0
+
+dependencies:
+  - name: tigera-operator
+    version: v3.20.0
+    repository: https://docs.projectcalico.org/charts
