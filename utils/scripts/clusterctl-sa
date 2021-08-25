@@ -11,7 +11,7 @@ export KUBECONFIG="${TMPDIR:-/tmp}/kubeconfig.sa"
 
 if [ ! -r "$KUBECONFIG" ]; then
     SA_DIR="${SA_DIR:-/var/run/secrets/kubernetes.io/serviceaccount}"
-    CA_DATA="$(cat $SA_DIR/ca.crt | base64)"
+    CA_DATA="$(cat $SA_DIR/ca.crt | base64 | tr -d '\n')"
     SA_NAMESPACE="$(cat $SA_DIR/namespace)"
     SA_TOKEN="$(cat $SA_DIR/token)"
     cat > $KUBECONFIG <<EOF
