@@ -1,0 +1,49 @@
+{{- if .Values.nvidiaGPUOperator.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-{{ .Release.Revision }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
+spec:
+  # Keep trying for a decent amount of time before failing
+  backoffLimit: 1000
+  # Keep succeeded jobs for 5m after finishing
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels: {{ include "cluster-addons.componentSelectorLabels" (list . "nvidia-gpu-operator") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "cluster-addons.componentName" (list . "deployer") }}
+      restartPolicy: OnFailure
+      containers:
+        - name: nvidia-gpu-operator
+          image: {{ printf "%s:%s" .Values.jobImage.repository (default .Chart.AppVersion .Values.jobImage.tag) }}
+          imagePullPolicy: {{ .Values.jobImage.pullPolicy }}
+          args:
+            - helm
+            - upgrade
+            - {{ .Values.nvidiaGPUOperator.release.name }}
+            - {{ .Values.nvidiaGPUOperator.chart.name }}
+            - --atomic
+            - --install
+            - --namespace
+            - {{ .Values.nvidiaGPUOperator.release.namespace }}
+            - --create-namespace
+            - --repo
+            - {{ .Values.nvidiaGPUOperator.chart.repo }}
+            - --version
+            - {{ .Values.nvidiaGPUOperator.chart.version }}
+            - --values
+            - /config/values.yaml
+            - --wait
+            - --timeout
+            - {{ .Values.nvidiaGPUOperator.release.timeout }}
+          volumeMounts:
+            - name: helm-values
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: helm-values
+          secret:
+            secretName: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator-values") }}
+{{- end }}

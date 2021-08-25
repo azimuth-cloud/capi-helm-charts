@@ -75,3 +75,20 @@ ccm:
     # The cloud-config file to use for the cloud controller manager
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
     cloudConfig:
+
+# Settings for the NVIDIA GPU operator
+nvidiaGPUOperator:
+  # Indicates if the NVIDIA GPU operator should be enabled
+  enabled: true
+  chart:
+    repo: https://nvidia.github.io/gpu-operator
+    name: gpu-operator
+    version: v1.8.1
+  release:
+    namespace: gpu-operator
+    name: gpu-operator
+    timeout: 5m
+  values:
+    # By default, CAPI clusters use containerd
+    operator:
+      defaultRuntime: containerd
