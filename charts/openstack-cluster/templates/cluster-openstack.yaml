@@ -8,7 +8,7 @@ spec:
   identityRef:
     kind: Secret
     name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
-  cloudName: {{ .Values.cloudName }}
+  cloudName: openstack
   dnsNameservers: {{ .Values.networking.dnsNameservers | toYaml | nindent 4 }}
   managedSecurityGroups: {{ .Values.networking.manageSecurityGroups }}
   {{- with .Values.networking.externalNetworkID }}

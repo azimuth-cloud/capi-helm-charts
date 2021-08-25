@@ -89,3 +89,27 @@ nodeGroups:
     name: md-0
     # The number of machines in the node group
     machineCount: 3
+
+# Configuration for cluster addons
+addons:
+  # Indicates if cluster addons should be deployed
+  enabled: true
+  # The image to use for the job that deploys the addons
+  image:
+    repository: ghcr.io/stackhpc/k8s-utils
+    tag: # defaults to chart appVersion
+    pullPolicy: IfNotPresent
+  # The chart to use for deploying addons
+  chart:
+    repo: https://stackhpc.github.io/capi-helm-charts
+    name: cluster-addons
+    version: 0.1.0-dev.0.main.32
+  # Release details for the addons deployment
+  release:
+    namespace: capi-system
+    name: cluster-addons
+    timeout: 30m
+  # Values for the addons
+  # See https://github.com/stackhpc/capi-helm-charts/blob/main/charts/cluster-addons for details
+  # The clouds.yaml used for cluster deployment will be given in addition
+  values: {}

@@ -85,11 +85,6 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.22; \
     /usr/bin/kubectl-v1.22 version --client
 
-# This script uses the latest version to discover the version of the Kubernetes
-# cluster before picking the correct version to use
-ENV KUBECTL_VN_LATEST=v1.22
-COPY ./kubectl-shim /usr/bin/kubectl
-
 ARG HELM_VERSION=v3.6.3
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
@@ -102,7 +97,7 @@ RUN set -ex; \
       tar -xz --strip-components 1 -C /usr/bin linux-$helm_arch/helm; \
     helm version
 
-ARG CLUSTERCTL_VERSION=v0.4.1
+ARG CLUSTERCTL_VERSION=v0.4.2
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -113,3 +108,8 @@ RUN set -ex; \
     curl -fsSL https://github.com/kubernetes-sigs/cluster-api/releases/download/$CLUSTERCTL_VERSION/clusterctl-linux-$clusterctl_arch -o /usr/bin/clusterctl; \
     chmod +x /usr/bin/clusterctl; \
     clusterctl version
+
+# Install helper scripts
+ENV KUBECTL_VN_LATEST=v1.22
+COPY ./scripts/ /usr/bin/
+
