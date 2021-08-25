@@ -1,3 +1,9 @@
+# Content for an OpenStack clouds.yaml file
+# Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
+clouds:
+# The name of the cloud to use from the specified clouds
+cloudName: openstack
+
 jobImage:
   repository: ghcr.io/stackhpc/k8s-utils
   tag: # defaults to chart appVersion
@@ -72,9 +78,13 @@ ccm:
       roles: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
       roleBindings: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
       daemonset: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.ccmManifestsPrefix . }}/openstack-cloud-controller-manager-ds.yaml"
-    # The cloud-config file to use for the cloud controller manager
+    # cloud-config options for the cloud controller manager
+    # The [Global] section is configured to use the specified cloud from .Values.clouds
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
     cloudConfig:
+      networking:
+      loadBalancer:
+      metadata:
 
 # Settings for the NVIDIA GPU operator
 nvidiaGPUOperator:
