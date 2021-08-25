@@ -1,4 +1,0 @@
-{{- if and .Values.ccm.enabled (eq .Values.ccm.type "openstack") }}
-{{- $opts := dict "type" "helm" "helmOpts" .Values.ccm.openstack "bootstrap" true }}
-{{ include "cluster-addons.job" (list . "ccm-openstack" $opts) }}
-{{- end }}

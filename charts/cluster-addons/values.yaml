@@ -3,6 +3,12 @@ jobImage:
   tag: # defaults to chart appVersion
   pullPolicy: IfNotPresent
 
+# Nameservers to use for bootstrap jobs that are not using host networking
+# but must execute before the cluster DNS is ready
+bootstrapDNSNameservers:
+  - 8.8.8.8
+  - 8.8.4.4
+
 # The tolerations to use for jobs that are part of bootstrapping the cluster
 # e.g. CNI, external cloud provider
 bootstrapTolerations:
@@ -48,14 +54,24 @@ ccm:
   type: openstack
   # Settings for the OpenStack cloud controller manager
   openstack:
-    # The Helm chart to use to deploy the OpenStack CCM
-    chart:
-      repo: https://kubernetes.github.io/cloud-provider-openstack
-      name: openstack-cloud-controller-manager
-      version: 1.1.2
-    # The release details for the OpenStack CCM
-    release:
-      name: openstack-cloud-controller-manager
-      namespace: capi-system
-      timeout:
-    # All other settings are used as values for the chart
+    # The version of the OpenStack CCM to install
+    # This is treated as a template during rendering
+    version: release-{{ .Capabilities.KubeVersion.Major }}.{{ .Capabilities.KubeVersion.Minor }}
+    # The base URL for OpenStack CCM manifests
+    # This is treated as a template during rendering
+    manifestsBaseURL: https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/{{ tpl .Values.ccm.openstack.version . }}
+    # The prefix for CCM manifests
+    ccmManifestsPrefix: /manifests/controller-manager
+    # The prefix for RBAC manifests
+    # Unfortunately, this changes for different Kubernetes versions
+    # This is treated as a template during rendering
+    rbacManifestsPrefix: "{{ ternary \"/manifests/controller-manager\" \"/cluster/addons/rbac\" (semverCompare \">=1.22\" .Capabilities.KubeVersion.Version) }}"
+    # The URLs to use for the manifests
+    # These are treated as templates during rendering
+    manifests:
+      roles: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
+      roleBindings: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
+      daemonset: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.ccmManifestsPrefix . }}/openstack-cloud-controller-manager-ds.yaml"
+    # The cloud-config file to use for the cloud controller manager
+    # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
+    cloudConfig:
