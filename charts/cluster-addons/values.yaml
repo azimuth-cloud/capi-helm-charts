@@ -3,6 +3,8 @@
 clouds:
 # The name of the cloud to use from the specified clouds
 cloudName: openstack
+# The PEM-encoded CA certificate for the specified cloud
+cloudCACert:
 
 jobImage:
   repository: ghcr.io/stackhpc/k8s-utils
