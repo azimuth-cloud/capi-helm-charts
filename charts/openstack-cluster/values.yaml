@@ -95,7 +95,7 @@ addons:
   # Indicates if cluster addons should be deployed
   enabled: true
   # The image to use for the job that deploys the addons
-  image:
+  jobImage:
     repository: ghcr.io/stackhpc/k8s-utils
     tag: # defaults to chart appVersion
     pullPolicy: IfNotPresent
@@ -103,7 +103,7 @@ addons:
   chart:
     repo: https://stackhpc.github.io/capi-helm-charts
     name: cluster-addons
-    version: 0.1.0-dev.0.main.32
+    version: # This defaults to the version that matches this chart
   # Release details for the addons deployment
   release:
     namespace: capi-system
@@ -111,5 +111,5 @@ addons:
     timeout: 30m
   # Values for the addons
   # See https://github.com/stackhpc/capi-helm-charts/blob/main/charts/cluster-addons for details
-  # The clouds.yaml used for cluster deployment will be given in addition
+  # The clouds.yaml used for cluster deployment will be given in addition to these
   values: {}

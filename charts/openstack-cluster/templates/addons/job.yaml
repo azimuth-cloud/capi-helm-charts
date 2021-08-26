@@ -1,0 +1,81 @@
+{{- if .Values.addons.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "addons") }}-{{ .Release.Revision }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "addons") | nindent 4 }}
+spec:
+  # Keep trying for a decent amount of time before failing
+  backoffLimit: 1000
+  # Keep succeeded jobs for 5m after finishing
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
+        capi.stackhpc.com/component: addons
+    spec:
+      # Ensure that we run as a non-root user
+      securityContext:
+        runAsUser: 1001
+      # Specifically request not to have the token for the default service account mounted
+      # in case it interferes with the kubeconfig for the target cluster
+      automountServiceAccountToken: false
+      restartPolicy: OnFailure
+      containers:
+        - name: addons
+          image: {{ printf "%s:%s" .Values.addons.jobImage.repository (default .Chart.AppVersion .Values.addons.jobImage.tag) }}
+          imagePullPolicy: {{ .Values.addons.jobImage.pullPolicy }}
+          env:
+            - name: KUBECONFIG
+              value: /kubeconfig/value
+          args:
+            - helm
+            - upgrade
+            - {{ .Values.addons.release.name }}
+            - {{ .Values.addons.chart.name }}
+            - --atomic
+            - --install
+            - --namespace
+            - {{ .Values.addons.release.namespace }}
+            - --create-namespace
+            - --repo
+            - {{ .Values.addons.chart.repo }}
+            - --version
+            - {{ default .Chart.Version .Values.addons.chart.version }}
+            # Include the clouds.yaml first
+            - --values
+            - /cloud-config/clouds.yaml
+            # Then add the cloud certificate if defined
+            {{- if .Values.cloudCACert }}
+            - --set-file
+            - cloudCACert=/cloud-config/cacert
+            {{- end }}
+            # Lastly include the user-specified values
+            - --values
+            - /config/values.yaml
+            - --wait
+            - --wait-for-jobs
+            - --timeout
+            - {{ .Values.addons.release.timeout }}
+          volumeMounts:
+            - name: kubeconfig
+              mountPath: /kubeconfig
+              readOnly: true
+            - name: cloud-config
+              mountPath: /cloud-config
+              readOnly: true
+            - name: helm-values
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: kubeconfig
+          secret:
+            secretName: {{ include "openstack-cluster.componentName" (list . "kubeconfig") }}
+        - name: cloud-config
+          secret:
+            secretName: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
+        - name: helm-values
+          secret:
+            secretName: {{ include "openstack-cluster.componentName" (list . "addons-values") }}
+{{- end }}

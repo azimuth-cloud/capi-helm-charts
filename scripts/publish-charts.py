@@ -190,27 +190,26 @@ def main():
     commit_files = cmd(["git", "show", "--pretty=", "--name-only", commit])
     changed_paths = [pathlib.Path(filename).resolve() for filename in commit_files.splitlines()]
 
-    # Get the charts in the repository
-    charts = [path.parent for path in chart_directory.glob('**/Chart.yaml')]
-
-    # Decide which charts we are actually going to publish
+    # Determine whether to publish charts or not
+    # Because there are dependencies that are not actual Helm dependencies, charts are
+    # either all published together or not at all
     if is_tag:
         # If the commit is a tag, publish all the charts regardless of changes
         # so that they get the version bump
-        print("[INFO] Detected tagged commit - publishing all charts")
+        print("[INFO] Detected tagged commit - publishing charts")
     elif is_changed(image_directory, changed_paths):
         # If the image was changed, publish all the charts regardless of changes
         # so that they pick up the new image for any deployment jobs
-        print("[INFO] Image for deploy jobs has changed - publishing all charts")
+        print("[INFO] Image for deploy jobs has changed - publishing charts")
+    elif is_changed(chart_directory, changed_paths):
+        # If any of the charts changed, publish all the charts
+        print("[INFO] At least one chart has changed - publishing charts")
     else:
-        # In all other cases, just publish the charts that changed
-        print("[INFO] Publishing changed charts only")
-        charts = [chart for chart in charts if is_changed(chart, changed_paths)]
-    if charts:
-        print(f"[INFO] Publishing {len(charts)} charts")
-    else:
-        print("[INFO] No charts to publish - exiting")
+        print("[INFO] Nothing has changed - exiting without publishing charts")
         return
+
+    # Get the charts in the repository
+    charts = [path.parent for path in chart_directory.glob('**/Chart.yaml')]
 
     # Publish the charts and re-generate the repository index
     publish_branch = os.environ.get('PUBLISH_BRANCH', 'gh-pages')

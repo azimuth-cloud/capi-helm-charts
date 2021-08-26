@@ -13,6 +13,9 @@ spec:
     metadata:
       labels: {{ include "cluster-addons.componentSelectorLabels" (list . "cni-weave") | nindent 8 }}
     spec:
+      # Ensure that we run as a non-root user
+      securityContext:
+        runAsUser: 1001
       serviceAccountName: {{ include "cluster-addons.componentName" (list . "deployer") }}
       restartPolicy: OnFailure
       containers:

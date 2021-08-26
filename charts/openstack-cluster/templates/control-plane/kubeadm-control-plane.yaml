@@ -1,0 +1,33 @@
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
+kind: KubeadmControlPlane
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+spec:
+  version: {{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" }}
+  replicas: {{ .Values.controlPlane.machineCount }}
+  machineTemplate:
+    infrastructureRef:
+      kind: OpenStackMachineTemplate
+      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+      name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+  kubeadmConfigSpec:
+    initConfiguration:
+      nodeRegistration:
+        name: '{{ "{{" }} local_hostname {{ "}}" }}'
+        kubeletExtraArgs:
+          cloud-provider: external
+    clusterConfiguration:
+      imageRepository: {{ .Values.kubeImageRepository }}
+      apiServer:
+        extraArgs:
+          cloud-provider: external
+      controllerManager:
+        extraArgs:
+          cloud-provider: external
+    joinConfiguration:
+      nodeRegistration:
+        name: '{{ "{{" }} local_hostname {{ "}}" }}'
+        kubeletExtraArgs:
+          cloud-provider: external
