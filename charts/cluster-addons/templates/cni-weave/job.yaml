@@ -26,8 +26,8 @@ spec:
             - /bin/sh
             - -c
             - |
-                set -ex
-                kubectl apply -k /kustomize
+                set -exo pipefail
+                kustomize build /kustomize | kubectl apply -f -
                 kubectl -n kube-system rollout status daemonset/weave-net
           volumeMounts:
             - name: kustomize
