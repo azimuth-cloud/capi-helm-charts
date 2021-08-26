@@ -26,12 +26,19 @@ spec:
             - /bin/sh
             - -c
             - |
-                set -exo pipefail
-                kubernetes_vn="$(kubectl version | base64 | tr -d '\n')"
-                kubectl apply -f "{{ tpl .Values.cni.weave.manifestURL . }}?k8s-version=$kubernetes_vn"
+                set -ex
+                kubectl apply -k /kustomize
                 kubectl -n kube-system rollout status daemonset/weave-net
+          volumeMounts:
+            - name: kustomize
+              mountPath: /kustomize
+              readOnly: true
       # This installs a primary CNI, so must be able to run on unready/uninitialised nodes
       tolerations: {{ .Values.bootstrapTolerations | toYaml | nindent 8 }}
       # Because it provides the container networking, it must use host networking
       hostNetwork: true
+      volumes:
+        - name: kustomize
+          secret:
+            secretName: {{ include "cluster-addons.componentName" (list . "cni-weave-kustomize") }}
 {{- end }}

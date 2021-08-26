@@ -48,11 +48,16 @@ cni:
     # The URL of the Calico manifest
     # This is treated as a template during rendering
     manifestURL: https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
+    # Any kustomization to be applied to the Calico manifests
+    kustomization:
   # Settings for the Weave CNI
   weave:
-    # The base URL of the Weave manifest
-    # The output of "kubectl version" is added as a query parameter, as per the docs
-    manifestURL: https://cloud.weave.works/k8s/net
+    # The base URL of the Weave manifests
+    # There is one manifest for Kubernetes >= 1.16 and one for the rest
+    version: "{{ ternary \"v1.16\" \"v1.13\" (semverCompare \">=1.16\" .Capabilities.KubeVersion.Version) }}"
+    manifestURL: https://cloud.weave.works/k8s/{{ tpl .Values.cni.weave.version . }}/net
+    # Any kustomization to be applied to the Weave manifests
+    kustomization:
 
 # Settings for the cloud controller manager for external cloud providers
 ccm:
@@ -80,6 +85,8 @@ ccm:
       roles: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
       roleBindings: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
       daemonset: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.ccmManifestsPrefix . }}/openstack-cloud-controller-manager-ds.yaml"
+    # Any kustomization to apply to the OpenStack CCM manifests
+    kustomization:
     # cloud-config options for the cloud controller manager
     # The [Global] section is configured to use the specified cloud from .Values.clouds
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
