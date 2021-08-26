@@ -29,13 +29,6 @@ spec:
           env:
             - name: KUBECONFIG
               value: /kubeconfig/value
-            # Tell Helm to use /tmp for cache, config and data
-            - name: HELM_CACHE_HOME
-              value: /tmp/helm/cache
-            - name: HELM_CONFIG_HOME
-              value: /tmp/helm/config
-            - name: HELM_DATA_HOME
-              value: /tmp/helm/data
           args:
             - helm
             - upgrade

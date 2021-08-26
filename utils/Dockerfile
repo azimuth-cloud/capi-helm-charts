@@ -85,6 +85,10 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.22; \
     /usr/bin/kubectl-v1.22 version --client
 
+# Tell Helm to use /tmp for cache, config and data
+ENV HELM_CACHE_HOME /tmp/helm/cache
+ENV HELM_CONFIG_HOME /tmp/helm/config
+ENV HELM_DATA_HOME /tmp/helm/data
 ARG HELM_VERSION=v3.6.3
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
@@ -110,6 +114,6 @@ RUN set -ex; \
     clusterctl version
 
 # Install helper scripts
-ENV KUBECTL_VN_LATEST=v1.22
+ENV KUBECTL_VN_LATEST v1.22
 COPY ./scripts/ /usr/bin/
 
