@@ -11,6 +11,10 @@ jobImage:
   tag: # defaults to chart appVersion
   pullPolicy: IfNotPresent
 
+# Indicates whether to install bootstrap charts only
+# If this is set to true, then only the CNI and CCM will be installed
+bootstrapOnly: false
+
 # Nameservers to use for bootstrap jobs that are not using host networking
 # but must execute before the cluster DNS is ready
 bootstrapDNSNameservers:

@@ -1,4 +1,4 @@
-{{- if .Values.nvidiaGPUOperator.enabled }}
+{{- if and (not .Values.bootstrapOnly) .Values.nvidiaGPUOperator.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
