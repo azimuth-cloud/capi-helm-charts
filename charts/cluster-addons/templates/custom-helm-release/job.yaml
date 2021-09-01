@@ -42,7 +42,7 @@ spec:
             - /config/values.yaml
             - --wait
             - --timeout
-            - {{ $releaseSpec.timeout }}
+            - {{ default "5m" $releaseSpec.timeout }}
           volumeMounts:
             - name: helm-values
               mountPath: /config
