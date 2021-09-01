@@ -21,7 +21,7 @@ spec:
       serviceAccountName: {{ include "cluster-addons.componentName" (list $ "deployer") }}
       restartPolicy: OnFailure
       containers:
-        - name: {{ $releaseName }}
+        - name: helm
           image: {{ printf "%s:%s" $.Values.jobImage.repository (default $.Chart.AppVersion $.Values.jobImage.tag) }}
           imagePullPolicy: {{ $.Values.jobImage.pullPolicy }}
           args:
@@ -32,7 +32,7 @@ spec:
             - --atomic
             - --install
             - --namespace
-            - {{ $releaseSpec.namespace }}
+            - {{ default $releaseName $releaseSpec.namespace }}
             - --create-namespace
             - --repo
             - {{ $releaseSpec.chart.repo }}

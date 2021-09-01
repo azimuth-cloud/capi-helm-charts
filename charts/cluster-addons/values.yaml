@@ -133,7 +133,7 @@ customHelmReleases:
   #     # NOTE: THIS IS REQUIRED
   #     version: 12.1.6
   #   # The namespace for the release
-  #   # If not given, the default namespace is used
+  #   # If not given, this defaults to the release name
   #   namespace: my-wordpress
   #   # The amount of time to wait for the chart to install before rolling back
   #   timeout: 5m
