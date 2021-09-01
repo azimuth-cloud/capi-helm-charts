@@ -115,3 +115,7 @@ nvidiaGPUOperator:
     # By default, CAPI clusters use containerd
     operator:
       defaultRuntime: containerd
+
+# Custom manifests to apply
+# This should be a map of filenames to manifest content
+customManifests:
