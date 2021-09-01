@@ -123,19 +123,19 @@ customManifests:
 # Custom Helm releases to apply
 # This should be a map of release name to release parameters
 customHelmReleases:
-  my-wordpress:
-    chart:
-      # The repository that the chart is in
-      repo: https://charts.bitnami.com/bitnami
-      # The name of the chart
-      name: wordpress
-      # The version of the chart to install
-      # NOTE: THIS IS REQUIRED
-      version: 12.1.6
-    # The namespace for the release
-    # If not given, the default namespace is used
-    namespace: my-wordpress
-    # The amount of time to wait for the chart to install before rolling back
-    timeout: 5m
-    # The values for the chart
-    values:    
+  # my-wordpress:
+  #   chart:
+  #     # The repository that the chart is in
+  #     repo: https://charts.bitnami.com/bitnami
+  #     # The name of the chart
+  #     name: wordpress
+  #     # The version of the chart to install
+  #     # NOTE: THIS IS REQUIRED
+  #     version: 12.1.6
+  #   # The namespace for the release
+  #   # If not given, the default namespace is used
+  #   namespace: my-wordpress
+  #   # The amount of time to wait for the chart to install before rolling back
+  #   timeout: 5m
+  #   # The values for the chart
+  #   values:
