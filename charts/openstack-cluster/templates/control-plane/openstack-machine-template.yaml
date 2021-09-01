@@ -9,7 +9,7 @@ template:
       kind: Secret
       name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
     cloudName: openstack
-    image: {{ .Values.machineImage | required ".Values.machineImage is required" }}
+    image: {{ tpl (required ".Values.machineImage is required" .Values.machineImage) . }}
     flavor: {{ .Values.controlPlane.machineFlavor | required ".Values.controlPlane.machineFlavor is required" }}
     sshKeyName: {{ .Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
 {{- end }}
