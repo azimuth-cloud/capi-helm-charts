@@ -15,49 +15,78 @@ spec:
         capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
         capi.stackhpc.com/component: addons
     spec:
+      serviceAccountName: {{ include "openstack-cluster.componentName" (list . "addon-deployer") }}
       # Ensure that we run as a non-root user
       securityContext:
         runAsUser: 1001
-      # Specifically request not to have the token for the default service account mounted
-      # in case it interferes with the kubeconfig for the target cluster
-      automountServiceAccountToken: false
       restartPolicy: OnFailure
       containers:
         - name: addons
           image: {{ printf "%s:%s" .Values.addons.jobImage.repository (default .Chart.AppVersion .Values.addons.jobImage.tag) }}
           imagePullPolicy: {{ .Values.addons.jobImage.pullPolicy }}
-          env:
-            - name: KUBECONFIG
-              value: /kubeconfig/value
           args:
-            - helm
-            - upgrade
-            - {{ .Values.addons.release.name }}
-            - {{ .Values.addons.chart.name }}
-            - --atomic
-            - --install
-            - --namespace
-            - {{ .Values.addons.release.namespace }}
-            - --create-namespace
-            - --repo
-            - {{ .Values.addons.chart.repo }}
-            - --version
-            - {{ default .Chart.Version .Values.addons.chart.version }}
-            # Include the clouds.yaml first
-            - --values
-            - /cloud-config/clouds.yaml
-            # Then add the cloud certificate if defined
-            {{- if .Values.cloudCACert }}
-            - --set-file
-            - cloudCACert=/cloud-config/cacert
-            {{- end }}
-            # Lastly include the user-specified values
-            - --values
-            - /config/values.yaml
-            - --wait
-            - --wait-for-jobs
-            - --timeout
-            - {{ .Values.addons.release.timeout }}
+            - /bin/sh
+            - -c
+            # On the first deployment, we need to install the CNI and CCM before the control plane
+            # can be "Ready". However the control plane will become "Available" once "kubeadm init"
+            # has run successfully on the first control plane node - we can watch for this condition
+            # and install the bootstrap components.
+            # We wait for the control plane to be "Ready" before installing all other addons.
+            #
+            # On subsequent deployments, we wait for the control plane to be "Ready" before updating
+            # any addons.
+            #
+            # We do this because control plane instability during scale-up/down can cause the API
+            # server and/or etcd to become unavailable and leave a Helm release in the "pending-install"
+            # state, even when --atomic is set.
+            - |
+                set -eo pipefail
+
+                controlplane_condition() {
+                  kubectl get kubeadmcontrolplane {{ include "openstack-cluster.componentName" (list . "control-plane") }} -o json 2>/dev/null | \
+                    jq -e ".status.conditions[] | select(.type == \"$1\") | .status == \"True\"" > /dev/null 2>&1
+                }
+
+                {{- if .Release.IsInstall }}
+                while ! controlplane_condition "Available" ; do
+                  echo "Waiting for control plane to become available..."
+                  sleep 10
+                done
+
+                echo "Installing bootstrap addon components..."
+                helm upgrade {{ .Values.addons.release.name }} {{ .Values.addons.chart.name }} \
+                  --kubeconfig /kubeconfig/value \
+                  --atomic --install \
+                  --namespace {{ .Values.addons.release.namespace }} --create-namespace \
+                  --repo {{ .Values.addons.chart.repo }} \
+                  --version {{ default .Chart.Version .Values.addons.chart.version }} \
+                  --values /cloud-config/clouds.yaml \
+                  {{- if .Values.cloudCACert }}
+                  --set-file cloudCACert=/cloud-config/cacert \
+                  {{- end }}
+                  --values /config/values.yaml \
+                  --set bootstrapOnly=true \
+                  --wait --wait-for-jobs --timeout {{ .Values.addons.release.timeout }}
+                {{- end }}
+
+                while ! controlplane_condition "Ready" ; do
+                  echo "Waiting for control plane to become ready..."
+                  sleep 10
+                done
+
+                echo "{{ if .Release.IsInstall }}Installing{{ else }}Updating{{ end }} addon components..."
+                helm upgrade {{ .Values.addons.release.name }} {{ .Values.addons.chart.name }} \
+                  --kubeconfig /kubeconfig/value \
+                  --atomic --install \
+                  --namespace {{ .Values.addons.release.namespace }} --create-namespace \
+                  --repo {{ .Values.addons.chart.repo }} \
+                  --version {{ default .Chart.Version .Values.addons.chart.version }} \
+                  --values /cloud-config/clouds.yaml \
+                  {{- if .Values.cloudCACert }}
+                  --set-file cloudCACert=/cloud-config/cacert \
+                  {{- end }}
+                  --values /config/values.yaml \
+                  --wait --wait-for-jobs --timeout {{ .Values.addons.release.timeout }}
           volumeMounts:
             - name: kubeconfig
               mountPath: /kubeconfig

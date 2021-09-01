@@ -1,16 +1,36 @@
----
+{{/*
+  Machine templates are immutable, so we need to make a new one when the spec changes.
+  To do this, we create a new template whenever the checksum of the spec changes.
+*/}}
+{{- define "openstack-cluster.controlplane.mt.spec" -}}
+template:
+  spec:
+    identityRef:
+      kind: Secret
+      name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
+    cloudName: openstack
+    image: {{ .Values.machineImage | required ".Values.machineImage is required" }}
+    flavor: {{ .Values.controlPlane.machineFlavor | required ".Values.controlPlane.machineFlavor is required" }}
+    sshKeyName: {{ .Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
+{{- end }}
+
+{{- define "openstack-cluster.controlplane.mt.checksum" -}}
+{{- include "openstack-cluster.controlplane.mt.spec" . | sha256sum }}
+{{- end }}
+
+{{- define "openstack-cluster.controlplane.mt.name" -}}
+{{- $checksum := include "openstack-cluster.controlplane.mt.checksum" . }}
+{{- include "openstack-cluster.componentName" (list . "control-plane") }}-{{ trunc 8 $checksum }}
+{{- end }}
+
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: OpenStackMachineTemplate
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+  name: {{ include "openstack-cluster.controlplane.mt.name" . }}
   labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+  annotations:
+    capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.controlplane.mt.checksum" . }}
+    # Ensure that the previous machine templates are kept around
+    helm.sh/resource-policy: keep
 spec:
-  template:
-    spec:
-      identityRef:
-        kind: Secret
-        name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
-      cloudName: openstack
-      image: {{ .Values.machineImage | required ".Values.machineImage is required" }}
-      flavor: {{ .Values.controlPlane.machineFlavor | required ".Values.controlPlane.machineFlavor is required" }}
-      sshKeyName: {{ .Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
+  {{- include "openstack-cluster.controlplane.mt.spec" . | nindent 2 }}

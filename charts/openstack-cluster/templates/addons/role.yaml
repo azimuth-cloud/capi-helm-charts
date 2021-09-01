@@ -1,0 +1,14 @@
+{{- if .Values.addons.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "addon-deployer") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "addons") | nindent 4 }}
+rules:
+  # Just grant access to the control plane for this cluster
+  - apiGroups: ["controlplane.cluster.x-k8s.io"]
+    resources: ["kubeadmcontrolplanes"]
+    resourceNames:
+      - {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+    verbs: ["get"]
+{{- end }}
