@@ -11,7 +11,7 @@ template:
       kind: Secret
       name: {{ include "openstack-cluster.componentName" (list $ctx "cloud-config") }}
     cloudName: openstack
-    image: {{ tpl (required ".Values.machineImage is required" $ctx.Values.machineImage) . }}
+    image: {{ tpl (required ".Values.machineImage is required" $ctx.Values.machineImage) $ctx }}
     flavor: {{ pluck "machineFlavor" $nodeGroup $ctx.Values.nodeGroupDefaults | first | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
     sshKeyName: {{ $ctx.Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
 {{- end }}
