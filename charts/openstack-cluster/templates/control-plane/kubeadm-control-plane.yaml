@@ -12,22 +12,4 @@ spec:
       kind: OpenStackMachineTemplate
       apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
       name: {{ include "openstack-cluster.controlplane.mt.name" . }}
-  kubeadmConfigSpec:
-    initConfiguration:
-      nodeRegistration:
-        name: '{{ "{{" }} local_hostname {{ "}}" }}'
-        kubeletExtraArgs:
-          cloud-provider: external
-    clusterConfiguration:
-      imageRepository: {{ .Values.kubeImageRepository }}
-      apiServer:
-        extraArgs:
-          cloud-provider: external
-      controllerManager:
-        extraArgs:
-          cloud-provider: external
-    joinConfiguration:
-      nodeRegistration:
-        name: '{{ "{{" }} local_hostname {{ "}}" }}'
-        kubeletExtraArgs:
-          cloud-provider: external
+  kubeadmConfigSpec: {{ toYaml .Values.controlPlane.kubeadmConfigSpec | nindent 4 }}

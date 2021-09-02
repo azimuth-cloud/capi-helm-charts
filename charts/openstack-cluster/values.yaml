@@ -16,9 +16,6 @@ machineSSHKeyName:
 # This should match the version of kubelet in the image
 kubernetesVersion:
 
-# The repository to pull Kubernetes system container images from 
-kubeImageRepository: k8s.gcr.io
-
 # Values for the Kubernetes cluster network
 kubeNetwork:
   # By default, use the private network range 172.16.0.0/12 for the cluster network
@@ -74,14 +71,43 @@ controlPlane:
   machineCount: 3
   # The flavor to use for control plane machines
   machineFlavor:
+  # The kubeadm config specification for the control plane
+  # By default, this uses a simple configuration that just enables the external cloud provider
+  kubeadmConfigSpec:
+    initConfiguration:
+      nodeRegistration:
+        name: '{{ local_hostname }}'
+        kubeletExtraArgs:
+          cloud-provider: external
+    clusterConfiguration:
+      apiServer:
+        extraArgs:
+          cloud-provider: external
+      controllerManager:
+        extraArgs:
+          cloud-provider: external
+    joinConfiguration:
+      nodeRegistration:
+        name: '{{ local_hostname }}'
+        kubeletExtraArgs:
+          cloud-provider: external
 
 # Defaults for node groups
-# Each of these can be overridden in the node group specification
+# Each of these can be overridden in the specification for an individual node group
 nodeGroupDefaults:
   # The failure domain for the node group
   failureDomain: nova
   # The flavor to use for machines in the node group
   machineFlavor:
+  # The default kubeadm config specification for worker nodes
+  # This will be merged with any configuration given for specific node groups
+  # By default, this uses a simple configuration that just enables the external cloud provider
+  kubeadmConfigSpec:
+    joinConfiguration:
+      nodeRegistration:
+        name: '{{ local_hostname }}'
+        kubeletExtraArgs:
+          cloud-provider: external
 
 # The worker node groups for the cluster
 nodeGroups:

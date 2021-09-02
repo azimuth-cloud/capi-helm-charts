@@ -3,8 +3,8 @@
   To do this, we create a new template whenever the checksum of the spec changes.
 */}}
 {{- define "openstack-cluster.nodegroup.mt.spec" -}}
-{{- $ctx := index . 0 }}
-{{- $nodeGroup := index . 1 }}
+{{- $ctx := index . 0 -}}
+{{- $nodeGroup := index . 1 -}}
 template:
   spec:
     identityRef:
@@ -38,6 +38,5 @@ metadata:
     capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
     # Ensure that the previous machine templates are kept around
     helm.sh/resource-policy: keep
-spec:
-  {{- include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
+spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
 {{- end }}

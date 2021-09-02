@@ -1,16 +1,43 @@
+{{/*
+  In order for changes to the kubeadm config to be applied to existing machines,
+  kubeadm config templates must be treated as immutable. This means that we must
+  create a new one when the spec changes and update the ref in the corresponding
+  machine deployment, which will trigger a rollout of new machines with the new
+  kubeadm config.
+
+  If the kubeadm config is updated in place, it will apply to new machine (e.g. on
+  a scale out operation), but will not be applied to existing machines.
+
+  To do this, we create a new template whenever the checksum of the spec changes.
+*/}}
+{{- define "openstack-cluster.nodegroup.kct.spec" -}}
+{{- $ctx := index . 0 -}}
+{{- $nodeGroup := index . 1 -}}
+template:
+  spec: {{ deepCopy $ctx.Values.nodeGroupDefaults.kubeadmConfigSpec | mustMerge (default dict $nodeGroup.kubeadmConfigSpec) | toYaml | nindent 4 }}
+{{- end }}
+
+{{- define "openstack-cluster.nodegroup.kct.checksum" -}}
+{{- include "openstack-cluster.nodegroup.kct.spec" . | sha256sum }}
+{{- end }}
+
+{{- define "openstack-cluster.nodegroup.kct.name" -}}
+{{- $ctx := index . 0 }}
+{{- $nodeGroup := index . 1 }}
+{{- $checksum := include "openstack-cluster.nodegroup.kct.checksum" . }}
+{{- include "openstack-cluster.componentName" (list $ctx $nodeGroup.name) }}-{{ trunc 8 $checksum }}
+{{- end }}
+
 {{- range $nodeGroup := .Values.nodeGroups }}
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
 kind: KubeadmConfigTemplate
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
+  name: {{ include "openstack-cluster.nodegroup.kct.name" (list $ $nodeGroup) }}
   labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
-spec:
-  template:
-    spec:
-      joinConfiguration:
-        nodeRegistration:
-          name: '{{ "{{" }} local_hostname {{ "}}" }}'
-          kubeletExtraArgs:
-            cloud-provider: external
+  annotations:
+    capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.nodegroup.kct.checksum" (list $ $nodeGroup) }}
+    # Ensure that the previous templates are kept around
+    helm.sh/resource-policy: keep
+spec: {{ include "openstack-cluster.nodegroup.kct.spec" (list $ $nodeGroup) | nindent 2 }}
 {{- end }}
