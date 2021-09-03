@@ -66,7 +66,7 @@ cni:
 # Settings for the cloud controller manager for external cloud providers
 ccm:
   # Indicates if an external cloud controller manager should be deployed
-  enabled: true
+  enabled: false
   # The type of the external CCM to deploy - currently only OpenStack is supported
   type: openstack
   # Settings for the OpenStack cloud controller manager
@@ -102,7 +102,7 @@ ccm:
 # Settings for the NVIDIA GPU operator
 nvidiaGPUOperator:
   # Indicates if the NVIDIA GPU operator should be enabled
-  enabled: true
+  enabled: false
   chart:
     repo: https://nvidia.github.io/gpu-operator
     name: gpu-operator

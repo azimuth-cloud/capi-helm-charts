@@ -72,7 +72,7 @@ controlPlane:
   # The flavor to use for control plane machines
   machineFlavor:
   # The kubeadm config specification for the control plane
-  # By default, this uses a simple configuration that just enables the external cloud provider
+  # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
     initConfiguration:
       nodeRegistration:
@@ -101,7 +101,7 @@ nodeGroupDefaults:
   machineFlavor:
   # The default kubeadm config specification for worker nodes
   # This will be merged with any configuration given for specific node groups
-  # By default, this uses a simple configuration that just enables the external cloud provider
+  # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
     joinConfiguration:
       nodeRegistration:
@@ -138,4 +138,8 @@ addons:
   # Values for the addons
   # See https://github.com/stackhpc/capi-helm-charts/blob/main/charts/cluster-addons for details
   # The clouds.yaml used for cluster deployment will be given in addition to these
-  values: {}
+  values:
+    # By default, enable the OpenStack CCM
+    ccm:
+      enabled: true
+      type: openstack
