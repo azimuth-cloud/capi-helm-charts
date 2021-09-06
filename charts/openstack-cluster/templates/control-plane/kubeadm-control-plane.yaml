@@ -8,6 +8,8 @@ spec:
   version: {{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" }}
   replicas: {{ .Values.controlPlane.machineCount }}
   machineTemplate:
+    metadata:
+      labels: {{ include "openstack-cluster.controlPlaneSelectorLabels" . | nindent 8 }}
     infrastructureRef:
       kind: OpenStackMachineTemplate
       apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4

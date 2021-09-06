@@ -1,0 +1,13 @@
+{{- if .Values.controlPlane.machineHealthCheck.enabled }}
+---
+apiVersion: cluster.x-k8s.io/v1alpha3
+kind: MachineHealthCheck
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  selector:
+    matchLabels: {{ include "openstack-cluster.controlPlaneSelectorLabels" . | nindent 6 }}
+  {{- toYaml .Values.controlPlane.machineHealthCheck.spec | nindent 2 }}
+{{- end }}

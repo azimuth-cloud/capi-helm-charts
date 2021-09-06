@@ -42,6 +42,14 @@ capi.stackhpc.com/component: {{ $componentName }}
 {{- end -}}
 
 {{/*
+Control plane selector labels
+*/}}
+{{- define "openstack-cluster.controlPlaneSelectorLabels" -}}
+capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
+capi.stackhpc.com/component: control-plane
+{{- end -}}
+
+{{/*
 Node group labels
 */}}
 {{- define "openstack-cluster.nodeGroupLabels" -}}

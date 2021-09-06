@@ -91,6 +91,24 @@ controlPlane:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
           cloud-provider: external
+  # The machine health check for auto-healing of the control plane
+  # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
+  machineHealthCheck:
+    # Indicates if the machine health check should be enabled
+    enabled: true
+    # The spec for the health check
+    spec:
+      # By default, unhealthy control plane nodes are always remediated
+      maxUnhealthy: 100%
+      # By default, consider a control plane node that has not been Ready
+      # for more than 5 mins unhealthy
+      unhealthyConditions:
+        - type: Ready
+          status: Unknown
+          timeout: 300s
+        - type: Ready
+          status: "False"
+          timeout: 300s
 
 # Defaults for node groups
 # Each of these can be overridden in the specification for an individual node group
@@ -108,6 +126,31 @@ nodeGroupDefaults:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
           cloud-provider: external
+  # The default machine health check for worker nodes
+  # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
+  # Note that maxUnhealthy or unhealthRange are evaluated per node group
+  machineHealthCheck:
+    # Indicates if the machine health check should be enabled
+    enabled: true
+    # The spec for the health check
+    spec:
+      # By default, only remediate worker nodes when no more than 40%
+      # of the nodes in the group are unhealthy
+      # This avoids all the nodes in a group being remediated at once, for
+      # example in the case of a network partition
+      maxUnhealthy: 40%
+      # If a node takes longer than 10 mins to startup, remediate it
+      nodeStartupTimeout: 10m
+      # By default, consider a worker node that has not been Ready for
+      # more than 5 mins unhealthy
+      unhealthyConditions:
+        - type: Ready
+          status: Unknown
+          timeout: 300s
+        - type: Ready
+          status: "False"
+          timeout: 300s
+
 
 # The worker node groups for the cluster
 nodeGroups:

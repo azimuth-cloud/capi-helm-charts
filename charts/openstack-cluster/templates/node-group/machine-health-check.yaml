@@ -1,0 +1,18 @@
+{{- $healthCheckDefaults := .Values.nodeGroupDefaults.machineHealthCheck }}
+{{- range $nodeGroup := .Values.nodeGroups }}
+{{- $healthCheckOverrides := default dict $nodeGroup.machineHealthCheck }}
+{{- $nodeGroupHealthCheck := deepCopy $healthCheckDefaults | mustMerge $healthCheckOverrides }}
+{{- if $nodeGroupHealthCheck.enabled }}
+---
+apiVersion: cluster.x-k8s.io/v1alpha3
+kind: MachineHealthCheck
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
+  labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" $ }}
+  selector:
+    matchLabels: {{ include "openstack-cluster.nodeGroupSelectorLabels" (list $ $nodeGroup.name) | nindent 6 }}
+  {{- toYaml $nodeGroupHealthCheck.spec | nindent 2 }}
+{{- end }}
+{{- end }}
