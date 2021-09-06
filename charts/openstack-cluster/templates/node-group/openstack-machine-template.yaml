@@ -14,6 +14,12 @@ template:
     image: {{ tpl (required ".Values.machineImage is required" $ctx.Values.machineImage) $ctx }}
     flavor: {{ $nodeGroup.machineFlavor | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
     sshKeyName: {{ $ctx.Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
+    {{- with $nodeGroup.machineNetworking.networks }}
+    networks: {{ toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with $nodeGroup.machineNetworking.ports }}
+    ports: {{ toYaml . | nindent 6 }}
+    {{- end }}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.mt.checksum" -}}

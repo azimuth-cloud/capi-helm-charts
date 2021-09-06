@@ -74,8 +74,9 @@ controlPlane:
   # The networks and ports for control plane nodes
   # If neither networks or ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
-  networks:
-  ports:
+  machineNetworking:
+    networks:
+    ports:
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
@@ -125,8 +126,9 @@ nodeGroupDefaults:
   # The default networks and ports for worker nodes
   # If neither networks or ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
-  networks:
-  ports:
+  machineNetworking:
+    networks:
+    ports:
   # The default kubeadm config specification for worker nodes
   # This will be merged with any configuration given for specific node groups
   # By default, this uses a simple configuration that enables the external cloud provider
