@@ -9,12 +9,12 @@ spec:
     kind: Secret
     name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
   cloudName: openstack
-  dnsNameservers: {{ .Values.networking.dnsNameservers | toYaml | nindent 4 }}
-  managedSecurityGroups: {{ .Values.networking.manageSecurityGroups }}
-  {{- with .Values.networking.externalNetworkID }}
+  dnsNameservers: {{ .Values.clusterNetworking.dnsNameservers | toYaml | nindent 4 }}
+  managedSecurityGroups: {{ .Values.clusterNetworking.manageSecurityGroups }}
+  {{- with .Values.clusterNetworking.externalNetworkID }}
   externalNetworkId: {{ . }}
   {{- end }}
-  {{- with .Values.networking.internalNetwork }}
+  {{- with .Values.clusterNetworking.internalNetwork }}
   {{- if or .networkFilter .subnetFilter }}
   {{- with .networkFilter }}
   network: {{ . | toYaml | nindent 4 }}

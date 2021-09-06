@@ -30,7 +30,7 @@ kubeNetwork:
   serviceDomain: cluster.local
 
 # Settings for the OpenStack networking for the cluster
-networking:
+clusterNetworking:
   # The nameservers to use for the hosts
   # By default, use Google's public DNS servers
   dnsNameservers: [8.8.8.8, 8.8.4.4]
@@ -71,6 +71,11 @@ controlPlane:
   machineCount: 3
   # The flavor to use for control plane machines
   machineFlavor:
+  # The networks and ports for control plane nodes
+  # If neither networks or ports are given, the cluster internal network is used
+  # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
+  networks:
+  ports:
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
@@ -93,7 +98,7 @@ controlPlane:
           cloud-provider: external
   # The machine health check for auto-healing of the control plane
   # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
-  machineHealthCheck:
+  healthCheck:
     # Indicates if the machine health check should be enabled
     enabled: true
     # The spec for the health check
@@ -117,6 +122,11 @@ nodeGroupDefaults:
   failureDomain: nova
   # The flavor to use for machines in the node group
   machineFlavor:
+  # The default networks and ports for worker nodes
+  # If neither networks or ports are given, the cluster internal network is used
+  # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
+  networks:
+  ports:
   # The default kubeadm config specification for worker nodes
   # This will be merged with any configuration given for specific node groups
   # By default, this uses a simple configuration that enables the external cloud provider
@@ -129,7 +139,7 @@ nodeGroupDefaults:
   # The default machine health check for worker nodes
   # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
   # Note that maxUnhealthy or unhealthRange are evaluated per node group
-  machineHealthCheck:
+  healthCheck:
     # Indicates if the machine health check should be enabled
     enabled: true
     # The spec for the health check

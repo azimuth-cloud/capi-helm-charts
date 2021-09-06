@@ -1,6 +1,6 @@
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
-{{- if $nodeGroup.machineHealthCheck.enabled }}
+{{- if $nodeGroup.healthCheck.enabled }}
 ---
 apiVersion: cluster.x-k8s.io/v1alpha3
 kind: MachineHealthCheck
@@ -11,6 +11,6 @@ spec:
   clusterName: {{ include "openstack-cluster.clusterName" $ }}
   selector:
     matchLabels: {{ include "openstack-cluster.nodeGroupSelectorLabels" (list $ $nodeGroup.name) | nindent 6 }}
-  {{- toYaml $nodeGroup.machineHealthCheck.spec | nindent 2 }}
+  {{- toYaml $nodeGroup.healthCheck.spec | nindent 2 }}
 {{- end }}
 {{- end }}

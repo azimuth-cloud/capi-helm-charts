@@ -1,4 +1,4 @@
-{{- if .Values.controlPlane.machineHealthCheck.enabled }}
+{{- if .Values.controlPlane.healthCheck.enabled }}
 ---
 apiVersion: cluster.x-k8s.io/v1alpha3
 kind: MachineHealthCheck
@@ -9,5 +9,5 @@ spec:
   clusterName: {{ include "openstack-cluster.clusterName" . }}
   selector:
     matchLabels: {{ include "openstack-cluster.controlPlaneSelectorLabels" . | nindent 6 }}
-  {{- toYaml .Values.controlPlane.machineHealthCheck.spec | nindent 2 }}
+  {{- toYaml .Values.controlPlane.healthCheck.spec | nindent 2 }}
 {{- end }}
