@@ -11,10 +11,9 @@
   To do this, we create a new template whenever the checksum of the spec changes.
 */}}
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
-{{- $ctx := index . 0 -}}
-{{- $nodeGroup := index . 1 -}}
+{{- $nodeGroup := index . 1 }}
 template:
-  spec: {{ deepCopy $ctx.Values.nodeGroupDefaults.kubeadmConfigSpec | mustMerge (default dict $nodeGroup.kubeadmConfigSpec) | toYaml | nindent 4 }}
+  spec: {{ toYaml $nodeGroup.kubeadmConfigSpec | nindent 4 }}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.kct.checksum" -}}
@@ -28,7 +27,8 @@ template:
 {{- include "openstack-cluster.componentName" (list $ctx $nodeGroup.name) }}-{{ trunc 8 $checksum }}
 {{- end }}
 
-{{- range $nodeGroup := .Values.nodeGroups }}
+{{- range $nodeGroupOverrides := .Values.nodeGroups }}
+{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
 kind: KubeadmConfigTemplate

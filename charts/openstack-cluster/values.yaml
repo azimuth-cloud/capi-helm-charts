@@ -151,7 +151,6 @@ nodeGroupDefaults:
           status: "False"
           timeout: 300s
 
-
 # The worker node groups for the cluster
 nodeGroups:
   - # The name of the node group

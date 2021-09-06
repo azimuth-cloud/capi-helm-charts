@@ -12,7 +12,7 @@ template:
       name: {{ include "openstack-cluster.componentName" (list $ctx "cloud-config") }}
     cloudName: openstack
     image: {{ tpl (required ".Values.machineImage is required" $ctx.Values.machineImage) $ctx }}
-    flavor: {{ pluck "machineFlavor" $nodeGroup $ctx.Values.nodeGroupDefaults | first | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
+    flavor: {{ $nodeGroup.machineFlavor | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
     sshKeyName: {{ $ctx.Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
 {{- end }}
 
@@ -27,7 +27,8 @@ template:
 {{- include "openstack-cluster.componentName" (list $ctx $nodeGroup.name) }}-{{ trunc 8 $checksum }}
 {{- end }}
 
-{{- range $nodeGroup := .Values.nodeGroups }}
+{{- range $nodeGroupOverrides := .Values.nodeGroups }}
+{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: OpenStackMachineTemplate
