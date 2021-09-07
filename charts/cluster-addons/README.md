@@ -74,40 +74,47 @@ underlying infrastructure, for example
 [Container Storage Interface (CSI) implementations](https://kubernetes-csi.github.io/docs/)
 and [authenticating webhooks](https://kubernetes.io/docs/reference/access-authn-authz/webhook/).    
 
-This chart is able to deploy the CCM from the
-[Kubernetes OpenStack cloud provider](https://github.com/kubernetes/cloud-provider-openstack)
-to integrate with the OpenStack cloud on which a Kubernetes cluster is deployed, allowing
-features like automatic labelling of nodes with OpenStack information (e.g. server ID and flavor),
-automatic configuration of hostnames and IP addresses and managed load balancers for services.
+This chart is able to deploy the CCM and the Cinder CSI plugin from the
+[Kubernetes OpenStack cloud provider](https://github.com/kubernetes/cloud-provider-openstack),
+which allows your Kubernetes cluster to integrate with the OpenStack cloud on which it is deployed.
+This enables features like automatic labelling of nodes with OpenStack information (e.g. server ID
+and flavor), automatic configuration of hostnames and IP addresses, managed load balancers for
+services and dynamic provisioning of RWO volumes.
 
-By default, the OpenStack integrations are not enabled. To enable OpenStack integrations the target
-cluster, use the following in your Helm values:
+By default, the OpenStack integrations are not enabled. To enable OpenStack integrations on the
+target cluster, use the following in your Helm values:
 
 ```yaml
 openstack:
   enabled: true
 ```
 
-To configure options for `[Networking]`, `[LoadBalancer]` and `[Metadata]` sections of the
-[cloud-config](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager)
-file you can use the Helm values, e.g.:
+To configure options for the `[Networking]`, `[LoadBalancer]`, `[BlockStorage]` and `[Metadata]`
+sections of the cloud-config file, you can use Helm values, e.g.:
 
 ```yaml
 openstack:
-  ccm:
-    cloudConfig:
-      networking:
-        public-network-name: public-internet
-      loadBalancer:
-        lb-method: LEAST_CONNECTIONS
-        create-monitor: "true"
-      metadata:
-        search-order: metadataService
+  cloudConfig:
+    networking:
+      public-network-name: public-internet
+    loadBalancer:
+      lb-method: LEAST_CONNECTIONS
+      create-monitor: "true"
+    blockStorage:
+      ignore-volume-az: "true"
+    metadata:
+      search-order: metadataService
 ```
 
 The `[Globals]` section is populated using the given `clouds.yaml` (see "OpenStack credentials" below).
 
-Additional configuration options are available for CCMs - see [values.yaml](./values.yaml).
+For the available options, consult the documentation for the
+[CCM](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager)
+and the
+[Cinder CSI plugin](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage).
+
+Additional configuration options are available for the OpenStack integrations - see
+[values.yaml](./values.yaml) for more details.
 
 ### OpenStack credentials
 
