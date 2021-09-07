@@ -1,4 +1,4 @@
-{{- if and .Values.ccm.enabled (eq .Values.ccm.type "openstack") }}
+{{- if and .Values.openstack.enabled .Values.openstack.ccm.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:

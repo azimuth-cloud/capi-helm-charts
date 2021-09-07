@@ -193,7 +193,6 @@ addons:
   # See https://github.com/stackhpc/capi-helm-charts/blob/main/charts/cluster-addons for details
   # The clouds.yaml used for cluster deployment will be given in addition to these
   values:
-    # By default, enable the OpenStack CCM
-    ccm:
+    # By default, enable the OpenStack integrations
+    openstack:
       enabled: true
-      type: openstack

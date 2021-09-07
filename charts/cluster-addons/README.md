@@ -66,25 +66,26 @@ cni:
 
 Additional configuration options are available for each - see [values.yaml](./values.yaml).
 
-## Cloud Controller Managers (CCMs)
+## OpenStack integrations
 
-In Kubernetes, a
-[Cloud Controller Manager (CCM)](https://kubernetes.io/docs/concepts/architecture/cloud-controller/)
-provides integration between a Kubernetes cluster and the cloud platform that it is running on.
-This enables things like the automatic labelling of nodes with cloud-specific information,
-automatic configuration of hostnames and IP addresses, and managed load balancers for services.
+Kubernetes allows cloud providers to provide various plugins to integrate with the
+underlying infrastructure, for example
+[Cloud Controller Managers (CCMs)](https://kubernetes.io/docs/concepts/architecture/cloud-controller/),
+[Container Storage Interface (CSI) implementations](https://kubernetes-csi.github.io/docs/)
+and [authenticating webhooks](https://kubernetes.io/docs/reference/access-authn-authz/webhook/).    
 
-This chart can install the
-[OpenStack CCM](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md)
-to provided this integration for clusters running on an OpenStack cloud.
+This chart is able to deploy the CCM from the
+[Kubernetes OpenStack cloud provider](https://github.com/kubernetes/cloud-provider-openstack)
+to integrate with the OpenStack cloud on which a Kubernetes cluster is deployed, allowing
+features like automatic labelling of nodes with OpenStack information (e.g. server ID and flavor),
+automatic configuration of hostnames and IP addresses and managed load balancers for services.
 
-By default, this chart does not deploy a CCM. To enable the OpenStack CCM on the target cluster,
-use the following in your Helm values:
+By default, the OpenStack integrations are not enabled. To enable OpenStack integrations the target
+cluster, use the following in your Helm values:
 
 ```yaml
-ccm:
+openstack:
   enabled: true
-  type: openstack
 ```
 
 To configure options for `[Networking]`, `[LoadBalancer]` and `[Metadata]` sections of the
@@ -92,8 +93,8 @@ To configure options for `[Networking]`, `[LoadBalancer]` and `[Metadata]` secti
 file you can use the Helm values, e.g.:
 
 ```yaml
-ccm:
-  openstack:
+openstack:
+  ccm:
     cloudConfig:
       networking:
         public-network-name: public-internet
@@ -157,9 +158,9 @@ nvidiaGPUOperator:
   enabled: true
 ```
 
-Because of the automatic detection of nodes with GPUs, there is no need to manually label
-nodes with GPUs. In the case where some nodes have GPUs and some do not, the GPU operator
-will do the right thing without the need for manual intervention.
+Because of the automatic detection and labelling of nodes with GPUs, there is no need to
+manually label nodes. In the case where some nodes have GPUs and some do not, the GPU
+operator will do the right thing without the need for manual intervention.
 
 Additional configuration options are available for the NVIDIA GPU operator - see
 [values.yaml](./values.yaml).

@@ -63,20 +63,20 @@ cni:
     # Any kustomization to be applied to the Weave manifests
     kustomization:
 
-# Settings for the cloud controller manager for external cloud providers
-ccm:
-  # Indicates if an external cloud controller manager should be deployed
+# Settings for the OpenStack integrations
+openstack:
+  # Indicates if the OpenStack integrations should be enabled
   enabled: false
-  # The type of the external CCM to deploy - currently only OpenStack is supported
-  type: openstack
-  # Settings for the OpenStack cloud controller manager
-  openstack:
+  # Settings for the OpenStack Cloud Controller Manager (CCM)
+  ccm:
+    # Indicates if the OpenStack CCM should be enabled
+    enabled: false
     # The version of the OpenStack CCM to install
     # This is treated as a template during rendering
     version: release-{{ .Capabilities.KubeVersion.Major }}.{{ .Capabilities.KubeVersion.Minor }}
     # The base URL for OpenStack CCM manifests
     # This is treated as a template during rendering
-    manifestsBaseURL: https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/{{ tpl .Values.ccm.openstack.version . }}
+    manifestsBaseURL: https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/{{ tpl .Values.openstack.ccm.version . }}
     # The prefix for CCM manifests
     ccmManifestsPrefix: /manifests/controller-manager
     # The prefix for RBAC manifests
@@ -86,9 +86,9 @@ ccm:
     # The URLs to use for the manifests
     # These are treated as templates during rendering
     manifests:
-      roles: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
-      roleBindings: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
-      daemonset: "{{ tpl .Values.ccm.openstack.manifestsBaseURL . }}{{ tpl .Values.ccm.openstack.ccmManifestsPrefix . }}/openstack-cloud-controller-manager-ds.yaml"
+      roles: "{{ tpl .Values.openstack.ccm.manifestsBaseURL . }}{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
+      roleBindings: "{{ tpl .Values.openstack.ccm.manifestsBaseURL . }}{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
+      daemonset: "{{ tpl .Values.openstack.ccm.manifestsBaseURL . }}{{ tpl .Values.openstack.ccm.ccmManifestsPrefix . }}/openstack-cloud-controller-manager-ds.yaml"
     # Any kustomization to apply to the OpenStack CCM manifests
     kustomization:
     # cloud-config options for the cloud controller manager
