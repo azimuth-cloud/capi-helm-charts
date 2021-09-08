@@ -1,0 +1,52 @@
+{{- if and (not .Values.bootstrapOnly) .Values.certManager.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cert-manager") }}-{{ .Release.Revision }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cert-manager") | nindent 4 }}
+spec:
+  # Keep trying for a decent amount of time before failing
+  backoffLimit: 1000
+  # Keep succeeded jobs for 5m after finishing
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels: {{ include "cluster-addons.componentSelectorLabels" (list . "cert-manager") | nindent 8 }}
+    spec:
+      # Ensure that we run as a non-root user
+      securityContext:
+        runAsUser: 1001
+      serviceAccountName: {{ include "cluster-addons.componentName" (list . "deployer") }}
+      restartPolicy: OnFailure
+      containers:
+        - name: cert-manager
+          image: {{ printf "%s:%s" .Values.jobImage.repository (default .Chart.AppVersion .Values.jobImage.tag) }}
+          imagePullPolicy: {{ .Values.jobImage.pullPolicy }}
+          args:
+            - helm
+            - upgrade
+            - {{ .Values.certManager.release.name }}
+            - {{ .Values.certManager.chart.name }}
+            - --atomic
+            - --install
+            - --namespace
+            - {{ .Values.certManager.release.namespace }}
+            - --create-namespace
+            - --repo
+            - {{ .Values.certManager.chart.repo }}
+            - --version
+            - {{ .Values.certManager.chart.version }}
+            - --values
+            - /config/values.yaml
+            - --wait
+            - --timeout
+            - {{ .Values.certManager.release.timeout }}
+          volumeMounts:
+            - name: helm-values
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: helm-values
+          secret:
+            secretName: {{ include "cluster-addons.componentName" (list . "cert-manager-values") }}
+{{- end }}

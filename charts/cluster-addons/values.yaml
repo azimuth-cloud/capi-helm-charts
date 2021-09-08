@@ -124,6 +124,25 @@ openstack:
       # Indicates if volume expansion is allowed
       allowVolumeExpansion: true
 
+# Settings for cert-manager
+certManager:
+  # Indicates if cert-manager should be enabled
+  enabled: true
+  chart:
+    repo: https://charts.jetstack.io
+    name: cert-manager
+    version: v1.5.3
+  release:
+    namespace: cert-manager
+    name: cert-manager
+    timeout: 5m
+  values:
+    # By default, make sure the cert-manager CRDs are installed
+    installCRDs: true
+    # Disable Prometheus support for now
+    prometheus:
+      enabled: false
+
 # Settings for the NVIDIA GPU operator
 nvidiaGPUOperator:
   # Indicates if the NVIDIA GPU operator should be enabled
