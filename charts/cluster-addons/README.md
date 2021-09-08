@@ -147,6 +147,28 @@ This file can then be passed to the chart using the `-f|--values` option, e.g.:
 helm install cluster-addons capi/cluster-addons --values ./clouds.yaml [...options]
 ```
 
+## cert-manager
+
+This chart is able to install [cert-manager](https://cert-manager.io/) on the target cluster.
+cert-manager provides custom resources for managing X509 certificates and certificate
+issuers as native Kuberbetes resources, simplifying the issuance and renewal of X509
+certificates (e.g. for TLS for web services). It is able to automatically negotiate
+certificates from services such as [Let's Encrypt](https://letsencrypt.org/) by fulfilling
+the required challenges, and can
+[automatically issue certificates](https://cert-manager.io/docs/usage/ingress/) for
+[Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+using annotations.
+
+cert-manager is enabled by default. To disable it, use the following Helm values:
+
+```yaml
+certManager:
+  enabled: false
+```
+
+Additional configuration options are available for cert-manager - see
+[values.yaml](./values.yaml).
+
 ## NVIDIA GPU operator
 
 This chart is able to install the

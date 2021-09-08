@@ -136,6 +136,7 @@ certManager:
     namespace: cert-manager
     name: cert-manager
     timeout: 5m
+  # See https://cert-manager.io/docs/installation/helm/ for available values
   values:
     # By default, make sure the cert-manager CRDs are installed
     installCRDs: true
