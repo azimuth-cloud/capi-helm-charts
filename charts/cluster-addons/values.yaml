@@ -140,7 +140,15 @@ metricsServer:
   manifests:
     - https://github.com/kubernetes-sigs/metrics-server/releases/download/{{ .Values.metricsServer.version }}/components.yaml
   # Any kustomization to be applied to the metrics server manifests
-  kustomization: {}
+  kustomization:
+    patches:
+      - patch: |-
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --kubelet-insecure-tls
+        target:
+          kind: Deployment
+          name: metrics-server
 
 # Settings for cert-manager
 certManager:
