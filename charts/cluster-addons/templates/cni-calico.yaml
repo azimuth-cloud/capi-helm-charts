@@ -1,0 +1,13 @@
+{{- if and .Values.cni.enabled (eq .Values.cni.type "calico") }}
+{{-
+  include
+    "cluster-addons.job.kustomize"
+    (list
+      .
+      "cni-calico"
+      .Values.cni.calico
+      (list (list "kube-system" "daemonset/calico-node"))
+      (dict "cni" true)
+    )
+}}
+{{- end }}

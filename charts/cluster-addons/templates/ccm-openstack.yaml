@@ -1,0 +1,39 @@
+{{- define "cluster-addons.ccm-openstack.config.patches" -}}
+kustomization:
+  patches:
+    - patch: |-
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --cluster-name={{ .Values.clusterName }}
+      target:
+        kind: DaemonSet
+        name: openstack-cloud-controller-manager
+    {{- if semverCompare "~1.21.0" .Capabilities.KubeVersion.Version }}
+    - patch: |-
+        - op: add
+          path: /rules/-
+          value:
+            apiGroups: [""]
+            resources: ["serviceaccounts/token"]
+            verbs: ["create"]
+      target:
+        group: rbac.authorization.k8s.io
+        version: v1
+        kind: ClusterRole
+        name: system:cloud-controller-manager
+    {{- end }}
+{{- end }}
+
+{{- if and .Values.openstack.enabled .Values.openstack.ccm.enabled }}
+{{- $patches := include "cluster-addons.ccm-openstack.config.patches" . | fromYaml }}
+{{- $config := include "cluster-addons.mergeConcat" (list $patches .Values.openstack.ccm) | fromYaml }}
+{{-
+  include "cluster-addons.job.kustomize" (list
+    .
+    "ccm-openstack"
+    $config
+    (list (list "kube-system" "daemonset/openstack-cloud-controller-manager"))
+    (dict "bootstrap" true)
+  )
+}}
+{{- end }}

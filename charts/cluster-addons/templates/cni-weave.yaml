@@ -1,0 +1,13 @@
+{{- if and .Values.cni.enabled (eq .Values.cni.type "weave") }}
+{{-
+  include
+    "cluster-addons.job.kustomize"
+    (list
+      .
+      "cni-weave"
+      .Values.cni.weave
+      (list (list "kube-system" "daemonset/weave-net"))
+      (dict "cni" true)
+    )
+}}
+{{- end }}

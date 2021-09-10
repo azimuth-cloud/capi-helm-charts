@@ -1,0 +1,3 @@
+{{- if and .Values.ingress.enabled .Values.ingress.nginx.enabled }}
+{{- include "cluster-addons.job.helm" (list . "ingress-nginx" .Values.ingress.nginx) }}
+{{- end }}

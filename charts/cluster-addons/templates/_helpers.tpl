@@ -80,3 +80,233 @@ Component labels
 {{ include "cluster-addons.commonLabels" (index . 0) }}
 {{ include "cluster-addons.componentSelectorLabels" . }}
 {{- end }}
+
+{{/*
+Template for a config secret for use by a job that deploys an addon.
+*/}}
+{{- define "cluster-addons.job.config" -}}
+{{- $ctx := index . 0 }}
+{{- $componentName := index . 1 }}
+{{- $options := slice (append . dict) 2 | first }}
+{{- $configSecretName := printf "%s-config" $componentName }}
+{{- $configDataTemplate := printf "cluster-addons.%s.config" $componentName }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ctx $configSecretName) }}
+  labels: {{ include "cluster-addons.componentLabels" (list $ctx $componentName) | nindent 4 }}
+stringData:
+{{- if hasKey $options "configData" }}
+{{- nindent 2 $options.configData }}
+{{- else }}
+{{- include $configDataTemplate $ctx | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Base template for a job that deploys an addon.
+*/}}
+{{- define "cluster-addons.job.base" -}}
+{{- $ctx := index . 0 }}
+{{- $componentName := index . 1 }}
+{{- $options := slice (append . dict) 2 | first }}
+{{- $configSecretName := printf "%s-config" $componentName }}
+{{- $scriptTemplate := printf "cluster-addons.%s.script" $componentName }}
+{{- $bootstrap := dig "bootstrap" false $options }}
+{{- $cni := dig "cni" false $options }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ctx $componentName) }}-{{ $ctx.Release.Revision }}
+  labels: {{ include "cluster-addons.componentLabels" (list $ctx $componentName) | nindent 4 }}
+spec:
+  # Keep trying for a decent amount of time before failing
+  backoffLimit: 1000
+  # Keep succeeded jobs for 5m after finishing
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels: {{ include "cluster-addons.componentSelectorLabels" (list $ctx $componentName) | nindent 8 }}
+    spec:
+      # Ensure that we run as a non-root user
+      securityContext:
+        runAsUser: 1001
+      serviceAccountName: {{ include "cluster-addons.componentName" (list $ctx "deployer") }}
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ $componentName }}
+          image: {{ printf "%s:%s" $ctx.Values.jobImage.repository (default $ctx.Chart.AppVersion $ctx.Values.jobImage.tag) }}
+          imagePullPolicy: {{ $ctx.Values.jobImage.pullPolicy }}
+          args:
+            - /bin/sh
+            - -c
+            - |
+                set -exo pipefail
+                {{- if hasKey $options "script" }}
+                {{- nindent 16 $options.script }}
+                {{- else }}
+                {{- include $scriptTemplate $ctx | nindent 16 }}
+                {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: {{ include "cluster-addons.componentName" (list $ctx $configSecretName) }}
+      {{- if or $bootstrap $cni }}
+      tolerations: {{ toYaml $ctx.Values.bootstrapTolerations | nindent 8 }}
+      {{- end }}
+      {{- if $cni }}
+      hostNetwork: true
+      {{- else if $bootstrap }}
+      dnsPolicy: None
+      dnsConfig:
+        nameservers: {{ toYaml $ctx.Values.bootstrapDNSNameservers | nindent 10 }}
+      {{- end }}
+{{- end }}
+
+{{/*
+Template for a job that deploys an addon.
+*/}}
+{{- define "cluster-addons.job" -}}
+{{- $ctx := index . 0 }}
+{{- $options := slice (append . dict) 2 | first }}
+{{- $bootstrap := dig "bootstrap" false $options }}
+{{- $cni := dig "cni" false $options }}
+{{- if or $cni $bootstrap (not $ctx.Values.bootstrapOnly) }}
+{{- include "cluster-addons.job.config" . }}
+---
+{{- include "cluster-addons.job.base" . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Template for producing the configuration required for a Helm release.
+*/}}
+{{- define "cluster-addons.job.helm.config" -}}
+values.yaml: |
+  {{- toYaml .values | nindent 2 }}
+{{- end }}
+
+{{/*
+Template for a script that installs or upgrades a Helm release.
+*/}}
+{{- define "cluster-addons.job.helm.script" -}}
+helm upgrade {{ .release.name }} {{ .chart.name }} \
+  --atomic --install \
+  --namespace {{ .release.namespace }} --create-namespace \
+  --repo {{ .chart.repo }} \
+  --version {{ .chart.version }} \
+  --values /config/values.yaml \
+  --wait --timeout {{ .release.timeout }} \
+  $HELM_EXTRA_ARGS
+{{- end }}
+
+{{/*
+Template for a job that deploys an addon using a Helm chart.
+*/}}
+{{- define "cluster-addons.job.helm" -}}
+{{- $ctx := index . 0 }}
+{{- $componentName := index . 1 }}
+{{- $helmSpec := index . 2 }}
+{{- $options := slice (append . dict) 3 | first }}
+{{-
+  include
+    "cluster-addons.job"
+    (list
+      $ctx
+      $componentName
+      (merge
+        (dict
+          "configData" (include "cluster-addons.job.helm.config" $helmSpec)
+          "script"     (include "cluster-addons.job.helm.script" $helmSpec)
+        )
+        $options
+      )
+    )
+}}
+{{- end }}
+
+{{/*
+Template for producing the configuration for an addon that uses kustomize.
+*/}}
+{{- define "cluster-addons.job.kustomize.config" -}}
+{{- $ctx := index . 0 }}
+{{- $kustomize := index . 1 }}
+kustomization.yaml: |
+  apiVersion: kustomize.config.k8s.io/v1beta1
+  kind: Kustomization
+  resources:
+  {{- range $kustomize.manifests }}
+  - {{ tpl . $ctx }}
+  {{- end }}
+  {{- with $kustomize.kustomization }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Template for producing a script for an addon that uses kustomize.
+*/}}
+{{- define "cluster-addons.job.kustomize.script" -}}
+kustomize build /config | kubectl apply -f -
+{{- range . }}
+kubectl -n {{ index . 0 }} rollout status {{ index . 1 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Template for a job that deploys an addon using kustomize.
+*/}}
+{{- define "cluster-addons.job.kustomize" -}}
+{{- $ctx := index . 0 }}
+{{- $componentName := index . 1 }}
+{{- $kustomize := index . 2 }}
+{{- $resources := index . 3 }}
+{{- $options := slice (append . dict) 4 | first }}
+{{-
+  include
+    "cluster-addons.job"
+    (list
+      $ctx
+      $componentName
+      (merge
+        (dict
+          "configData" (include "cluster-addons.job.kustomize.config" (list $ctx $kustomize))
+          "script"     (include "cluster-addons.job.kustomize.script" $resources)
+        )
+        $options
+      )
+    )
+}}
+{{- end }}
+
+{{/*
+Template that merges two variables with the latter taking precedence and outputs the result as YAML.
+Lists are merged by concatenating them rather than overwriting.
+*/}}
+{{- define "cluster-addons.mergeConcat" -}}
+{{- $left := index . 0 }}
+{{- if kindIs (kindOf list) $left }}
+{{- index . 1 | default list | concat $left | toYaml }}
+{{- else if kindIs (kindOf dict) $left }}
+{{- $right := index . 1 | default dict }}
+{{- range $key := concat (keys $left) (keys $right) | uniq }}
+{{ $key }}:
+  {{- if and (hasKey $left $key) (hasKey $right $key) }}
+  {{-
+    include "cluster-addons.mergeConcat" (list (index $left $key) (index $right $key)) |
+    nindent 2
+  }}
+  {{- else if hasKey $left $key }}
+  {{- index $left $key | toYaml | nindent 2 }}
+  {{- else }}
+  {{- index $right $key | toYaml | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- else }}
+{{- default $left (index . 1) | toYaml }}
+{{- end }}
+{{- end }}

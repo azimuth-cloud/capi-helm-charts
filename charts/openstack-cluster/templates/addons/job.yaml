@@ -65,6 +65,7 @@ spec:
                   --set-file cloudCACert=/cloud-config/cacert \
                   {{- end }}
                   --values /config/values.yaml \
+                  --set clusterName={{ include "openstack-cluster.clusterName" . }} \
                   --set bootstrapOnly=true \
                   --wait --wait-for-jobs --timeout {{ .Values.addons.release.timeout }}
                 {{- end }}
@@ -86,6 +87,7 @@ spec:
                   --set-file cloudCACert=/cloud-config/cacert \
                   {{- end }}
                   --values /config/values.yaml \
+                  --set clusterName={{ include "openstack-cluster.clusterName" . }} \
                   --wait --wait-for-jobs --timeout {{ .Values.addons.release.timeout }}
           volumeMounts:
             - name: kubeconfig

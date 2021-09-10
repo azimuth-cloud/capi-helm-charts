@@ -1,0 +1,19 @@
+{{- range $releaseName, $releaseSpec := .Values.customHelmReleases }}
+{{-
+  include
+    "cluster-addons.job.helm"
+    (list
+      $
+      (printf "helm-%s" $releaseName)
+      (dict
+        "chart"   $releaseSpec.chart
+        "release" (dict
+          "name"      $releaseName
+          "namespace" (dig "namespace" $releaseName $releaseSpec)
+          "timeout"   (dig "timeout" "5m" $releaseSpec)
+        )
+        "values"  (default dict $releaseSpec.values)
+      )
+    )
+}}
+{{- end }}

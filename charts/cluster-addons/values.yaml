@@ -1,3 +1,6 @@
+# The name of the Kubernetes cluster we are deploying to
+clusterName: kubernetes
+
 # Content for an OpenStack clouds.yaml file
 # Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
 clouds:
@@ -49,19 +52,22 @@ cni:
     # The version of Calico to deploy
     # This is only used in the default manifest URL
     version: v3.20
-    # The URL of the Calico manifest
+    # The URLs of the Calico manifests
     # This is treated as a template during rendering
-    manifestURL: https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
+    manifests:
+      - https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
     # Any kustomization to be applied to the Calico manifests
-    kustomization:
+    kustomization: {}
   # Settings for the Weave CNI
   weave:
-    # The base URL of the Weave manifests
+    # The version of Weave to deploy
     # There is one manifest for Kubernetes >= 1.16 and one for the rest
     version: "{{ ternary \"v1.16\" \"v1.13\" (semverCompare \">=1.16\" .Capabilities.KubeVersion.Version) }}"
-    manifestURL: https://cloud.weave.works/k8s/{{ tpl .Values.cni.weave.version . }}/net
+    # The URLs of the Weave manifests
+    manifests:
+      - https://cloud.weave.works/k8s/{{ tpl .Values.cni.weave.version . }}/net
     # Any kustomization to be applied to the Weave manifests
-    kustomization:
+    kustomization: {}
 
 # Settings for the OpenStack integrations
 openstack:
@@ -96,7 +102,7 @@ openstack:
       - "{{ tpl .Values.openstack.manifestsBaseURL . }}{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
       - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml"
     # Any kustomization to apply to the OpenStack CCM manifests
-    kustomization:
+    kustomization: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
     # Indicates if the Cinder CSI should be enabled
@@ -110,7 +116,7 @@ openstack:
       - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/cinder-csi-nodeplugin.yaml"
       - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/csi-cinder-driver.yaml"
     # Any kustomization to apply to the OpenStack CCM manifests
-    kustomization:
+    kustomization: {}
     # Variables affecting the definition of the storage class
     storageClass:
       # Indicates if the storage class should be enabled
@@ -143,6 +149,25 @@ certManager:
     # Disable Prometheus support for now
     prometheus:
       enabled: false
+
+# Settings for ingress controllers
+ingress:
+  # Indicates if ingress controllers should be enabled
+  enabled: true
+  # Settings for the Nginx ingress controller
+  nginx:
+    # Indicates if the Nginx ingress controller should be enabled
+    enabled: true
+    chart:
+      repo: https://kubernetes.github.io/ingress-nginx
+      name: ingress-nginx
+      version: 4.0.1
+    release:
+      namespace: ingress-nginx
+      name: ingress-nginx
+      timeout: 5m
+    # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
+    values: {}
 
 # Settings for the NVIDIA GPU operator
 nvidiaGPUOperator:
@@ -183,4 +208,4 @@ customHelmReleases:
   #   # The amount of time to wait for the chart to install before rolling back
   #   timeout: 5m
   #   # The values for the chart
-  #   values:
+  #   values: {}
