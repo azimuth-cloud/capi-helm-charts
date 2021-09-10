@@ -149,6 +149,11 @@ certManager:
     # Disable Prometheus support for now
     prometheus:
       enabled: false
+  # Settings for automatic ACME HTTP01 support using Let's Encrypt
+  acmeHttp01Issuer:
+    enabled: yes
+    name: letsencrypt-http01
+    server: https://acme-v02.api.letsencrypt.org/directory
 
 # Settings for ingress controllers
 ingress:

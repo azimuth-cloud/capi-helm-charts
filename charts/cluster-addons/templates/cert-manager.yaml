@@ -1,3 +1,32 @@
+{{- define "cluster-addons.cert-manager.config" -}}
+{{- include "cluster-addons.job.helm.config" .Values.certManager }}
+{{- if and .Values.ingress.enabled .Values.certManager.acmeHttp01Issuer.enabled }}
+acme-http01-issuer.yaml: |
+  apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    name: {{ .Values.certManager.acmeHttp01Issuer.name }}
+  spec:
+    acme:
+      server: {{ .Values.certManager.acmeHttp01Issuer.server }}
+      privateKeySecretRef:
+        name: {{ .Values.certManager.acmeHttp01Issuer.name }}-key
+      solvers:
+        - http01:
+            ingress:
+              {{- if .Values.ingress.nginx.enabled }}
+              class: {{ dig "controller" "ingressClassResource" "name" "nginx" .Values.ingress.nginx.values }}
+              {{- else }}
+              {{- fail "Ingress is enabled but no controllers are selected" }}
+              {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "cluster-addons.cert-manager.script" -}}
+{{- include "cluster-addons.job.helm.script" .Values.certManager }}
+kubectl apply -f /config/acme-http01-issuer.yaml
+{{- end }}
+
 {{- if .Values.certManager.enabled }}
-{{- include "cluster-addons.job.helm" (list . "cert-manager" .Values.certManager) }}
+{{- include "cluster-addons.job" (list . "cert-manager") }}
 {{- end }}
