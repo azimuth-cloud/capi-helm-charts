@@ -130,6 +130,18 @@ openstack:
       # Indicates if volume expansion is allowed
       allowVolumeExpansion: true
 
+# Settings for the metrics server
+metricsServer:
+  # Indicates if the metrics server should be deployed
+  enabled: true
+  # The version of the metrics server to deploy
+  version: v0.5.0
+  # The URLs of the metrics server manifests
+  manifests:
+    - https://github.com/kubernetes-sigs/metrics-server/releases/download/{{ .Values.metricsServer.version }}/components.yaml
+  # Any kustomization to be applied to the metrics server manifests
+  kustomization: {}
+
 # Settings for cert-manager
 certManager:
   # Indicates if cert-manager should be enabled

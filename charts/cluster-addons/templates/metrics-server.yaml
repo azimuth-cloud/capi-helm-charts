@@ -1,0 +1,12 @@
+{{- if .Values.metricsServer.enabled }}
+{{-
+  include
+    "cluster-addons.job.kustomize"
+    (list
+      .
+      "metrics-server"
+      .Values.metricsServer
+      (list (list "kube-system" "deployment/metrics-server"))
+    )
+}}
+{{- end }}
