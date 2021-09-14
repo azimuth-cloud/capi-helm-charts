@@ -1,0 +1,10 @@
+{{- if and .Values.cni.enabled (eq .Values.cni.type "cilium") }}
+{{-
+  include "cluster-addons.job.helm" (list
+    .
+    "cni-cilium"
+    .Values.cni.cilium
+    (dict "cni" true)
+  )
+}}
+{{- end }}

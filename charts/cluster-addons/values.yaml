@@ -45,8 +45,8 @@ bootstrapTolerations:
 cni:
   # Indicates if a CNI should be deployed
   enabled: true
-  # The type of CNI to deploy - support values are calico, weave
-  type: calico
+  # The type of CNI to deploy - supported values are calico, cilium, weave
+  type: cilium
   # Settings for the calico CNI
   calico:
     # The version of Calico to deploy
@@ -58,6 +58,20 @@ cni:
       - https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
     # Any kustomization to be applied to the Calico manifests
     kustomization: {}
+  # Settings for the Cilium CNI
+  cilium:
+    chart:
+      repo: https://helm.cilium.io/
+      name: cilium
+      version: 1.10.4
+    release:
+      namespace: kube-system
+      name: cilium
+      timeout: 5m
+    # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
+    values:
+      ipam:
+        mode: kubernetes
   # Settings for the Weave CNI
   weave:
     # The version of Weave to deploy
