@@ -37,9 +37,8 @@ clusterNetworking:
   # Indicates if security groups should be managed by the cluster
   manageSecurityGroups: true
   # Indicates if the managed security groups should allow all in-cluster traffic
-  # By default, the only in-cluster traffic that is permitted is etcd, kubelet
-  # and BGP/IP-in-IP for Calico
-  allowAllInClusterTraffic: false
+  # The default CNI installed by the addons is Cilium, so this is true by default
+  allowAllInClusterTraffic: true
   # The ID of the external network to use
   # If not given, the external network will be detected
   externalNetworkId:
