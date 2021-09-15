@@ -225,6 +225,33 @@ nvidiaGPUOperator:
     operator:
       defaultRuntime: containerd
 
+# Settings for cluster monitoring
+monitoring:
+  # Indicates if the cluster monitoring should be enabled
+  enabled: true
+  # Because Helm doesn't upgrade CRDs, we install them manually instead
+  # In the manifest base URL, "${CHART_VERSION}" and "${CHART_APPVERSION}" are replaced with the
+  # version and appVersion of the Helm chart respectively
+  crdManifestsBaseURL: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v${CHART_APPVERSION}/example/prometheus-operator-crd
+  crdManifests:
+    - monitoring.coreos.com_alertmanagerconfigs.yaml
+    - monitoring.coreos.com_alertmanagers.yaml
+    - monitoring.coreos.com_podmonitors.yaml
+    - monitoring.coreos.com_probes.yaml
+    - monitoring.coreos.com_prometheuses.yaml
+    - monitoring.coreos.com_prometheusrules.yaml
+    - monitoring.coreos.com_servicemonitors.yaml
+    - monitoring.coreos.com_thanosrulers.yaml
+  chart:
+    repo: https://prometheus-community.github.io/helm-charts
+    name: kube-prometheus-stack
+    version: 18.0.8
+  release:
+    namespace: monitoring-system
+    name: kube-prometheus-stack
+    timeout: 5m
+  values:
+
 # Custom manifests to apply
 # This should be a map of filenames to manifest content
 customManifests:

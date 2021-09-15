@@ -194,11 +194,25 @@ values.yaml: |
 Template for a script that installs or upgrades a Helm release.
 */}}
 {{- define "cluster-addons.job.helm.script" -}}
+{{- if hasKey . "crdManifests" -}}
+get_chart_version() {
+  helm show chart --repo {{ .chart.repo }} --version {{ .chart.version }} {{ .chart.name }} | \
+    grep -e "^$1" | \
+    cut -d ":" -f 2 | \
+    tr -d '[:space:]'
+}
+CHART_VERSION="$(get_chart_version "version")"
+CHART_APPVERSION="$(get_chart_version "appVersion")"
+{{- range $manifestName := .crdManifests }}
+kubectl apply -f {{ $.crdManifestsBaseURL }}/{{ $manifestName }}
+{{- end }}
+{{- end }}
 helm upgrade {{ .release.name }} {{ .chart.name }} \
   --atomic --install \
   --namespace {{ .release.namespace }} --create-namespace \
   --repo {{ .chart.repo }} \
   --version {{ .chart.version }} \
+  --skip-crds \
   --values /config/values.yaml \
   --wait --timeout {{ .release.timeout }} \
   $HELM_EXTRA_ARGS
