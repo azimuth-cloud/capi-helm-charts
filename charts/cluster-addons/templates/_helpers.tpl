@@ -212,7 +212,9 @@ helm upgrade {{ .release.name }} {{ .chart.name }} \
   --namespace {{ .release.namespace }} --create-namespace \
   --repo {{ .chart.repo }} \
   --version {{ .chart.version }} \
+  {{- if hasKey . "crdManifests" -}}
   --skip-crds \
+  {{- end }}
   --values /config/values.yaml \
   --wait --timeout {{ .release.timeout }} \
   $HELM_EXTRA_ARGS
