@@ -147,7 +147,15 @@ To inspect the progress of the cluster deployment, you can use the
 [clusterctl CLI](https://cluster-api.sigs.k8s.io/clusterctl/overview.html):
 
 ```sh
-clusterctl describe cluster my-cluster
+$ clusterctl describe cluster my-cluster
+NAME                                                           READY  SEVERITY  REASON  SINCE  MESSAGE
+/my-cluster                                                    True                     5d21h
+├─ClusterInfrastructure - OpenStackCluster/my-cluster
+├─ControlPlane - KubeadmControlPlane/my-cluster-control-plane  True                     5d21h
+│ └─3 Machines...                                              True                     5d22h  See my-cluster-control-plane-77xg4, my-cluster-control-plane-stswh, ...
+└─Workers
+  └─MachineDeployment/my-cluster-md-0                          True                     5d22h
+    └─3 Machines...                                            True                     5d22h  See my-cluster-md-0-8656cccd7b-4n2rq, my-cluster-md-0-8656cccd7b-dh7mc, ...
 ```
 
 To update the cluster, just modify the configuration as required and run the above
