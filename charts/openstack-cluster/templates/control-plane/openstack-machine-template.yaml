@@ -9,9 +9,18 @@ template:
       kind: Secret
       name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
     cloudName: openstack
-    image: {{ tpl (required ".Values.machineImage is required" .Values.machineImage) . }}
     flavor: {{ .Values.controlPlane.machineFlavor | required ".Values.controlPlane.machineFlavor is required" }}
-    sshKeyName: {{ .Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
+    {{- with .Values.machineSSHKeyName }}
+    sshKeyName: {{ . }}
+    {{- end }}
+    {{- if gt (float64 .Values.controlPlane.machineRootVolumeSize) 0.0 }}
+    rootVolume:
+      sourceType: image
+      sourceUUID: {{ .Values.machineImageId | required ".Values.machineImageId is required when using a root volume" }}
+      diskSize: {{ .Values.controlPlane.machineRootVolumeSize }}
+    {{- else }}
+    image: {{ tpl (required ".Values.machineImage is required when not using a root volume" .Values.machineImage) . }}
+    {{- end }}
     {{- with .Values.controlPlane.machineNetworking.networks }}
     networks: {{ toYaml . | nindent 6 }}
     {{- end }}

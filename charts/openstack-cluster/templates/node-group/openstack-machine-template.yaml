@@ -11,9 +11,18 @@ template:
       kind: Secret
       name: {{ include "openstack-cluster.componentName" (list $ctx "cloud-config") }}
     cloudName: openstack
-    image: {{ tpl (required ".Values.machineImage is required" $ctx.Values.machineImage) $ctx }}
     flavor: {{ $nodeGroup.machineFlavor | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
-    sshKeyName: {{ $ctx.Values.machineSSHKeyName | required ".Values.machineSSHKeyName is required" }}
+    {{- with $ctx.Values.machineSSHKeyName }}
+    sshKeyName: {{ . }}
+    {{- end }}
+    {{- if gt (float64 $nodeGroup.machineRootVolumeSize) 0.0 }}
+    rootVolume:
+      sourceType: image
+      sourceUUID: {{ $ctx.Values.machineImageId | required ".Values.machineImageId is required when using a root volume" }}
+      diskSize: {{ $nodeGroup.machineRootVolumeSize }}
+    {{- else }}
+    image: {{ tpl (required ".Values.machineImage is required when not using a root volume" $ctx.Values.machineImage) $ctx }}
+    {{- end }}
     {{- with $nodeGroup.machineNetworking.networks }}
     networks: {{ toYaml . | nindent 6 }}
     {{- end }}

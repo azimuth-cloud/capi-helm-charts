@@ -6,8 +6,12 @@ cloudName: openstack
 # The PEM-encoded CA certificate for the specified cloud
 cloudCACert:
 
-# The image to use for cluster machines
+# The name of the image to use for cluster machines
+# This is used when creating machines using ephemeral root disks
 machineImage:
+# The ID of the image to use for cluster machines
+# This is required when creating machines with volumes as root disks
+machineImageId:
 
 # The name of the SSH key to inject into cluster machines
 machineSSHKeyName:
@@ -87,6 +91,9 @@ controlPlane:
   machineNetworking:
     networks:
     ports:
+  # The root volume size for the machine
+  # If greater than zero, a volume is provisioned to be the root disk for the machine
+  machineRootVolumeSize: 0
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
@@ -139,6 +146,9 @@ nodeGroupDefaults:
   machineNetworking:
     networks:
     ports:
+  # The root volume size for the machine
+  # If greater than zero, a volume is provisioned to be the root disk for the machine
+  machineRootVolumeSize: 0
   # The default kubeadm config specification for worker nodes
   # This will be merged with any configuration given for specific node groups
   # By default, this uses a simple configuration that enables the external cloud provider
