@@ -62,9 +62,16 @@ apiServer:
   enableLoadBalancer: true
   # Indicates whether to associate a floating IP with the API server
   associateFloatingIP: true
-  # The fixed floating IP to associate with the API server
+  # The specific floating IP to associate with the API server
   # If not given, a new IP will be allocated if required
   floatingIP:
+  # The specific fixed IP to associate with the API server
+  # If enableLoadBalancer is true, this will become the VIP of the load balancer
+  # If enableLoadBalancer and associateFloatingIP are both false, this should be
+  # the IP of a pre-allocated port to be used as the VIP
+  fixedIP:
+  # The port to use for the API server
+  port: 6443
 
 # Settings for the control plane
 controlPlane:

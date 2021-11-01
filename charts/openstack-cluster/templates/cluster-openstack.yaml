@@ -9,6 +9,9 @@ spec:
     kind: Secret
     name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
   cloudName: openstack
+  {{- with .Values.controlPlaneEndpoint }}
+  controlPlaneEndpoint: {{ . | toYaml | nindent 4 }}
+  {{- end }}
   {{- with .Values.clusterNetworking }}
   dnsNameservers: {{ .dnsNameservers | toYaml | nindent 4 }}
   managedSecurityGroups: {{ .manageSecurityGroups }}
@@ -35,4 +38,8 @@ spec:
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}
   {{- end }}
+  {{- with .fixedIP }}
+  apiServerFixedIP: {{ . }}
+  {{- end }}
+  apiServerPort: {{ .port }}
   {{- end }}
