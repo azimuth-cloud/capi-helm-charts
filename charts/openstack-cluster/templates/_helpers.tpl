@@ -70,3 +70,14 @@ capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" $ctx }}
 capi.stackhpc.com/component: worker
 capi.stackhpc.com/node-group: {{ $nodeGroupName }}
 {{- end -}}
+
+{{/*
+Name of the cloud-config secret.
+*/}}
+{{- define "openstack-cluster.cloudConfigSecretName" -}}
+{{- if .Values.cloudConfigSecretName -}}
+{{- .Values.cloudConfigSecretName -}}
+{{- else -}}
+{{ include "openstack-cluster.componentName" (list . "cloud-config") -}}
+{{- end -}}
+{{- end -}}

@@ -105,7 +105,7 @@ spec:
             secretName: {{ include "openstack-cluster.componentName" (list . "kubeconfig") }}
         - name: cloud-config
           secret:
-            secretName: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
+            secretName: {{ include "openstack-cluster.cloudConfigSecretName" . }}
         - name: helm-values
           secret:
             secretName: {{ include "openstack-cluster.componentName" (list . "addons-values") }}

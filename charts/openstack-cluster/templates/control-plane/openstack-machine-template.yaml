@@ -7,7 +7,7 @@ template:
   spec:
     identityRef:
       kind: Secret
-      name: {{ include "openstack-cluster.componentName" (list . "cloud-config") }}
+      name: {{ include "openstack-cluster.cloudConfigSecretName" . }}
     cloudName: openstack
     flavor: {{ .Values.controlPlane.machineFlavor | required ".Values.controlPlane.machineFlavor is required" }}
     {{- with .Values.machineSSHKeyName }}

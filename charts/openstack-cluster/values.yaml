@@ -1,3 +1,6 @@
+# The name of an existing secret containing the cloud-config
+cloudConfigSecretName:
+
 # Content for the clouds.yaml file
 # Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
 clouds:
