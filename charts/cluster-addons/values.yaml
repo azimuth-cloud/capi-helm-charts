@@ -198,23 +198,6 @@ ingress:
     # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
     values: {}
 
-# Settings for the NVIDIA GPU operator
-nvidiaGPUOperator:
-  # Indicates if the NVIDIA GPU operator should be enabled
-  enabled: false
-  chart:
-    repo: https://nvidia.github.io/gpu-operator
-    name: gpu-operator
-    version: v1.8.1
-  release:
-    namespace: gpu-operator
-    name: gpu-operator
-    timeout: 5m
-  values:
-    # By default, CAPI clusters use containerd
-    operator:
-      defaultRuntime: containerd
-
 # Settings for cluster monitoring
 monitoring:
   # Indicates if the cluster monitoring should be enabled
@@ -240,7 +223,129 @@ monitoring:
     namespace: monitoring-system
     name: kube-prometheus-stack
     timeout: 5m
+  values: {}
+
+# Settings for node feature discovery (NFD) addon
+nfd:
+  # Indicates if node feature discovery should be enabled
+  # NFD is required by some addons, e.g. the NVIDIA GPU operator, so NFD may
+  # be enabled even when this flag is false
+  enabled: false
+  chart:
+    repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+    name: node-feature-discovery
+    version: 0.9.0
+  release:
+    namespace: nfd-system
+    name: node-feature-discovery
+    timeout: 5m
   values:
+    master:
+      extraLabelNs:
+        - nvidia.com
+    worker:
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Equal"
+          value: ""
+          effect: "NoSchedule"
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "present"
+          effect: "NoSchedule"
+      # We want to be able to identify nodes with high-performance hardware
+      # So the whitelisted device classes are:
+      #   02   - Network Controllers (e.g. Ethernet, Infiniband)
+      #   03   - Display Controllers (e.g. GPUs)
+      #   0b40 - Co-processors
+      #   12   - Processing Accelerators (e.g. specialised AI inference chips)
+      config: |
+        sources:
+          pci:
+            deviceClassWhitelist:
+              - "02"
+              - "03"
+              - "0b40"
+              - "12"
+            deviceLabelFields:
+              - vendor
+
+# Settings for the Mellanox OFED driver
+mofed:
+  # Indicates if the Mellanox OFED driver should be enabled
+  # This is automatically enabled if the Mellanox network operator is enabled
+  enabled: false
+  chart:
+    repo: https://stackhpc.github.io/mofed-utils
+    name: mofed-driver
+    version: 0.1.0-dev.0.main.19
+  release:
+    namespace: mofed-system
+    name: mofed-driver
+    timeout: 5m
+  values: {}
+
+# Settings for the Mellanox network operator
+mellanoxNetworkOperator:
+  # Indicates if the Mellanox network operator should be enabled
+  # Note that because it uses node feature discovery to run only on nodes
+  # with a Mellanox NIC available, the overhead of enabling this on clusters
+  # that do not need it now but may need it in the future is low
+  enabled: false
+  chart:
+    repo: https://mellanox.github.io/network-operator
+    name: network-operator
+    version: 1.0.0
+  release:
+    namespace: network-operator
+    name: network-operator
+    timeout: 5m
+  values:
+    # Use shared NFD
+    nfd:
+      enabled: false
+    # Don't deploy the SR-IOV network operator for now
+    sriovNetworkOperator:
+      enabled: false
+    # Do deploy the NicClusterPolicy
+    deployCR: true
+    # Don't enable the OFED driver - we will use mofed-utils (see above)
+    ofedDriver:
+      deploy: false
+    # Enable the RDMA shared device plugin
+    rdmaSharedDevicePlugin:
+      deploy: true
+      # By default, assume there is just one Mellanox NIC attached
+      resources:
+        - name: rdma_shared_device_a
+          vendors: [15b3]
+    sriovDevicePlugin:
+      deploy: false
+    secondaryNetwork:
+      deploy: false
+
+# Settings for the NVIDIA GPU operator
+nvidiaGPUOperator:
+  # Indicates if the NVIDIA GPU operator should be enabled
+  # Note that because it uses node feature discovery to run only on nodes
+  # with an NVIDIA GPU available, the overhead of enabling this on clusters
+  # that do not need it now but may need it in the future is low
+  enabled: false
+  chart:
+    repo: https://nvidia.github.io/gpu-operator
+    name: gpu-operator
+    version: v1.8.1
+  release:
+    namespace: gpu-operator
+    name: gpu-operator
+    timeout: 5m
+  values:
+    # Use shared NFD
+    nfd:
+      enabled: false
+    # By default, CAPI clusters use containerd
+    operator:
+      defaultRuntime: containerd
 
 # Custom manifests to apply
 # This should be a map of filenames to manifest content

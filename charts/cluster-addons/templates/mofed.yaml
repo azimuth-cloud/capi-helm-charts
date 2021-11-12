@@ -1,0 +1,3 @@
+{{- if or .Values.mofed.enabled .Values.mellanoxNetworkOperator.enabled }}
+{{- include "cluster-addons.job.helm" (list . "mofed" .Values.mofed) }}
+{{- end }}
