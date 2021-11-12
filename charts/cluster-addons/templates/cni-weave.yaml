@@ -7,7 +7,7 @@
       "cni-weave"
       .Values.cni.weave
       (list (list "kube-system" "daemonset/weave-net"))
-      (dict "cni" true)
+      (dict "bootstrap" true)
     )
 }}
 {{- end }}

@@ -7,7 +7,7 @@
       "cni-calico"
       .Values.cni.calico
       (list (list "kube-system" "daemonset/calico-node"))
-      (dict "cni" true)
+      (dict "bootstrap" true)
     )
 }}
 {{- end }}

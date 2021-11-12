@@ -4,7 +4,7 @@
     .
     "cni-cilium"
     .Values.cni.cilium
-    (dict "cni" true)
+    (dict "bootstrap" true)
   )
 }}
 {{- end }}

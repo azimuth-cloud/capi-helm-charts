@@ -18,12 +18,6 @@ jobImage:
 # If this is set to true, then only the CNI and CCM will be installed
 bootstrapOnly: false
 
-# Nameservers to use for bootstrap jobs that are not using host networking
-# but must execute before the cluster DNS is ready
-bootstrapDNSNameservers:
-  - 8.8.8.8
-  - 8.8.4.4
-
 # The tolerations to use for jobs that are part of bootstrapping the cluster
 # e.g. CNI, external cloud provider
 bootstrapTolerations:
@@ -98,10 +92,6 @@ openstack:
   # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
   # and https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage
   cloudConfig:
-    networking:
-    loadBalancer:
-    blockStorage:
-    metadata:
   # Settings for the Cloud Controller Manager (CCM)
   ccm:
     # Indicates if the OpenStack CCM should be enabled

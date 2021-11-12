@@ -113,7 +113,6 @@ Base template for a job that deploys an addon.
 {{- $configSecretName := printf "%s-config" $componentName }}
 {{- $scriptTemplate := printf "cluster-addons.%s.script" $componentName }}
 {{- $bootstrap := dig "bootstrap" false $options }}
-{{- $cni := dig "cni" false $options }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -155,15 +154,9 @@ spec:
         - name: config
           secret:
             secretName: {{ include "cluster-addons.componentName" (list $ctx $configSecretName) }}
-      {{- if or $bootstrap $cni }}
-      tolerations: {{ toYaml $ctx.Values.bootstrapTolerations | nindent 8 }}
-      {{- end }}
-      {{- if $cni }}
+      {{- if $bootstrap }}
       hostNetwork: true
-      {{- else if $bootstrap }}
-      dnsPolicy: None
-      dnsConfig:
-        nameservers: {{ toYaml $ctx.Values.bootstrapDNSNameservers | nindent 10 }}
+      tolerations: {{ toYaml $ctx.Values.bootstrapTolerations | nindent 8 }}
       {{- end }}
 {{- end }}
 
@@ -174,8 +167,7 @@ Template for a job that deploys an addon.
 {{- $ctx := index . 0 }}
 {{- $options := slice (append . dict) 2 | first }}
 {{- $bootstrap := dig "bootstrap" false $options }}
-{{- $cni := dig "cni" false $options }}
-{{- if or $cni $bootstrap (not $ctx.Values.bootstrapOnly) }}
+{{- if or $bootstrap (not $ctx.Values.bootstrapOnly) }}
 {{- include "cluster-addons.job.config" . }}
 ---
 {{- include "cluster-addons.job.base" . }}
