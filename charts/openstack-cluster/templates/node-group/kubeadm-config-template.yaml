@@ -30,7 +30,7 @@ template:
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
 metadata:
   name: {{ include "openstack-cluster.nodegroup.kct.name" (list $ $nodeGroup) }}

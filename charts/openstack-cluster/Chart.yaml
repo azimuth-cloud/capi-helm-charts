@@ -3,3 +3,4 @@ name: openstack-cluster
 description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster API.
 type: application
 version: 0.1.0
+appVersion: main

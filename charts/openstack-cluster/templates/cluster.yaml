@@ -1,5 +1,5 @@
 ---
-apiVersion: cluster.x-k8s.io/v1alpha4
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: {{ include "openstack-cluster.clusterName" . }}
@@ -7,7 +7,7 @@ metadata:
 spec:
   clusterNetwork: {{ .Values.kubeNetwork | toYaml | nindent 4 }}
   controlPlaneRef:
-    apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
   infrastructureRef:
