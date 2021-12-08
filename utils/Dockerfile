@@ -10,7 +10,7 @@ FROM alpine
 # Install some useful tools
 RUN apk add --no-cache curl jq
 
-ARG KUBECTL_VN_1_20=v1.20.12
+ARG KUBECTL_VN_1_20=v1.20.13
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -22,7 +22,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.20; \
     /usr/bin/kubectl-v1.20 version --client
 
-ARG KUBECTL_VN_1_21=v1.21.6
+ARG KUBECTL_VN_1_21=v1.21.7
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -34,7 +34,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.21; \
     /usr/bin/kubectl-v1.21 version --client
 
-ARG KUBECTL_VN_1_22=v1.22.3
+ARG KUBECTL_VN_1_22=v1.22.4
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \

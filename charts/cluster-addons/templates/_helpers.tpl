@@ -184,6 +184,12 @@ values.yaml: |
 
 {{/*
 Template for a script that installs or upgrades a Helm release.
+
+Because Helm has poor support for CRDs, there is an option to apply CRD manifests
+before installing or upgrading the release.
+
+There is also support for rolling back an interrupted install or upgrade before proceeding
+by checking for the pending-[install,upgrade] status.
 */}}
 {{- define "cluster-addons.job.helm.script" -}}
 {{- if hasKey . "crdManifests" -}}
@@ -199,6 +205,30 @@ CHART_APPVERSION="$(get_chart_version "appVersion")"
 kubectl apply -f {{ $.crdManifestsBaseURL }}/{{ $manifestName }}
 {{- end }}
 {{- end }}
+
+helm_release_exists() {
+  helm status {{ .release.name }} --namespace {{ .release.namespace }}
+}
+
+helm_release_status() {
+  helm status {{ .release.name }} --namespace {{ .release.namespace }} --output json | \
+    jq -r '.info.status'
+}
+
+if helm_release_exists; then
+  status="$(helm_release_status)"
+  if [ "$status" = "pending-install" ]; then
+    helm delete {{ .release.name }} \
+      --namespace {{ .release.namespace }} \
+      --wait --timeout {{ .release.timeout }}
+  elif [ "$status" = "pending-upgrade" ]; then
+    helm rollback {{ .release.name }} \
+      --namespace {{ .release.namespace }} \
+      --cleanup-on-fail \
+      --wait --wait-for-jobs --timeout {{ .release.timeout }}
+  fi
+fi
+
 helm upgrade {{ .release.name }} {{ .chart.name }} \
   --atomic --install \
   --namespace {{ .release.namespace }} --create-namespace \
@@ -208,7 +238,7 @@ helm upgrade {{ .release.name }} {{ .chart.name }} \
   --skip-crds \
   {{- end }}
   --values /config/values.yaml \
-  --wait --timeout {{ .release.timeout }} \
+  --wait --wait-for-jobs --timeout {{ .release.timeout }} \
   $HELM_EXTRA_ARGS
 {{- end }}
 
