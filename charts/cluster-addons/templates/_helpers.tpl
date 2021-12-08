@@ -121,8 +121,8 @@ metadata:
 spec:
   # Keep trying for a decent amount of time before failing
   backoffLimit: 1000
-  # Keep succeeded jobs for 5m after finishing
-  ttlSecondsAfterFinished: 300
+  # Keep succeeded jobs for 2h after finishing
+  ttlSecondsAfterFinished: 7200
   template:
     metadata:
       labels: {{ include "cluster-addons.componentSelectorLabels" (list $ctx $componentName) | nindent 8 }}

@@ -211,7 +211,7 @@ addons:
   release:
     namespace: capi-system
     name: cluster-addons
-    timeout: 120m
+    timeout: 60m
   # Values for the addons
   # See https://github.com/stackhpc/capi-helm-charts/blob/main/charts/cluster-addons for details
   # The clouds.yaml used for cluster deployment will be given in addition to these
