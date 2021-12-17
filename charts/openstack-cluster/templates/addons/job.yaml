@@ -7,8 +7,6 @@ metadata:
 spec:
   # Keep trying for a decent amount of time before failing
   backoffLimit: 1000
-  # Keep succeeded jobs for 5m after finishing
-  ttlSecondsAfterFinished: 300
   template:
     metadata:
       labels:
