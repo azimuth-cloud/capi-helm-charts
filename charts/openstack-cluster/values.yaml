@@ -169,11 +169,8 @@ nodeGroupDefaults:
     enabled: true
     # The spec for the health check
     spec:
-      # By default, only remediate worker nodes when no more than 40%
-      # of the nodes in the group are unhealthy
-      # This avoids all the nodes in a group being remediated at once, for
-      # example in the case of a network partition
-      maxUnhealthy: 40%
+      # By default, unhealthy worker nodes are always remediated
+      maxUnhealthy: 100%
       # If a node takes longer than 10 mins to startup, remediate it
       nodeStartupTimeout: 10m
       # By default, consider a worker node that has not been Ready for
