@@ -9,6 +9,7 @@ metadata:
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" $ }}
   replicas: {{ $nodeGroup.machineCount | required (printf "no machine count specified for node group '%s'" $nodeGroup.name) }}
+  strategy: {{ toYaml $nodeGroup.rolloutStrategy | nindent 4 }}
   selector:
     matchLabels: {{ include "openstack-cluster.nodeGroupSelectorLabels" (list $ $nodeGroup.name) | nindent 6 }}
   template:
@@ -27,4 +28,5 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
         kind: OpenStackMachineTemplate
         name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
+      nodeDrainTimeout: {{ $nodeGroup.nodeDrainTimeout }}
 {{- end }}

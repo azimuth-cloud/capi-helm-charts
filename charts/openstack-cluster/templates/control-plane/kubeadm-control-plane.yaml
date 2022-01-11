@@ -7,6 +7,7 @@ metadata:
 spec:
   version: {{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" }}
   replicas: {{ .Values.controlPlane.machineCount }}
+  rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
   machineTemplate:
     metadata:
       labels: {{ include "openstack-cluster.controlPlaneSelectorLabels" . | nindent 8 }}
@@ -14,4 +15,7 @@ spec:
       kind: OpenStackMachineTemplate
       apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
       name: {{ include "openstack-cluster.controlplane.mt.name" . }}
+    {{- with .Values.controlPlane.nodeDrainTimeout }}
+    nodeDrainTimeout: {{ . }}
+    {{- end }}
   kubeadmConfigSpec: {{ toYaml .Values.controlPlane.kubeadmConfigSpec | nindent 4 }}
