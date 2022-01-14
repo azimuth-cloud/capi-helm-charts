@@ -1,0 +1,30 @@
+image:
+  repository: ghcr.io/stackhpc/capi-operator
+  tag:
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+podSecurityContext:
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+
+resources: {}
+
+# Node selector for operator pods
+nodeSelector: {}
+
+# Affinity rules for operator pods
+affinity: {}
+
+# Tolerations for operator pods
+tolerations: []
+
+kubeRbacProxy:
+  image:
+    repository: gcr.io/kubebuilder/kube-rbac-proxy
+    tag: v0.8.0
+    pullPolicy: IfNotPresent
+  resources: {}

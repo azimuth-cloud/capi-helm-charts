@@ -1,0 +1,110 @@
+{{/*
+  Jobs do not get run again when the spec changes, so we need to make a new one when the spec changes.
+  To do this, we create a new job whenever the checksum of the spec changes and include a fragment of
+  the checksum in the job name.
+
+  The other possible approach would be to include .Release.Revision in the job name, so that a new
+  job is created each time "helm upgrade" is run regardless of any changes to the values. We cannot
+  use this approach because this Helm chart is used to create an operator and the way the reconciliation
+  loop works in the operator means this will spin into an infinite loop of new releases. In any case,
+  it means that a job will be run when there are no changes to be made, which is unnecessary.
+*/}}
+{{- define "addon.install-job.spec" -}}
+backoffLimit: {{ .Values.backoffLimit }}
+activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+{{- with .Values.ttlSecondsAfterFinished }}
+ttlSecondsAfterFinished: {{ . }}
+{{- end }}
+template:
+  metadata:
+    labels: {{ include "addon.jobSelectorLabels" (list . "install") | nindent 8 }}
+    annotations:
+      # Include an annotation containing the checksum of the configuration
+      # This ensures that the spec of the job changes when the configuration changes,
+      # resulting in a new job being produced
+      capi.stackhpc.com/config-checksum: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+  spec:
+    {{- with .Values.imagePullSecrets }}
+    imagePullSecrets: {{ toYaml . | nindent 8 }}
+    {{- end }}
+    securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
+    restartPolicy: OnFailure
+    {{- if not .Values.kubeconfigSecret.name }}
+    serviceAccountName: {{ tpl .Values.serviceAccount.name . }}
+    {{- end }}
+    containers:
+      - name: install
+        image: {{ include "addon.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+        args:
+          - /bin/bash
+          - -c
+          - |
+              set -exo pipefail
+              if [ -f ./hook-preinstall.sh ]; then
+                  source ./hook-preinstall.sh
+              fi
+              source ./install.sh
+              if [ -f ./hook-postinstall.sh ]; then
+                  source ./hook-postinstall.sh
+              fi
+        {{- if .Values.kubeconfigSecret.name }}
+        env:
+          - name: KUBECONFIG
+            value: /config/auth/kubeconfig
+        {{- end }}
+        # Set the working directory to the directory containing the install config
+        workingDir: /config/install
+        resources: {{ toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+          - name: install-config
+            mountPath: /config/install
+            readOnly: true
+          {{- if .Values.kubeconfigSecret.name }}
+          - name: kubeconfig
+            mountPath: /config/auth
+            readOnly: true
+          {{- end }}
+    hostNetwork: {{ .Values.hostNetwork }}
+    {{- with .Values.nodeSelector }}
+    nodeSelector: {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+    affinity: {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+    tolerations: {{ toYaml . | nindent 8 }}
+    {{- end }}
+    volumes:
+      - name: install-config
+        secret:
+          secretName: {{ include "addon.fullname" . }}-config
+      {{- if .Values.kubeconfigSecret.name }}
+      - name: kubeconfig
+        secret:
+          secretName: {{ tpl .Values.kubeconfigSecret.name . }}
+          items:
+            - key: {{ .Values.kubeconfigSecret.key }}
+              path: kubeconfig
+      {{- end }}
+{{- end }}
+
+{{- define "addon.install-job.spec.checksum" -}}
+{{- include "addon.install-job.spec" . | sha256sum }}
+{{- end }}
+
+{{- define "addon.install-job.name" -}}
+{{- $checksum := include "addon.install-job.spec.checksum" . }}
+{{- include "addon.fullname" . }}-{{ trunc 8 $checksum }}
+{{- end }}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "addon.install-job.name" . }}
+  labels: {{ include "addon.jobLabels" (list . "install") | nindent 4 }}
+  annotations:
+    capi.stackhpc.com/spec-checksum: {{ include "addon.install-job.spec.checksum" . }}
+spec:
+  {{- include "addon.install-job.spec" . | nindent 2 }}

@@ -1,0 +1,166 @@
+# Used to override the chart name in resource names
+nameOverride:
+# Used to override the full name in resource names (usually "<release name>-<chart-name>")
+fullnameOverride:
+
+# The image to use for the job pods
+image:
+  # The image repository to use
+  repository: ghcr.io/stackhpc/k8s-utils
+  # The image tag to use
+  # Defaults to chart appVersion if not given
+  tag:
+  # The pull policy to use
+  pullPolicy: IfNotPresent
+
+# Secrets required to pull the image (if required)
+imagePullSecrets:
+
+# Details of a secret containing a kubeconfig file for a remote cluster
+# If given, this is used in preference to a service account
+kubeconfigSecret:
+  # The name of the secret
+  # This is treated as a template during rendering
+  name:
+  # The key of the kubeconfig file in the secret
+  key: kubeconfig
+
+# Details of the service account to use
+# A pre-existing service account can be used, or a new one can be created
+#
+# A service account is always required as it is used by the pre-delete hook
+# to suspend any install jobs that are still running prior to running the deletion
+#
+# The permissions required by the service account depend on whether the installation
+# is targetting a remote cluster or the local cluster
+#
+# Whether the installation target is local or remote, the service account needs to
+# have permission to list and patch jobs in the release namespace for the delete hook
+# to be able to suspend any running install jobs
+#
+# When the installation targets the local cluster, the service account must also have
+# permission to create any resources that need to be installed, which could be into
+# other namespaces - the cluster-admin cluster role is normally used for this
+serviceAccount:
+  # Indicates whether to create a new service account
+  create: true
+  # The name of the cluster role to bind the created service account to
+  clusterRoleName: cluster-admin
+  # The name of the service account
+  # If create = true, this is the name of the created service account
+  # If create = false, this is the name of an existing service account to use
+  # This is treated as a template during rendering
+  name: "{{ include \"addon.fullname\" . }}"
+
+# The type of the install job
+# One of helm, kustomize or custom
+installType: custom
+
+# Options that are used for Helm jobs
+helm:
+  # List of manifest URLs containing CRDs to install before running Helm
+  # This is because Helm has poor support for CRDs, particularly on upgrade
+  crdManifests: []
+  # Options for the Helm chart
+  chart:
+    # The repository URL for the chart
+    repo:
+    # The name of the chart
+    name:
+    # The version of the chart to use
+    version:
+  # Options for the Helm release
+  release:
+    # The namespace for the release
+    namespace:
+    # The name of the release
+    name:
+    # The time to wait for the release to complete
+    timeout: 60m
+    # The values for the release
+    # Values can come from either a dict or a template
+    # The template is rendered with the root context, then the result is merged into the dict
+    # Values from the template take precedence over the dict
+    values: {}
+    valuesTemplate:
+
+# Options that are used for Kustomize jobs
+kustomize:
+  # Values for the kustomization file
+  # Values can come from either a dict or a template
+  # The template is rendered with the root context, then the result is merged into the dict
+  # Values from the template take precedence over the dict
+  kustomization: {}
+  kustomizationTemplate:
+  # The namespace to wait for resources in
+  resourceNamespace:
+  # List of resources to wait for for in the format <type>/<name>
+  # Waiting is done using "kubectl rollout status" so resources must be compatible with that command
+  resources: []
+    # - statefulset/my-statefulset
+    # - deployment/my-deployment
+
+# Options for a custom install job
+custom:
+  # The bash script to use for install/upgrade operations
+  # This is treated as a template during rendering
+  install:
+  # The bash script to use for delete operations
+  delete:
+
+# A map of filename -> content of extra files to be made available
+extraFiles: {}
+
+# Hook configuration
+# Each hook is an optional bash script that is executed at a particular point
+# The hook scripts are treated as templates during the rendering
+hooks:
+  # This hook is executed before an install/upgrade operation
+  preInstall:
+  # This hook is executed after a successful install/upgrade operation
+  postInstall:
+  # This hook is executed before a delete operation
+  preDelete:
+  # This hook is executed after a successful delete operation
+  postDelete:
+
+# This is the number of retries for the job before it is considered failed
+# By default, it is set to a large number so that failures are infrequent
+backoffLimit: 1000
+# The maximum duration of the job in seconds
+# By default, a deadline of one hour is imposed
+# For no deadline, set to null
+activeDeadlineSeconds: 3600
+
+# The time after finishing (completed or failed) that a job is eligible to be deleted
+# If not set, finished jobs will never be deleted
+ttlSecondsAfterFinished:
+
+# The pod security context for the job pods
+# By default, just ensure that we run as a non-root user
+podSecurityContext:
+  runAsNonRoot: true
+
+# The container security context for the job pod containers
+securityContext:
+  allowPrivilegeEscalation: false
+
+# Resources for the job pod containers
+resources: {}
+
+# Indicates if the job pod should use the host network
+# This may be required for certain bootstrap resources, e.g. using a job inside a cluster
+# to install the CNI for that cluster
+hostNetwork: false
+
+# Tolerations for job pods
+# For example, if using this chart to deploy bootstrap resources it may be necessary
+# to add tolerations that allow the job pods to be scheduled onto the control plane nodes 
+tolerations: []
+
+# Node selector for job pods
+# Can be used to target jobs onto specific nodes
+nodeSelector: {}
+
+# Affinity rules for job pods
+affinity: {}

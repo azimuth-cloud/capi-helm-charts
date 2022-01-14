@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #####
-# Simple script that selects the correct kubectl version for the target API server
+# Script that selects the correct kubectl version for the target API server and
+# executes the given kubectl command using it
 # 
 # This is done by making a pre-flight request with the latest kubectl version to get
 # the API server version in the hope that it works despite any version skew, being

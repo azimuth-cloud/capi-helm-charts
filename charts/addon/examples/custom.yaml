@@ -1,0 +1,6 @@
+# Just create and delete a namespace
+custom:
+  install: |
+    kubectl create ns test-ns
+  delete: |
+    kubectl delete ns test-ns

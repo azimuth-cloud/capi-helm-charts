@@ -1,0 +1,36 @@
+installType: helm
+
+helm:
+  chart:
+    repo: https://charts.jetstack.io
+    name: cert-manager
+    version: v1.6.1
+  release:
+    namespace: cert-manager
+    name: cert-manager
+    values:
+      installCRDs: true
+      prometheus:
+        enabled: false
+
+## Use extraFiles and afterScript to install an issuer
+
+extraFiles:
+  acme-http01-issuer.yaml: |
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: letsencrypt-http01
+    spec:
+      acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+          name: letsencrypt-http01-key
+        solvers:
+          - http01:
+              ingress:
+                class: nginx
+
+hooks:
+  postInstall: |
+    kubectl apply -f acme-http01-issuer.yaml

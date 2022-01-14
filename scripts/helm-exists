@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+#####
+# Wrapper around "helm status" that just exits cleanly if a release exists and
+# exits with an error if not
+#####
+
+RELEASE=$1
+shift
+
+NAMESPACE_ARG=
+HELM_ARGS=
+
+while :; do
+    case $1 in
+        --namespace)
+            NAMESPACE_ARG="$1 $2"
+            shift
+            ;;
+        ?*)
+            HELM_ARGS="$HELM_ARGS $1"
+            ;;
+        *)
+            break
+    esac
+    shift
+done
+
+set -e
+
+exec helm status $RELEASE $NAMESPACE_ARG > /dev/null 2>&1
