@@ -23,7 +23,7 @@ kubeconfigSecret:
   # This is treated as a template during rendering
   name:
   # The key of the kubeconfig file in the secret
-  key: kubeconfig
+  key: value
 
 # Details of the service account to use
 # A pre-existing service account can be used, or a new one can be created
@@ -107,6 +107,10 @@ custom:
   install:
   # The bash script to use for delete operations
   delete:
+
+# A list of extra volumes to contribute to the projected volume for the config
+# Because they are used in a projected volumes, only secrets and configmaps can be used
+extraVolumes: []
 
 # A map of filename -> content of extra files to be made available
 extraFiles: {}
