@@ -25,7 +25,7 @@ kubeconfigSecret:
   # The key of the kubeconfig file in the secret
   key: value
 
-# Details of the service account to use
+# Options for the service account to use
 # A pre-existing service account can be used, or a new one can be created
 #
 # A service account is always required as it is used by the pre-delete hook
@@ -36,7 +36,7 @@ kubeconfigSecret:
 #
 # Whether the installation target is local or remote, the service account needs to
 # have permission to list and patch jobs in the release namespace for the delete hook
-# to be able to suspend any running install jobs
+# in order to suspend any running install jobs
 #
 # When the installation targets the local cluster, the service account must also have
 # permission to create any resources that need to be installed, which could be into

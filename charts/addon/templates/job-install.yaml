@@ -14,7 +14,7 @@ backoffLimit: {{ .Values.backoffLimit }}
 activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
 template:
   metadata:
-    labels: {{ include "addon.jobSelectorLabels" (list . "install") | nindent 8 }}
+    labels: {{ include "addon.jobSelectorLabels" (list . "install") | nindent 6 }}
     annotations:
       # Include an annotation containing the checksum of the configuration
       # This ensures that the spec of the job changes when the configuration changes,
@@ -22,9 +22,9 @@ template:
       capi.stackhpc.com/config-checksum: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
   spec:
     {{- with .Values.imagePullSecrets }}
-    imagePullSecrets: {{ toYaml . | nindent 8 }}
+    imagePullSecrets: {{ toYaml . | nindent 6 }}
     {{- end }}
-    securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
+    securityContext: {{ toYaml .Values.podSecurityContext | nindent 6 }}
     restartPolicy: OnFailure
     {{- if not .Values.kubeconfigSecret.name }}
     serviceAccountName: {{ tpl .Values.serviceAccount.name . }}
@@ -33,7 +33,7 @@ template:
       - name: install
         image: {{ include "addon.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+        securityContext: {{ toYaml .Values.securityContext | nindent 10 }}
         args:
           - /bin/bash
           - -c
@@ -53,20 +53,20 @@ template:
         {{- end }}
         # Set the working directory to the directory containing the config
         workingDir: /config
-        resources: {{ toYaml .Values.resources | nindent 12 }}
+        resources: {{ toYaml .Values.resources | nindent 10 }}
         volumeMounts:
           - name: config
             mountPath: /config
             readOnly: true
     hostNetwork: {{ .Values.hostNetwork }}
     {{- with .Values.nodeSelector }}
-    nodeSelector: {{ toYaml . | nindent 8 }}
+    nodeSelector: {{ toYaml . | nindent 6 }}
     {{- end }}
     {{- with .Values.affinity }}
-    affinity: {{ toYaml . | nindent 8 }}
+    affinity: {{ toYaml . | nindent 6 }}
     {{- end }}
     {{- with .Values.tolerations }}
-    tolerations: {{ toYaml . | nindent 8 }}
+    tolerations: {{ toYaml . | nindent 6 }}
     {{- end }}
     volumes:
       - name: config
