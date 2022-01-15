@@ -136,10 +136,6 @@ backoffLimit: 1000
 # For no deadline, set to null
 activeDeadlineSeconds: 3600
 
-# The time after finishing (completed or failed) that a job is eligible to be deleted
-# If not set, finished jobs will never be deleted
-ttlSecondsAfterFinished:
-
 # The pod security context for the job pods
 # By default, just ensure that we run as a non-root user
 podSecurityContext:

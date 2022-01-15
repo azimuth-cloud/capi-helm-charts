@@ -12,9 +12,6 @@
 {{- define "addon.install-job.spec" -}}
 backoffLimit: {{ .Values.backoffLimit }}
 activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
-{{- with .Values.ttlSecondsAfterFinished }}
-ttlSecondsAfterFinished: {{ . }}
-{{- end }}
 template:
   metadata:
     labels: {{ include "addon.jobSelectorLabels" (list . "install") | nindent 8 }}
