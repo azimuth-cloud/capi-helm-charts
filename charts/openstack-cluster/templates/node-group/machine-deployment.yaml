@@ -17,7 +17,7 @@ spec:
       labels: {{ include "openstack-cluster.nodeGroupSelectorLabels" (list $ $nodeGroup.name) | nindent 8 }}
     spec:
       clusterName: {{ include "openstack-cluster.clusterName" $ }}
-      version: {{ $.Values.kubernetesVersion }}
+      version: {{ $.Values.global.kubernetesVersion }}
       failureDomain: {{ $nodeGroup.failureDomain }}
       bootstrap:
         configRef:

@@ -1,0 +1,22 @@
+{{- define "cluster-addons.extra-addons.config" -}}
+{{- $ctx := index . 0 }}
+{{- $config := index . 1 }}
+{{-
+  include "cluster-addons.job.defaults" $ctx |
+    fromYaml |
+    merge $config |
+    toYaml
+}}
+{{- end }}
+
+{{- range $name, $config := .Values.extraAddons -}}
+{{- $config := include "cluster-addons.extra-addons.config" (list . $config) }}
+{{-
+  include "addon.job.fromConfig" (list
+    .
+    $name
+    (omit $config "enabled")
+    (default true $config.enabled)
+  )
+}}
+{{- end }}

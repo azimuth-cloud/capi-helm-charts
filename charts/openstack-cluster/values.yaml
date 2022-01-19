@@ -1,5 +1,10 @@
-# The name of an existing secret containing the cloud-config
-cloudConfigSecretName:
+# Configuration that is shared between the cluster and the addons
+global:
+  # The Kubernetes version of the cluster
+  # This should match the version of kubelet and kubeadm in the image
+  kubernetesVersion:
+  # The name of an existing secret containing a clouds.yaml and optional cacert
+  cloudCredentialsSecretName:
 
 # Content for the clouds.yaml file
 # Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
@@ -18,10 +23,6 @@ machineImageId:
 
 # The name of the SSH key to inject into cluster machines
 machineSSHKeyName:
-
-# The Kubernetes version to deploy
-# This should match the version of kubelet in the image
-kubernetesVersion:
 
 # Values for the Kubernetes cluster network
 kubeNetwork:
@@ -222,25 +223,14 @@ nodeGroups:
 addons:
   # Indicates if cluster addons should be deployed
   enabled: true
-  # The image to use for the job that deploys the addons
-  jobImage:
-    repository: ghcr.io/stackhpc/k8s-utils
-    tag: # defaults to chart appVersion
-    pullPolicy: IfNotPresent
-  # The chart to use for deploying addons
-  chart:
-    repo: https://stackhpc.github.io/capi-helm-charts
-    name: cluster-addons
-    version: # This defaults to the version that matches this chart
-  # Release details for the addons deployment
-  release:
-    namespace: capi-system
-    name: cluster-addons
-    timeout: 60m
-  # Values for the addons
-  # See https://github.com/stackhpc/capi-helm-charts/blob/main/charts/cluster-addons for details
-  # The clouds.yaml used for cluster deployment will be given in addition to these
-  values:
-    # By default, enable the OpenStack integrations
-    openstack:
-      enabled: true
+  clusterName: "{{ include \"openstack-cluster.clusterName\" . }}"
+  # The Kubernetes version for the addons should be v<major>.<minor>
+  kubernetesVersion: "v{{ .Values.global.kubernetesVersion | splitList \".\" | reverse | rest | reverse | join \".\" }}"
+  # Launch addons on the workload cluster using the kubeconfig file created by CAPI
+  kubeconfigSecret:
+    name: "{{ include \"openstack-cluster.componentName\" (list . \"kubeconfig\") }}"
+    key: value
+  # By default, enable the OpenStack integrations
+  openstack:
+    enabled: true
+    cloudCredentialsSecretName: "{{ include \"openstack-cluster.cloudCredentialsSecretName\" . }}"

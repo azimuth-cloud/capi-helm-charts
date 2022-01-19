@@ -110,7 +110,8 @@ working cluster:
 
 ```yaml
 # The target Kubernetes version
-kubernetesVersion: 1.22.1
+global:
+  kubernetesVersion: 1.22.1
 
 # An image with the required software installed at the target version
 machineImage: ubuntu-2004-kube-v{{ .Values.kubernetesVersion }}
@@ -171,21 +172,22 @@ command again. Some examples of updates that can be performed are:
 
 ### Cluster addons
 
-The cluster addons are enabled by default, however by default only a CNI and the
-OpenStack CCM are enabled.
+The cluster addons are enabled by default, however by default only a CNI, the
+[Metrics Server](https://github.com/kubernetes-sigs/metrics-server) and the
+OpenStack CCM and Cinder CSI are enabled.
 
 You can configure which addons are deployed and the configuration of those addons
 by specifying values for the addons Helm chart:
 
 ```yaml
 addons:
-  values:
-    nvidiaGPUOperator:
-      enabled: true
+  # Enable the Nginx ingress controller
+  ingress:
+    enabled: true
 ```
 
-The available options under `addons.values` correspond to the available options
-for the [cluster-addons chart](../cluster-addons).
+The available options under `addons` correspond to the chart values for the
+[cluster-addons chart](../cluster-addons).
 
 The cluster addons also can be disabled completely using the following configuration:
 
@@ -199,10 +201,6 @@ The cluster addons also can be disabled completely using the following configura
 addons:
   enabled: false
 ```
-
-Note that changing this after the initial deployment will **not** uninstall any
-addons that have already been installed, but it will prevent updates to addons
-from being applied.
 
 ## Accessing a workload cluster
 

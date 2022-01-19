@@ -1,3 +1,14 @@
-{{- if and .Values.ingress.enabled .Values.ingress.nginx.enabled }}
-{{- include "cluster-addons.job.helm" (list . "ingress-nginx" .Values.ingress.nginx) }}
+{{- define "cluster-addons.ingress-nginx.config" -}}
+{{- include "cluster-addons.job.defaults" . }}
+installType: helm
+helm: {{ omit .Values.ingress.nginx "enabled" | toYaml | nindent 2 }}
 {{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "ingress-nginx"
+    "cluster-addons.ingress-nginx.config"
+    (and .Values.ingress.enabled .Values.ingress.nginx.enabled)
+  )
+}}

@@ -1,39 +1,65 @@
 # The name of the Kubernetes cluster we are deploying to
-clusterName: kubernetes
+# Defaults to the release name if not given for use as a dependency of openstack-cluster
+clusterName: "{{ .Release.Name }}"
 
-# Content for an OpenStack clouds.yaml file
-# Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
-clouds:
-# The name of the cloud to use from the specified clouds
-cloudName: openstack
-# The PEM-encoded CA certificate for the specified cloud
-cloudCACert:
+# The Kubernetes version of the target cluster
+# This is treated as a template at rendering time
+kubernetesVersion: v1.22
 
-jobImage:
-  repository: ghcr.io/stackhpc/k8s-utils
-  tag: # defaults to chart appVersion
-  pullPolicy: IfNotPresent
+# Details of a secret containing a kubeconfig file for a remote cluster
+# If given, this is used in preference to a service account
+kubeconfigSecret:
+  # The name of the secret
+  # This is treated as a template during rendering
+  name:
+  # The key of the kubeconfig file in the secret
+  key: value
 
-# Indicates whether to install bootstrap charts only
-# If this is set to true, then only the CNI and CCM will be installed
-bootstrapOnly: false
+# Options for the service account to use
+# A pre-existing service account can be used, or a new one can be created
+#
+# A service account is always required as it is used by the pre-delete hook
+# to suspend any install jobs that are still running prior to running the deletion
+#
+# The permissions required by the service account depend on whether the installation
+# is targetting a remote cluster or the local cluster
+#
+# Whether the installation target is local or remote, the service account needs to
+# have permission to list and patch jobs in the release namespace for the delete hook
+# in order to suspend any running install jobs
+#
+# When the installation targets the local cluster, the service account must also have
+# permission to create any resources that need to be installed, which could be into
+# other namespaces - the cluster-admin cluster role is normally used for this
+serviceAccount:
+  # Indicates whether to create a new service account
+  create: true
+  # The name of the cluster role to bind the created service account to
+  clusterRoleName: cluster-admin
+  # The name of the service account
+  # If create = true, this is the name of the created service account
+  # If create = false, this is the name of an existing service account to use
+  # This is treated as a template during rendering
+  name: "{{ include \"cluster-addons.fullname\" . }}-deployer"
 
-# The tolerations to use for jobs that are part of bootstrapping the cluster
-# e.g. CNI, external cloud provider
-bootstrapTolerations:
-  # Allow the job to run on a control plane node if required
-  - key: node-role.kubernetes.io/master
-    operator: Exists
-    effect: NoSchedule
-  # Allow the job to run on a node awaiting initialisation by an external cloud provider
-  - key: node.cloudprovider.kubernetes.io/uninitialized
-    operator: Equal
-    value: "true"
-    effect: NoSchedule
-  # Allow the job to run on nodes that are not ready
-  - key: node.kubernetes.io/not-ready
-    operator: Exists
-    effect: NoSchedule
+# Defaults for job settings
+# In all cases, the defaults for the version of the addons chart in use are used
+# See the values for the addons chart for details
+jobDefaults: {}
+  # image:
+  #   repository:
+  #   tag:
+  #   pullPolicy:
+  # imagePullSecrets:
+  # backoffLimit:
+  # activeDeadlineSeconds:
+  # podSecurityContext:
+  # securityContext:
+  # resources:
+  # hostNetwork:
+  # tolerations:
+  # nodeSelector:
+  # affinity:
 
 # Settings for the CNI addon
 cni:
@@ -62,20 +88,10 @@ cni:
       namespace: kube-system
       name: cilium
       timeout: 5m
-    # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
-    values:
-      ipam:
-        mode: kubernetes
-  # Settings for the Weave CNI
-  weave:
-    # The version of Weave to deploy
-    # There is one manifest for Kubernetes >= 1.16 and one for the rest
-    version: "{{ ternary \"v1.16\" \"v1.13\" (semverCompare \">=1.16\" .Capabilities.KubeVersion.Version) }}"
-    # The URLs of the Weave manifests
-    manifests:
-      - https://cloud.weave.works/k8s/{{ tpl .Values.cni.weave.version . }}/net
-    # Any kustomization to be applied to the Weave manifests
-    kustomization: {}
+      # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
+      values:
+        ipam:
+          mode: kubernetes
 
 # Settings for the OpenStack integrations
 openstack:
@@ -83,10 +99,16 @@ openstack:
   enabled: false
   # The version of the OpenStack cloud provider to install
   # By default, use the release branch for the Kubernetes version of the target cluster
-  version: release-{{ .Capabilities.KubeVersion.Major }}.{{ .Capabilities.KubeVersion.Minor }}
+  version: release-{{ tpl .Values.kubernetesVersion . | trimPrefix "v" }}
   # The base URL for OpenStack cloud provider manifests
-  # By default, pull the manifests from GitHub
+  # By default, pull the manifests from GitHub at the specified version
   manifestsBaseURL: https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/{{ tpl .Values.openstack.version . }}
+  # The name of a secret containing a clouds.yaml file and optional cacert
+  # If the cacert is present, it should be referred to in the clouds.yaml file as /etc/config/cacert
+  # See https://docs.openstack.org/openstacksdk/latest/user/config/configuration.html#ssl-settings
+  cloudCredentialsSecretName:
+  # The name of the cloud to use in the clouds.yaml
+  cloudName: openstack
   # cloud-config options for the OpenStack integrations
   # The [Global] section is configured to use the specified cloud from .Values.clouds
   # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
@@ -99,11 +121,17 @@ openstack:
     enabled: true
     # The prefix for RBAC manifests
     # Unfortunately, this changes for different Kubernetes versions
-    rbacManifestsPrefix: "{{ ternary \"/manifests/controller-manager\" \"/cluster/addons/rbac\" (semverCompare \">=1.22\" .Capabilities.KubeVersion.Version) }}"
+    rbacManifestsPrefix: >-
+      {{
+        tpl .Values.kubernetesVersion . |
+          trimPrefix "v" |
+          semverCompare ">=1.22" |
+          ternary "manifests/controller-manager" "cluster/addons/rbac"
+      }}
     # The URLs to use for the manifests
     manifests:
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
+      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
+      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
       - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml"
     # Any kustomization to apply to the OpenStack CCM manifests
     kustomization: {}
@@ -157,7 +185,7 @@ metricsServer:
 # Settings for cert-manager
 certManager:
   # Indicates if cert-manager should be enabled
-  enabled: true
+  enabled: false
   chart:
     repo: https://charts.jetstack.io
     name: cert-manager
@@ -166,14 +194,15 @@ certManager:
     namespace: cert-manager
     name: cert-manager
     timeout: 5m
-  # See https://cert-manager.io/docs/installation/helm/ for available values
-  values:
-    # By default, make sure the cert-manager CRDs are installed
-    installCRDs: true
-    # Disable Prometheus support for now
-    prometheus:
-      enabled: false
+    # See https://cert-manager.io/docs/installation/helm/ for available values
+    values:
+      # By default, make sure the cert-manager CRDs are installed
+      installCRDs: true
+      # Disable Prometheus support for now
+      prometheus:
+        enabled: false
   # Settings for automatic ACME HTTP01 support using Let's Encrypt
+  # This is only enabled if ingress is also enabled
   acmeHttp01Issuer:
     enabled: yes
     name: letsencrypt-http01
@@ -182,7 +211,7 @@ certManager:
 # Settings for ingress controllers
 ingress:
   # Indicates if ingress controllers should be enabled
-  enabled: true
+  enabled: false
   # Settings for the Nginx ingress controller
   nginx:
     # Indicates if the Nginx ingress controller should be enabled
@@ -195,73 +224,31 @@ ingress:
       namespace: ingress-nginx
       name: ingress-nginx
       timeout: 5m
-    # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
-    values: {}
-
-# Settings for the NVIDIA GPU operator
-nvidiaGPUOperator:
-  # Indicates if the NVIDIA GPU operator should be enabled
-  enabled: false
-  chart:
-    repo: https://nvidia.github.io/gpu-operator
-    name: gpu-operator
-    version: v1.8.1
-  release:
-    namespace: gpu-operator
-    name: gpu-operator
-    timeout: 5m
-  values:
-    # By default, CAPI clusters use containerd
-    operator:
-      defaultRuntime: containerd
+      # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
+      values: {}
 
 # Settings for cluster monitoring
 monitoring:
   # Indicates if the cluster monitoring should be enabled
-  enabled: true
-  # Because Helm doesn't upgrade CRDs, we install them manually instead
-  # In the manifest base URL, "${CHART_VERSION}" and "${CHART_APPVERSION}" are replaced with the
-  # version and appVersion of the Helm chart respectively
-  crdManifestsBaseURL: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v${CHART_APPVERSION}/example/prometheus-operator-crd
+  enabled: false
   crdManifests:
-    - monitoring.coreos.com_alertmanagerconfigs.yaml
-    - monitoring.coreos.com_alertmanagers.yaml
-    - monitoring.coreos.com_podmonitors.yaml
-    - monitoring.coreos.com_probes.yaml
-    - monitoring.coreos.com_prometheuses.yaml
-    - monitoring.coreos.com_prometheusrules.yaml
-    - monitoring.coreos.com_servicemonitors.yaml
-    - monitoring.coreos.com_thanosrulers.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
   chart:
     repo: https://prometheus-community.github.io/helm-charts
     name: kube-prometheus-stack
-    version: 18.0.8
+    version: 30.0.1
   release:
     namespace: monitoring-system
     name: kube-prometheus-stack
     timeout: 5m
-  values:
+    values: {}
 
-# Custom manifests to apply
-# This should be a map of filenames to manifest content
-customManifests:
-
-# Custom Helm releases to apply
-# This should be a map of release name to release parameters
-customHelmReleases:
-  # my-wordpress:
-  #   chart:
-  #     # The repository that the chart is in
-  #     repo: https://charts.bitnami.com/bitnami
-  #     # The name of the chart
-  #     name: wordpress
-  #     # The version of the chart to install
-  #     # NOTE: THIS IS REQUIRED
-  #     version: 12.1.6
-  #   # The namespace for the release
-  #   # If not given, this defaults to the release name
-  #   namespace: my-wordpress
-  #   # The amount of time to wait for the chart to install before rolling back
-  #   timeout: 5m
-  #   # The values for the chart
-  #   values: {}
+# Map of extra addons in the form "component name" -> "addon spec"
+extraAddons: {}

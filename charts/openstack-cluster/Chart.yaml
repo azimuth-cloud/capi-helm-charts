@@ -4,3 +4,10 @@ description: Helm chart for deploying a cluster on an OpenStack cloud using Clus
 type: application
 version: 0.1.0
 appVersion: main
+
+dependencies:
+  - name: cluster-addons
+    version: "*"
+    repository: file://../cluster-addons
+    alias: addons
+    conditions: addons.enabled

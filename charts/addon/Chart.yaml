@@ -1,8 +1,8 @@
 apiVersion: v2
 name: addon
 description: >
-  Helm chart that installs an addon into a target cluster using a job.
+  Helm chart that provides templates for producing jobs that install addons onto a target cluster.
   The target cluster can be local (using a service account) or remote (using a kubeconfig file).
-type: application
+type: library
 version: 0.1.0
 appVersion: main

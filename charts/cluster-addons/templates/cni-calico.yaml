@@ -1,13 +1,33 @@
-{{- if and .Values.cni.enabled (eq .Values.cni.type "calico") }}
-{{-
-  include
-    "cluster-addons.job.kustomize"
-    (list
-      .
-      "cni-calico"
-      .Values.cni.calico
-      (list (list "kube-system" "daemonset/calico-node"))
-      (dict "bootstrap" true)
-    )
-}}
+{{- define "cluster-addons.cni-calico.config" -}}
+{{- include "cluster-addons.job.defaults" . }}
+installType: kustomize
+kustomize:
+  kustomizationTemplate: |
+    resources:
+      {{- range .Values.cni.calico.manifests }}
+      - {{ tpl . $ }}
+      {{- end }}
+    patches:
+      - patch: |-
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --kubelet-insecure-tls
+        target:
+          kind: Deployment
+          name: metrics-server
+  {{- with .Values.cni.calico.kustomization }}
+  kustomization: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  resourceNamespace: kube-system
+  resources:
+    - daemonset/calico-node
 {{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "cni-calico"
+    "cluster-addons.cni-calico.config"
+    (and .Values.cni.enabled (eq .Values.cni.type "calico"))
+  )
+}}

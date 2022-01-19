@@ -17,6 +17,8 @@ RUN apt-get update && \
     apt-get install -y curl jq tini && \
     rm -rf /var/lib/apt/lists/*
 
+COPY --from=hairyhenderson/gomplate:v3.10.0 /gomplate /usr/bin/gomplate
+
 ARG KUBECTL_VN_1_20=v1.20.14
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \

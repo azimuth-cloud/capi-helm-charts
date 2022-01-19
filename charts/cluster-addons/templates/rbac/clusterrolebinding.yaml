@@ -2,8 +2,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "addon.fullname" . }}
-  labels: {{ include "addon.labels" . | nindent 4 }}
+  name: {{ include "cluster-addons.fullname" . }}
+  labels: {{ include "cluster-addons.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}

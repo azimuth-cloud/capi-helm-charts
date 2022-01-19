@@ -1,10 +1,14 @@
-{{- if and .Values.cni.enabled (eq .Values.cni.type "cilium") }}
+{{- define "cluster-addons.cni-cilium.config" -}}
+{{- include "cluster-addons.job.defaults" . }}
+installType: helm
+helm: {{ toYaml .Values.cni.cilium | nindent 2 }}
+{{- end }}
+
 {{-
-  include "cluster-addons.job.helm" (list
+  include "addon.job" (list
     .
     "cni-cilium"
-    .Values.cni.cilium
-    (dict "bootstrap" true)
+    "cluster-addons.cni-cilium.config"
+    (and .Values.cni.enabled (eq .Values.cni.type "cilium"))
   )
 }}
-{{- end }}
