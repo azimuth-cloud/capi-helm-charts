@@ -6,23 +6,31 @@ the cluster management charts from this repository, e.g.
 [openstack-cluster](../openstack-cluster), but should work for any Kubernetes cluster.
 
 The addons are deployed by launching
-[Kubernetes jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/) on the
-target cluster, each of which is responsible for installing or updating a single addon.
+[Kubernetes jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/), each of
+which is responsible for installing or updating a single addon. These jobs can
+either install the addons into the local cluster using a service account or a remote cluster
+using a `kubeconfig` file in a pre-existing secret. By default, the local cluster is the
+target.
+
 The jobs use the [utils image](../../utils) from this repository, which bundles some
 useful tools like [jq](https://stedolan.github.io/jq/),
 [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/),
-[kustomize](https://kustomize.io/) and [helm](https://helm.sh), and the jobs execute
-with full permissions on the cluster using the `cluster-admin` cluster role. This is
-used rather than a more restrictive role for a few reasons:
+[kustomize](https://kustomize.io/) and [helm](https://helm.sh).
 
-  1. This chart provides a mechanism to apply custom addons, and there is no way to
+When targetting the local cluster, the service account used to run the jobs must have
+enough permissions to create all the objects that the addon will create. In practice,
+this means that the service account will usually require the `cluster-admin` cluster role
+for two reasons:
+
+  1. This chart provides a mechanism to specify custom addons, and there is no way to
      know in advance what resources those custom addons may need to manage.
-  1. Addons may need to manage
+  1. This may even include instances of a
      [CRD](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/)
-     instances that are not covered by a more restrictive role.
+     that is installed by another addon.
   1. Several addons need to create
      [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) resources,
-     and so could elevate their permissions anyway by creating new roles.
+     and Kubernetes requires that the account creating RBAC resources has at least the
+     permissions that it is attempting to apply to another account.
 
 There are two patterns used in this chart for managing addons:
 
@@ -41,20 +49,38 @@ This chart also allows custom addons to be managed using the Helm values, either
 specifying manifest content inline, or by specifying a Helm chart to install with the
 corresponding values.
 
+## Targetting a remote cluster
+
+By default, the jobs that install the addons target the local cluster using a service account.
+
+It is also possible to target a remote cluster, using a `kubeconfig` file. This must first
+be uploaded to the cluster as a secret:
+
+```sh
+kubectl create secret generic target-kubeconfig --from-file=kubeconfig=$PWD/kubeconfig
+```
+
+Then you can tell the addons to use that `kubeconfig` file using the Helm values:
+
+```yaml
+kubeconfigSecret:
+  name: target-kubeconfig
+  key: kubeconfig
+```
+
 ## Container Network Interface (CNI) plugins
 
-This chart can install either
-[Calico](https://docs.projectcalico.org/about/about-calico) or
-[Weave](https://www.weave.works/docs/net/latest/kubernetes/kube-addon/) as a
+This chart can install either [Calico](https://docs.projectcalico.org/about/about-calico) or
+[Cilium](https://cilium.io/) as a
 [CNI plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
-to provide the pod networking in a Kubernetes cluster. By default, the Calico CNI will be
+to provide the pod networking in a Kubernetes cluster. By default, the Cilium CNI will be
 installed.
 
-To switch the CNI to Weave, use the following in your Helm values:
+To switch the CNI to Calico, use the following in your Helm values:
 
 ```yaml
 cni:
-  type: weave
+  type: calico
 ```
 
 And to disable the installation of a CNI completely:
@@ -94,16 +120,19 @@ sections of the cloud-config file, you can use Helm values, e.g.:
 
 ```yaml
 openstack:
-  cloudConfig:
-    networking:
-      public-network-name: public-internet
-    loadBalancer:
-      lb-method: LEAST_CONNECTIONS
-      create-monitor: "true"
-    blockStorage:
-      ignore-volume-az: "true"
-    metadata:
-      search-order: metadataService
+  cloudConfig: |
+    [Networking]
+    public-network-name=public-internet
+
+    [LoadBalancer]
+    lb-method=LEAST_CONNECTIONS
+    create-monitor=true
+    
+    [BlockStorage]
+    ignore-volume-az=true
+
+    [Metadata]
+    search-order=metadataService
 ```
 
 The `[Globals]` section is populated using the given `clouds.yaml` (see "OpenStack credentials" below).
@@ -124,9 +153,8 @@ manage OpenStack resources on behalf of the cluster. The recommended way to do t
 to avoid your password being in stored on the cluster. Application credentials are project-scoped,
 and ideally you should use a separate application credential for each cluster in a project.
 
-For ease of use, this chart is written so that a `clouds.yaml` file can be given directly
-to the chart as a configuration file. When an application credential is created in Horizon,
-the corresponding `clouds.yaml` file can be downloaded, and should look something like this:
+When an application credential is created in Horizon, the corresponding `clouds.yaml` file can be
+downloaded, and should look something like this:
 
 ```yaml
 clouds:
@@ -141,10 +169,42 @@ clouds:
     auth_type: "v3applicationcredential"
 ```
 
-This file can then be passed to the chart using the `-f|--values` option, e.g.:
+The credentials are provided to this Helm chart by putting them into a secret:
 
 ```sh
-helm install cluster-addons capi/cluster-addons --values ./clouds.yaml [...options]
+kubectl create secret generic my-cloud-credential --from-file=clouds.yaml=$PWD/clouds.yaml
+```
+
+That secret can then be configured in the Helm values:
+
+```yaml
+openstack:
+  cloudCredentialsSecretName: my-cloud-credential
+```
+
+The secret can also contain a certificate file that is used to validate the SSL certificate from
+the target cloud:
+
+```sh
+kubectl create secret generic my-cloud-credential \
+  --from-file=clouds.yaml=$PWD/clouds.yaml \
+  --from-file=cacert=$PWD/ca.crt
+```
+
+Alternatively, certificate verification can be disabled in the `clouds.yaml`:
+
+```yaml
+clouds:
+  openstack:
+    auth:
+      auth_url: https://my.cloud:5000
+      application_credential_id: "<app cred id>"
+      application_credential_secret: "<app cred secret>"
+    region_name: "RegionOne"
+    interface: "public"
+    identity_api_version: 3
+    auth_type: "v3applicationcredential"
+    verify: false
 ```
 
 ## cert-manager
@@ -159,12 +219,15 @@ the required challenges, and can
 [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 using annotations.
 
-cert-manager is enabled by default. To disable it, use the following Helm values:
+cert-manager is disabled by default. To enable it, use the following Helm values:
 
 ```yaml
 certManager:
-  enabled: false
+  enabled: true
 ```
+
+By default, the installation includes a cluster issuer called `letsencrypt-http01` that
+targets [Let's Encrypt](https://letsencrypt.org/) for certificate issuing.
 
 Additional configuration options are available for cert-manager - see
 [values.yaml](./values.yaml).
@@ -188,98 +251,144 @@ particular Ingress resource using
 This chart can install the [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)
 onto the target cluster.
 
-The Nginx Ingress Controller is enabled by default. To disable it, use the following Helm values:
+The Nginx Ingress Controller is disabled by default. To enable it, use the following Helm values:
 
 ```yaml
 ingress:
-  enabled: false
-```
-
-## NVIDIA GPU operator
-
-This chart is able to install the
-[NVIDIA GPU operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/overview.html)
-to provide access to NVIDIA GPUs from Kubernetes pods using the
-[device plugin framework](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/).
-
-When deployed, the GPU operator will detect nodes with NVIDIA GPUs and automatically install the
-NVIDIA software components required to make the GPUs available to Kubernetes. This does not
-require any special modifications to the image used to deploy the nodes.
-
-The GPU operator is not enabled by default. To enable it, use the following Helm values:
-
-```yaml
-nvidiaGPUOperator:
   enabled: true
 ```
 
-Because of the automatic detection and labelling of nodes with GPUs, there is no need to
-manually label nodes. In the case where some nodes have GPUs and some do not, the GPU
-operator will do the right thing without the need for manual intervention.
+## Extra addons
 
-Additional configuration options are available for the NVIDIA GPU operator - see
-[values.yaml](./values.yaml).
+This chart is able to manage the application of additional user-specified addons to the target
+cluster. These can use Helm, Kustomize or a custom script to install and uninstall the addon,
+and can even use a custom image containing specialist tools if required.
 
-## Custom manifests
-
-This chart is able to manage the application of custom user-specified manifests to the
-cluster using `kubectl apply`. This can be useful to install cluster-specific resources
-such as additional
-[storage classes](https://kubernetes.io/docs/concepts/storage/storage-classes/)
-or [RBAC rules](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
-
-To apply custom manifests to the cluster as part of the addon installation, use something
-similar to the following in your Helm values:
+Each addon should have the form (not all options are required at all times):
 
 ```yaml
-# This should be a mapping of filenames to manifest content
-customManifests:
-  storageclass-standard.yaml: |
-    apiVersion: storage.k8s.io/v1
-    kind: StorageClass
-    metadata:
-    name: standard
-    provisioner: my-storage-provisioner
-
-  pod-reader.yaml: |
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRole
-    metadata:
-      name: pod-reader
-    rules:
-      - apiGroups: [""]
-        resources: ["pods"]
-        verbs: ["get", "watch", "list"]
+# One of helm, kustomize or custom
+installType: custom
+# Options for a Helm addon
+helm:
+  # List of URLs of manifests containing CRDs
+  # Helm's handling of CRDs is not great - this helps if CRDs require updates
+  crdManifests: []
+  # The information for the Helm chart
+  chart:
+    # The URL of the chart repository
+    repo:
+    # The name of the chart
+    name:
+    # The version of the chart to use
+    version:
+  # Information about the Helm release
+  release:
+    # The namespace for the release on the target cluster
+    namespace:
+    # The name of the release
+    name:
+    # The time to wait for the Helm release to install correctly
+    timeout: 60m
+    # The values for the release
+    # These can come from a dict or a template
+    # The template is rendered with the root context, then the result is merged into the dict
+    # Values from the template take precedence over the dict
+    values: {}
+    valuesTemplate:
+# Options for a kustomize addon
+kustomize:
+  # The kustomize configuration
+  # This can come from a dict or a template
+  # The template is rendered with the root context, then the result is merged into the dict
+  # Values from the template take precedence over the dict
+  kustomization: {}
+  kustomizationTemplate:
+  # A list of resources to watch to determine when the addon has installed
+  # These should be resources that can be used with "kubectl rollout status"
+  # E.g. "deployment/my-deployment" or "statefulset/my-statefulset"
+  resources: []
+  # The namespace on the target cluster to watch resources in
+  resourceNamespace:
+# Options for a custom addon
+custom:
+  # Script that installs the addon
+  # It is treated as a template, and rendered with the root context
+  install:
+  # Script that deletes the addon
+  # It is also treated as a template and rendered with the root context
+  delete:
+# A list of extra sources to be added to the projected volume used for configuration
+# The secrets and configmaps must already exist in the namespace
+# https://kubernetes.io/docs/concepts/storage/projected-volumes/
+extraVolumes: []
+# A map of filename -> content of additional files to include in the config directory
+extraFiles: {}
+# Hook scripts that execute at certain times in the addon's lifecycle
+# Hook scripts are treated as templates during rendering, and are rendered with the root context
+hooks:
+  # Executed before the addon is installed or upgraded
+  preInstall:
+  # Executed after the addon is installed or upgraded
+  postInstall:
+  # Executed before the addon is deleted
+  preDelete:
+  # Executed after the addon is deleted
+  postDelete:
+# Details of a custom image to use, if required
+image:
+  # The repository of the image
+  repository:
+  # The tag to use from the repository
+  tag:
 ```
 
-## Custom Helm charts
-
-In addition to simple custom manifests, this chart is also able to manage additional
-cluster-specific Helm releases.
-
-To deploy a custom Helm release as part of the addon installation, use something similar
-to the following in your Helm values:
+For example, the following extra addon will install a couple of additional manifests
+into the cluster using Kustomize:
 
 ```yaml
-customHelmReleases:
-  # This is the name of the release
+extraAddons:
+  custom-manifests:
+    installType: kustomize
+    kustomize:
+      kustomization:
+        resources:
+          - ./storageclass-standard.yaml
+          - ./pod-reader.yaml
+    extraFiles:
+      storageclass-standard.yaml: |
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+        name: standard
+        provisioner: my-storage-provisioner
+      pod-reader.yaml: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: pod-reader
+        rules:
+          - apiGroups: [""]
+            resources: ["pods"]
+            verbs: ["get", "watch", "list"]
+```
+
+Or to deploy a custom Helm release as part of the addon installation:
+
+```yaml
+extraAddons:
   my-wordpress:
-    chart:
-      # The repository that the chart is in
-      repo: https://charts.bitnami.com/bitnami
-      # The name of the chart
-      name: wordpress
-      # The version of the chart to use
-      # NOTE: THIS IS REQUIRED
-      version: 12.1.6
-    # The namespace for the release
-    # If not given, this defaults to the release name
-    namespace: wordpress
-    # The amount of time to wait for the chart to deploy before rolling back
-    timeout: 5m
-    # The values for the chart
-    values:
-      wordpressUsername: jbloggs
-      wordpressPassword: supersecretpassword
-      wordpressBlogName: JBloggs Awesome Blog!
+    installType: helm
+    helm:
+      chart:
+        repo: https://charts.bitnami.com/bitnami
+        name: wordpress
+        version: 12.1.6
+      release:
+        namespace: wordpress
+        name: my-wordpress
+        values:
+          wordpressUsername: jbloggs
+          wordpressPassword: supersecretpassword
+          wordpressBlogName: JBloggs Awesome Blog!
 ```

@@ -1,3 +1,14 @@
-{{- if .Values.monitoring.enabled }}
-{{- include "cluster-addons.job.helm" (list . "monitoring" .Values.monitoring) }}
+{{- define "cluster-addons.monitoring.config" -}}
+{{- include "cluster-addons.job.defaults" . }}
+installType: helm
+helm: {{ omit .Values.monitoring "enabled" | toYaml | nindent 2 }}
 {{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "monitoring"
+    "cluster-addons.monitoring.config"
+    .Values.monitoring.enabled
+  )
+}}

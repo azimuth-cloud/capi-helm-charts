@@ -1,38 +1,46 @@
 {{- define "cluster-addons.csi-cinder.config" -}}
-{{- $config := deepCopy .Values.openstack.csiCinder }}
-{{- if .Values.openstack.csiCinder.storageClass.enabled }}
-{{- $_ := set $config "manifests" (append $config.manifests "./storageclass.yaml") }}
-{{- end }}
-{{- include "cluster-addons.job.kustomize.config" (list . $config) }}
+{{- include "cluster-addons.job.defaults" . }}
+installType: kustomize
+kustomize:
+  kustomizationTemplate: |
+    resources:
+      {{- range .Values.openstack.csiCinder.manifests }}
+      - {{ tpl . $ }}
+      {{- end }}
+      {{- if .Values.openstack.csiCinder.storageClass.enabled }}
+      - ./storageclass.yaml
+      {{- end }}
+  {{- with .Values.openstack.csiCinder.kustomization }}
+  kustomization: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  resourceNamespace: kube-system
+  resources:
+    - statefulset/csi-cinder-controllerplugin
+    - daemonset/csi-cinder-nodeplugin
 {{- with .Values.openstack.csiCinder.storageClass }}
 {{- if .enabled }}
-storageclass.yaml: |
-  apiVersion: storage.k8s.io/v1
-  kind: StorageClass
-  metadata:
-    name: {{ .name }}
-    {{- if .isDefault }}
-    annotations:
-      storageclass.kubernetes.io/is-default-class: "true"
-    {{- end }}
-  provisioner: cinder.csi.openstack.org
-  reclaimPolicy: {{ .reclaimPolicy }}
-  allowVolumeExpansion: {{ .allowVolumeExpansion }}
+extraFiles:
+  storageclass.yaml: |
+    apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: {{ .name }}
+      {{- if .isDefault }}
+      annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+      {{- end }}
+    provisioner: cinder.csi.openstack.org
+    reclaimPolicy: {{ .reclaimPolicy }}
+    allowVolumeExpansion: {{ .allowVolumeExpansion }}
 {{- end }}
 {{- end }}
 {{- end }}
 
-{{- define "cluster-addons.csi-cinder.script" -}}
 {{-
-  include
-    "cluster-addons.job.kustomize.script"
-    (list
-      (list "kube-system" "statefulset/csi-cinder-controllerplugin")
-      (list "kube-system" "daemonset/csi-cinder-nodeplugin")
-    )
+  include "addon.job" (list
+    .
+    "csi-cinder"
+    "cluster-addons.csi-cinder.config"
+    (and .Values.openstack.enabled .Values.openstack.csiCinder.enabled)
+  )
 }}
-{{- end }}
-
-{{- if and .Values.openstack.enabled .Values.openstack.csiCinder.enabled }}
-{{- include "cluster-addons.job" (list . "csi-cinder") }}
-{{- end }}

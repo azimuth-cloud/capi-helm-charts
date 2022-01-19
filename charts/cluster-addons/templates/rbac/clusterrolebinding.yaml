@@ -1,14 +1,15 @@
----
+{{- if and .Values.serviceAccount.create (not .Values.kubeconfigSecret.name) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: "{{ include "cluster-addons.fullname" . }}:deployer"
+  name: {{ include "cluster-addons.fullname" . }}
   labels: {{ include "cluster-addons.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "cluster-addons.componentName" (list . "deployer") }}
     namespace: {{ .Release.Namespace }}
+    name: {{ tpl .Values.serviceAccount.name . }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin
+  name: {{ .Values.serviceAccount.clusterRoleName }}
+{{- end }}

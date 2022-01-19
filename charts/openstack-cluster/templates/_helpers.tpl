@@ -72,12 +72,12 @@ capi.stackhpc.com/node-group: {{ $nodeGroupName }}
 {{- end -}}
 
 {{/*
-Name of the cloud-config secret.
+Name of the secret containing the cloud credentials.
 */}}
-{{- define "openstack-cluster.cloudConfigSecretName" -}}
-{{- if .Values.cloudConfigSecretName -}}
-{{- .Values.cloudConfigSecretName -}}
+{{- define "openstack-cluster.cloudCredentialsSecretName" -}}
+{{- if .Values.global.cloudCredentialsSecretName -}}
+{{- .Values.global.cloudCredentialsSecretName -}}
 {{- else -}}
-{{ include "openstack-cluster.componentName" (list . "cloud-config") -}}
+{{ include "openstack-cluster.componentName" (list . "cloud-credentials") -}}
 {{- end -}}
 {{- end -}}

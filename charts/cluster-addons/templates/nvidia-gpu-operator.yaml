@@ -1,3 +1,0 @@
-{{- if .Values.nvidiaGPUOperator.enabled }}
-{{- include "cluster-addons.job.helm" (list . "nvidia-gpu-operator" .Values.nvidiaGPUOperator) }}
-{{- end }}

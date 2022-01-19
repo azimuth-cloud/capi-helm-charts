@@ -1,12 +1,25 @@
-{{- if .Values.metricsServer.enabled }}
-{{-
-  include
-    "cluster-addons.job.kustomize"
-    (list
-      .
-      "metrics-server"
-      .Values.metricsServer
-      (list (list "kube-system" "deployment/metrics-server"))
-    )
-}}
+{{- define "cluster-addons.metrics-server.config" -}}
+{{- include "cluster-addons.job.defaults" . }}
+installType: kustomize
+kustomize:
+  kustomizationTemplate: |
+    resources:
+      {{- range .Values.metricsServer.manifests }}
+      - {{ tpl . $ }}
+      {{- end }}
+  {{- with .Values.metricsServer.kustomization }}
+  kustomization: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  resourceNamespace: kube-system
+  resources:
+    - deployment/metrics-server
 {{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "metrics-server"
+    "cluster-addons.metrics-server.config"
+    .Values.metricsServer.enabled
+  )
+}}

@@ -1,0 +1,53 @@
+{{- define "cluster-addons.cloud-config.config" -}}
+{{-
+  $secretNameTemplate := required
+    ".Values.openstack.cloudCredentialsSecretName is required"
+    .Values.openstack.cloudCredentialsSecretName 
+}}
+{{- $secretName := tpl $secretNameTemplate . }}
+{{- include "cluster-addons.job.defaults" . }}
+installType: custom
+custom:
+  install: |
+    gomplate --file secret.yaml.tpl | kubectl apply -f -
+  delete: |
+    gomplate --file secret.yaml.tpl | kubectl delete -f -
+extraVolumes:
+  - secret:
+      name: {{ $secretName }}
+extraFiles:
+  secret.yaml.tpl: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: cloud-config
+      namespace: kube-system
+    stringData:
+      # Just include the data for the cloud we will be using
+      clouds.yaml: |
+        {{ "{{" }} file.Read "./clouds.yaml" | indent 4 | trimSpace {{ "}}" }}
+      {{ "{{-" }} if file.Exists "./cacert" {{ "}}" }}
+      cacert: |
+        {{ "{{" }} file.Read "./cacert" | indent 4 | trimSpace {{ "}}" }}
+      {{ "{{-" }} end {{ "}}" }}
+      cloud.conf: |
+        [Global]
+        use-clouds=true
+        clouds-file=/etc/config/clouds.yaml
+        cloud={{ .Values.openstack.cloudName }}
+        {{ "{{-" }} if file.Exists "./cacert" {{ "}}" }}
+        ca-file=/etc/config/cacert
+        {{ "{{-" }} end {{ "}}" }}
+        {{- with .Values.openstack.cloudConfig }}
+        {{- nindent 8 . }}
+        {{- end }}
+{{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "cloud-config"
+    "cluster-addons.cloud-config.config"
+    .Values.openstack.enabled
+  )
+}}

@@ -5,7 +5,7 @@ metadata:
   name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
   labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
 spec:
-  version: {{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" }}
+  version: {{ .Values.global.kubernetesVersion | required ".Values.global.kubernetesVersion is required" }}
   replicas: {{ .Values.controlPlane.machineCount }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
   machineTemplate:
