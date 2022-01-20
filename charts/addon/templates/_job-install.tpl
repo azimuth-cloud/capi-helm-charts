@@ -5,8 +5,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  {{- $configChecksum := include "addon.config.secret" . | sha256sum }}
-  name: {{ include "addon.job.name" (list $ctx $name "install") }}-{{ trunc 8 $configChecksum }}
+  name: {{ include "addon.job.name" (list $ctx $name "install") }}-{{ $ctx.Release.Revision }}
   labels: {{ include "addon.job.labels" (list $ctx $name "install") | nindent 4 }}
 spec:
   backoffLimit: {{ $config.backoffLimit }}
