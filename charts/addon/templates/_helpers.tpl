@@ -43,7 +43,6 @@ app.kubernetes.io/component: {{ $componentName }}
 {{- $operation := index . 2 -}}
 {{ include "addon.selectorLabels" (list $ctx $componentName) }}
 capi.stackhpc.com/operation: {{ $operation }}
-capi.stackhpc.com/revision: {{ $ctx.Release.Revision | quote }}
 {{- end }}
 
 {{- define "addon.commonLabels" -}}
@@ -64,6 +63,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- $ctx := index . 0 -}}
 {{ include "addon.commonLabels" $ctx }}
 {{ include "addon.job.selectorLabels" . }}
+capi.stackhpc.com/revision: {{ $ctx.Release.Revision | quote }}
 {{- end }}
 
 {{/*
