@@ -17,6 +17,7 @@
     $name
     (omit $config "enabled")
     (default true $config.enabled)
+    0
   )
 }}
 {{- end }}

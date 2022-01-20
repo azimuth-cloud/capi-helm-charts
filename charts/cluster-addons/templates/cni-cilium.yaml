@@ -10,5 +10,6 @@ helm: {{ toYaml .Values.cni.cilium | nindent 2 }}
     "cni-cilium"
     "cluster-addons.cni-cilium.config"
     (and .Values.cni.enabled (eq .Values.cni.type "cilium"))
+    2
   )
 }}

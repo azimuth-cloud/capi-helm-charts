@@ -42,5 +42,6 @@ extraFiles:
     "csi-cinder"
     "cluster-addons.csi-cinder.config"
     (and .Values.openstack.enabled .Values.openstack.csiCinder.enabled)
+    1
   )
 }}

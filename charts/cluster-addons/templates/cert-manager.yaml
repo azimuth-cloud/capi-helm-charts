@@ -34,5 +34,6 @@ hooks:
     "cert-manager"
     "cluster-addons.cert-manager.config"
     .Values.certManager.enabled
+    0
   )
 }}

@@ -43,5 +43,6 @@ kustomize:
     "ccm-openstack"
     "cluster-addons.ccm-openstack.config"
     (and .Values.openstack.enabled .Values.openstack.ccm.enabled)
+    1
   )
 }}

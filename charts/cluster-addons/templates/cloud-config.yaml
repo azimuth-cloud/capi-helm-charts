@@ -49,5 +49,6 @@ extraFiles:
     "cloud-config"
     "cluster-addons.cloud-config.config"
     .Values.openstack.enabled
+    3
   )
 }}

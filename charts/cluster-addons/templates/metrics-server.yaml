@@ -21,5 +21,6 @@ kustomize:
     "metrics-server"
     "cluster-addons.metrics-server.config"
     .Values.metricsServer.enabled
+    0
   )
 }}

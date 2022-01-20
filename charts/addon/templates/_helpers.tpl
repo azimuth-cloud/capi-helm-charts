@@ -314,6 +314,7 @@ pre-upgrade hook is produced to uninstall the addon.
 {{- $name := index . 1 }}
 {{- $overrides := index . 2 }}
 {{- $enabled := index . 3 }}
+{{- $weight := index . 4 }}
 {{- $defaults := include "addon.config.defaults" $ctx | fromYaml }}
 {{- $config := include "addon.mergeConcat" (list $defaults $overrides) | fromYaml }}
 {{- if $enabled }}
@@ -321,11 +322,11 @@ pre-upgrade hook is produced to uninstall the addon.
 ---
 {{- include "addon.job.install" (list $ctx $name $config) }}
 ---
-{{- include "addon.job.uninstall" (list $ctx $name "pre-delete" $config) }}
+{{- include "addon.job.uninstall" (list $ctx $name "pre-delete" $weight $config) }}
 {{- else if $ctx.Release.IsUpgrade }}
 {{- $secretName := include "addon.fullname" (list $ctx $name) | printf "%s-config" }}
 {{- if lookup "v1" "Secret" $ctx.Release.Namespace $secretName }}
-{{- include "addon.job.uninstall" (list $ctx $name "pre-upgrade" $config) }}
+{{- include "addon.job.uninstall" (list $ctx $name "pre-upgrade" $weight $config) }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -339,6 +340,7 @@ for the configuration produced by the specified template.
 {{- $name := index . 1 }}
 {{- $configTemplate := index . 2 }}
 {{- $enabled := index . 3 }}
+{{- $weight := index . 4 }}
 {{- $config := include $configTemplate $ctx | fromYaml }}
-{{- include "addon.job.fromConfig" (list $ctx $name $config $enabled) }}
+{{- include "addon.job.fromConfig" (list $ctx $name $config $enabled $weight) }}
 {{- end }}

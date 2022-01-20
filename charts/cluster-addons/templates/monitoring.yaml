@@ -10,5 +10,6 @@ helm: {{ omit .Values.monitoring "enabled" | toYaml | nindent 2 }}
     "monitoring"
     "cluster-addons.monitoring.config"
     .Values.monitoring.enabled
+    0
   )
 }}
