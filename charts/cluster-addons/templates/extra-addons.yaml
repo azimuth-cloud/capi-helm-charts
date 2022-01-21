@@ -10,13 +10,13 @@
 {{- end }}
 
 {{- range $name, $config := .Values.extraAddons -}}
-{{- $config := include "cluster-addons.extra-addons.config" (list . $config) }}
+{{- $merged := include "cluster-addons.extra-addons.config" (list $ $config) | fromYaml }}
 {{-
   include "addon.job.fromConfig" (list
-    .
+    $
     $name
-    (omit $config "enabled")
-    (default true $config.enabled)
+    (omit $merged "enabled")
+    (default true $merged.enabled)
     0
   )
 }}
