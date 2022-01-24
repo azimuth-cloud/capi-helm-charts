@@ -145,7 +145,7 @@ by checking for the pending-[install,upgrade] status.
     .release.name
 }}
 {{- range .crdManifests }}
-kubectl apply -f {{ . }}
+kubectl replace -f {{ . }}
 {{- end }}
 helm-upgrade {{ $releaseName }} {{ $chartName }} \
   --atomic \

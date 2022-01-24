@@ -35,10 +35,10 @@ for two reasons:
 There are two patterns used in this chart for managing addons:
 
   1. Manifests are pulled from a URL and run through `kustomize` before being applied
-     using `kubectl apply`. The manifests are **not** present in this repository. In
-     this case, the URL and kustomize configuration can be changed using the Helm values
-     if required, e.g. to change images from Docker Hub to another repository or to
-     point to an internal source if an air-gapped installation is required.
+     using `kubectl`. The manifests are **not** present in this repository. In this case,
+     the URL and kustomize configuration can be changed using the Helm values if required,
+     e.g. to change images from Docker Hub to another repository or to point to an
+     internal source if an air-gapped installation is required.
   1. Using a Helm chart. The chart to use is configured using Helm values rather
      than Helm dependencies, which allows full control via configuration over which
      repository is used (e.g. a mirror for an air-gapped installation) and which version
