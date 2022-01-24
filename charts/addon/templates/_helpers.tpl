@@ -113,7 +113,9 @@ values obtained from rendering the valuesTemplate.
 Template for a script that installs or upgrades a Helm release.
 
 Because Helm has poor support for CRDs, there is an option to apply CRD manifest URLs before
-installing or upgrading the release.
+installing or upgrading the release. CRDs are installed using "kubectl create/replace"
+rather than "kubectl apply" because CRDs with comprehensive schemas can easily become too
+large for the last-applied-configuration annotation.
 
 There is also support for rolling back an interrupted install or upgrade before proceeding
 by checking for the pending-[install,upgrade] status.
@@ -145,7 +147,7 @@ by checking for the pending-[install,upgrade] status.
     .release.name
 }}
 {{- range .crdManifests }}
-kubectl replace -f {{ . }}
+kubectl create -f {{ . }} || kubectl replace -f {{ . }}
 {{- end }}
 helm-upgrade {{ $releaseName }} {{ $chartName }} \
   --atomic \
