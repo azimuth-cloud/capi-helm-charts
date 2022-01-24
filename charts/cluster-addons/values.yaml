@@ -87,7 +87,7 @@ cni:
     release:
       namespace: kube-system
       name: cilium
-      timeout: 5m
+      timeout: 30m
       # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
       values:
         ipam:
@@ -193,7 +193,7 @@ certManager:
   release:
     namespace: cert-manager
     name: cert-manager
-    timeout: 5m
+    timeout: 30m
     # See https://cert-manager.io/docs/installation/helm/ for available values
     values:
       # By default, make sure the cert-manager CRDs are installed
@@ -223,7 +223,7 @@ ingress:
     release:
       namespace: ingress-nginx
       name: ingress-nginx
-      timeout: 5m
+      timeout: 30m
       # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
       values: {}
 
@@ -247,7 +247,7 @@ monitoring:
   release:
     namespace: monitoring-system
     name: kube-prometheus-stack
-    timeout: 5m
+    timeout: 30m
     values: {}
 
 # Map of extra addons in the form "component name" -> "addon spec"
