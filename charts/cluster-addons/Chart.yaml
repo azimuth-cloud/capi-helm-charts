@@ -7,5 +7,5 @@ appVersion: main
 
 dependencies:
   - name: addon
-    version: "*"
+    version: ">=0-0"
     repository: file://../addon
