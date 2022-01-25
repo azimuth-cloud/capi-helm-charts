@@ -212,15 +212,23 @@ Template for a script that installs or upgrades resources using Kustomize.
 */}}
 {{- define "addon.kustomize.install" }}
 kustomize build . | kubectl apply -f -
-{{- if .resources }}
+{{- range .resources }}
 {{-
   $namespace := required
-    "resourceNamespace is required for a Kustomize job with resources"
-    .resourceNamespace
+    "namespace is required for a resource to watch"
+    .namespace
 }}
-{{- range .resources }}
-kubectl -n {{ $namespace }} rollout status {{ . }}
-{{- end }}
+{{-
+  $kind := required
+    "kind is required for a resource to watch"
+    .kind
+}}
+{{-
+  $name := required
+    "name is required for a resource to watch"
+    .name
+}}
+kubectl -n {{ $namespace }} rollout status {{ $kind }}/{{ $name }}
 {{- end }}
 {{- end }}
 
@@ -229,15 +237,23 @@ Template for a script that deletes resources using Kustomize.
 */}}
 {{- define "addon.kustomize.delete" }}
 kustomize build . | kubectl delete -f -
-{{- if .resources }}
+{{- range .resources }}
 {{-
   $namespace := required
-    "resourceNamespace is required for a Kustomize job with resources"
-    .resourceNamespace
+    "namespace is required for a resource to watch"
+    .namespace
 }}
-{{- range .resources }}
-kubectl -n {{ $namespace }} wait --for=delete {{ . }}
-{{- end }}
+{{-
+  $kind := required
+    "kind is required for a resource to watch"
+    .kind
+}}
+{{-
+  $name := required
+    "name is required for a resource to watch"
+    .name
+}}
+kubectl -n {{ $namespace }} wait --for=delete {{ $kind }}/{{ $name }}
 {{- end }}
 {{- end }}
 
@@ -275,8 +291,13 @@ kustomize:
   # Values from the template take precedence over the dict
   kustomization: {}
   kustomizationTemplate:
-  resourceNamespace:
-  resources: []
+  # List of resources to watch to determine if the rollout is complete
+  # Resources should be usable with "kubectl rollout status"
+  watches: []
+    # The resources should be specified in the form
+    # namespace:
+    # kind:
+    # name:
 custom:
   # Scripts are treated as templates during rendering
   install:

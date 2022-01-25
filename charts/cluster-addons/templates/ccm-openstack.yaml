@@ -32,9 +32,10 @@ kustomize:
   {{- with .Values.openstack.ccm.kustomization }}
   kustomization: {{ toYaml . | nindent 4 }}
   {{- end }}
-  resourceNamespace: kube-system
-  resources:
-    - daemonset/openstack-cloud-controller-manager
+  watches:
+    - namespace: kube-system
+      kind: DaemonSet
+      name: openstack-cloud-controller-manager
 {{- end }}
 
 {{-

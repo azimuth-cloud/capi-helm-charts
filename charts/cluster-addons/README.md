@@ -305,11 +305,12 @@ kustomize:
   kustomization: {}
   kustomizationTemplate:
   # A list of resources to watch to determine when the addon has installed
-  # These should be resources that can be used with "kubectl rollout status"
-  # E.g. "deployment/my-deployment" or "statefulset/my-statefulset"
-  resources: []
-  # The namespace on the target cluster to watch resources in
-  resourceNamespace:
+  watches: []
+    # These should be of the form
+    # - namespace: my-namespace
+    #   kind: Deployment
+    #   name: my-deployment
+    #   condition: Available
 # Options for a custom addon
 custom:
   # Script that installs the addon

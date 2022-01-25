@@ -13,10 +13,13 @@ kustomize:
   {{- with .Values.openstack.csiCinder.kustomization }}
   kustomization: {{ toYaml . | nindent 4 }}
   {{- end }}
-  resourceNamespace: kube-system
-  resources:
-    - statefulset/csi-cinder-controllerplugin
-    - daemonset/csi-cinder-nodeplugin
+  watches:
+    - namespace: kube-system
+      kind: StatefulSet
+      name: csi-cinder-controllerplugin
+    - namespace: kube-system
+      kind: Daemonset
+      name: csi-cinder-nodeplugin
 {{- with .Values.openstack.csiCinder.storageClass }}
 {{- if .enabled }}
 extraFiles:
