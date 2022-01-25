@@ -10,6 +10,7 @@
 {{- end }}
 
 {{- range $name, $config := .Values.extraAddons -}}
+---
 {{- $merged := include "cluster-addons.extra-addons.config" (list $ $config) | fromYaml }}
 {{-
   include "addon.job.fromConfig" (list
