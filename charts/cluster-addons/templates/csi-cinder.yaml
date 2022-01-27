@@ -15,7 +15,11 @@ kustomize:
   {{- end }}
   watches:
     - namespace: kube-system
+      {{- if semverCompare ">=1.23" (tpl .Values.kubernetesVersion . | trimPrefix "v") }}
+      kind: Deployment
+      {{- else }}
       kind: StatefulSet
+      {{- end }}
       name: csi-cinder-controllerplugin
     - namespace: kube-system
       kind: Daemonset
