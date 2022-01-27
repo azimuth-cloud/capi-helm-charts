@@ -74,31 +74,31 @@ uninstallHookWeight: {{ include "cluster-addons.uninstallHookWeight" . }}
 Determines if an addon is enabled given the name.
 */}}
 {{- define "cluster-addons.enabled" -}}
-{{- $ctx := index . 0 }}
-{{- $name := index . 1 }}
-{{- if eq $name "ccm-openstack" }}
-{{- and $ctx.Values.openstack.enabled $ctx.Values.openstack.ccm.enabled | toYaml }}
-{{- else if eq $name "cert-manager" }}
-{{- $ctx.Values.certManager.enabled | toYaml }}
-{{- else if eq $name "cloud-config" }}
-{{- $ctx.Values.openstack.enabled | toYaml }}
-{{- else if eq $name "cni-calico" }}
-{{- and $ctx.Values.cni.enabled (eq $ctx.Values.cni.type "calico") | toYaml }}
-{{- else if eq $name "cni-cilium" }}
-{{- and $ctx.Values.cni.enabled (eq $ctx.Values.cni.type "cilium") | toYaml }}
-{{- else if eq $name "csi-cinder" }}
-{{- and $ctx.Values.openstack.enabled $ctx.Values.openstack.csiCinder.enabled | toYaml }}
-{{- else if eq $name "ingress-nginx" }}
-{{- and $ctx.Values.ingress.enabled $ctx.Values.ingress.nginx.enabled | toYaml }}
-{{- else if eq $name "metrics-server" }}
-{{- $ctx.Values.metricsServer.enabled | toYaml }}
-{{- else if eq $name "monitoring" }}
-{{- $ctx.Values.monitoring.enabled | toYaml }}
-{{- else if hasKey $ctx.Values.extraAddons $name }}
-{{- dig $name "enabled" true $ctx.Values.extraAddons | toYaml }}
-{{- else }}
-{{- printf "Unrecognised addon '%s'" $name | fail }}
-{{- end }}
+{{- $ctx := index . 0 -}}
+{{- $name := index . 1 -}}
+{{- if eq $name "ccm-openstack" -}}
+{{- and $ctx.Values.openstack.enabled $ctx.Values.openstack.ccm.enabled | toYaml -}}
+{{- else if eq $name "cert-manager" -}}
+{{- $ctx.Values.certManager.enabled | toYaml -}}
+{{- else if eq $name "cloud-config" -}}
+{{- $ctx.Values.openstack.enabled | toYaml -}}
+{{- else if eq $name "cni-calico" -}}
+{{- and $ctx.Values.cni.enabled (eq $ctx.Values.cni.type "calico") | toYaml -}}
+{{- else if eq $name "cni-cilium" -}}
+{{- and $ctx.Values.cni.enabled (eq $ctx.Values.cni.type "cilium") | toYaml -}}
+{{- else if eq $name "csi-cinder" -}}
+{{- and $ctx.Values.openstack.enabled $ctx.Values.openstack.csiCinder.enabled | toYaml -}}
+{{- else if eq $name "ingress-nginx" -}}
+{{- and $ctx.Values.ingress.enabled $ctx.Values.ingress.nginx.enabled | toYaml -}}
+{{- else if eq $name "metrics-server" -}}
+{{- $ctx.Values.metricsServer.enabled | toYaml -}}
+{{- else if eq $name "monitoring" -}}
+{{- $ctx.Values.monitoring.enabled | toYaml -}}
+{{- else if hasKey $ctx.Values.extraAddons $name -}}
+{{- dig $name "enabled" true $ctx.Values.extraAddons | toYaml -}}
+{{- else -}}
+false
+{{- end -}}
 {{- end }}
 
 {{/*
