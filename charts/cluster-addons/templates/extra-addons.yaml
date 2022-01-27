@@ -1,8 +1,17 @@
 {{- define "cluster-addons.extra-addons.config" -}}
 {{- $ctx := index . 0 }}
-{{- $config := index . 1 }}
+{{- $name := index . 1 }}
 {{-
-  include "cluster-addons.job.defaults" $ctx |
+  $config := omit
+    (index . 2)
+    "kubeconfigSecret"
+    "serviceAccountName"
+    "enabled"
+    "dependsOn"
+    "uninstallHookWeight"
+}}
+{{-
+  include "cluster-addons.job.defaults" (list $ctx $name) |
     fromYaml |
     merge $config |
     toYaml
@@ -11,14 +20,6 @@
 
 {{- range $name, $config := .Values.extraAddons }}
 ---
-{{- $merged := include "cluster-addons.extra-addons.config" (list $ $config) | fromYaml }}
-{{-
-  include "addon.job.fromConfig" (list
-    $
-    $name
-    (omit $merged "enabled")
-    (default true $merged.enabled)
-    0
-  )
-}}
+{{- $merged := include "cluster-addons.extra-addons.config" (list $ $name $config) | fromYaml }}
+{{- include "addon.job.fromConfig" (list $ $name $merged) }}
 {{- end }}

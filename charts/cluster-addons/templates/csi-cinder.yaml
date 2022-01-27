@@ -1,5 +1,5 @@
 {{- define "cluster-addons.csi-cinder.config" -}}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "csi-cinder") }}
 installType: kustomize
 kustomize:
   kustomizationTemplate: |
@@ -44,7 +44,5 @@ extraFiles:
     .
     "csi-cinder"
     "cluster-addons.csi-cinder.config"
-    (and .Values.openstack.enabled .Values.openstack.csiCinder.enabled)
-    1
   )
 }}

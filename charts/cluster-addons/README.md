@@ -1,9 +1,22 @@
-# cluster-addons chart
+# cluster-addons chart  <!-- omit in toc -->
 
 This [Helm chart](https://helm.sh/) manages the deployment of addons for a
 [Kubernetes](https://kubernetes.io) cluster. It is primarily intended to be used with
 the cluster management charts from this repository, e.g.
 [openstack-cluster](../openstack-cluster), but should work for any Kubernetes cluster.
+
+## Contents  <!-- omit in toc -->
+
+- [How does it work?](#how-does-it-work)
+- [Targetting a remote cluster](#targetting-a-remote-cluster)
+- [Container Network Interface (CNI) plugins](#container-network-interface-cni-plugins)
+- [OpenStack integrations](#openstack-integrations)
+  - [OpenStack credentials](#openstack-credentials)
+- [cert-manager](#cert-manager)
+- [Ingress controllers](#ingress-controllers)
+- [Extra addons](#extra-addons)
+
+## How does it work?
 
 The addons are deployed by launching
 [Kubernetes jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/), each of
@@ -267,6 +280,11 @@ and can even use a custom image containing specialist tools if required.
 Each addon should have the form (not all options are required at all times):
 
 ```yaml
+# The name of any components that this addon depends on being installed before it can be installed
+# This can be the name of an addon, including the name of other extra addons
+# It can also be either "ingress" or "storage" to wait for storage providers and ingress controllers
+# respectively, regardless of the explicit implementation
+dependsOn: []
 # One of helm, kustomize or custom
 installType: custom
 # Options for a Helm addon

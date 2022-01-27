@@ -10,4 +10,4 @@ dependencies:
     version: ">=0-0"
     repository: file://../cluster-addons
     alias: addons
-    conditions: addons.enabled
+    condition: addons.enabled

@@ -1,5 +1,5 @@
 {{- define "cluster-addons.cni-cilium.config" -}}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "cni-cilium") }}
 installType: helm
 helm: {{ toYaml .Values.cni.cilium | nindent 2 }}
 {{- end }}
@@ -9,7 +9,5 @@ helm: {{ toYaml .Values.cni.cilium | nindent 2 }}
     .
     "cni-cilium"
     "cluster-addons.cni-cilium.config"
-    (and .Values.cni.enabled (eq .Values.cni.type "cilium"))
-    2
   )
 }}

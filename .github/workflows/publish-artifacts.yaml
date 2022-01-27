@@ -50,11 +50,6 @@ jobs:
           # when determining the number of commits since the last tag
           fetch-depth: 0
 
-      - name: Resolve chart dependencies in order
-        run: |
-          helm dependency update ./charts/cluster-addons
-          helm dependency update ./charts/openstack-cluster
-
       - name: Get SemVer version for current commit
         id: semver
         uses: stackhpc/github-actions/semver@master

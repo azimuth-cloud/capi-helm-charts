@@ -1,5 +1,5 @@
 {{- define "cluster-addons.cert-manager.config" -}}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "cert-manager") }}
 installType: helm
 helm: {{ omit .Values.certManager "enabled" "acmeHttp01Issuer" | toYaml | nindent 2 }}
 {{- if and .Values.ingress.enabled .Values.certManager.acmeHttp01Issuer.enabled }}
@@ -33,7 +33,5 @@ hooks:
     .
     "cert-manager"
     "cluster-addons.cert-manager.config"
-    .Values.certManager.enabled
-    0
   )
 }}

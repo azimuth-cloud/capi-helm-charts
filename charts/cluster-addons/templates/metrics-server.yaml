@@ -1,5 +1,5 @@
 {{- define "cluster-addons.metrics-server.config" -}}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "metrics-server") }}
 installType: kustomize
 kustomize:
   kustomizationTemplate: |
@@ -21,7 +21,5 @@ kustomize:
     .
     "metrics-server"
     "cluster-addons.metrics-server.config"
-    .Values.metricsServer.enabled
-    0
   )
 }}

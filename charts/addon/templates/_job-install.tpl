@@ -25,9 +25,51 @@ template:
     {{- end }}
     securityContext: {{ toYaml $config.podSecurityContext | nindent 6 }}
     restartPolicy: OnFailure
-    {{- if not $config.kubeconfigSecret.name }}
     serviceAccountName: {{ tpl $config.serviceAccountName $ctx }}
-    {{- end }}
+    initContainers:
+      - name: wait-for-api
+        image: {{ printf "%s:%s" $config.image.repository (default $ctx.Chart.AppVersion $config.image.tag) }}
+        imagePullPolicy: {{ $config.image.pullPolicy }}
+        securityContext: {{ toYaml $config.securityContext | nindent 10 }}
+        args:
+          - /bin/bash
+          - -c
+          - |
+              set -x
+              until kubectl api-resources >/dev/null 2>&1; do
+                  sleep 5
+              done
+        {{- if $config.kubeconfigSecret.name }}
+        env:
+          - name: KUBECONFIG
+            value: /config/kubeconfig
+        {{- end }}
+        resources: {{ toYaml $config.resources | nindent 10 }}
+        volumeMounts:
+          - name: config
+            mountPath: /config
+            readOnly: true
+      {{- range $dep := $config.dependsOn }}
+      - name: wait-for-{{ $dep }}
+        image: {{ printf "%s:%s" $config.image.repository (default $ctx.Chart.AppVersion $config.image.tag) }}
+        imagePullPolicy: {{ $config.image.pullPolicy }}
+        securityContext: {{ toYaml $config.securityContext | nindent 10 }}
+        args:
+          - /bin/bash
+          - -c
+          - |
+              set -ex
+              {{- $labels := include "addon.job.selectorLabels" (list $ctx $dep "install") | fromYaml }}
+              {{- range $i, $label := keys $labels -}}
+              {{- if $i }}
+              LABELS="$LABELS,{{ $label }}={{ index $labels $label }}"
+              {{- else }}
+              LABELS="{{ $label }}={{ index $labels $label }}"
+              {{- end }}
+              {{- end }}
+              kubectl wait --for=condition=Complete job -n {{ $ctx.Release.Namespace }} -l "$LABELS" --all --timeout=-1s
+        resources: {{ toYaml $config.resources | nindent 10 }}
+      {{- end }}
     containers:
       - name: install
         image: {{ printf "%s:%s" $config.image.repository (default $ctx.Chart.AppVersion $config.image.tag) }}
@@ -92,7 +134,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   {{- $checksum := include "addon.job.install.spec" . | sha256sum }}
-  name: {{ include "addon.job.name" (list $ctx $name "install") }}-{{ trunc 8 $checksum }}
+  name: {{ include "addon.job.name" (list $ctx $name "install") }}-{{ trunc 5 $checksum }}
   labels: {{ include "addon.job.labels" (list $ctx $name "install") | nindent 4 }}
 spec: {{ include "addon.job.install.spec" . | nindent 2 }}
 {{- end }}

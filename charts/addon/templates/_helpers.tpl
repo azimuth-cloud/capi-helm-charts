@@ -90,7 +90,8 @@ Lists are merged by concatenating them rather than overwriting.
   {{- end }}
 {{- end }}
 {{- else }}
-{{- default $left (index . 1) | toYaml }}
+{{- $right := index . 1 }}
+{{- kindIs "invalid" $right | ternary $left $right | toYaml }}
 {{- end }}
 {{- end }}
 
@@ -147,7 +148,8 @@ by checking for the pending-[install,upgrade] status.
     .release.name
 }}
 {{- range .crdManifests }}
-kubectl create -f {{ . }} || kubectl replace -f {{ . }}
+kubectl create -f {{ . }} || \
+  kubectl replace -f {{ . }}
 {{- end }}
 helm-upgrade {{ $releaseName }} {{ $chartName }} \
   --atomic \
@@ -212,7 +214,7 @@ Template for a script that installs or upgrades resources using Kustomize.
 */}}
 {{- define "addon.kustomize.install" }}
 kustomize build . | kubectl apply -f -
-{{- range .resources }}
+{{- range .watches }}
 {{-
   $namespace := required
     "namespace is required for a resource to watch"
@@ -237,7 +239,7 @@ Template for a script that deletes resources using Kustomize.
 */}}
 {{- define "addon.kustomize.delete" }}
 kustomize build . | kubectl delete -f -
-{{- range .resources }}
+{{- range .watches }}
 {{-
   $namespace := required
     "namespace is required for a resource to watch"
@@ -261,6 +263,13 @@ kubectl -n {{ $namespace }} wait --for=delete {{ $kind }}/{{ $name }}
 Template that produces the default configuration.
 */}}
 {{- define "addon.config.defaults" -}}
+# Indicates whether the addon is enabled or not
+enabled: true
+# A list of other addons that this addon should wait for before installing
+dependsOn: []
+# The weight to use for the uninstall hook
+# This can be used to influence the order in which addons are deleted
+uninstallHookWeight: 0
 image:
   repository: ghcr.io/stackhpc/k8s-utils
   tag:  # Defaults to chart appVersion if not given
@@ -336,20 +345,18 @@ pre-upgrade hook is produced to uninstall the addon.
 {{- $ctx := index . 0 }}
 {{- $name := index . 1 }}
 {{- $overrides := index . 2 }}
-{{- $enabled := index . 3 }}
-{{- $weight := index . 4 }}
 {{- $defaults := include "addon.config.defaults" $ctx | fromYaml }}
 {{- $config := include "addon.mergeConcat" (list $defaults $overrides) | fromYaml }}
-{{- if $enabled }}
+{{- if $config.enabled }}
 {{- include "addon.config.secret" (list $ctx $name $config) }}
 ---
 {{- include "addon.job.install" (list $ctx $name $config) }}
 ---
-{{- include "addon.job.uninstall" (list $ctx $name "pre-delete" $weight $config) }}
+{{- include "addon.job.uninstall" (list $ctx $name "pre-delete" $config) }}
 {{- else if $ctx.Release.IsUpgrade }}
 {{- $secretName := include "addon.fullname" (list $ctx $name) | printf "%s-config" }}
 {{- if lookup "v1" "Secret" $ctx.Release.Namespace $secretName }}
-{{- include "addon.job.uninstall" (list $ctx $name "pre-upgrade" $weight $config) }}
+{{- include "addon.job.uninstall" (list $ctx $name "pre-upgrade" $config) }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -362,8 +369,6 @@ for the configuration produced by the specified template.
 {{- $ctx := index . 0 }}
 {{- $name := index . 1 }}
 {{- $configTemplate := index . 2 }}
-{{- $enabled := index . 3 }}
-{{- $weight := index . 4 }}
 {{- $config := include $configTemplate $ctx | fromYaml }}
-{{- include "addon.job.fromConfig" (list $ctx $name $config $enabled $weight) }}
+{{- include "addon.job.fromConfig" (list $ctx $name $config) }}
 {{- end }}

@@ -5,7 +5,7 @@
     .Values.openstack.cloudCredentialsSecretName 
 }}
 {{- $secretName := tpl $secretNameTemplate . }}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "cloud-config") }}
 installType: custom
 custom:
   install: |
@@ -48,7 +48,5 @@ extraFiles:
     .
     "cloud-config"
     "cluster-addons.cloud-config.config"
-    .Values.openstack.enabled
-    3
   )
 }}

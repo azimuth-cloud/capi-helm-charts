@@ -1,5 +1,5 @@
 {{- define "cluster-addons.ccm-openstack.config" -}}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "ccm-openstack") }}
 installType: kustomize
 kustomize:
   kustomizationTemplate: |
@@ -43,7 +43,5 @@ kustomize:
     .
     "ccm-openstack"
     "cluster-addons.ccm-openstack.config"
-    (and .Values.openstack.enabled .Values.openstack.ccm.enabled)
-    1
   )
 }}

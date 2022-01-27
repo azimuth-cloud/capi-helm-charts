@@ -46,7 +46,7 @@ if helm-exists $RELEASE $NAMESPACE_ARG; then
         echo "Rolling back failed upgrade..."
         helm rollback $RELEASE $NAMESPACE_ARG --cleanup-on-fail --wait --wait-for-jobs $TIMEOUT_ARG
     elif [ "$status" = "pending-rollback" ]; then
-        echo "Competing pending rollback..."
+        echo "Completing pending rollback..."
         helm rollback $RELEASE $NAMESPACE_ARG --cleanup-on-fail --wait --wait-for-jobs $TIMEOUT_ARG
     fi
 fi

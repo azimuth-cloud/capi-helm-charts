@@ -2,8 +2,7 @@
 {{- $ctx := index . 0 }}
 {{- $name := index . 1 }}
 {{- $hook := index . 2 }}
-{{- $hookWeight := index . 3 }}
-{{- $config := index . 4 }}
+{{- $config := index . 3 }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -11,14 +10,14 @@ metadata:
   labels: {{ include "addon.job.labels" (list $ctx $name "uninstall") | nindent 4 }}
   annotations:
     helm.sh/hook: {{ $hook }}
-    helm.sh/hook-weight: {{ $hookWeight | quote }}
+    helm.sh/hook-weight: {{ $config.uninstallHookWeight | quote }}
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   backoffLimit: {{ $config.backoffLimit }}
   activeDeadlineSeconds: {{ $config.activeDeadlineSeconds }}
   template:
     metadata:
-      labels: {{ include "addon.job.selectorLabels" (list $ctx $name "install") | nindent 8 }}
+      labels: {{ include "addon.job.selectorLabels" (list $ctx $name "uninstall") | nindent 8 }}
     spec:
       {{- with $config.imagePullSecrets }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}

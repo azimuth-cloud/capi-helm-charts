@@ -61,11 +61,17 @@ jobDefaults: {}
   # nodeSelector:
   # affinity:
 
+# The available categories for dependencies and the addons that belong to them
+categories:
+  bootstrap: [cloud-config, ccm-openstack, cni-calico, cni-cilium]
+  storage: [csi-cinder]
+  ingress: [ingress-nginx]
+
 # Settings for the CNI addon
 cni:
   # Indicates if a CNI should be deployed
   enabled: true
-  # The type of CNI to deploy - supported values are calico, cilium, weave
+  # The type of CNI to deploy - supported values are calico or cilium
   type: cilium
   # Settings for the calico CNI
   calico:

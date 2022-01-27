@@ -1,5 +1,5 @@
 {{- define "cluster-addons.cni-calico.config" -}}
-{{- include "cluster-addons.job.defaults" . }}
+{{- include "cluster-addons.job.defaults" (list . "cni-calico") }}
 installType: kustomize
 kustomize:
   kustomizationTemplate: |
@@ -29,7 +29,5 @@ kustomize:
     .
     "cni-calico"
     "cluster-addons.cni-calico.config"
-    (and .Values.cni.enabled (eq .Values.cni.type "calico"))
-    2
   )
 }}
