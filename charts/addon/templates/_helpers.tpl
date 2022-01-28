@@ -216,7 +216,7 @@ with no values.
 CHART_DIR="$(mktemp -d)"
 kustomize build . | make-chart {{ $name }} "$CHART_DIR"
 # Install the CRDs separately as Helm doesn't install updates
-for crdfile in $(ls "$CHART_DIR/crds"); do
+for crdfile in $(find "$CHART_DIR/crds" -name '*.yaml'); do
     kubectl create -f "$crdfile" || kubectl replace -f "$crdfile"
 done
 helm-upgrade {{ $name }} "$CHART_DIR" \
@@ -247,7 +247,7 @@ helm-delete {{ $name }} \
   --namespace kustomize-releases \
   --wait \
   --timeout 24h
-for crdfile in $(ls "$CHART_DIR/crds"); do
+for crdfile in $(find "$CHART_DIR/crds" -name '*.yaml'); do
     kubectl delete -f "$crdfile"
 done
 {{- end }}
