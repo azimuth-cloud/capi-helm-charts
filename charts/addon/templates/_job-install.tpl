@@ -4,9 +4,13 @@
   checksum of the configuration as an annotation, so that the job spec changes when
   the configuration does.
 
-  Most elements of the job spec are immutable, so this guarantees we get new jobs
-  at the right times. Job labels are OK to update, and we include the revision there
-  in order to be able to order the jobs in time.
+  This guarantees we get new jobs only when there is a change to make. Even if there is
+  not a new job, the job labels are updated to include the current revision so that we
+  can order the jobs in time.
+
+  The job spec is immutable, which can cause issues with updates. To mitigate this, we
+  use the spec from the existing job when a job exists with the same name (and hence
+  the same checksum).
 */}}
 {{- define "addon.job.install.spec" -}}
 {{- $ctx := index . 0 -}}
@@ -60,7 +64,7 @@ template:
           - |
               set -ex
               {{- $labels := include "addon.job.selectorLabels" (list $ctx $dep "install") | fromYaml }}
-              {{- range $i, $label := keys $labels -}}
+              {{- range $i, $label := (keys $labels | sortAlpha) -}}
               {{- if $i }}
               LABELS="$LABELS,{{ $label }}={{ index $labels $label }}"
               {{- else }}
@@ -134,7 +138,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   {{- $checksum := include "addon.job.install.spec" . | sha256sum }}
-  name: {{ include "addon.job.name" (list $ctx $name "install") }}-{{ trunc 5 $checksum }}
+  {{- $jobName := printf "%s-%s" (include "addon.job.name" (list $ctx $name "install")) (trunc 5 $checksum) }}
+  name: {{ $jobName }}
   labels: {{ include "addon.job.labels" (list $ctx $name "install") | nindent 4 }}
-spec: {{ include "addon.job.install.spec" . | nindent 2 }}
+spec:
+  {{- $existingJob := lookup "batch/v1" "Job" $ctx.Release.Namespace $jobName }}
+  {{- if $existingJob }}
+  {{- toYaml $existingJob.spec | nindent 2 }}
+  {{- else }}
+  {{- include "addon.job.install.spec" . | nindent 2 }}
+  {{- end }}
 {{- end }}

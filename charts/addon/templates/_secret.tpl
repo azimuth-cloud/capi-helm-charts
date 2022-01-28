@@ -30,18 +30,18 @@ stringData:
   {{- end }}
   {{- if eq $config.installType "helm" }}
   values.yaml: |
-    {{- include "addon.helm.values" (list $ctx $config.helm) | nindent 4 }}
+    {{- include "addon.helm.values" (list $ctx $name $config.helm) | nindent 4 }}
   install.sh: |
-    {{- include "addon.helm.install" $config.helm | nindent 4 }}
+    {{- include "addon.helm.install" (list $name $config.helm) | nindent 4 }}
   delete.sh: |
-    {{- include "addon.helm.delete" $config.helm | nindent 4 }}
+    {{- include "addon.helm.delete" (list $name $config.helm) | nindent 4 }}
   {{- else if eq $config.installType "kustomize" }}
   kustomization.yaml: |
-    {{- include "addon.kustomize.kustomization" (list $ctx $config.kustomize) | nindent 4 }}
+    {{- include "addon.kustomize.kustomization" (list $ctx $name $config.kustomize) | nindent 4 }}
   install.sh: |
-    {{- include "addon.kustomize.install" $config.kustomize | nindent 4 }}
+    {{- include "addon.kustomize.install" (list $name $config.kustomize) | nindent 4 }}
   delete.sh: |
-    {{- include "addon.kustomize.delete" $config.kustomize | nindent 4 }}
+    {{- include "addon.kustomize.delete" (list $name $config.kustomize) | nindent 4 }}
   {{- else if eq $config.installType "custom" }}
   install.sh: |
     {{-

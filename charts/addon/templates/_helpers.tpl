@@ -101,7 +101,7 @@ values obtained from rendering the valuesTemplate.
 */}}
 {{- define "addon.helm.values" }}
 {{- $ctx := index . 0 }}
-{{- $config := index . 1 }}
+{{- $config := index . 2 }}
 {{- if $config.release.valuesTemplate }}
 {{- $templateValues := tpl $config.release.valuesTemplate $ctx | fromYaml }}
 {{- include "addon.mergeConcat" (list $config.release.values $templateValues) }}
@@ -122,49 +122,46 @@ There is also support for rolling back an interrupted install or upgrade before 
 by checking for the pending-[install,upgrade] status.
 */}}
 {{- define "addon.helm.install" -}}
+{{- $name := index . 0 }}
+{{- $config := index . 1 }}
 {{-
   $chartRepo := required
     "chart.repo is required for a Helm job"
-    .chart.repo
+    $config.chart.repo
 }}
 {{-
   $chartName := required
     "chart.name is required for a Helm job"
-    .chart.name
+    $config.chart.name
 }}
 {{-
   $chartVersion := required
     "chart.version is required for a Helm job"
-    .chart.version
+    $config.chart.version
 }}
 {{-
   $releaseNamespace := required
     "release.namespace is required for a Helm job"
-    .release.namespace
+    $config.release.namespace
 }}
-{{-
-  $releaseName := required
-    "release.name is required for a Helm job"
-    .release.name
-}}
-{{- range .crdManifests }}
+{{- range $config.crdManifests }}
 kubectl create -f {{ . }} || \
   kubectl replace -f {{ . }}
 {{- end }}
-helm-upgrade {{ $releaseName }} {{ $chartName }} \
+helm-upgrade {{ $name }} {{ $chartName }} \
   --atomic \
   --install \
   --namespace {{ $releaseNamespace }} \
   --create-namespace \
   --repo {{ $chartRepo }} \
   --version {{ $chartVersion }} \
-  {{- if .crdManifests -}}
+  {{- if $config.crdManifests -}}
   --skip-crds \
   {{- end }}
   --values values.yaml \
   --wait \
   --wait-for-jobs \
-  --timeout {{ .release.timeout }} \
+  --timeout 24h \
   $HELM_EXTRA_ARGS
 {{- end }}
 
@@ -172,21 +169,18 @@ helm-upgrade {{ $releaseName }} {{ $chartName }} \
 Template for a script that deletes a Helm release.
 */}}
 {{- define "addon.helm.delete" -}}
+{{- $name := index . 0 }}
+{{- $config := index . 1 }}
 {{-
   $releaseNamespace := required
     "release.namespace is required for a Helm job"
-    .release.namespace
+    $config.release.namespace
 }}
-{{-
-  $releaseName := required
-    "release.name is required for a Helm job"
-    .release.name
-}}
-helm-delete {{ $releaseName }} \
+helm-delete {{ $name }} \
   --namespace {{ $releaseNamespace }} \
   --wait \
-  --timeout {{ .release.timeout }}
-{{- range .crdManifests }}
+  --timeout 24h
+{{- range $config.crdManifests }}
 kubectl delete -f {{ . }}
 {{- end }}
 {{- end }}
@@ -196,7 +190,7 @@ Template for a kustomization file for use with Kustomize.
 */}}
 {{- define "addon.kustomize.kustomization" }}
 {{- $ctx := index . 0 }}
-{{- $config := index . 1 }}
+{{- $config := index . 2 }}
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 {{- if $config.kustomizationTemplate }}
@@ -211,52 +205,51 @@ kind: Kustomization
 
 {{/*
 Template for a script that installs or upgrades resources using Kustomize.
+
+Because kustomize has no release semantics, which we want, what we actually do is
+convert the output of kustomize into an ephemeral Helm chart which is then installed
+with no values.
 */}}
 {{- define "addon.kustomize.install" }}
-kustomize build . | kubectl apply -f -
-{{- range .watches }}
-{{-
-  $namespace := required
-    "namespace is required for a resource to watch"
-    .namespace
-}}
-{{-
-  $kind := required
-    "kind is required for a resource to watch"
-    .kind
-}}
-{{-
-  $name := required
-    "name is required for a resource to watch"
-    .name
-}}
-kubectl -n {{ $namespace }} rollout status {{ $kind }}/{{ $name }}
-{{- end }}
+{{- $name := index . 0 }}
+{{- $config := index . 1 }}
+CHART_DIR="$(mktemp -d)"
+kustomize build . | make-chart {{ $name }} "$CHART_DIR"
+# Install the CRDs separately as Helm doesn't install updates
+for crdfile in $(ls "$CHART_DIR/crds"); do
+    kubectl create -f "$crdfile" || kubectl replace -f "$crdfile"
+done
+helm-upgrade {{ $name }} "$CHART_DIR" \
+  --atomic \
+  --install \
+  --namespace kustomize-releases \
+  --create-namespace \
+  --skip-crds \
+  --wait \
+  --wait-for-jobs \
+  --timeout 24h \
+  $HELM_EXTRA_ARGS
 {{- end }}
 
 {{/*
 Template for a script that deletes resources using Kustomize.
+
+Because we are using Helm releases to manage resources templated by kustomize,
+this just means deleting the Helm release. However we still want to run customize
+in order to generate the CRDs that need deleting.
 */}}
 {{- define "addon.kustomize.delete" }}
-kustomize build . | kubectl delete -f -
-{{- range .watches }}
-{{-
-  $namespace := required
-    "namespace is required for a resource to watch"
-    .namespace
-}}
-{{-
-  $kind := required
-    "kind is required for a resource to watch"
-    .kind
-}}
-{{-
-  $name := required
-    "name is required for a resource to watch"
-    .name
-}}
-kubectl -n {{ $namespace }} wait --for=delete {{ $kind }}/{{ $name }}
-{{- end }}
+{{- $name := index . 0 }}
+{{- $config := index . 1 }}
+CHART_DIR="$(mktemp -d)"
+kustomize build . | make-chart {{ $name }} "$CHART_DIR"
+helm-delete {{ $name }} \
+  --namespace kustomize-releases \
+  --wait \
+  --timeout 24h
+for crdfile in $(ls "$CHART_DIR/crds"); do
+    kubectl delete -f "$crdfile"
+done
 {{- end }}
 
 {{/*
@@ -289,8 +282,6 @@ helm:
     version:
   release:
     namespace:
-    name:
-    timeout: 60m
     # The template is rendered with the root context, then the result is merged into the dict
     # Values from the template take precedence over the dict
     values: {}
@@ -300,13 +291,6 @@ kustomize:
   # Values from the template take precedence over the dict
   kustomization: {}
   kustomizationTemplate:
-  # List of resources to watch to determine if the rollout is complete
-  # Resources should be usable with "kubectl rollout status"
-  watches: []
-    # The resources should be specified in the form
-    # namespace:
-    # kind:
-    # name:
 custom:
   # Scripts are treated as templates during rendering
   install:

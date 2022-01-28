@@ -9,7 +9,6 @@ RELEASE=$1
 shift
 
 NAMESPACE_ARG=
-TIMEOUT_ARG=
 HELM_ARGS=
 
 while :; do
@@ -20,10 +19,6 @@ while :; do
             ;;
         --namespace)
             NAMESPACE_ARG="$1 $2"
-            shift
-            ;;
-        --timeout)
-            TIMEOUT_ARG="$1 $2"
             shift
             ;;
         ?*)
@@ -38,5 +33,5 @@ done
 set -e
 
 if helm-exists $RELEASE $NAMESPACE_ARG; then
-    exec helm delete $RELEASE $NAMESPACE_ARG $TIMEOUT_ARG $HELM_ARGS
+    exec helm delete $RELEASE $NAMESPACE_ARG $HELM_ARGS
 fi

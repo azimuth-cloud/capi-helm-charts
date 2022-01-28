@@ -14,8 +14,9 @@ RUN groupadd --gid $UTILS_GID $UTILS_GROUP && \
       $UTILS_USER
 
 RUN apt-get update && \
-    apt-get install -y curl jq tini && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y curl git jq python3 python3-pip tini && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --no-cache pyyaml
 
 COPY --from=hairyhenderson/gomplate:v3.10.0 /gomplate /usr/bin/gomplate
 
@@ -96,7 +97,7 @@ RUN set -ex; \
     kustomize version
 
 ENV KUBECTL_VN_LATEST v1.23
-COPY ./scripts/* /usr/bin/
+COPY ./bin/* /usr/bin/
 
 USER $UTILS_UID
 ENTRYPOINT ["tini", "-g", "--"]

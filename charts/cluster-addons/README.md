@@ -304,10 +304,6 @@ helm:
   release:
     # The namespace for the release on the target cluster
     namespace:
-    # The name of the release
-    name:
-    # The time to wait for the Helm release to install correctly
-    timeout: 60m
     # The values for the release
     # These can come from a dict or a template
     # The template is rendered with the root context, then the result is merged into the dict
@@ -322,13 +318,6 @@ kustomize:
   # Values from the template take precedence over the dict
   kustomization: {}
   kustomizationTemplate:
-  # A list of resources to watch to determine when the addon has installed
-  watches: []
-    # These should be of the form
-    # - namespace: my-namespace
-    #   kind: Deployment
-    #   name: my-deployment
-    #   condition: Available
 # Options for a custom addon
 custom:
   # Script that installs the addon

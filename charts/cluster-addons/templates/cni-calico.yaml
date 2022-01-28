@@ -18,10 +18,6 @@ kustomize:
   {{- with .Values.cni.calico.kustomization }}
   kustomization: {{ toYaml . | nindent 4 }}
   {{- end }}
-  watches:
-    - namespace: kube-system
-      kind: DaemonSet
-      name: calico-node
 {{- end }}
 
 {{-

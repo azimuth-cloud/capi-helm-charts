@@ -10,10 +10,6 @@ kustomize:
   {{- with .Values.metricsServer.kustomization }}
   kustomization: {{ toYaml . | nindent 4 }}
   {{- end }}
-  watches:
-    - namespace: kube-system
-      kind: Deployment
-      name: metrics-server
 {{- end }}
 
 {{-

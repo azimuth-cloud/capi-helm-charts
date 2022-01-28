@@ -152,16 +152,21 @@ value:
 {{- end }}
 
 {{/*
-Produces the dependencies for an addon, ensuring uniqueness and only including
-those that are enabled.
+Produces the dependencies for an addon, ensuring uniqueness and a consistent ordering
+and only including those that are enabled.
 
 The result is returned as an object so it can be used with fromYaml.
 */}}
 {{- define "cluster-addons.dependsOn.enabled" -}}
 {{- $ctx := index . 0 }}
-{{- $unique := (include "cluster-addons.dependsOn.all" . | fromYaml).value | default list | uniq }}
+{{-
+  $sortedUnique := (include "cluster-addons.dependsOn.all" . | fromYaml).value |
+    default list |
+    uniq |
+    sortAlpha
+}}
 value:
-  {{- range $unique }}
+  {{- range $sortedUnique }}
   {{- if eq (include "cluster-addons.enabled" (list $ctx .)) "true" }}
   - {{ . }}
   {{- end }}
