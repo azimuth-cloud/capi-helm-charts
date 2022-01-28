@@ -14,9 +14,10 @@
 #####
 
 import pathlib
+import re
 import sys
 
-import yaml
+from ruamel import yaml
 
 
 CHART_YAML = """\
@@ -49,8 +50,13 @@ def main(name, directory):
             path = crds_directory / filename
         else:
             path = templates_directory / filename
+        # Escape any go template syntax in the resulting document
+        # Note that we only need to escape the starting delimiters as ending delimiters
+        # are ignored without the corresponding start delimiter
+        content = yaml.safe_dump(document, default_flow_style = False)
+        content = re.sub(r"\{\{\-?", "{{ \"\g<0>\" }}", content)
         with path.open("w") as f:
-            yaml.safe_dump(document, f)
+            f.write(content)
 
 
 if __name__ == "__main__":

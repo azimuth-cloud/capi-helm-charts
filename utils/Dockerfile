@@ -16,7 +16,7 @@ RUN groupadd --gid $UTILS_GID $UTILS_GROUP && \
 RUN apt-get update && \
     apt-get install -y curl git jq python3 python3-pip tini && \
     rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache pyyaml
+    pip install --no-cache ruamel.yaml
 
 COPY --from=hairyhenderson/gomplate:v3.10.0 /gomplate /usr/bin/gomplate
 
