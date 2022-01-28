@@ -133,8 +133,6 @@ spec:
               {{- range $config.extraVolumes }}
               - {{ toYaml . | nindent 16 }}
               {{- end }}
-        {{- if $config.kubeconfigSecret.name }}
         - name: kubeconfig
           emptyDir: {}
-        {{- end }}
 {{- end }}
