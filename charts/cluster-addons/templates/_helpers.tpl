@@ -68,6 +68,28 @@ dependsOn: {{
     nindent 2
 }}
 uninstallHookWeight: {{ include "cluster-addons.uninstallHookWeight" . }}
+{{- if and $ctx.Values.clusterApi (not (has $name $ctx.Values.categories.bootstrap)) }}
+extraInitContainers:
+  - name: wait-for-capi-cluster
+    image: {{
+      printf "%s:%s"
+        $ctx.Values.jobDefaults.image.repository
+        (default $ctx.Chart.AppVersion $ctx.Values.jobDefaults.image.tag)
+    }}
+    imagePullPolicy: {{ $ctx.Values.jobDefaults.image.pullPolicy }}
+    securityContext: {{ toYaml $ctx.Values.jobDefaults.securityContext | nindent 6 }}
+    args:
+      - kubectl
+      - wait
+      - --for=condition=Ready
+      - clusters.cluster.x-k8s.io
+      - {{ tpl $ctx.Values.clusterName $ctx }}
+      - --namespace
+      - {{ $ctx.Release.Namespace }}
+      - --timeout
+      - "-1s"
+    resources: {{ toYaml $ctx.Values.jobDefaults.resources | nindent 6 }}
+{{- end }}
 {{- end }}
 
 {{/*

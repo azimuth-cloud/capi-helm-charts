@@ -6,6 +6,11 @@ clusterName: "{{ .Release.Name }}"
 # This is treated as a template at rendering time
 kubernetesVersion: v1.22
 
+# Indicates whether the addons are being deployed as part of a Cluster API cluster
+# If true then addons will wait for the cluster to become ready before installing, except
+# for the bootstrap addons which just wait for the API to become available
+clusterApi: false
+
 # Details of a secret containing a kubeconfig file for a remote cluster
 # If given, this is used in preference to a service account
 kubeconfigSecret:
@@ -45,17 +50,18 @@ serviceAccount:
 # Defaults for job settings
 # In all cases, the defaults for the version of the addons chart in use are used
 # See the values for the addons chart for details
-jobDefaults: {}
-  # image:
-  #   repository:
-  #   tag:
-  #   pullPolicy:
+jobDefaults:
+  image:
+    repository: ghcr.io/stackhpc/k8s-utils
+    tag:  # Defaults to chart appVersion if not given
+    pullPolicy: IfNotPresent
+  securityContext:
+    allowPrivilegeEscalation: false
+  resources: {}
   # imagePullSecrets:
   # backoffLimit:
   # activeDeadlineSeconds:
   # podSecurityContext:
-  # securityContext:
-  # resources:
   # hostNetwork:
   # tolerations:
   # nodeSelector:

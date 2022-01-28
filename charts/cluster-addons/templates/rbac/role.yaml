@@ -21,4 +21,14 @@ rules:
       - get
       - watch
       - patch
+  {{- if .Values.clusterApi }}
+  - apiGroups:
+      - cluster.x-k8s.io
+    resources:
+      - clusters
+    verbs:
+      - list
+      - get
+      - watch
+  {{- end }}
 {{- end }}

@@ -223,6 +223,10 @@ nodeGroups:
 addons:
   # Indicates if cluster addons should be deployed
   enabled: true
+  # Indicates to the cluster addons that they are being deployed as part of a Cluster API cluster
+  # This means that they will wait for the control plane to stabilise before installing, except
+  # for the bootstrap addons which just wait for it be become available
+  clusterApi: true
   clusterName: "{{ include \"openstack-cluster.clusterName\" . }}"
   # The Kubernetes version for the addons should be v<major>.<minor>
   kubernetesVersion: "v{{ .Values.global.kubernetesVersion | splitList \".\" | reverse | rest | reverse | join \".\" }}"

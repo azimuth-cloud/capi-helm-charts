@@ -76,6 +76,7 @@ Lists are merged by concatenating them rather than overwriting.
 {{- index . 1 | default list | concat $left | toYaml }}
 {{- else if kindIs (kindOf dict) $left }}
 {{- $right := index . 1 | default dict }}
+{{- if or $left $right }}
 {{- range $key := concat (keys $left) (keys $right) | uniq }}
 {{ $key }}:
   {{- if and (hasKey $left $key) (hasKey $right $key) }}
@@ -88,6 +89,9 @@ Lists are merged by concatenating them rather than overwriting.
   {{- else }}
   {{- index $right $key | toYaml | nindent 2 }}
   {{- end }}
+{{- end }}
+{{- else }}
+{}
 {{- end }}
 {{- else }}
 {{- $right := index . 1 }}
@@ -303,6 +307,10 @@ hooks:
   postInstall:
   preDelete:
   postDelete:
+# Extra containers to run as init containers
+# These should include environment variables, volume mounts etc. if they need
+# to target a remote cluster using kubeconfigSecret
+extraInitContainers: []
 backoffLimit: 1000
 activeDeadlineSeconds: 3600
 podSecurityContext:

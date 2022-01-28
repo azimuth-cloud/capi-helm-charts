@@ -74,6 +74,9 @@ template:
               kubectl wait --for=condition=Complete job -n {{ $ctx.Release.Namespace }} -l "$LABELS" --all --timeout=-1s
         resources: {{ toYaml $config.resources | nindent 10 }}
       {{- end }}
+      {{- range $config.extraInitContainers }}
+      - {{ toYaml . | nindent 8 }}
+      {{- end }}
     containers:
       - name: install
         image: {{ printf "%s:%s" $config.image.repository (default $ctx.Chart.AppVersion $config.image.tag) }}
