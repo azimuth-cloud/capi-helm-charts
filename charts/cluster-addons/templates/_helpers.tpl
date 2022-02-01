@@ -112,6 +112,8 @@ Determines if an addon is enabled given the name.
 {{- and $ctx.Values.openstack.enabled $ctx.Values.openstack.csiCinder.enabled | toYaml -}}
 {{- else if eq $name "ingress-nginx" -}}
 {{- and $ctx.Values.ingress.enabled $ctx.Values.ingress.nginx.enabled | toYaml -}}
+{{- else if eq $name "dashboard" -}}
+{{- $ctx.Values.dashboard.enabled | toYaml -}}
 {{- else if eq $name "metrics-server" -}}
 {{- $ctx.Values.metricsServer.enabled | toYaml -}}
 {{- else if eq $name "monitoring" -}}

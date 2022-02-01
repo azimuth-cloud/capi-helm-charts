@@ -1,0 +1,13 @@
+{{- define "cluster-addons.dashboard.config" -}}
+{{- include "cluster-addons.job.defaults" (list . "dashboard") }}
+installType: helm
+helm: {{ omit .Values.dashboard "enabled" | toYaml | nindent 2 }}
+{{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "dashboard"
+    "cluster-addons.dashboard.config"
+  )
+}}

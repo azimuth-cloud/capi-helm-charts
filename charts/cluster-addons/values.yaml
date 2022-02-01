@@ -83,7 +83,7 @@ cni:
   calico:
     # The version of Calico to deploy
     # This is only used in the default manifest URL
-    version: v3.20
+    version: v3.22
     # The URLs of the Calico manifests
     # This is treated as a template during rendering
     manifests:
@@ -95,7 +95,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.10.4
+      version: 1.11.1
     release:
       namespace: kube-system
       # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
@@ -177,7 +177,7 @@ metricsServer:
   # Indicates if the metrics server should be deployed
   enabled: true
   # The version of the metrics server to deploy
-  version: v0.5.0
+  version: v0.6.0
   # The URLs of the metrics server manifests
   manifests:
     - https://github.com/kubernetes-sigs/metrics-server/releases/download/{{ .Values.metricsServer.version }}/components.yaml
@@ -192,6 +192,18 @@ metricsServer:
           kind: Deployment
           name: metrics-server
 
+# Settings for the Kubernetes dashboard
+dashboard:
+  # Indicates if the Kubernetes dashboard should be enabled
+  enabled: true
+  chart:
+    repo: https://kubernetes.github.io/dashboard
+    name: kubernetes-dashboard
+    version: 5.1.1
+  release:
+    namespace: kubernetes-dashboard
+    values: {}
+
 # Settings for cert-manager
 certManager:
   # Indicates if cert-manager should be enabled
@@ -199,7 +211,7 @@ certManager:
   chart:
     repo: https://charts.jetstack.io
     name: cert-manager
-    version: v1.5.3
+    version: v1.5.5
   release:
     namespace: cert-manager
     # See https://cert-manager.io/docs/installation/helm/ for available values
@@ -227,7 +239,7 @@ ingress:
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.0.1
+      version: 4.0.16
     release:
       namespace: ingress-nginx
       # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
@@ -249,7 +261,7 @@ monitoring:
   chart:
     repo: https://prometheus-community.github.io/helm-charts
     name: kube-prometheus-stack
-    version: 30.0.1
+    version: 30.2.0
   release:
     namespace: monitoring-system
     values: {}
