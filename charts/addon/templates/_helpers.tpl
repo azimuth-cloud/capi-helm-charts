@@ -311,6 +311,8 @@ hooks:
 # These should include environment variables, volume mounts etc. if they need
 # to target a remote cluster using kubeconfigSecret
 extraInitContainers: []
+# Indicates whether a pre-delete hook should be generated for the addon
+generatePreDeleteHook: true
 backoffLimit: 1000
 activeDeadlineSeconds: 3600
 podSecurityContext:
@@ -343,8 +345,10 @@ pre-upgrade hook is produced to uninstall the addon.
 {{- include "addon.config.secret" (list $ctx $name $config) }}
 ---
 {{- include "addon.job.install" (list $ctx $name $config) }}
+{{- if $config.generatePreDeleteHook }}
 ---
 {{- include "addon.job.uninstall" (list $ctx $name "pre-delete" $config) }}
+{{- end }}
 {{- else if $ctx.Release.IsUpgrade }}
 {{- $secretName := include "addon.fullname" (list $ctx $name) | printf "%s-config" }}
 {{- if lookup "v1" "Secret" $ctx.Release.Namespace $secretName }}

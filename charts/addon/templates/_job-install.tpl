@@ -53,8 +53,8 @@ template:
           - name: config
             mountPath: /config
             readOnly: true
-      {{- range $dep := $config.dependsOn }}
-      - name: wait-for-{{ $dep }}
+      {{- if $config.dependsOn }}
+      - name: wait-for-dependencies
         image: {{ printf "%s:%s" $config.image.repository (default $ctx.Chart.AppVersion $config.image.tag) }}
         imagePullPolicy: {{ $config.image.pullPolicy }}
         securityContext: {{ toYaml $config.securityContext | nindent 10 }}
@@ -63,6 +63,7 @@ template:
           - -c
           - |
               set -ex
+              {{- range $dep := $config.dependsOn }}
               {{- $labels := include "addon.job.selectorLabels" (list $ctx $dep "install") | fromYaml }}
               {{- range $i, $label := (keys $labels | sortAlpha) -}}
               {{- if $i }}
@@ -72,6 +73,7 @@ template:
               {{- end }}
               {{- end }}
               kubectl wait --for=condition=Complete job -n {{ $ctx.Release.Namespace }} -l "$LABELS" --all --timeout=-1s
+              {{- end }}
         resources: {{ toYaml $config.resources | nindent 10 }}
       {{- end }}
       {{- range $config.extraInitContainers }}
@@ -141,7 +143,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   {{- $checksum := include "addon.job.install.spec" . | sha256sum }}
-  {{- $jobName := printf "%s-%s" (include "addon.job.name" (list $ctx $name "install")) (trunc 5 $checksum) }}
+  {{-
+    $jobName := printf "%s-%s"
+      (include "addon.job.name" (list $ctx $name "install") | trunc 57 | trimSuffix "-")
+      (trunc 5 $checksum)
+  }}
   name: {{ $jobName }}
   labels: {{ include "addon.job.labels" (list $ctx $name "install") | nindent 4 }}
 spec:

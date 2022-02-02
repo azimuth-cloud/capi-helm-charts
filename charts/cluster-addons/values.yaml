@@ -47,25 +47,24 @@ serviceAccount:
   # This is treated as a template during rendering
   name: "{{ include \"cluster-addons.fullname\" . }}-deployer"
 
-# Defaults for job settings
-# In all cases, the defaults for the version of the addons chart in use are used
-# See the values for the addons chart for details
+# Default settings for jobs
 jobDefaults:
   image:
     repository: ghcr.io/stackhpc/k8s-utils
     tag:  # Defaults to chart appVersion if not given
     pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  backoffLimit: 1000
+  activeDeadlineSeconds: 3600
+  podSecurityContext:
+    runAsNonRoot: true
   securityContext:
     allowPrivilegeEscalation: false
   resources: {}
-  # imagePullSecrets:
-  # backoffLimit:
-  # activeDeadlineSeconds:
-  # podSecurityContext:
-  # hostNetwork:
-  # tolerations:
-  # nodeSelector:
-  # affinity:
+  hostNetwork: false
+  tolerations: []
+  nodeSelector: {}
+  affinity: {}
 
 # The available categories for dependencies and the addons that belong to them
 categories:
@@ -265,6 +264,66 @@ monitoring:
   release:
     namespace: monitoring-system
     values: {}
+
+# Settings for node feature discovery (NFD)
+nfd:
+  # Indicates if node feature discovery should be enabled
+  enabled: true
+  chart:
+    repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+    name: node-feature-discovery
+    version: 0.10.1
+  release:
+    namespace: node-feature-discovery
+    values:
+      master:
+        extraLabelNs:
+          - nvidia.com
+      worker:
+        # Allow the NFD pods to be scheduled on master nodes
+        tolerations:
+          - key: "node-role.kubernetes.io/master"
+            operator: "Equal"
+            value: ""
+            effect: "NoSchedule"
+          - key: "nvidia.com/gpu"
+            operator: "Equal"
+            value: "present"
+            effect: "NoSchedule"
+        # We want to be able to identify nodes with high-performance hardware
+        # So the whitelisted device classes are:
+        #   02   - Network Controllers (e.g. Ethernet, Infiniband)
+        #   03   - Display Controllers (e.g. GPUs)
+        #   0b40 - Co-processors
+        #   12   - Processing Accelerators (e.g. specialised AI inference chips)
+        config:
+          sources:
+            pci:
+              deviceClassWhitelist:
+                - "02"
+                - "03"
+                - "0b40"
+                - "12"
+              deviceLabelFields:
+                - vendor
+
+# Settings for the NVIDIA GPU operator
+nvidiaGPUOperator:
+  # Indicates if the NVIDIA GPU operator should be enabled
+  # Note that because it uses node feature discovery to run only on nodes
+  # with an NVIDIA GPU available, the overhead of enabling this on clusters
+  # that do not need it now but may need it in the future is low
+  enabled: true
+  chart:
+    repo: https://nvidia.github.io/gpu-operator
+    name: gpu-operator
+    version: v1.9.1
+  release:
+    namespace: gpu-operator
+    values:
+      # Use the shared NFD
+      nfd:
+        enabled: false
 
 # Map of extra addons in the form "component name" -> "addon spec"
 extraAddons: {}

@@ -90,6 +90,9 @@ extraInitContainers:
       - "-1s"
     resources: {{ toYaml $ctx.Values.jobDefaults.resources | nindent 6 }}
 {{- end }}
+# If the addons are deployed as part of a Cluster API cluster, suppress the pre-delete hooks
+# If the cluster no longer exists, then neither do the addons!
+generatePreDeleteHook: {{ not $ctx.Values.clusterApi | toYaml }}
 {{- end }}
 
 {{/*
@@ -118,6 +121,10 @@ Determines if an addon is enabled given the name.
 {{- $ctx.Values.metricsServer.enabled | toYaml -}}
 {{- else if eq $name "monitoring" -}}
 {{- $ctx.Values.monitoring.enabled | toYaml -}}
+{{- else if eq $name "nfd" -}}
+{{- $ctx.Values.nfd.enabled | toYaml -}}
+{{- else if eq $name "nvidia-gpu-operator" -}}
+{{- $ctx.Values.nvidiaGPUOperator.enabled | toYaml -}}
 {{- else if hasKey $ctx.Values.extraAddons $name -}}
 {{- dig $name "enabled" true $ctx.Values.extraAddons | toYaml -}}
 {{- else -}}
@@ -139,6 +146,8 @@ value:
   {{- else if eq $name "monitoring" }}
   - storage
   - ingress
+  {{- else if eq $name "nvidia-gpu-operator" }}
+  - nfd
   {{- else if hasKey $ctx.Values.extraAddons $name }}
   {{- dig $name "dependsOn" list $ctx.Values.extraAddons | toYaml | nindent 2 }}
   {{- else }}

@@ -1,0 +1,13 @@
+{{- define "cluster-addons.nfd.config" -}}
+{{- include "cluster-addons.job.defaults" (list . "nfd") }}
+installType: helm
+helm: {{ omit .Values.nfd "enabled" | toYaml | nindent 2 }}
+{{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "nfd"
+    "cluster-addons.nfd.config"
+  )
+}}

@@ -4,10 +4,11 @@ ENV UTILS_UID 1001
 ENV UTILS_GID 1001
 ENV UTILS_USER utils
 ENV UTILS_GROUP utils
+ENV UTILS_HOME /home/utils
 RUN groupadd --gid $UTILS_GID $UTILS_GROUP && \
     useradd \
-      --no-create-home \
-      --no-user-group \
+      --home-dir $UTILS_HOME \
+      --create-home \
       --gid $UTILS_GID \
       --shell /sbin/nologin \
       --uid $UTILS_UID \
@@ -100,5 +101,6 @@ ENV KUBECTL_VN_LATEST v1.23
 COPY ./bin/* /usr/bin/
 
 USER $UTILS_UID
+WORKDIR $UTILS_HOME
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["bash"]
