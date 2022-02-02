@@ -194,7 +194,7 @@ metricsServer:
 # Settings for the Kubernetes dashboard
 dashboard:
   # Indicates if the Kubernetes dashboard should be enabled
-  enabled: true
+  enabled: false
   chart:
     repo: https://kubernetes.github.io/dashboard
     name: kubernetes-dashboard
