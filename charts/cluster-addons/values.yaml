@@ -192,7 +192,7 @@ metricsServer:
           name: metrics-server
 
 # Settings for the Kubernetes dashboard
-dashboard:
+kubernetesDashboard:
   # Indicates if the Kubernetes dashboard should be enabled
   enabled: false
   chart:
@@ -265,8 +265,8 @@ monitoring:
     namespace: monitoring-system
     values: {}
 
-# Settings for node feature discovery (NFD)
-nfd:
+# Settings for node feature discovery
+nodeFeatureDiscovery:
   # Indicates if node feature discovery should be enabled
   enabled: true
   chart:

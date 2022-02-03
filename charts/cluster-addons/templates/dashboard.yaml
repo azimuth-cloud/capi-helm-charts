@@ -1,13 +1,13 @@
-{{- define "cluster-addons.dashboard.config" -}}
-{{- include "cluster-addons.job.defaults" (list . "dashboard") }}
+{{- define "cluster-addons.kubernetes-dashboard.config" -}}
+{{- include "cluster-addons.job.defaults" (list . "kubernetes-dashboard") }}
 installType: helm
-helm: {{ omit .Values.dashboard "enabled" | toYaml | nindent 2 }}
+helm: {{ omit .Values.kubernetesDashboard "enabled" | toYaml | nindent 2 }}
 {{- end }}
 
 {{-
   include "addon.job" (list
     .
-    "dashboard"
-    "cluster-addons.dashboard.config"
+    "kubernetes-dashboard"
+    "cluster-addons.kubernetes-dashboard.config"
   )
 }}

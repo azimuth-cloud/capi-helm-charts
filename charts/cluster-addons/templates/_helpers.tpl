@@ -115,14 +115,14 @@ Determines if an addon is enabled given the name.
 {{- and $ctx.Values.openstack.enabled $ctx.Values.openstack.csiCinder.enabled | toYaml -}}
 {{- else if eq $name "ingress-nginx" -}}
 {{- and $ctx.Values.ingress.enabled $ctx.Values.ingress.nginx.enabled | toYaml -}}
-{{- else if eq $name "dashboard" -}}
-{{- $ctx.Values.dashboard.enabled | toYaml -}}
+{{- else if eq $name "kubernetes-dashboard" -}}
+{{- $ctx.Values.kubernetesDashboard.enabled | toYaml -}}
 {{- else if eq $name "metrics-server" -}}
 {{- $ctx.Values.metricsServer.enabled | toYaml -}}
 {{- else if eq $name "monitoring" -}}
 {{- $ctx.Values.monitoring.enabled | toYaml -}}
-{{- else if eq $name "nfd" -}}
-{{- $ctx.Values.nfd.enabled | toYaml -}}
+{{- else if eq $name "node-feature-discovery" -}}
+{{- $ctx.Values.nodeFeatureDiscovery.enabled | toYaml -}}
 {{- else if eq $name "nvidia-gpu-operator" -}}
 {{- $ctx.Values.nvidiaGPUOperator.enabled | toYaml -}}
 {{- else if hasKey $ctx.Values.extraAddons $name -}}
@@ -147,7 +147,7 @@ value:
   - storage
   - ingress
   {{- else if eq $name "nvidia-gpu-operator" }}
-  - nfd
+  - node-feature-discovery
   {{- else if hasKey $ctx.Values.extraAddons $name }}
   {{- dig $name "dependsOn" list $ctx.Values.extraAddons | toYaml | nindent 2 }}
   {{- else }}

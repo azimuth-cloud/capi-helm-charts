@@ -1,13 +1,13 @@
-{{- define "cluster-addons.nfd.config" -}}
-{{- include "cluster-addons.job.defaults" (list . "nfd") }}
+{{- define "cluster-addons.node-feature-discovery.config" -}}
+{{- include "cluster-addons.job.defaults" (list . "node-feature-discovery") }}
 installType: helm
-helm: {{ omit .Values.nfd "enabled" | toYaml | nindent 2 }}
+helm: {{ omit .Values.nodeFeatureDiscovery "enabled" | toYaml | nindent 2 }}
 {{- end }}
 
 {{-
   include "addon.job" (list
     .
-    "nfd"
-    "cluster-addons.nfd.config"
+    "node-feature-discovery"
+    "cluster-addons.node-feature-discovery.config"
   )
 }}
