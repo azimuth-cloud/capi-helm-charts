@@ -201,7 +201,10 @@ kubernetesDashboard:
     version: 5.1.1
   release:
     namespace: kubernetes-dashboard
-    values: {}
+    values:
+      # Enable the metrics scraper by default
+      metricsScraper:
+        enabled: true
 
 # Settings for cert-manager
 certManager:
