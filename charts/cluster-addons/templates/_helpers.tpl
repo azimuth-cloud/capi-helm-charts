@@ -185,21 +185,32 @@ value:
 {{- end }}
 
 {{/*
-Produces the dependencies for an addon, ensuring uniqueness and a consistent ordering
-and only including those that are enabled.
+Produces the dependencies for an addon, ensuring uniqueness and a consistent ordering.
+
+The result is returned as an object so it can be used with fromYaml.
+*/}}
+{{- define "cluster-addons.dependsOn.unique" -}}
+{{- $ctx := index . 0 }}
+value: {{
+  (include "cluster-addons.dependsOn.all" . | fromYaml).value |
+    default list |
+    uniq |
+    sortAlpha |
+    toYaml |
+    nindent 2
+}}
+{{- end }}
+
+{{/*
+Produces the enabled dependencies for an addon.
 
 The result is returned as an object so it can be used with fromYaml.
 */}}
 {{- define "cluster-addons.dependsOn.enabled" -}}
 {{- $ctx := index . 0 }}
-{{-
-  $sortedUnique := (include "cluster-addons.dependsOn.all" . | fromYaml).value |
-    default list |
-    uniq |
-    sortAlpha
-}}
+{{- $deps := (include "cluster-addons.dependsOn.unique" . | fromYaml).value | default list -}}
 value:
-  {{- range $sortedUnique }}
+  {{- range $deps }}
   {{- if eq (include "cluster-addons.enabled" (list $ctx .)) "true" }}
   - {{ . }}
   {{- end }}
@@ -208,7 +219,9 @@ value:
 
 {{/*
 Produces the uninstall hook weight for the specified addon, ensuring that it is
-removed before any of its dependencies. Only addons that are enabled are considered.
+removed before any of its dependencies. All addons are considered, even those that
+are not enabled, because not doing so causes addons to be removed in the wrong
+order when two addons with dependencies on each other are uninstalled together.
 
 Addons with no enabled dependencies have a weight of zero. Addons with at least one
 enabled dependency have a weight that is one less than the minimum of the weights
@@ -218,8 +231,8 @@ of the dependencies.
 {{- $ctx := index . 0 -}}
 {{- $name := index . 1 -}}
 {{- $weight := 1 }}
-{{- $enabled := (include "cluster-addons.dependsOn.enabled" . | fromYaml).value | default list -}}
-{{- range $enabled -}}
+{{- $deps := (include "cluster-addons.dependsOn.unique" . | fromYaml).value | default list -}}
+{{- range $deps -}}
 {{- $dependencyWeight := include "cluster-addons.uninstallHookWeight" (list $ctx .) | atoi -}}
 {{- $weight = min $weight $dependencyWeight -}}
 {{- end -}}
