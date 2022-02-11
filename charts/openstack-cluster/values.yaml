@@ -99,8 +99,7 @@ controlPlane:
   # If greater than zero, a volume is provisioned to be the root disk for the machine
   machineRootVolumeSize: 0
   # The time to wait for a node to finish draining before it can be removed
-  # By default, no explicit limit is placed on the timeout for control plane nodes
-  nodeDrainTimeout: 0s
+  nodeDrainTimeout: 5m
   # The rollout strategy to use for the control plane nodes
   # By default, the strategy allows the control plane to begin provisioning new nodes
   # without first tearing down old ones
