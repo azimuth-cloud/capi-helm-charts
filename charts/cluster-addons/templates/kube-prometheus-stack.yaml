@@ -1,0 +1,13 @@
+{{- define "cluster-addons.kube-prometheus-stack.config" -}}
+{{- include "cluster-addons.job.defaults" (list . "kube-prometheus-stack") }}
+installType: helm
+helm: {{ toYaml .Values.monitoring.kubePrometheusStack | nindent 2 }}
+{{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "kube-prometheus-stack"
+    "cluster-addons.kube-prometheus-stack.config"
+  )
+}}

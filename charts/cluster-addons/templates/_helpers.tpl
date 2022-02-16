@@ -119,8 +119,12 @@ Determines if an addon is enabled given the name.
 {{- $ctx.Values.kubernetesDashboard.enabled | toYaml -}}
 {{- else if eq $name "metrics-server" -}}
 {{- $ctx.Values.metricsServer.enabled | toYaml -}}
-{{- else if eq $name "monitoring" -}}
+{{- else if eq $name "prometheus-operator-crds" -}}
 {{- $ctx.Values.monitoring.enabled | toYaml -}}
+{{- else if eq $name "kube-prometheus-stack" -}}
+{{- $ctx.Values.monitoring.enabled | toYaml -}}
+{{- else if eq $name "loki-stack" -}}
+{{- and $ctx.Values.monitoring.enabled $ctx.Values.monitoring.lokiStack.enabled | toYaml -}}
 {{- else if eq $name "node-feature-discovery" -}}
 {{- $ctx.Values.nodeFeatureDiscovery.enabled | toYaml -}}
 {{- else if eq $name "nvidia-gpu-operator" -}}
@@ -143,9 +147,11 @@ The result is returned as an object so it can be used with fromYaml.
 value:
   {{- if (list "ccm-openstack" "csi-cinder" | has $name) }}
   - cloud-config
-  {{- else if eq $name "monitoring" }}
+  {{- else if eq $name "kube-prometheus-stack" }}
   - storage
   - ingress
+  {{- else if eq $name "loki-stack" }}
+  - storage
   {{- else if eq $name "nvidia-gpu-operator" }}
   - node-feature-discovery
   {{- else if hasKey $ctx.Values.extraAddons $name }}

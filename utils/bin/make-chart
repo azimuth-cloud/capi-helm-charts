@@ -29,8 +29,9 @@ version: 0.1.0
 
 def main(name, directory):
     # Make sure that the crd and templates directories exist within the chart directory
-    chart_directory = pathlib.Path(directory).resolve()
-    crds_directory = chart_directory / "crds"
+    directory = pathlib.Path(directory).resolve()
+    crds_directory = directory / "crds"
+    chart_directory = directory / "chart"
     crds_directory.mkdir(parents = True, exist_ok = True)
     templates_directory = chart_directory / "templates"
     templates_directory.mkdir(parents = True, exist_ok = True)
@@ -38,8 +39,8 @@ def main(name, directory):
     chart_file = chart_directory / "Chart.yaml"
     with chart_file.open("w") as f:
         f.write(CHART_YAML.format(name = name))
-    # For each YAML document in the stdin, write it to a separate file in the chart directory
-    # CRDs go in the crds directory and everything else in the templates directory
+    # For each YAML document in the stdin, write it to a separate file in the given directory
+    # CRDs go in the crds directory and everything else in the chart's templates directory
     for document in yaml.safe_load_all(sys.stdin):
         filename = "{}_{}_{}.yaml".format(
             document["apiVersion"].replace("/", "_"),

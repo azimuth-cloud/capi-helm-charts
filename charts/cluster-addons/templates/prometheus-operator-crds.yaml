@@ -1,0 +1,22 @@
+{{- define "cluster-addons.prometheus-operator-crds.config" -}}
+{{- include "cluster-addons.job.defaults" (list . "prometheus-operator-crds") }}
+installType: custom
+custom:
+  install: |
+    crd_apply() { kubectl replace -f "$1" || kubectl create -f "$1"; }
+    {{- range .Values.monitoring.prometheusOperatorCrds }}
+    crd_apply {{ tpl . $ }}
+    {{- end }}
+  delete: |
+    {{- range .Values.monitoring.prometheusOperatorCrds }}
+    kubectl delete -f {{ tpl . $ }}
+    {{- end }}
+{{- end }}
+
+{{-
+  include "addon.job" (list
+    .
+    "prometheus-operator-crds"
+    "cluster-addons.prometheus-operator-crds.config"
+  )
+}}

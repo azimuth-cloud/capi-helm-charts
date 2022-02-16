@@ -148,9 +148,11 @@ by checking for the pending-[install,upgrade] status.
     "release.namespace is required for a Helm job"
     $config.release.namespace
 }}
+{{- if $config.crdManifests }}
+crd_apply() { kubectl replace -f "$1" || kubectl create -f "$1"; }
 {{- range $config.crdManifests }}
-kubectl create -f {{ . }} || \
-  kubectl replace -f {{ . }}
+crd_apply {{ . }}
+{{- end }}
 {{- end }}
 helm-upgrade {{ $name }} {{ $chartName }} \
   --atomic \
@@ -217,13 +219,13 @@ with no values.
 {{- define "addon.kustomize.install" }}
 {{- $name := index . 0 }}
 {{- $config := index . 1 }}
-CHART_DIR="$(mktemp -d)"
-kustomize build . | make-chart {{ $name }} "$CHART_DIR"
+TMPDIR="$(mktemp -d)"
+kustomize build . | make-chart {{ $name }} "$TMPDIR"
 # Install the CRDs separately as Helm doesn't install updates
-for crdfile in $(find "$CHART_DIR/crds" -name '*.yaml'); do
+for crdfile in $(find "$TMPDIR/crds" -name '*.yaml'); do
     kubectl create -f "$crdfile" || kubectl replace -f "$crdfile"
 done
-helm-upgrade {{ $name }} "$CHART_DIR" \
+helm-upgrade {{ $name }} "$TMPDIR/chart" \
   --atomic \
   --install \
   --namespace kustomize-releases \
@@ -245,13 +247,13 @@ in order to generate the CRDs that need deleting.
 {{- define "addon.kustomize.delete" }}
 {{- $name := index . 0 }}
 {{- $config := index . 1 }}
-CHART_DIR="$(mktemp -d)"
-kustomize build . | make-chart {{ $name }} "$CHART_DIR"
+TMPDIR="$(mktemp -d)"
+kustomize build . | make-chart {{ $name }} "$TMPDIR"
 helm-delete {{ $name }} \
   --namespace kustomize-releases \
   --wait \
   --timeout 24h
-for crdfile in $(find "$CHART_DIR/crds" -name '*.yaml'); do
+for crdfile in $(find "$TMPDIR/crds" -name '*.yaml'); do
     kubectl delete -f "$crdfile"
 done
 {{- end }}

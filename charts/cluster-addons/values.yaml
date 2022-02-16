@@ -68,7 +68,12 @@ jobDefaults:
 
 # The available categories for dependencies and the addons that belong to them
 categories:
-  bootstrap: [cloud-config, ccm-openstack, cni-calico, cni-cilium]
+  bootstrap:
+    - cloud-config
+    - ccm-openstack
+    - cni-calico
+    - cni-cilium
+    - prometheus-operator-crds
   storage: [csi-cinder]
   ingress: [ingress-nginx]
 
@@ -251,7 +256,7 @@ ingress:
 monitoring:
   # Indicates if the cluster monitoring should be enabled
   enabled: false
-  crdManifests:
+  prometheusOperatorCrds:
     - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
     - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
     - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
@@ -260,13 +265,23 @@ monitoring:
     - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
     - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
     - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
-  chart:
-    repo: https://prometheus-community.github.io/helm-charts
-    name: kube-prometheus-stack
-    version: 30.2.0
-  release:
-    namespace: monitoring-system
-    values: {}
+  kubePrometheusStack:
+    chart:
+      repo: https://prometheus-community.github.io/helm-charts
+      name: kube-prometheus-stack
+      version: 30.2.0
+    release:
+      namespace: monitoring-system
+      values: {}
+  lokiStack:
+    enabled: true
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: loki-stack
+      version: 2.6.1
+    release:
+      namespace: monitoring-system
+      values: {}
 
 # Settings for node feature discovery
 nodeFeatureDiscovery:
