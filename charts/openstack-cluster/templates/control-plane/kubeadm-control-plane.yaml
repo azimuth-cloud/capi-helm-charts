@@ -1,3 +1,37 @@
+{{/*
+Produces the spec for the controlplane kubeadmconfig object, with support for KubeProxyConfiguration.
+*/}}
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec" -}}
+{{- $kubeadmConfigSpec := omit . "kubeProxyConfiguration" "files" "preKubeadmCommands" }}
+{{- $kubeProxyConfiguration := dig "kubeProxyConfiguration" dict . }}
+{{- $files := dig "files" list . }}
+{{- $preKubeadmCommands := dig "preKubeadmCommands" list . }}
+{{- with $kubeadmConfigSpec }}
+{{- toYaml . }}
+{{- end }}
+files:
+  {{- range $files }}
+  - {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $kubeProxyConfiguration }}
+  - path: /run/kubeadm/kube-proxy-configuration.yaml
+    content: |
+      ---
+      apiVersion: kubeproxy.config.k8s.io/v1alpha1
+      kind: KubeProxyConfiguration
+      {{- toYaml . | nindent 6 }}
+    owner: root:root
+    permissions: "0644"
+  {{- end }}
+preKubeadmCommands:
+  {{- range $preKubeadmCommands }}
+  - {{ . }}
+  {{- end }}
+  {{- if $kubeProxyConfiguration }}
+  - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
+  {{- end }}
+{{- end }}
+
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
@@ -18,4 +52,4 @@ spec:
     {{- with .Values.controlPlane.nodeDrainTimeout }}
     nodeDrainTimeout: {{ . }}
     {{- end }}
-  kubeadmConfigSpec: {{ toYaml .Values.controlPlane.kubeadmConfigSpec | nindent 4 }}
+  kubeadmConfigSpec: {{ include "openstack-cluster.controlplane.kubeadmConfigSpec" .Values.controlPlane.kubeadmConfigSpec | nindent 4 }}

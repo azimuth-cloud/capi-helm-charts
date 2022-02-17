@@ -116,18 +116,31 @@ controlPlane:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
           cloud-provider: external
+    # As well as enabling an external cloud provider, we set the bind addresses for the
+    # etcd metrics, controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus
+    # can reach them to collect metrics
     clusterConfiguration:
+      etcd:
+        local:
+          extraArgs:
+            listen-metrics-urls: http://0.0.0.0:2381
       apiServer:
         extraArgs:
           cloud-provider: external
       controllerManager:
         extraArgs:
           cloud-provider: external
+          bind-address: 0.0.0.0
+      scheduler:
+        extraArgs:
+          bind-address: 0.0.0.0
     joinConfiguration:
       nodeRegistration:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
           cloud-provider: external
+    kubeProxyConfiguration:
+      metricsBindAddress: 0.0.0.0:10249
   # The machine health check for auto-healing of the control plane
   # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
   healthCheck:
@@ -237,3 +250,21 @@ addons:
   openstack:
     enabled: true
     cloudCredentialsSecretName: "{{ include \"openstack-cluster.cloudCredentialsSecretName\" . }}"
+  monitoring:
+    kubePrometheusStack:
+      release:
+        values:
+          # Use the metrics port rather than the client as it does not require certificate auth
+          kubeEtcd:
+            service:
+              port: 2381
+              targetPort: 2381
+          # Use the correct port for kube-scheduler
+          kubeScheduler:
+            service:
+              port: 10259
+              targetPort: 10259
+            serviceMonitor:
+              https: true
+              # The certificate is valid for 127.0.0.1
+              insecureSkipVerify: true
