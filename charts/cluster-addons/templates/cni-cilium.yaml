@@ -2,6 +2,37 @@
 {{- include "cluster-addons.job.defaults" (list . "cni-cilium") }}
 installType: helm
 helm: {{ toYaml .Values.cni.cilium | nindent 2 }}
+{{- $kubeProxyReplacement := dig "kubeProxyReplacement" "probe" .Values.cni.cilium.release.values }}
+{{- if eq $kubeProxyReplacement "strict" }}
+{{- $hasServiceHost := hasKey .Values.cni.cilium.release.values "k8sServiceHost" }}
+{{- $hasServicePort := hasKey .Values.cni.cilium.release.values "k8sServicePort" }}
+{{- if or (and $hasServiceHost $hasServicePort) .Values.kubeconfigSecret.name }}
+{{- if not (and $hasServiceHost $hasServicePort) }}
+hooks:
+  {{/* Point Cilium at the Kubernetes server targetted by the kubeconfig file */}}
+  preInstall: |
+    SERVER="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+    SCHEME="$(echo "$SERVER" | cut -d':' -f1)"
+    ADDRESS="$(echo "$SERVER" | cut -d'/' -f3)"
+    HOST="$(echo "$ADDRESS" | cut -d':' -f1)"
+    if grep -q ":" <<< "$ADDRESS"; then
+      PORT="$(echo "$ADDRESS" | cut -d':' -f2)"
+    else
+      if [ "$SCHEME" = "http" ]; then
+        PORT=80
+      else
+        PORT=443
+      fi
+    fi
+
+    HELM_EXTRA_ARGS="--set k8sServiceHost=$HOST"
+    HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set k8sServicePort=$PORT"
+    export HELM_EXTRA_ARGS
+{{- end }}
+{{- else }}
+{{- fail "k8sServiceHost and k8sServicePort must be specified when using a service account with kubeProxyReplacement=strict" }}
+{{- end }}
+{{- end }}
 {{- end }}
 
 {{-

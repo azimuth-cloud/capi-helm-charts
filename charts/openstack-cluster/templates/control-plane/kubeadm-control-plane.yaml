@@ -1,17 +1,31 @@
 {{/*
-Produces the spec for the controlplane kubeadmconfig object, with support for KubeProxyConfiguration.
+Produces the spec for the controlplane kubeadmconfig object, with support for KubeProxyConfiguration
+and the skipPhases flag of InitConfiguration.
 */}}
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec" -}}
-{{- $kubeadmConfigSpec := omit . "kubeProxyConfiguration" "files" "preKubeadmCommands" }}
+{{- $kubeadmConfigSpec := omit . "initConfiguration" "kubeProxyConfiguration" "files" "preKubeadmCommands" }}
+{{- $initConfiguration := omit (dig "initConfiguration" dict .) "skipPhases" }}
+{{- $skipPhases := dig "initConfiguration" "skipPhases" list . }}
 {{- $kubeProxyConfiguration := dig "kubeProxyConfiguration" dict . }}
 {{- $files := dig "files" list . }}
 {{- $preKubeadmCommands := dig "preKubeadmCommands" list . }}
 {{- with $kubeadmConfigSpec }}
 {{- toYaml . }}
 {{- end }}
+{{- with $initConfiguration }}
+initConfiguration: {{ toYaml $initConfiguration | nindent 2 }}
+{{- end }}
+{{- if or $files $skipPhases $kubeProxyConfiguration }}
 files:
   {{- range $files }}
   - {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if $skipPhases }}
+  - path: /run/kubeadm/skip-phases.yaml
+    content: |
+      skipPhases: {{ toYaml $skipPhases | nindent 8 }}
+    owner: root:root
+    permissions: "0644"
   {{- end }}
   {{- with $kubeProxyConfiguration }}
   - path: /run/kubeadm/kube-proxy-configuration.yaml
@@ -23,13 +37,24 @@ files:
     owner: root:root
     permissions: "0644"
   {{- end }}
+{{- end }}
+{{- if or $preKubeadmCommands $skipPhases $kubeProxyConfiguration }}
 preKubeadmCommands:
   {{- range $preKubeadmCommands }}
   - {{ . }}
   {{- end }}
+  {{- if $skipPhases }}
+  - cat /run/kubeadm/skip-phases.yaml >> /run/kubeadm/kubeadm.yaml
+  {{- end }}
   {{- if $kubeProxyConfiguration }}
   - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
   {{- end }}
+{{- end }}
+{{- end }}
+
+{{- $skipPhases := dig "kubeadmConfigSpec" "initConfiguration" "skipPhases" list .Values.controlPlane }}
+{{- if and $skipPhases (semverCompare "<1.22.0" .Values.global.kubernetesVersion) }}
+{{- fail "skipPhases is only supported for Kubernetes 1.22 and higher" }}
 {{- end }}
 
 ---
