@@ -90,7 +90,9 @@ cni:
       name: tigera-operator
       version: v3.22.0
     release:
-      namespace: tigera-operator
+      # The Calico chart creates namespaces, which cannot exist in advance
+      # So we put the Helm release in an installation namespace
+      namespace: calico-helm
       # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
       values: {}
   # Settings for the Cilium CNI
