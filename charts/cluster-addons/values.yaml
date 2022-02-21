@@ -82,7 +82,7 @@ cni:
   # Indicates if a CNI should be deployed
   enabled: true
   # The type of CNI to deploy - supported values are calico or cilium
-  type: cilium
+  type: calico
   # Settings for the calico CNI
   calico:
     # The version of Calico to deploy
@@ -91,9 +91,21 @@ cni:
     # The URLs of the Calico manifests
     # This is treated as a template during rendering
     manifests:
-      - https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
-    # Any kustomization to be applied to the Calico manifests
+      - https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/tigera-operator.yaml
+    # Any kustomization to be applied to the tigera-operator manifests
     kustomization: {}
+    # The spec of the Calico installation
+    # See https://projectcalico.docs.tigera.io/reference/installation/api
+    installation:
+      calicoNetwork:
+        # By default, disable BGP
+        bgp: Disabled
+        # Use a single IP pool with VXLAN
+        # The special variable __KUBEADM_POD_CIDR__ is replaced with the pod CIDR from the
+        # kubeadm configmap, if kubeadm is in use
+        ipPools:
+          - cidr: __KUBEADM_POD_CIDR__
+            encapsulation: VXLANCrossSubnet
   # Settings for the Cilium CNI
   cilium:
     chart:

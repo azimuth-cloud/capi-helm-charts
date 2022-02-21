@@ -21,6 +21,18 @@ RUN apt-get update && \
 
 COPY --from=hairyhenderson/gomplate:v3.10.0 /gomplate /usr/bin/gomplate
 
+ARG YQ_VN=v4.20.2
+RUN set -ex; \
+    OS_ARCH="$(uname -m)"; \
+    case "$OS_ARCH" in \
+        x86_64) yq_arch=amd64 ;; \
+        aarch64) yq_arch=arm64 ;; \
+        *) false ;; \
+    esac; \
+    curl -fsSL https://github.com/mikefarah/yq/releases/download/${YQ_VN}/yq_linux_${yq_arch} -o /usr/bin/yq; \
+    chmod +x /usr/bin/yq; \
+    /usr/bin/yq --version
+
 ARG KUBECTL_VN_1_20=v1.20.14
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \

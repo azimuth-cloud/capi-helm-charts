@@ -10,6 +10,22 @@ kustomize:
   {{- with .Values.cni.calico.kustomization }}
   kustomization: {{ toYaml . | nindent 4 }}
   {{- end }}
+extraFiles:
+  installation.yaml: |
+    apiVersion: operator.tigera.io/v1
+    kind: Installation
+    metadata:
+      name: default
+    spec: {{ toYaml .Values.cni.calico.installation | nindent 6 }}
+hooks:
+  postInstall: |
+    KUBEADM_POD_CIDR="$(
+      kubectl -n kube-system get configmap kubeadm-config -o jsonpath='{.data.ClusterConfiguration}' | \
+        yq '.networking.podSubnet'
+    )"
+    sed "s#__KUBEADM_POD_CIDR__#${KUBEADM_POD_CIDR}#" installation.yaml | kubectl apply -f -
+  preDelete: |
+    kubectl delete installations.operator.tigera.io default || true
 {{- end }}
 
 {{-

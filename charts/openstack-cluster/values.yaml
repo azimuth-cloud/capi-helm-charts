@@ -116,9 +116,6 @@ controlPlane:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
           cloud-provider: external
-      # In the default configuration, Cilium is the CNI and we want to use the kube-proxy replacement
-      skipPhases:
-        - addon/kube-proxy
     # As well as enabling an external cloud provider, we set the bind addresses for the
     # etcd metrics, controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus
     # can reach them to collect metrics
@@ -249,15 +246,6 @@ addons:
   kubeconfigSecret:
     name: "{{ include \"openstack-cluster.componentName\" (list . \"kubeconfig\") }}"
     key: value
-  # Deploy Cilium with the kube-proxy replacement enabled
-  cni:
-    cilium:
-      release:
-        values:
-          kubeProxyReplacement: strict
-          bpf:
-            hostRouting: false
-            masquerade: true
   # By default, enable the OpenStack integrations
   openstack:
     enabled: true
