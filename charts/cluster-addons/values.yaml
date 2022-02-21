@@ -85,16 +85,15 @@ cni:
   type: cilium
   # Settings for the calico CNI
   calico:
-    chart:
-      repo: https://projectcalico.docs.tigera.io/charts
-      name: tigera-operator
-      version: v3.22.0
-    release:
-      # The Calico chart creates namespaces, which cannot exist in advance
-      # So we put the Helm release in an installation namespace
-      namespace: calico-helm
-      # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
-      values: {}
+    # The version of Calico to deploy
+    # This is only used in the default manifest URL
+    version: v3.22
+    # The URLs of the Calico manifests
+    # This is treated as a template during rendering
+    manifests:
+      - https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/calico.yaml
+    # Any kustomization to be applied to the Calico manifests
+    kustomization: {}
   # Settings for the Cilium CNI
   cilium:
     chart:
@@ -103,7 +102,7 @@ cni:
       version: 1.11.1
     release:
       namespace: kube-system
-      # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/
+      # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
       values:
         ipam:
           mode: kubernetes

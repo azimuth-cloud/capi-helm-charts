@@ -1,7 +1,15 @@
 {{- define "cluster-addons.cni-calico.config" -}}
 {{- include "cluster-addons.job.defaults" (list . "cni-calico") }}
-installType: helm
-helm: {{ toYaml .Values.cni.calico | nindent 2 }}
+installType: kustomize
+kustomize:
+  kustomizationTemplate: |
+    resources:
+      {{- range .Values.cni.calico.manifests }}
+      - {{ tpl . $ }}
+      {{- end }}
+  {{- with .Values.cni.calico.kustomization }}
+  kustomization: {{ toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}
 
 {{-
