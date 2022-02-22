@@ -105,7 +105,7 @@ cni:
         # kubeadm configmap, if kubeadm is in use
         ipPools:
           - cidr: __KUBEADM_POD_CIDR__
-            encapsulation: VXLANCrossSubnet
+            encapsulation: VXLAN
   # Settings for the Cilium CNI
   cilium:
     chart:
