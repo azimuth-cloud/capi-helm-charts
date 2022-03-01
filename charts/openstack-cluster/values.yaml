@@ -64,6 +64,14 @@ clusterNetworking:
     # This is only used if neither of networkFilter and subnetFilter are given
     nodeCidr: 192.168.3.0/24
 
+# Settings for registry mirrors
+registryMirrors: {}
+  # docker.io: ["https://registry.my.domain/v2/dockerhub-public"]
+
+# List of additional packages to install on cluster nodes
+additionalPackages: []
+  # - nfs-common
+
 # Settings for the Kubernetes API server
 apiServer:
   # Indicates whether to deploy a load balancer for the API server

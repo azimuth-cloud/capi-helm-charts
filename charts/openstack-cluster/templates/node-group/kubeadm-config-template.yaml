@@ -10,10 +10,11 @@
 
   To do this, we create a new template whenever the checksum of the spec changes.
 */}}
+
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
+{{- $ctx := index . 0 }}
 {{- $nodeGroup := index . 1 }}
-template:
-  spec: {{ toYaml $nodeGroup.kubeadmConfigSpec | nindent 4 }}
+{{- include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) }}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.kct.checksum" -}}
@@ -39,5 +40,7 @@ metadata:
     capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.nodegroup.kct.checksum" (list $ $nodeGroup) }}
     # Ensure that the previous templates are kept around
     helm.sh/resource-policy: keep
-spec: {{ include "openstack-cluster.nodegroup.kct.spec" (list $ $nodeGroup) | nindent 2 }}
+spec:
+  template:
+    spec: {{ include "openstack-cluster.nodegroup.kct.spec" (list $ $nodeGroup) | nindent 6 }}
 {{- end }}

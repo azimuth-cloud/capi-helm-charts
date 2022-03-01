@@ -1,14 +1,26 @@
 {{/*
-Produces the spec for the controlplane kubeadmconfig object, with support for KubeProxyConfiguration
-and the skipPhases flag of InitConfiguration.
+Produces the kubeadm config spec for a controlplane object, with support for the skipPhases
+option of InitConfiguration and specifying a KubeProxyConfiguration.
 */}}
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec" -}}
-{{- $kubeadmConfigSpec := omit . "initConfiguration" "kubeProxyConfiguration" "files" "preKubeadmCommands" }}
-{{- $initConfiguration := omit (dig "initConfiguration" dict .) "skipPhases" }}
-{{- $skipPhases := dig "initConfiguration" "skipPhases" list . }}
-{{- $kubeProxyConfiguration := dig "kubeProxyConfiguration" dict . }}
-{{- $files := dig "files" list . }}
-{{- $preKubeadmCommands := dig "preKubeadmCommands" list . }}
+{{- $ctx := index . 0 }}
+{{- $kubeadmConfigSpec := omit
+  (index . 1)
+  "initConfiguration"
+  "kubeProxyConfiguration"
+  "files"
+  "preKubeadmCommands"
+}}
+{{- $initConfiguration := omit (index . 1 | dig "initConfiguration" dict) "skipPhases" }}
+{{- $skipPhases := index . 1 | dig "initConfiguration" "skipPhases" list }}
+{{- $kubeProxyConfiguration := index . 1 | dig "kubeProxyConfiguration" dict }}
+{{- $files := index . 1 | dig "files" list }}
+{{- $preKubeadmCommands := index . 1 | dig "preKubeadmCommands" list }}
+
+{{- if and $skipPhases (semverCompare "<1.22.0" $ctx.Values.global.kubernetesVersion) }}
+{{- fail "skipPhases is only supported for Kubernetes 1.22 and higher" }}
+{{- end }}
+
 {{- with $kubeadmConfigSpec }}
 {{- toYaml . }}
 {{- end }}
@@ -52,11 +64,6 @@ preKubeadmCommands:
 {{- end }}
 {{- end }}
 
-{{- $skipPhases := dig "kubeadmConfigSpec" "initConfiguration" "skipPhases" list .Values.controlPlane }}
-{{- if and $skipPhases (semverCompare "<1.22.0" .Values.global.kubernetesVersion) }}
-{{- fail "skipPhases is only supported for Kubernetes 1.22 and higher" }}
-{{- end }}
-
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
@@ -77,4 +84,12 @@ spec:
     {{- with .Values.controlPlane.nodeDrainTimeout }}
     nodeDrainTimeout: {{ . }}
     {{- end }}
-  kubeadmConfigSpec: {{ include "openstack-cluster.controlplane.kubeadmConfigSpec" .Values.controlPlane.kubeadmConfigSpec | nindent 4 }}
+  kubeadmConfigSpec: {{
+    include
+      "openstack-cluster.controlplane.kubeadmConfigSpec"
+      (list . .Values.controlPlane.kubeadmConfigSpec) |
+    fromYaml |
+    list . |
+    include "openstack-cluster.kubeadmConfigSpec" |
+    nindent 4
+  }}

@@ -81,3 +81,48 @@ Name of the secret containing the cloud credentials.
 {{ include "openstack-cluster.componentName" (list . "cloud-credentials") -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Produces the spec for a KubeadmConfig object, with support for configuring registry
+mirrors and additional packages.
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec" -}}
+{{- $ctx := index . 0 }}
+{{- $registryMirrors := $ctx.Values.registryMirrors }}
+{{- $additionalPackages := $ctx.Values.additionalPackages }}
+{{- $kubeadmConfigSpec := omit (index . 1) "files" "preKubeadmCommands" }}
+{{- $files := index . 1 | dig "files" list }}
+{{- $preKubeadmCommands := index . 1 | dig "preKubeadmCommands" list }}
+
+{{- with $kubeadmConfigSpec }}
+{{- toYaml . }}
+{{- end }}
+{{- if or $registryMirrors $files }}
+files:
+  {{- if $registryMirrors }}
+  - path: /etc/containerd/conf.d/mirrors.toml
+    content: |
+      version = 2
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        {{- range $registry, $mirrors := $registryMirrors }}
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."{{ $registry }}"]
+          endpoint = [{{ range $i, $mirror := $mirrors }}{{- if gt $i 0 }},{{ end }}"{{ . }}"{{- end }}]
+        {{- end }}
+    owner: root:root
+    permissions: "0644"
+  {{- end }}
+  {{- range $files }}
+  - {{ toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- if or $additionalPackages $preKubeadmCommands }}
+preKubeadmCommands:
+  {{- if $additionalPackages }}
+  - apt update -y
+  - apt install -y {{ join " " $additionalPackages }}
+  {{- end }}
+  {{- range $preKubeadmCommands }}
+  - {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}
