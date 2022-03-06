@@ -23,9 +23,10 @@ extraFiles:
       name: cloud-config
       namespace: kube-system
     stringData:
-      # Just include the data for the cloud we will be using
+      {{ "{{-" }} $clouds := file.Read "./clouds.yaml" {{ "}}" }}
+      {{ "{{-" }} $cloud := index (data.YAML $clouds).clouds "{{ .Values.openstack.cloudName }}" {{ "}}" }}
       clouds.yaml: |
-        {{ "{{" }} file.Read "./clouds.yaml" | indent 4 | trimSpace {{ "}}" }}
+        {{ "{{" }} $clouds | indent 4 | trimSpace {{ "}}" }}
       {{ "{{-" }} if file.Exists "./cacert" {{ "}}" }}
       cacert: |
         {{ "{{" }} file.Read "./cacert" | indent 4 | trimSpace {{ "}}" }}
@@ -37,6 +38,11 @@ extraFiles:
         cloud={{ .Values.openstack.cloudName }}
         {{ "{{-" }} if file.Exists "./cacert" {{ "}}" }}
         ca-file=/etc/config/cacert
+        {{ "{{-" }} end {{ "}}" }}
+        {{ "{{-" }} if has $cloud "verify" {{ "}}" }}
+        {{ "{{-" }} if not $cloud.verify {{ "}}" }}
+        tls-insecure=true
+        {{ "{{-" }} end {{ "}}" }}
         {{ "{{-" }} end {{ "}}" }}
         {{- with .Values.openstack.cloudConfig }}
         {{- nindent 8 . }}
