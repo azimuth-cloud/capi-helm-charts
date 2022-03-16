@@ -42,9 +42,10 @@ def main(name, directory):
     # For each YAML document in the stdin, write it to a separate file in the given directory
     # CRDs go in the crds directory and everything else in the chart's templates directory
     for document in yaml.safe_load_all(sys.stdin):
-        filename = "{}_{}_{}.yaml".format(
+        filename = "{}_{}_{}_{}.yaml".format(
             document["apiVersion"].replace("/", "_"),
             document["kind"].lower(),
+            document["metadata"].get("namespace", ""),
             document["metadata"]["name"]
         )
         if document["kind"] == "CustomResourceDefinition":
