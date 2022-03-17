@@ -3,6 +3,25 @@
 installType: helm
 helm: {{ omit .Values.nvidiaGPUOperator "enabled" | toYaml | nindent 2 }}
 {{- end }}
+extraFiles:
+  configmap-nvidia-dcgm-exporter-dashboard.yaml: |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: nvidia-dcgm-exporter-dashboard
+      namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
+      labels:
+        {{- include "cluster-addons.labels" . | nindent 8 }}
+        grafana_dashboard: "1"
+    data:
+      nvidia-dcgm-exporter-dashboard.json: |
+        {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev2.json" | nindent 8 }}
+hooks:
+  postInstall: |
+    kubectl apply -f ./configmap-nvidia-dcgm-exporter-dashboard.yaml
+  preDelete: |
+    kubectl delete -f ./configmap-nvidia-dcgm-exporter-dashboard.yaml
+{{- end }}
 
 {{-
   include "addon.job" (list
