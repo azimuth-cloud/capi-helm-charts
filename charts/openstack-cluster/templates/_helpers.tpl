@@ -99,6 +99,14 @@ mirrors and additional packages.
 {{- end }}
 {{- if or $registryMirrors $files }}
 files:
+  - path: /etc/containerd/conf.d/.keepdir
+    content: |
+      # This file is created by the capi-helm-chart to
+      # ensure that its parent directory exists. *.toml
+      # files in this directory are included in containerd
+      # config when /etc/containerd/config.toml is parsed.
+    owner: root:root
+    permissions: "0644"
   {{- if $registryMirrors }}
   - path: /etc/containerd/conf.d/mirrors.toml
     content: |
