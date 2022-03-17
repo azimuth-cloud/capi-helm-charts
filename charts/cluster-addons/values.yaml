@@ -354,6 +354,21 @@ nvidiaGPUOperator:
       # Use the shared NFD
       nfd:
         enabled: false
+      # Export operator and node metrics in a Prometheus format.
+      # The component provides information on the status of the
+      # operator (e.g. reconciliation status, number of GPU enabled nodes).
+      nodeStatusExporter:
+        enabled: true
+      toolkit:
+        # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+        # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+        # Instead make a new config file specifically for nvidia runtime config,
+        # which is parsed as an "include" in the main containerd config file.
+        #
+        # https://github.com/NVIDIA/gpu-operator/issues/301
+        env:
+          - name: "CONTAINERD_CONFIG"
+            value: "/etc/containerd/conf.d/nvidia.toml"
 
 # Map of extra addons in the form "component name" -> "addon spec"
 extraAddons: {}

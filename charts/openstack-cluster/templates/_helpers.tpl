@@ -97,9 +97,16 @@ mirrors and additional packages.
 {{- with $kubeadmConfigSpec }}
 {{- toYaml . }}
 {{- end }}
-{{- if or $registryMirrors $files }}
 files:
-  {{- if $registryMirrors }}
+  - path: /etc/containerd/conf.d/.keepdir
+    content: |
+      # This file is created by the capi-helm-chart to
+      # ensure that its parent directory exists. *.toml
+      # files in this directory are included in containerd
+      # config when /etc/containerd/config.toml is parsed.
+    owner: root:root
+    permissions: "0644"
+{{- if $registryMirrors }}
   - path: /etc/containerd/conf.d/mirrors.toml
     content: |
       version = 2
@@ -110,7 +117,8 @@ files:
         {{- end }}
     owner: root:root
     permissions: "0644"
-  {{- end }}
+{{- end }}
+{{- if $files }}
   {{- range $files }}
   - {{ toYaml . | nindent 4 }}
   {{- end }}
