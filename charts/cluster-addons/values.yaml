@@ -354,6 +354,11 @@ nvidiaGPUOperator:
       # Use the shared NFD
       nfd:
         enabled: false
+      # Export operator and node metrics in a Prometheus format.
+      # The component provides information on the status of the
+      # operator (e.g. reconciliation status, number of GPU enabled nodes).
+      nodeStatusExporter:
+        enabled: true
 
 # Map of extra addons in the form "component name" -> "addon spec"
 extraAddons: {}
