@@ -2,6 +2,7 @@
 {{- include "cluster-addons.job.defaults" (list . "kube-prometheus-stack") }}
 installType: helm
 helm: {{ toYaml .Values.monitoring.kubePrometheusStack | nindent 2 }}
+{{- if .Values.nvidiaGpuOperator.enabled }}
 extraFiles:
   configmap-nvidia-dcgm-exporter-dashboard.yaml: |
     apiVersion: v1
@@ -15,11 +16,35 @@ extraFiles:
     data:
       nvidia-dcgm-exporter-dashboard.json: |
         {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev2.json" | nindent 8 }}
+
+  servicemonitor-nvidia-dcgm-exporter.yaml: |
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: gpu-operator-dcgm-exporter
+      namespace: {{ .Values.monitoring.nvidiaGPUOperator.release.namespace }}
+      labels:
+        {{- include "cluster-addons.labels" . | nindent 8 }}
+    spec:
+      endpoints:
+        - interval: 10s
+          path: /metrics
+          port: gpu-metrics
+      namespaceSelector:
+        matchNames:
+          - gpu-operator
+      selector:
+        matchLabels:
+          app: nvidia-dcgm-exporter
+
 hooks:
   postInstall: |
     kubectl apply -f ./configmap-nvidia-dcgm-exporter-dashboard.yaml
+    kubectl apply -f ./servicemonitor-nvidia-dcgm-exporter.yaml
   preDelete: |
     kubectl delete -f ./configmap-nvidia-dcgm-exporter-dashboard.yaml
+    kubectl delete -f ./servicemonitor-nvidia-dcgm-exporter.yaml
+{{- end }}
 {{- end }}
 
 {{-
