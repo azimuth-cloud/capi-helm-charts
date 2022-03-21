@@ -22,7 +22,7 @@ extraFiles:
     kind: ServiceMonitor
     metadata:
       name: gpu-operator-dcgm-exporter
-      namespace: {{ .Values.monitoring.nvidiaGPUOperator.release.namespace }}
+      namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
       labels:
         {{- include "cluster-addons.labels" . | nindent 8 }}
     spec:
@@ -32,7 +32,7 @@ extraFiles:
           port: gpu-metrics
       namespaceSelector:
         matchNames:
-          - gpu-operator
+          - {{ .Values.nvidiaGPUOperator.release.namespace }}
       selector:
         matchLabels:
           app: nvidia-dcgm-exporter
