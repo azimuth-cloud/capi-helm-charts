@@ -25,6 +25,7 @@ extraFiles:
       namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
       labels:
         {{- include "cluster-addons.labels" . | nindent 8 }}
+        release: kube-prometheus-stack
     spec:
       endpoints:
         - interval: 10s
