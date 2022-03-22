@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "autoscaler") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "autoscaler") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
+      capi.stackhpc.com/component: autoscaler
+  template:
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
+        capi.stackhpc.com/component: autoscaler
+    spec:
+      serviceAccountName: {{ include "openstack-cluster.componentName" (list . "autoscaler") }}
+      {{- with .Values.autoscaler.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{ toYaml .Values.autoscaler.podSecurityContext | nindent 8 }}
+      containers:
+        - name: autoscaler
+          securityContext: {{ toYaml .Values.autoscaler.securityContext | nindent 12 }}
+          image: {{ include "openstack-cluster.autoscaler.image" . }}
+          imagePullPolicy: {{ .Values.autoscaler.image.pullPolicy }}
+          command:
+            - /cluster-autoscaler
+          args:
+            - --cloud-provider=clusterapi
+            - --kubeconfig=/mnt/kubeconfig/value
+            - --clusterapi-cloud-config-authoritative
+            - --node-group-auto-discovery=clusterapi:namespace={{ .Release.Namespace }},clusterName={{ include "openstack-cluster.clusterName" . }}
+          resources: {{ toYaml .Values.autoscaler.resources | nindent 12 }}
+          volumeMounts:
+            - name: kubeconfig
+              mountPath: /mnt/kubeconfig
+              readOnly: true
+      {{- with .Values.autoscaler.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autoscaler.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autoscaler.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        # Mount the kubeconfig for the workload cluster from the secret
+        - name: kubeconfig
+          secret:
+            secretName: {{ include "openstack-cluster.componentName" (list . "kubeconfig") }}

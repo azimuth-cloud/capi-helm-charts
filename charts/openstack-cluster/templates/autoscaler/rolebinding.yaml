@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "autoscaler") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "autoscaler") | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "openstack-cluster.componentName" (list . "autoscaler") }}
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ .Release.Namespace }}
+    name: {{ include "openstack-cluster.componentName" (list . "autoscaler") }}

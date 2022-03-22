@@ -171,6 +171,8 @@ controlPlane:
 # Defaults for node groups
 # Each of these can be overridden in the specification for an individual node group
 nodeGroupDefaults:
+  # Indicates if the node group should be autoscaled
+  autoscale: false
   # The failure domain for the node group
   failureDomain: nova
   # The flavor to use for machines in the node group
@@ -236,8 +238,46 @@ nodeGroupDefaults:
 nodeGroups:
   - # The name of the node group
     name: md-0
-    # The number of machines in the node group
+    # The number of machines in the node group if autoscale is false
     machineCount: 3
+    # The minimum and maximum number of machines in the node group if autoscale is true
+    # machineCountMin: 3
+    # machineCountMax: 3
+
+# Configuration for the cluster autoscaler
+autoscaler:
+  # The image to use for the autoscaler component
+  image:
+    repository: k8s.gcr.io/autoscaling/cluster-autoscaler
+    pullPolicy: IfNotPresent
+    # The tag depends on the Kubernetes version on the target cluster, but can be overridden
+    tag:
+    # These are the current latest versions for each Kubernetes minor version
+    # If a tag is not specified here for the target Kubernetes version, vX.Y.0 is used
+    tags:
+      "1.23": v1.23.0
+      "1.22": v1.22.2
+      "1.21": v1.21.2
+      "1.20": v1.20.2
+  imagePullSecrets: []
+  # Pod-level security context
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+  # Container-level security context
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
+    readOnlyRootFilesystem: true
+  # Resource requests and limits for pods
+  resources: {}
+  # Node selector for pods
+  nodeSelector: {}
+  # Tolerations for pods
+  tolerations: []
+  # Affinity rules for pods
+  affinity: {}
 
 # Configuration for cluster addons
 addons:
