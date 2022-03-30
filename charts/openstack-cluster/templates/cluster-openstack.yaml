@@ -16,7 +16,7 @@ spec:
   dnsNameservers: {{ .dnsNameservers | toYaml | nindent 4 }}
   managedSecurityGroups: {{ .manageSecurityGroups }}
   allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
-  {{- with .externalNetworkID }}
+  {{- with .externalNetworkId }}
   externalNetworkId: {{ . }}
   {{- end }}
   {{- with .internalNetwork }}
