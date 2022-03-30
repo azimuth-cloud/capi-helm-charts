@@ -370,5 +370,45 @@ nvidiaGPUOperator:
           - name: "CONTAINERD_CONFIG"
             value: "/etc/containerd/conf.d/nvidia.toml"
 
+# Settings for the Mellanox network operator
+mellanoxNetworkOperator:
+  # Indicates if the network operator should be enabled
+  # Note that because it uses node feature discovery to run only on nodes
+  # with a Mellanox NIC available, the overhead of enabling this on clusters
+  # that do not need it now but may need it in the future is low
+  enabled: true
+  chart:
+    repo: https://mellanox.github.io/network-operator
+    name: network-operator
+    version: 1.1.0
+  release:
+    namespace: network-operator
+    values:
+      # Use the shared NFD
+      nfd:
+        enabled: false
+      # Deploy the default NICClusterPolicy
+      deployCR: true
+      # Deploy the OFED driver onto nodes with a suitable NIC
+      ofedDriver:
+        deploy: true
+        # OFED takes ages to deploy on low-resource nodes
+        # The startup probe has a fixed failure threshold of 60
+        # So in order to give the drivers up to one hour to install, we use a period
+        # of 60 seconds for the startup probe
+        startupProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 60
+      # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
+      rdmaSharedDevicePlugin:
+        deploy: true
+      # Disable all other features for now
+      sriovNetworkOperator:
+        enabled: false
+      sriovDevicePlugin:
+        deploy: false
+      secondaryNetwork:
+        deploy: false
+
 # Map of extra addons in the form "component name" -> "addon spec"
 extraAddons: {}

@@ -129,6 +129,8 @@ Determines if an addon is enabled given the name.
 {{- $ctx.Values.nodeFeatureDiscovery.enabled | toYaml -}}
 {{- else if eq $name "nvidia-gpu-operator" -}}
 {{- $ctx.Values.nvidiaGPUOperator.enabled | toYaml -}}
+{{- else if eq $name "mellanox-network-operator" -}}
+{{- $ctx.Values.mellanoxNetworkOperator.enabled | toYaml -}}
 {{- else if hasKey $ctx.Values.extraAddons $name -}}
 {{- dig $name "enabled" true $ctx.Values.extraAddons | toYaml -}}
 {{- else -}}
@@ -153,6 +155,8 @@ value:
   {{- else if eq $name "loki-stack" }}
   - storage
   {{- else if eq $name "nvidia-gpu-operator" }}
+  - node-feature-discovery
+  {{- else if eq $name "mellanox-network-operator" }}
   - node-feature-discovery
   {{- else if hasKey $ctx.Values.extraAddons $name }}
   {{- dig $name "dependsOn" list $ctx.Values.extraAddons | toYaml | nindent 2 }}
