@@ -28,6 +28,9 @@ extraFiles:
     provisioner: cinder.csi.openstack.org
     reclaimPolicy: {{ .reclaimPolicy }}
     allowVolumeExpansion: {{ .allowVolumeExpansion }}
+    {{- with .allowedTopologies }}
+    allowedTopologies: {{ toYaml . | nindent 6 }}
+    {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
