@@ -187,8 +187,12 @@ openstack:
       reclaimPolicy: Delete
       # Indicates if volume expansion is allowed
       allowVolumeExpansion: true
+      # The Cinder availability zone to use for volumes provisioned by the storage class
+      availabilityZone: nova
+      # The Cinder volume type to use for volumes provisioned by the storage class
+      # If not given, the default volume type will be used
+      volumeType:
       # The allowed topologies for the storage class
-      # If not given, the default Cinder availability zone will be used
       allowedTopologies:
 
 # Settings for the metrics server
