@@ -33,6 +33,7 @@ extraFiles:
       {{- end }}
     reclaimPolicy: {{ .reclaimPolicy }}
     allowVolumeExpansion: {{ .allowVolumeExpansion }}
+    volumeBindingMode: WaitForFirstConsumer
     {{- with .allowedTopologies }}
     allowedTopologies: {{ toYaml . | nindent 6 }}
     {{- end }}
