@@ -203,7 +203,7 @@ metricsServer:
   # Indicates if the metrics server should be deployed
   enabled: true
   # The version of the metrics server to deploy
-  version: v0.6.0
+  version: v0.6.1
   # The URLs of the metrics server manifests
   manifests:
     - https://github.com/kubernetes-sigs/metrics-server/releases/download/{{ .Values.metricsServer.version }}/components.yaml
@@ -225,7 +225,7 @@ kubernetesDashboard:
   chart:
     repo: https://kubernetes.github.io/dashboard
     name: kubernetes-dashboard
-    version: 5.1.1
+    version: 5.3.1
   release:
     namespace: kubernetes-dashboard
     values:
@@ -268,7 +268,7 @@ ingress:
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.0.16
+      version: 4.0.18
     release:
       namespace: ingress-nginx
       # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
@@ -291,7 +291,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 32.2.1
+      version: 34.6.0
     release:
       namespace: monitoring-system
       values: {}
@@ -312,7 +312,7 @@ nodeFeatureDiscovery:
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.10.1
+    version: 0.11.0
   release:
     namespace: node-feature-discovery
     values:
@@ -357,7 +357,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://nvidia.github.io/gpu-operator
     name: gpu-operator
-    version: v1.9.1
+    version: v1.10.0
   release:
     namespace: gpu-operator
     values:
