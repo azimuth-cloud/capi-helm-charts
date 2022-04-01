@@ -44,8 +44,11 @@ extraFiles:
         tls-insecure=true
         {{ "{{-" }} end {{ "}}" }}
         {{ "{{-" }} end {{ "}}" }}
-        {{- with .Values.openstack.cloudConfig }}
-        {{- nindent 8 . }}
+        {{- range $section, $items := omit .Values.openstack.cloudConfig "Global" }}
+        [{{ $section }}]
+        {{- range $name, $value := $items }}
+        {{ $name }}={{ $value }}
+        {{- end }}
         {{- end }}
 {{- end }}
 

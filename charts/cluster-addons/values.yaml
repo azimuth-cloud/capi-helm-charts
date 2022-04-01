@@ -140,6 +140,9 @@ openstack:
   # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
   # and https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage
   cloudConfig:
+    # By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ
+    BlockStorage:
+      ignore-volume-az: true
   # Settings for the Cloud Controller Manager (CCM)
   ccm:
     # Indicates if the OpenStack CCM should be enabled
