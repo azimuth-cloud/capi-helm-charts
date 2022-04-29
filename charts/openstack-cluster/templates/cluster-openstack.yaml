@@ -1,5 +1,5 @@
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha5
 kind: OpenStackCluster
 metadata:
   name: {{ include "openstack-cluster.clusterName" . }}
@@ -33,7 +33,8 @@ spec:
   {{- end }}
   {{- end }}
   {{- with .Values.apiServer }}
-  managedAPIServerLoadBalancer: {{ .enableLoadBalancer }}
+  apiServerLoadBalancer:
+    enabled: {{ .enableLoadBalancer }}
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}
