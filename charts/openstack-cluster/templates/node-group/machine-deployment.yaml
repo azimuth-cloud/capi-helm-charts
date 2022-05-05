@@ -46,7 +46,7 @@ spec:
           kind: KubeadmConfigTemplate
           name: {{ include "openstack-cluster.nodegroup.kct.name" (list $ $nodeGroup) }}
       infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha5
         kind: OpenStackMachineTemplate
         name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
       nodeDrainTimeout: {{ $nodeGroup.nodeDrainTimeout }}

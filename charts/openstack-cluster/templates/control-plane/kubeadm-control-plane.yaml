@@ -79,7 +79,7 @@ spec:
       labels: {{ include "openstack-cluster.controlPlaneSelectorLabels" . | nindent 8 }}
     infrastructureRef:
       kind: OpenStackMachineTemplate
-      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha5
       name: {{ include "openstack-cluster.controlplane.mt.name" . }}
     {{- with .Values.controlPlane.nodeDrainTimeout }}
     nodeDrainTimeout: {{ . }}

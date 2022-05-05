@@ -17,11 +17,14 @@ template:
     {{- end }}
     {{- if gt (float64 $nodeGroup.machineRootVolumeSize) 0.0 }}
     rootVolume:
-      sourceType: image
-      sourceUUID: {{ $ctx.Values.machineImageId | required ".Values.machineImageId is required when using a root volume" }}
       diskSize: {{ $nodeGroup.machineRootVolumeSize }}
+    {{- end }}
+    {{- if $ctx.Values.machineImageId }}
+    imageUUID: {{ $ctx.Values.machineImageId }}
+    {{- else if $ctx.Values.machineImage }}
+    image: {{ tpl $ctx.Values.machineImage $ctx }}
     {{- else }}
-    image: {{ tpl (required ".Values.machineImage is required when not using a root volume" $ctx.Values.machineImage) $ctx }}
+    {{- fail "Either machineImage or machineImageId is required" }}
     {{- end }}
     {{- with $nodeGroup.machineNetworking.networks }}
     networks: {{ toYaml . | nindent 6 }}
@@ -45,7 +48,7 @@ template:
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha5
 kind: OpenStackMachineTemplate
 metadata:
   name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
