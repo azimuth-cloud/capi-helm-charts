@@ -21,7 +21,7 @@ RUN apt-get update && \
 
 COPY --from=hairyhenderson/gomplate:v3.10.0 /gomplate /usr/bin/gomplate
 
-ARG YQ_VN=v4.20.2
+ARG YQ_VN=v4.25.1
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -33,7 +33,7 @@ RUN set -ex; \
     chmod +x /usr/bin/yq; \
     /usr/bin/yq --version
 
-ARG KUBECTL_VN_1_20=v1.20.14
+ARG KUBECTL_VN_1_20=v1.20.15
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -45,7 +45,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.20; \
     /usr/bin/kubectl-v1.20 version --client
 
-ARG KUBECTL_VN_1_21=v1.21.8
+ARG KUBECTL_VN_1_21=v1.21.12
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -57,7 +57,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.21; \
     /usr/bin/kubectl-v1.21 version --client
 
-ARG KUBECTL_VN_1_22=v1.22.5
+ARG KUBECTL_VN_1_22=v1.22.9
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -69,7 +69,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.22; \
     /usr/bin/kubectl-v1.22 version --client
 
-ARG KUBECTL_VN_1_23=v1.23.1
+ARG KUBECTL_VN_1_23=v1.23.6
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -81,10 +81,22 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.23; \
     /usr/bin/kubectl-v1.23 version --client
 
+ARG KUBECTL_VN_1_24=v1.24.0
+RUN set -ex; \
+    OS_ARCH="$(uname -m)"; \
+    case "$OS_ARCH" in \
+        x86_64) kubectl_arch=amd64 ;; \
+        aarch64) kubectl_arch=arm64 ;; \
+        *) false ;; \
+    esac; \
+    curl -fsSL https://dl.k8s.io/release/${KUBECTL_VN_1_24}/bin/linux/${kubectl_arch}/kubectl -o /usr/bin/kubectl-v1.24; \
+    chmod +x /usr/bin/kubectl-v1.24; \
+    /usr/bin/kubectl-v1.24 version --client
+
 ENV HELM_CACHE_HOME /tmp/helm/cache
 ENV HELM_CONFIG_HOME /tmp/helm/config
 ENV HELM_DATA_HOME /tmp/helm/data
-ARG HELM_VERSION=v3.7.2
+ARG HELM_VERSION=v3.8.2
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -96,7 +108,7 @@ RUN set -ex; \
       tar -xz --strip-components 1 -C /usr/bin linux-${helm_arch}/helm; \
     helm version
 
-ARG KUSTOMIZE_VERSION=v4.4.1
+ARG KUSTOMIZE_VERSION=v4.5.4
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -109,7 +121,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kustomize; \
     kustomize version
 
-ENV KUBECTL_VN_LATEST v1.23
+ENV KUBECTL_VN_LATEST v1.24
 COPY ./bin/* /usr/bin/
 
 USER $UTILS_UID
