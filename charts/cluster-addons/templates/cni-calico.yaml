@@ -1,15 +1,7 @@
 {{- define "cluster-addons.cni-calico.config" -}}
 {{- include "cluster-addons.job.defaults" (list . "cni-calico") }}
-installType: kustomize
-kustomize:
-  kustomizationTemplate: |
-    resources:
-      {{- range .Values.cni.calico.manifests }}
-      - {{ tpl . $ }}
-      {{- end }}
-  {{- with .Values.cni.calico.kustomization }}
-  kustomization: {{ toYaml . | nindent 4 }}
-  {{- end }}
+installType: helm
+helm: {{ omit .Values.cni.calico "installation" | toYaml | nindent 2 }}
 extraFiles:
   installation.yaml: |
     apiVersion: operator.tigera.io/v1

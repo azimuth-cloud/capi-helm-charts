@@ -85,15 +85,17 @@ cni:
   type: calico
   # Settings for the calico CNI
   calico:
-    # The version of Calico to deploy
-    # This is only used in the default manifest URL
-    version: v3.22
-    # The URLs of the Calico manifests
-    # This is treated as a template during rendering
-    manifests:
-      - https://docs.projectcalico.org/{{ .Values.cni.calico.version }}/manifests/tigera-operator.yaml
-    # Any kustomization to be applied to the tigera-operator manifests
-    kustomization: {}
+    chart:
+      repo: https://projectcalico.docs.tigera.io/charts
+      name: tigera-operator
+      version: v3.23.0
+    release:
+      namespace: tigera-operator
+      # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
+      values:
+        # Managing the installation separately makes deriving the pod CIDR cleaner
+        installation:
+          enabled: false
     # The spec of the Calico installation
     # See https://projectcalico.docs.tigera.io/reference/installation/api
     installation:
