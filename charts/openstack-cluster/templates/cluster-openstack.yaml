@@ -44,3 +44,6 @@ spec:
   {{- end }}
   apiServerPort: {{ .port }}
   {{- end }}
+  {{- with .Values.controlPlane.failureDomains }}
+  controlPlaneAvailabilityZones: {{ toYaml . | nindent 4 }}
+  {{- end }}
