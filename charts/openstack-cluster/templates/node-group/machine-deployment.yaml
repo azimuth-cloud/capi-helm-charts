@@ -39,7 +39,9 @@ spec:
     spec:
       clusterName: {{ include "openstack-cluster.clusterName" $ }}
       version: {{ $.Values.global.kubernetesVersion }}
-      failureDomain: {{ $nodeGroup.failureDomain }}
+      {{- with $nodeGroup.failureDomain }}
+      failureDomain: {{ . }}
+      {{- end }}
       bootstrap:
         configRef:
           apiVersion: bootstrap.cluster.x-k8s.io/v1beta1

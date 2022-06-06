@@ -44,6 +44,9 @@ spec:
   {{- end }}
   apiServerPort: {{ .port }}
   {{- end }}
+  {{- if .Values.controlPlane.ignoreFailureDomains }}
+  ignoreAvailabilityZones: true
+  {{- end }}
   {{- with .Values.controlPlane.failureDomains }}
   controlPlaneAvailabilityZones: {{ toYaml . | nindent 4 }}
   {{- end }}

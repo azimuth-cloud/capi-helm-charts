@@ -91,10 +91,11 @@ apiServer:
 
 # Settings for the control plane
 controlPlane:
-  # The failure domains to use for control plane nodes
-  # If given, should be a list of availability zones
-  # If not given, all availability zones will be considered for control plane nodes
+  # The failure domains (availability zones) to use for control plane nodes
+  # If not given, all availability zones will be considered suitable
   failureDomains:
+  # Indicates if failure domains should be ignored for the control plane
+  ignoreFailureDomains: false
   # The number of control plane machines to deploy
   # For high-availability, this should be greater than 1
   # For etcd quorum, it should be odd - usually 3, or 5 for very large clusters
@@ -185,8 +186,9 @@ controlPlane:
 nodeGroupDefaults:
   # Indicates if the node group should be autoscaled
   autoscale: false
-  # The failure domain for the node group
-  failureDomain: nova
+  # The failure domain (availability zone) for the node group
+  # Leave blank to allow nova to pick the availability zone
+  failureDomain:
   # The flavor to use for machines in the node group
   machineFlavor:
   # The default networks and ports for worker nodes
