@@ -118,6 +118,15 @@ files:
     owner: root:root
     permissions: "0644"
 {{- end }}
+{{- if $ctx.Values.registryAuth }}
+  - path: /etc/containerd/conf.d/auth.toml
+    contentFrom:
+      secret:
+        name: {{ include "openstack-cluster.componentName" (list $ctx "containerd-auth") }}
+        key: "auth.toml"
+    owner: root:root
+    permissions: "0644"
+{{- end }}
 {{- if $files }}
   {{- range $files }}
   - {{ toYaml . | nindent 4 }}

@@ -68,6 +68,12 @@ clusterNetworking:
 registryMirrors: {}
   # docker.io: ["https://registry.my.domain/v2/dockerhub-public"]
 
+# Settings for node-level registry auth
+registryAuth: {}
+  # registry-1.docker.io:
+  #   username: "<username>"
+  #   password: "<password>"
+
 # List of additional packages to install on cluster nodes
 additionalPackages: []
   # - nfs-common
