@@ -16,6 +16,12 @@ custom:
         --namespace {{ .Release.Namespace }} \
         -o jsonpath='{.status.externalNetwork.id}'
     )"
+    export INTERNAL_NETWORK_NAME="$(
+      KUBECONFIG= kubectl get openstackcluster \
+        {{ tpl .Values.clusterName . }} \
+        --namespace {{ .Release.Namespace }} \
+        -o jsonpath='{.status.network.name}'
+    )"
     {{- end }}
     gomplate --file secret.yaml.tpl | kubectl apply -f -
   delete: |
@@ -52,11 +58,15 @@ extraFiles:
         tls-insecure=true
         {{ "{{-" }} end {{ "}}" }}
         {{ "{{-" }} end {{ "}}" }}
-        {{- range $section, $items := omit .Values.openstack.cloudConfig "Global" "LoadBalancer" }}
-        [{{ $section }}]
-        {{- range $name, $value := $items }}
-        {{ $name }}={{ $value }}
+        [Networking]
+        {{- $networkingItems := default dict .Values.openstack.cloudConfig.Networking }}
+        {{- if hasKey $networkingItems "internal-network-name" }}
+        internal-network-name={{ index $networkingItems "internal-network-name" }}
+        {{- else if .Values.clusterApi }}
+        internal-network-name={{ "{{" }} .Env.INTERNAL_NETWORK_NAME {{ "}}" }}
         {{- end }}
+        {{- range $netName, $netValue := omit $networkingItems "internal-network-name" }}
+        {{ $netName }}={{ $netValue }}
         {{- end }}
         [LoadBalancer]
         {{- $lbItems := default dict .Values.openstack.cloudConfig.LoadBalancer }}
@@ -68,6 +78,18 @@ extraFiles:
         {{- range $lbName, $lbValue := omit $lbItems "floating-network-id" }}
         {{ $lbName }}={{ $lbValue }}
         {{- end }}
+        {{-
+          range $section, $items := omit
+            .Values.openstack.cloudConfig
+            "Global"
+            "LoadBalancer"
+            "Networking"
+        }}
+        [{{ $section }}]
+        {{- range $name, $value := $items }}
+        {{ $name }}={{ $value }}
+        {{- end }}
+        {{ end }}
 {{- end }}
 
 {{-
