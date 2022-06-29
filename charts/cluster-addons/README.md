@@ -86,14 +86,14 @@ kubeconfigSecret:
 This chart can install either [Calico](https://docs.projectcalico.org/about/about-calico) or
 [Cilium](https://cilium.io/) as a
 [CNI plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
-to provide the pod networking in a Kubernetes cluster. By default, the Cilium CNI will be
+to provide the pod networking in a Kubernetes cluster. By default, the Calico CNI will be
 installed.
 
-To switch the CNI to Calico, use the following in your Helm values:
+To switch the CNI to Cilium, use the following in your Helm values:
 
 ```yaml
 cni:
-  type: calico
+  type: cilium
 ```
 
 And to disable the installation of a CNI completely:
@@ -133,19 +133,16 @@ sections of the cloud-config file, you can use Helm values, e.g.:
 
 ```yaml
 openstack:
-  cloudConfig: |
-    [Networking]
-    public-network-name=public-internet
-
-    [LoadBalancer]
-    lb-method=LEAST_CONNECTIONS
-    create-monitor=true
-    
-    [BlockStorage]
-    ignore-volume-az=true
-
-    [Metadata]
-    search-order=metadataService
+  cloudConfig:
+    Networking:
+      public-network-name: public-internet
+    LoadBalancer:
+      lb-method: LEAST_CONNECTIONS
+      create-monitor: true
+    BlockStorage:
+      ignore-volume-az: true
+    Metadata:
+      search-order: metadataService
 ```
 
 The `[Globals]` section is populated using the given `clouds.yaml` (see "OpenStack credentials" below).
