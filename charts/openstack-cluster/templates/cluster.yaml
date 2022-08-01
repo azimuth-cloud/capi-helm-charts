@@ -11,6 +11,6 @@ spec:
     kind: KubeadmControlPlane
     name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
   infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha5
+    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha6
     kind: OpenStackCluster
     name: {{ include "openstack-cluster.clusterName" . }}
