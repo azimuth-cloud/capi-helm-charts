@@ -54,7 +54,8 @@ metadata:
   labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
   annotations:
     capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
-    # Ensure that the previous machine templates are kept around
+    # We let Cluster API clean up the cluster resources
+    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
 spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
 {{- end }}

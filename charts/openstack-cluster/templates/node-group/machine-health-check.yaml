@@ -7,6 +7,10 @@ kind: MachineHealthCheck
 metadata:
   name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
   labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
+  annotations:
+    # We let Cluster API clean up the cluster resources
+    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    helm.sh/resource-policy: keep
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" $ }}
   selector:
