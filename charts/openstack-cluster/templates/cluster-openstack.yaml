@@ -17,7 +17,9 @@ spec:
   controlPlaneEndpoint: {{ . | toYaml | nindent 4 }}
   {{- end }}
   {{- with .Values.clusterNetworking }}
-  dnsNameservers: {{ .dnsNameservers | toYaml | nindent 4 }}
+  {{- with .dnsNameservers }}
+  dnsNameservers: {{ toYaml . | toYaml | nindent 4 }}
+  {{- end }}
   managedSecurityGroups: {{ .manageSecurityGroups }}
   allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
   {{- with .externalNetworkId }}
