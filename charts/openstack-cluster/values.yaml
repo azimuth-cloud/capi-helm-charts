@@ -73,6 +73,13 @@ registryAuth: {}
   #   username: "<username>"
   #   password: "<password>"
 
+# A map of trusted CAs to add to the system trust on cluster nodes
+trustedCAs: {}
+  # custom-ca: |
+  #   -----BEGIN CERTIFICATE-----
+  #   ...certificate data...
+  #   -----END CERTIFICATE-----
+
 # List of additional packages to install on cluster nodes
 additionalPackages: []
   # - nfs-common

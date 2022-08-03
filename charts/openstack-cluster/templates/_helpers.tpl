@@ -90,6 +90,7 @@ mirrors and additional packages.
 {{- $ctx := index . 0 }}
 {{- $registryMirrors := $ctx.Values.registryMirrors }}
 {{- $additionalPackages := $ctx.Values.additionalPackages }}
+{{- $trustedCAs := $ctx.Values.trustedCAs }}
 {{- $kubeadmConfigSpec := omit (index . 1) "files" "preKubeadmCommands" }}
 {{- $files := index . 1 | dig "files" list }}
 {{- $preKubeadmCommands := index . 1 | dig "preKubeadmCommands" list }}
@@ -127,6 +128,15 @@ files:
     owner: root:root
     permissions: "0644"
 {{- end }}
+{{- if $trustedCAs }}
+  {{- range $name, $certificate := $trustedCAs }}
+  - path: /usr/local/share/ca-certificates/{{ $name }}.crt
+    content: |
+      {{- nindent 6 $certificate }}
+    owner: root:root
+    permissions: "0644"
+  {{- end }}
+{{- end }}
 {{- if $files }}
   {{- range $files }}
   - {{ toYaml . | nindent 4 }}
@@ -134,6 +144,9 @@ files:
 {{- end }}
 {{- if or $additionalPackages $preKubeadmCommands }}
 preKubeadmCommands:
+  {{- if $trustedCAs }}
+  - update-ca-certificates
+  {{- end }}
   {{- if $additionalPackages }}
   - apt update -y
   - apt install -y {{ join " " $additionalPackages }}
