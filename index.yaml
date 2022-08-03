@@ -3,7 +3,7 @@ entries:
   addon:
   - apiVersion: v2
     appVersion: 90bd870
-    created: "2022-08-03T12:04:13.495214027Z"
+    created: "2022-08-03T15:37:08.576866851Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -15,7 +15,7 @@ entries:
     version: 0.1.0-dev.0.main.168
   - apiVersion: v2
     appVersion: 5ec4046
-    created: "2022-08-03T12:04:13.494854631Z"
+    created: "2022-08-03T15:37:08.576483745Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -27,7 +27,7 @@ entries:
     version: 0.1.0-dev.0.main.167
   - apiVersion: v2
     appVersion: e158efd
-    created: "2022-08-03T12:04:13.494490035Z"
+    created: "2022-08-03T15:37:08.57612104Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -39,7 +39,7 @@ entries:
     version: 0.1.0-dev.0.main.162
   - apiVersion: v2
     appVersion: a0bcee5
-    created: "2022-08-03T12:04:13.49412274Z"
+    created: "2022-08-03T15:37:08.575772635Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -51,7 +51,7 @@ entries:
     version: 0.1.0-dev.0.main.161
   - apiVersion: v2
     appVersion: 8c3da0b
-    created: "2022-08-03T12:04:13.493742044Z"
+    created: "2022-08-03T15:37:08.575413229Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -63,7 +63,7 @@ entries:
     version: 0.1.0-dev.0.main.160
   - apiVersion: v2
     appVersion: b6a660b
-    created: "2022-08-03T12:04:13.493380149Z"
+    created: "2022-08-03T15:37:08.575022924Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -75,7 +75,7 @@ entries:
     version: 0.1.0-dev.0.main.159
   - apiVersion: v2
     appVersion: a53b6aa
-    created: "2022-08-03T12:04:13.493012553Z"
+    created: "2022-08-03T15:37:08.574661018Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -87,7 +87,7 @@ entries:
     version: 0.1.0-dev.0.main.158
   - apiVersion: v2
     appVersion: fa6c1b3
-    created: "2022-08-03T12:04:13.492639157Z"
+    created: "2022-08-03T15:37:08.574195511Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -99,7 +99,7 @@ entries:
     version: 0.1.0-dev.0.main.157
   - apiVersion: v2
     appVersion: 094e78c
-    created: "2022-08-03T12:04:13.492271962Z"
+    created: "2022-08-03T15:37:08.573827306Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -111,7 +111,7 @@ entries:
     version: 0.1.0-dev.0.main.155
   - apiVersion: v2
     appVersion: b6ea279
-    created: "2022-08-03T12:04:13.491908366Z"
+    created: "2022-08-03T15:37:08.573011394Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -123,7 +123,7 @@ entries:
     version: 0.1.0-dev.0.main.153
   - apiVersion: v2
     appVersion: 619d334
-    created: "2022-08-03T12:04:13.49153507Z"
+    created: "2022-08-03T15:37:08.572591888Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -135,7 +135,7 @@ entries:
     version: 0.1.0-dev.0.main.152
   - apiVersion: v2
     appVersion: e05d38d
-    created: "2022-08-03T12:04:13.491156775Z"
+    created: "2022-08-03T15:37:08.572172782Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -147,7 +147,7 @@ entries:
     version: 0.1.0-dev.0.main.151
   - apiVersion: v2
     appVersion: 48ec077
-    created: "2022-08-03T12:04:13.49074808Z"
+    created: "2022-08-03T15:37:08.571516572Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -159,7 +159,7 @@ entries:
     version: 0.1.0-dev.0.main.150
   - apiVersion: v2
     appVersion: 20d5f36
-    created: "2022-08-03T12:04:13.490375184Z"
+    created: "2022-08-03T15:37:08.571174067Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -171,7 +171,7 @@ entries:
     version: 0.1.0-dev.0.main.149
   - apiVersion: v2
     appVersion: 58ca23b
-    created: "2022-08-03T12:04:13.489955389Z"
+    created: "2022-08-03T15:37:08.570307854Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -183,7 +183,7 @@ entries:
     version: 0.1.0-dev.0.main.148
   - apiVersion: v2
     appVersion: e863259
-    created: "2022-08-03T12:04:13.489515394Z"
+    created: "2022-08-03T15:37:08.569959249Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -195,7 +195,7 @@ entries:
     version: 0.1.0-dev.0.main.147
   - apiVersion: v2
     appVersion: 64baf2e
-    created: "2022-08-03T12:04:13.488973501Z"
+    created: "2022-08-03T15:37:08.569605444Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -207,7 +207,7 @@ entries:
     version: 0.1.0-dev.0.main.146
   - apiVersion: v2
     appVersion: d43ca26
-    created: "2022-08-03T12:04:13.488561306Z"
+    created: "2022-08-03T15:37:08.569256939Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -219,7 +219,7 @@ entries:
     version: 0.1.0-dev.0.main.145
   - apiVersion: v2
     appVersion: f6cba31
-    created: "2022-08-03T12:04:13.488137711Z"
+    created: "2022-08-03T15:37:08.568902634Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -231,7 +231,7 @@ entries:
     version: 0.1.0-dev.0.main.141
   - apiVersion: v2
     appVersion: 8589a10
-    created: "2022-08-03T12:04:13.487660916Z"
+    created: "2022-08-03T15:37:08.568514328Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -243,7 +243,7 @@ entries:
     version: 0.1.0-dev.0.main.136
   - apiVersion: v2
     appVersion: 8f14e9d
-    created: "2022-08-03T12:04:13.486909925Z"
+    created: "2022-08-03T15:37:08.568152623Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -255,7 +255,7 @@ entries:
     version: 0.1.0-dev.0.main.134
   - apiVersion: v2
     appVersion: 322275f
-    created: "2022-08-03T12:04:13.48653873Z"
+    created: "2022-08-03T15:37:08.567800918Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -267,7 +267,7 @@ entries:
     version: 0.1.0-dev.0.main.133
   - apiVersion: v2
     appVersion: 999b2c0
-    created: "2022-08-03T12:04:13.486160734Z"
+    created: "2022-08-03T15:37:08.567449012Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -279,7 +279,7 @@ entries:
     version: 0.1.0-dev.0.main.132
   - apiVersion: v2
     appVersion: e8a4421
-    created: "2022-08-03T12:04:13.485765739Z"
+    created: "2022-08-03T15:37:08.567082807Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -291,7 +291,7 @@ entries:
     version: 0.1.0-dev.0.main.131
   - apiVersion: v2
     appVersion: "1322175"
-    created: "2022-08-03T12:04:13.485367443Z"
+    created: "2022-08-03T15:37:08.566730102Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -303,7 +303,7 @@ entries:
     version: 0.1.0-dev.0.main.130
   - apiVersion: v2
     appVersion: f31d8a0
-    created: "2022-08-03T12:04:13.484996748Z"
+    created: "2022-08-03T15:37:08.566380697Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -315,7 +315,7 @@ entries:
     version: 0.1.0-dev.0.main.129
   - apiVersion: v2
     appVersion: 8385f3f
-    created: "2022-08-03T12:04:13.484622252Z"
+    created: "2022-08-03T15:37:08.565993191Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -327,7 +327,7 @@ entries:
     version: 0.1.0-dev.0.main.128
   - apiVersion: v2
     appVersion: d7510dc
-    created: "2022-08-03T12:04:13.484264356Z"
+    created: "2022-08-03T15:37:08.565631586Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -339,7 +339,7 @@ entries:
     version: 0.1.0-dev.0.main.127
   - apiVersion: v2
     appVersion: a1dd093
-    created: "2022-08-03T12:04:13.483898661Z"
+    created: "2022-08-03T15:37:08.56527218Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -351,7 +351,7 @@ entries:
     version: 0.1.0-dev.0.main.126
   - apiVersion: v2
     appVersion: 1b57d25
-    created: "2022-08-03T12:04:13.483523865Z"
+    created: "2022-08-03T15:37:08.564911575Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -363,7 +363,7 @@ entries:
     version: 0.1.0-dev.0.main.125
   - apiVersion: v2
     appVersion: f5009f3
-    created: "2022-08-03T12:04:13.48313697Z"
+    created: "2022-08-03T15:37:08.56452567Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -375,7 +375,7 @@ entries:
     version: 0.1.0-dev.0.main.124
   - apiVersion: v2
     appVersion: f78cd29
-    created: "2022-08-03T12:04:13.482770574Z"
+    created: "2022-08-03T15:37:08.564165064Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -387,7 +387,7 @@ entries:
     version: 0.1.0-dev.0.main.123
   - apiVersion: v2
     appVersion: "7233517"
-    created: "2022-08-03T12:04:13.482407778Z"
+    created: "2022-08-03T15:37:08.563801059Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -399,7 +399,7 @@ entries:
     version: 0.1.0-dev.0.main.122
   - apiVersion: v2
     appVersion: fed5876
-    created: "2022-08-03T12:04:13.481988483Z"
+    created: "2022-08-03T15:37:08.563377653Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -411,7 +411,7 @@ entries:
     version: 0.1.0-dev.0.main.121
   - apiVersion: v2
     appVersion: 2a26c83
-    created: "2022-08-03T12:04:13.481616188Z"
+    created: "2022-08-03T15:37:08.562930546Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -423,7 +423,7 @@ entries:
     version: 0.1.0-dev.0.main.120
   - apiVersion: v2
     appVersion: 65b7380
-    created: "2022-08-03T12:04:13.481232092Z"
+    created: "2022-08-03T15:37:08.562462339Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -435,7 +435,7 @@ entries:
     version: 0.1.0-dev.0.main.118
   - apiVersion: v2
     appVersion: 31b1a23
-    created: "2022-08-03T12:04:13.480855097Z"
+    created: "2022-08-03T15:37:08.562039033Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -447,7 +447,7 @@ entries:
     version: 0.1.0-dev.0.main.117
   - apiVersion: v2
     appVersion: 49b2c35
-    created: "2022-08-03T12:04:13.480481401Z"
+    created: "2022-08-03T15:37:08.561642727Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -459,7 +459,7 @@ entries:
     version: 0.1.0-dev.0.main.116
   - apiVersion: v2
     appVersion: 4e6d1fd
-    created: "2022-08-03T12:04:13.480090906Z"
+    created: "2022-08-03T15:37:08.561186921Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -471,7 +471,7 @@ entries:
     version: 0.1.0-dev.0.main.115
   - apiVersion: v2
     appVersion: d172024
-    created: "2022-08-03T12:04:13.479519713Z"
+    created: "2022-08-03T15:37:08.560776014Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -483,7 +483,7 @@ entries:
     version: 0.1.0-dev.0.main.114
   - apiVersion: v2
     appVersion: 8f32d7a
-    created: "2022-08-03T12:04:13.479119917Z"
+    created: "2022-08-03T15:37:08.560272907Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -495,7 +495,7 @@ entries:
     version: 0.1.0-dev.0.main.113
   - apiVersion: v2
     appVersion: 0eb14ce
-    created: "2022-08-03T12:04:13.478724222Z"
+    created: "2022-08-03T15:37:08.559875601Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -507,7 +507,7 @@ entries:
     version: 0.1.0-dev.0.main.112
   - apiVersion: v2
     appVersion: 9c807f7
-    created: "2022-08-03T12:04:13.478307927Z"
+    created: "2022-08-03T15:37:08.559484096Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -519,7 +519,7 @@ entries:
     version: 0.1.0-dev.0.main.111
   - apiVersion: v2
     appVersion: b11f7b9
-    created: "2022-08-03T12:04:13.477586935Z"
+    created: "2022-08-03T15:37:08.559060389Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -531,7 +531,7 @@ entries:
     version: 0.1.0-dev.0.main.110
   - apiVersion: v2
     appVersion: bf453de
-    created: "2022-08-03T12:04:13.47724074Z"
+    created: "2022-08-03T15:37:08.55839578Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -543,7 +543,7 @@ entries:
     version: 0.1.0-dev.0.main.109
   - apiVersion: v2
     appVersion: 5b94ef8
-    created: "2022-08-03T12:04:13.476459549Z"
+    created: "2022-08-03T15:37:08.558040474Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -555,7 +555,7 @@ entries:
     version: 0.1.0-dev.0.main.108
   - apiVersion: v2
     appVersion: c2d418d
-    created: "2022-08-03T12:04:13.475809557Z"
+    created: "2022-08-03T15:37:08.556848157Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -567,7 +567,7 @@ entries:
     version: 0.1.0-dev.0.main.107
   - apiVersion: v2
     appVersion: 9f883c4
-    created: "2022-08-03T12:04:13.475133165Z"
+    created: "2022-08-03T15:37:08.556126346Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -579,7 +579,7 @@ entries:
     version: 0.1.0-dev.0.main.106
   - apiVersion: v2
     appVersion: 109a689
-    created: "2022-08-03T12:04:13.474469172Z"
+    created: "2022-08-03T15:37:08.555417436Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -591,7 +591,7 @@ entries:
     version: 0.1.0-dev.0.main.105
   - apiVersion: v2
     appVersion: cd86dd7
-    created: "2022-08-03T12:04:13.47380578Z"
+    created: "2022-08-03T15:37:08.554764926Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -603,7 +603,7 @@ entries:
     version: 0.1.0-dev.0.main.104
   - apiVersion: v2
     appVersion: 997ccfc
-    created: "2022-08-03T12:04:13.473126988Z"
+    created: "2022-08-03T15:37:08.554074516Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -615,7 +615,7 @@ entries:
     version: 0.1.0-dev.0.main.102
   - apiVersion: v2
     appVersion: ce65787
-    created: "2022-08-03T12:04:13.472453696Z"
+    created: "2022-08-03T15:37:08.553367706Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -627,7 +627,7 @@ entries:
     version: 0.1.0-dev.0.main.101
   - apiVersion: v2
     appVersion: 297c09b
-    created: "2022-08-03T12:04:13.471804304Z"
+    created: "2022-08-03T15:37:08.552600695Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -639,7 +639,7 @@ entries:
     version: 0.1.0-dev.0.main.100
   - apiVersion: v2
     appVersion: f1959c2
-    created: "2022-08-03T12:04:13.500091269Z"
+    created: "2022-08-03T15:37:08.580592105Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -651,7 +651,7 @@ entries:
     version: 0.1.0-dev.0.main.99
   - apiVersion: v2
     appVersion: 3194ad4
-    created: "2022-08-03T12:04:13.49921398Z"
+    created: "2022-08-03T15:37:08.579935596Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -663,7 +663,7 @@ entries:
     version: 0.1.0-dev.0.main.98
   - apiVersion: v2
     appVersion: 6426a65
-    created: "2022-08-03T12:04:13.49836529Z"
+    created: "2022-08-03T15:37:08.579328987Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -675,7 +675,7 @@ entries:
     version: 0.1.0-dev.0.main.97
   - apiVersion: v2
     appVersion: 614c27e
-    created: "2022-08-03T12:04:13.497153704Z"
+    created: "2022-08-03T15:37:08.578718078Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -687,7 +687,7 @@ entries:
     version: 0.1.0-dev.0.main.96
   - apiVersion: v2
     appVersion: a62ba9f
-    created: "2022-08-03T12:04:13.496516911Z"
+    created: "2022-08-03T15:37:08.578115969Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -699,7 +699,7 @@ entries:
     version: 0.1.0-dev.0.main.95
   - apiVersion: v2
     appVersion: b8f22f5
-    created: "2022-08-03T12:04:13.495872319Z"
+    created: "2022-08-03T15:37:08.57747816Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -711,7 +711,7 @@ entries:
     version: 0.1.0-dev.0.main.94
   - apiVersion: v2
     appVersion: a525daa
-    created: "2022-08-03T12:04:13.471076813Z"
+    created: "2022-08-03T15:37:08.551914984Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -723,7 +723,7 @@ entries:
     version: 0.1.0-dev.0.helm-operator.93
   - apiVersion: v2
     appVersion: 294e0dd
-    created: "2022-08-03T12:04:13.470370721Z"
+    created: "2022-08-03T15:37:08.551215174Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -735,7 +735,7 @@ entries:
     version: 0.1.0-dev.0.fix-nvidia-operator-config-path.140
   - apiVersion: v2
     appVersion: 53fb2b3
-    created: "2022-08-03T12:04:13.469960726Z"
+    created: "2022-08-03T15:37:08.550853069Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -747,7 +747,7 @@ entries:
     version: 0.1.0-dev.0.fix-nvidia-operator-config-path.139
   - apiVersion: v2
     appVersion: 26847c5
-    created: "2022-08-03T12:04:13.46957733Z"
+    created: "2022-08-03T15:37:08.550497064Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -759,7 +759,7 @@ entries:
     version: 0.1.0-dev.0.fix-internal-network.166
   - apiVersion: v2
     appVersion: 506d0be
-    created: "2022-08-03T12:04:13.469186735Z"
+    created: "2022-08-03T15:37:08.550104858Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -771,7 +771,7 @@ entries:
     version: 0.1.0-dev.0.fix-internal-network.165
   - apiVersion: v2
     appVersion: "4997e86"
-    created: "2022-08-03T12:04:13.468606142Z"
+    created: "2022-08-03T15:37:08.549730552Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -782,8 +782,20 @@ entries:
     - addon-0.1.0-dev.0.fix-internal-network.162.tgz
     version: 0.1.0-dev.0.fix-internal-network.162
   - apiVersion: v2
+    appVersion: 68ec56f
+    created: "2022-08-03T15:37:08.549127244Z"
+    description: 'Helm chart that provides templates for producing jobs that install
+      addons onto a target cluster. The target cluster can be local (using a service
+      account) or remote (using a kubeconfig file). '
+    digest: 3dc9dd502a807c01bbfca293d8de8f9fb4fcec7561de7400636740eedcf2599c
+    name: addon
+    type: library
+    urls:
+    - addon-0.1.0-dev.0.feature-trusted-cas.169.tgz
+    version: 0.1.0-dev.0.feature-trusted-cas.169
+  - apiVersion: v2
     appVersion: 031582c
-    created: "2022-08-03T12:04:13.468184647Z"
+    created: "2022-08-03T15:37:08.548662237Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -795,7 +807,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.149
   - apiVersion: v2
     appVersion: 3528b70
-    created: "2022-08-03T12:04:13.467746052Z"
+    created: "2022-08-03T15:37:08.54821803Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -807,7 +819,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.148
   - apiVersion: v2
     appVersion: aefc9c4
-    created: "2022-08-03T12:04:13.467218358Z"
+    created: "2022-08-03T15:37:08.547714023Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -819,7 +831,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.147
   - apiVersion: v2
     appVersion: 2fa45ad
-    created: "2022-08-03T12:04:13.466543466Z"
+    created: "2022-08-03T15:37:08.547076513Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -831,7 +843,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-grafana-dashboard.144
   - apiVersion: v2
     appVersion: afa22e9
-    created: "2022-08-03T12:04:13.466165871Z"
+    created: "2022-08-03T15:37:08.546691308Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -843,7 +855,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-grafana-dashboard.143
   - apiVersion: v2
     appVersion: d82f8b6
-    created: "2022-08-03T12:04:13.465738576Z"
+    created: "2022-08-03T15:37:08.546346003Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -855,7 +867,7 @@ entries:
     version: 0.1.0-dev.0.feature-ignore-azs.161
   - apiVersion: v2
     appVersion: 5ace74e
-    created: "2022-08-03T12:04:13.465327681Z"
+    created: "2022-08-03T15:37:08.545992498Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -867,7 +879,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.169
   - apiVersion: v2
     appVersion: 1c1e38e
-    created: "2022-08-03T12:04:13.464884186Z"
+    created: "2022-08-03T15:37:08.545583492Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -879,7 +891,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.168
   - apiVersion: v2
     appVersion: 2fe4d26
-    created: "2022-08-03T12:04:13.464462291Z"
+    created: "2022-08-03T15:37:08.545198786Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -891,7 +903,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.163
   - apiVersion: v2
     appVersion: eb42ecf
-    created: "2022-08-03T12:04:13.464063996Z"
+    created: "2022-08-03T15:37:08.544714679Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -903,7 +915,7 @@ entries:
     version: 0.1.0-dev.0.feature-capo-v1alpha5.154
   - apiVersion: v2
     appVersion: 865e7e1
-    created: "2022-08-03T12:04:13.463607401Z"
+    created: "2022-08-03T15:37:08.544261772Z"
     description: 'Helm chart that provides templates for producing jobs that install
       addons onto a target cluster. The target cluster can be local (using a service
       account) or remote (using a kubeconfig file). '
@@ -916,7 +928,7 @@ entries:
   cluster-addons:
   - apiVersion: v2
     appVersion: a155dd3
-    created: "2022-08-03T12:04:13.745117169Z"
+    created: "2022-08-03T15:37:08.820283722Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 97c5c0b1ed331abc3111e35119de25ff111f32e52a2cdc41ea6353c8d9e18e88
     name: cluster-addons
@@ -926,7 +938,7 @@ entries:
     version: 0.1.0-dev.0.mofed-integration.79
   - apiVersion: v2
     appVersion: 90bd870
-    created: "2022-08-03T12:04:13.668033081Z"
+    created: "2022-08-03T15:37:08.743594497Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -940,7 +952,7 @@ entries:
     version: 0.1.0-dev.0.main.168
   - apiVersion: v2
     appVersion: 5ec4046
-    created: "2022-08-03T12:04:13.66474982Z"
+    created: "2022-08-03T15:37:08.740782956Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -954,7 +966,7 @@ entries:
     version: 0.1.0-dev.0.main.167
   - apiVersion: v2
     appVersion: e158efd
-    created: "2022-08-03T12:04:13.66220685Z"
+    created: "2022-08-03T15:37:08.73765991Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -968,7 +980,7 @@ entries:
     version: 0.1.0-dev.0.main.162
   - apiVersion: v2
     appVersion: a0bcee5
-    created: "2022-08-03T12:04:13.659651681Z"
+    created: "2022-08-03T15:37:08.735236274Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -982,7 +994,7 @@ entries:
     version: 0.1.0-dev.0.main.161
   - apiVersion: v2
     appVersion: 8c3da0b
-    created: "2022-08-03T12:04:13.657094311Z"
+    created: "2022-08-03T15:37:08.732845339Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -996,7 +1008,7 @@ entries:
     version: 0.1.0-dev.0.main.160
   - apiVersion: v2
     appVersion: b6a660b
-    created: "2022-08-03T12:04:13.653209757Z"
+    created: "2022-08-03T15:37:08.730405704Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1010,7 +1022,7 @@ entries:
     version: 0.1.0-dev.0.main.159
   - apiVersion: v2
     appVersion: a53b6aa
-    created: "2022-08-03T12:04:13.650755386Z"
+    created: "2022-08-03T15:37:08.727225257Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1024,7 +1036,7 @@ entries:
     version: 0.1.0-dev.0.main.158
   - apiVersion: v2
     appVersion: fa6c1b3
-    created: "2022-08-03T12:04:13.648239616Z"
+    created: "2022-08-03T15:37:08.724824922Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1038,7 +1050,7 @@ entries:
     version: 0.1.0-dev.0.main.157
   - apiVersion: v2
     appVersion: 094e78c
-    created: "2022-08-03T12:04:13.645586047Z"
+    created: "2022-08-03T15:37:08.722471987Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1052,7 +1064,7 @@ entries:
     version: 0.1.0-dev.0.main.155
   - apiVersion: v2
     appVersion: b6ea279
-    created: "2022-08-03T12:04:13.642174088Z"
+    created: "2022-08-03T15:37:08.720076652Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1066,7 +1078,7 @@ entries:
     version: 0.1.0-dev.0.main.153
   - apiVersion: v2
     appVersion: 619d334
-    created: "2022-08-03T12:04:13.639681617Z"
+    created: "2022-08-03T15:37:08.717663217Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1080,7 +1092,7 @@ entries:
     version: 0.1.0-dev.0.main.152
   - apiVersion: v2
     appVersion: e05d38d
-    created: "2022-08-03T12:04:13.637159247Z"
+    created: "2022-08-03T15:37:08.714123065Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1094,7 +1106,7 @@ entries:
     version: 0.1.0-dev.0.main.151
   - apiVersion: v2
     appVersion: 48ec077
-    created: "2022-08-03T12:04:13.634650377Z"
+    created: "2022-08-03T15:37:08.71173033Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1108,7 +1120,7 @@ entries:
     version: 0.1.0-dev.0.main.150
   - apiVersion: v2
     appVersion: 20d5f36
-    created: "2022-08-03T12:04:13.632115907Z"
+    created: "2022-08-03T15:37:08.709304494Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1122,7 +1134,7 @@ entries:
     version: 0.1.0-dev.0.main.149
   - apiVersion: v2
     appVersion: 58ca23b
-    created: "2022-08-03T12:04:13.629169541Z"
+    created: "2022-08-03T15:37:08.706918559Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1136,7 +1148,7 @@ entries:
     version: 0.1.0-dev.0.main.148
   - apiVersion: v2
     appVersion: e863259
-    created: "2022-08-03T12:04:13.626363275Z"
+    created: "2022-08-03T15:37:08.703855014Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1150,7 +1162,7 @@ entries:
     version: 0.1.0-dev.0.main.147
   - apiVersion: v2
     appVersion: 64baf2e
-    created: "2022-08-03T12:04:13.623851504Z"
+    created: "2022-08-03T15:37:08.701039973Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1164,7 +1176,7 @@ entries:
     version: 0.1.0-dev.0.main.146
   - apiVersion: v2
     appVersion: d43ca26
-    created: "2022-08-03T12:04:13.621431733Z"
+    created: "2022-08-03T15:37:08.69880574Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1178,7 +1190,7 @@ entries:
     version: 0.1.0-dev.0.main.145
   - apiVersion: v2
     appVersion: f6cba31
-    created: "2022-08-03T12:04:13.618868563Z"
+    created: "2022-08-03T15:37:08.696595907Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1192,7 +1204,7 @@ entries:
     version: 0.1.0-dev.0.main.141
   - apiVersion: v2
     appVersion: 8589a10
-    created: "2022-08-03T12:04:13.615577102Z"
+    created: "2022-08-03T15:37:08.694440676Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1206,7 +1218,7 @@ entries:
     version: 0.1.0-dev.0.main.136
   - apiVersion: v2
     appVersion: 8f14e9d
-    created: "2022-08-03T12:04:13.613318429Z"
+    created: "2022-08-03T15:37:08.692146042Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1220,7 +1232,7 @@ entries:
     version: 0.1.0-dev.0.main.134
   - apiVersion: v2
     appVersion: 322275f
-    created: "2022-08-03T12:04:13.611102355Z"
+    created: "2022-08-03T15:37:08.689179199Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1234,7 +1246,7 @@ entries:
     version: 0.1.0-dev.0.main.133
   - apiVersion: v2
     appVersion: 999b2c0
-    created: "2022-08-03T12:04:13.608849882Z"
+    created: "2022-08-03T15:37:08.687071168Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1248,7 +1260,7 @@ entries:
     version: 0.1.0-dev.0.main.132
   - apiVersion: v2
     appVersion: e8a4421
-    created: "2022-08-03T12:04:13.606528709Z"
+    created: "2022-08-03T15:37:08.684935636Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1262,7 +1274,7 @@ entries:
     version: 0.1.0-dev.0.main.131
   - apiVersion: v2
     appVersion: "1322175"
-    created: "2022-08-03T12:04:13.603411146Z"
+    created: "2022-08-03T15:37:08.682832506Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1276,7 +1288,7 @@ entries:
     version: 0.1.0-dev.0.main.130
   - apiVersion: v2
     appVersion: f31d8a0
-    created: "2022-08-03T12:04:13.601203472Z"
+    created: "2022-08-03T15:37:08.680750275Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1290,7 +1302,7 @@ entries:
     version: 0.1.0-dev.0.main.129
   - apiVersion: v2
     appVersion: 8385f3f
-    created: "2022-08-03T12:04:13.599007398Z"
+    created: "2022-08-03T15:37:08.678216238Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1304,7 +1316,7 @@ entries:
     version: 0.1.0-dev.0.main.128
   - apiVersion: v2
     appVersion: d7510dc
-    created: "2022-08-03T12:04:13.596827724Z"
+    created: "2022-08-03T15:37:08.675703401Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1318,7 +1330,7 @@ entries:
     version: 0.1.0-dev.0.main.127
   - apiVersion: v2
     appVersion: a1dd093
-    created: "2022-08-03T12:04:13.59461585Z"
+    created: "2022-08-03T15:37:08.673664971Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1332,7 +1344,7 @@ entries:
     version: 0.1.0-dev.0.main.126
   - apiVersion: v2
     appVersion: 1b57d25
-    created: "2022-08-03T12:04:13.592377477Z"
+    created: "2022-08-03T15:37:08.671639441Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1346,7 +1358,7 @@ entries:
     version: 0.1.0-dev.0.main.125
   - apiVersion: v2
     appVersion: f5009f3
-    created: "2022-08-03T12:04:13.589190115Z"
+    created: "2022-08-03T15:37:08.669620412Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1360,7 +1372,7 @@ entries:
     version: 0.1.0-dev.0.main.124
   - apiVersion: v2
     appVersion: f78cd29
-    created: "2022-08-03T12:04:13.587123639Z"
+    created: "2022-08-03T15:37:08.667625182Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1374,7 +1386,7 @@ entries:
     version: 0.1.0-dev.0.main.123
   - apiVersion: v2
     appVersion: "7233517"
-    created: "2022-08-03T12:04:13.585055564Z"
+    created: "2022-08-03T15:37:08.66474344Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1388,7 +1400,7 @@ entries:
     version: 0.1.0-dev.0.main.122
   - apiVersion: v2
     appVersion: fed5876
-    created: "2022-08-03T12:04:13.582969888Z"
+    created: "2022-08-03T15:37:08.662816212Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1402,7 +1414,7 @@ entries:
     version: 0.1.0-dev.0.main.121
   - apiVersion: v2
     appVersion: 2a26c83
-    created: "2022-08-03T12:04:13.580825714Z"
+    created: "2022-08-03T15:37:08.660891484Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1416,7 +1428,7 @@ entries:
     version: 0.1.0-dev.0.main.120
   - apiVersion: v2
     appVersion: 65b7380
-    created: "2022-08-03T12:04:13.578408142Z"
+    created: "2022-08-03T15:37:08.658921155Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1430,7 +1442,7 @@ entries:
     version: 0.1.0-dev.0.main.118
   - apiVersion: v2
     appVersion: 31b1a23
-    created: "2022-08-03T12:04:13.575936171Z"
+    created: "2022-08-03T15:37:08.657277331Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1444,7 +1456,7 @@ entries:
     version: 0.1.0-dev.0.main.117
   - apiVersion: v2
     appVersion: 49b2c35
-    created: "2022-08-03T12:04:13.574236992Z"
+    created: "2022-08-03T15:37:08.655667907Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1458,7 +1470,7 @@ entries:
     version: 0.1.0-dev.0.main.116
   - apiVersion: v2
     appVersion: 4e6d1fd
-    created: "2022-08-03T12:04:13.572603911Z"
+    created: "2022-08-03T15:37:08.653228371Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1472,7 +1484,7 @@ entries:
     version: 0.1.0-dev.0.main.115
   - apiVersion: v2
     appVersion: d172024
-    created: "2022-08-03T12:04:13.57095563Z"
+    created: "2022-08-03T15:37:08.651378644Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1486,7 +1498,7 @@ entries:
     version: 0.1.0-dev.0.main.114
   - apiVersion: v2
     appVersion: 8f32d7a
-    created: "2022-08-03T12:04:13.56929085Z"
+    created: "2022-08-03T15:37:08.649779521Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1500,7 +1512,7 @@ entries:
     version: 0.1.0-dev.0.main.113
   - apiVersion: v2
     appVersion: 0eb14ce
-    created: "2022-08-03T12:04:13.56763737Z"
+    created: "2022-08-03T15:37:08.648193997Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1514,7 +1526,7 @@ entries:
     version: 0.1.0-dev.0.main.112
   - apiVersion: v2
     appVersion: 9c807f7
-    created: "2022-08-03T12:04:13.56595139Z"
+    created: "2022-08-03T15:37:08.646636174Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1528,7 +1540,7 @@ entries:
     version: 0.1.0-dev.0.main.111
   - apiVersion: v2
     appVersion: b11f7b9
-    created: "2022-08-03T12:04:13.563748516Z"
+    created: "2022-08-03T15:37:08.644897149Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1542,7 +1554,7 @@ entries:
     version: 0.1.0-dev.0.main.110
   - apiVersion: v2
     appVersion: bf453de
-    created: "2022-08-03T12:04:13.561783039Z"
+    created: "2022-08-03T15:37:08.643274525Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1556,7 +1568,7 @@ entries:
     version: 0.1.0-dev.0.main.109
   - apiVersion: v2
     appVersion: 5b94ef8
-    created: "2022-08-03T12:04:13.560191658Z"
+    created: "2022-08-03T15:37:08.6415466Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1570,7 +1582,7 @@ entries:
     version: 0.1.0-dev.0.main.108
   - apiVersion: v2
     appVersion: c2d418d
-    created: "2022-08-03T12:04:13.558362379Z"
+    created: "2022-08-03T15:37:08.639055863Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1584,7 +1596,7 @@ entries:
     version: 0.1.0-dev.0.main.107
   - apiVersion: v2
     appVersion: 9f883c4
-    created: "2022-08-03T12:04:13.556468402Z"
+    created: "2022-08-03T15:37:08.637279437Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1598,7 +1610,7 @@ entries:
     version: 0.1.0-dev.0.main.106
   - apiVersion: v2
     appVersion: 109a689
-    created: "2022-08-03T12:04:13.554584924Z"
+    created: "2022-08-03T15:37:08.635481711Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1612,7 +1624,7 @@ entries:
     version: 0.1.0-dev.0.main.105
   - apiVersion: v2
     appVersion: cd86dd7
-    created: "2022-08-03T12:04:13.552661647Z"
+    created: "2022-08-03T15:37:08.633690584Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1626,7 +1638,7 @@ entries:
     version: 0.1.0-dev.0.main.104
   - apiVersion: v2
     appVersion: 997ccfc
-    created: "2022-08-03T12:04:13.549631183Z"
+    created: "2022-08-03T15:37:08.631846057Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1640,7 +1652,7 @@ entries:
     version: 0.1.0-dev.0.main.102
   - apiVersion: v2
     appVersion: ce65787
-    created: "2022-08-03T12:04:13.547732505Z"
+    created: "2022-08-03T15:37:08.62997053Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1654,7 +1666,7 @@ entries:
     version: 0.1.0-dev.0.main.101
   - apiVersion: v2
     appVersion: 297c09b
-    created: "2022-08-03T12:04:13.545856627Z"
+    created: "2022-08-03T15:37:08.627870999Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1668,7 +1680,7 @@ entries:
     version: 0.1.0-dev.0.main.100
   - apiVersion: v2
     appVersion: f1959c2
-    created: "2022-08-03T12:04:13.743450589Z"
+    created: "2022-08-03T15:37:08.818679099Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1682,7 +1694,7 @@ entries:
     version: 0.1.0-dev.0.main.99
   - apiVersion: v2
     appVersion: 3194ad4
-    created: "2022-08-03T12:04:13.741591511Z"
+    created: "2022-08-03T15:37:08.816846972Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1696,7 +1708,7 @@ entries:
     version: 0.1.0-dev.0.main.98
   - apiVersion: v2
     appVersion: 6426a65
-    created: "2022-08-03T12:04:13.739481236Z"
+    created: "2022-08-03T15:37:08.814994945Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1710,7 +1722,7 @@ entries:
     version: 0.1.0-dev.0.main.97
   - apiVersion: v2
     appVersion: 614c27e
-    created: "2022-08-03T12:04:13.736869267Z"
+    created: "2022-08-03T15:37:08.813172618Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1724,7 +1736,7 @@ entries:
     version: 0.1.0-dev.0.main.96
   - apiVersion: v2
     appVersion: a62ba9f
-    created: "2022-08-03T12:04:13.734992289Z"
+    created: "2022-08-03T15:37:08.810078173Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1738,7 +1750,7 @@ entries:
     version: 0.1.0-dev.0.main.95
   - apiVersion: v2
     appVersion: b8f22f5
-    created: "2022-08-03T12:04:13.733138011Z"
+    created: "2022-08-03T15:37:08.808264046Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -1752,7 +1764,7 @@ entries:
     version: 0.1.0-dev.0.main.94
   - apiVersion: v2
     appVersion: 38f714d
-    created: "2022-08-03T12:04:13.731274833Z"
+    created: "2022-08-03T15:37:08.80648852Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 41a84581e7bfbff1061f34ee0706039933b2fec6bbd9a71abd68e26c021d53cf
     name: cluster-addons
@@ -1762,7 +1774,7 @@ entries:
     version: 0.1.0-dev.0.main.87
   - apiVersion: v2
     appVersion: 8f7a2f4
-    created: "2022-08-03T12:04:13.729938149Z"
+    created: "2022-08-03T15:37:08.805192401Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 632bb9e0ec5f37016f3fe9bc595fbf4555c8899c6a28a47f06b0a6c884c8c474
     name: cluster-addons
@@ -1772,7 +1784,7 @@ entries:
     version: 0.1.0-dev.0.main.86
   - apiVersion: v2
     appVersion: 5ffc623
-    created: "2022-08-03T12:04:13.728625364Z"
+    created: "2022-08-03T15:37:08.803879482Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 358d47ab8ed56664f82d4eed9cca257f5476226fc4d7c07ee1ed982bd3f85bd3
     name: cluster-addons
@@ -1782,7 +1794,7 @@ entries:
     version: 0.1.0-dev.0.main.85
   - apiVersion: v2
     appVersion: 24c6bad
-    created: "2022-08-03T12:04:13.727208981Z"
+    created: "2022-08-03T15:37:08.802442561Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: f7d1e2f944833e7fef0fe775aef33a4702715c388716800fcb48d3bc3c461184
     name: cluster-addons
@@ -1792,7 +1804,7 @@ entries:
     version: 0.1.0-dev.0.main.84
   - apiVersion: v2
     appVersion: 3c6f0d4
-    created: "2022-08-03T12:04:13.724549413Z"
+    created: "2022-08-03T15:37:08.801175642Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 35b84b764e6ae7ec15c3dce9bd809c10a29012165b55213732bd9fbf3b579611
     name: cluster-addons
@@ -1802,7 +1814,7 @@ entries:
     version: 0.1.0-dev.0.main.83
   - apiVersion: v2
     appVersion: f4948c5
-    created: "2022-08-03T12:04:13.723227728Z"
+    created: "2022-08-03T15:37:08.799851323Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: f6d43c531093e7d712f6ae27446a098661f05afbc6e56274154298d6f552177d
     name: cluster-addons
@@ -1812,7 +1824,7 @@ entries:
     version: 0.1.0-dev.0.main.82
   - apiVersion: v2
     appVersion: 9aaa27e
-    created: "2022-08-03T12:04:13.721889444Z"
+    created: "2022-08-03T15:37:08.797850293Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 15ba5b2ff33ec440e42b0f1c43caa15e6852d66412a337a4c75116969398ac02
     name: cluster-addons
@@ -1822,7 +1834,7 @@ entries:
     version: 0.1.0-dev.0.main.81
   - apiVersion: v2
     appVersion: 11f6d48
-    created: "2022-08-03T12:04:13.720602159Z"
+    created: "2022-08-03T15:37:08.79629047Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 51b771b18ae1e4d1f4a9820e9452f6314fffbee1a8c54b4ce4557eea9025fb03
     name: cluster-addons
@@ -1832,7 +1844,7 @@ entries:
     version: 0.1.0-dev.0.main.80
   - apiVersion: v2
     appVersion: 77749b8
-    created: "2022-08-03T12:04:13.719306875Z"
+    created: "2022-08-03T15:37:08.795022452Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 37af1620f00f3a3ec1f746221cb2b9a6cf35d1d59cdeaf0c2a3cb4748d31d293
     name: cluster-addons
@@ -1842,7 +1854,7 @@ entries:
     version: 0.1.0-dev.0.main.79
   - apiVersion: v2
     appVersion: 860df38
-    created: "2022-08-03T12:04:13.717966391Z"
+    created: "2022-08-03T15:37:08.793696432Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: a5be01d8eedf369e01a8c419ca9a1446ec54cf81e24798834ee844ee35fc7d4c
     name: cluster-addons
@@ -1852,7 +1864,7 @@ entries:
     version: 0.1.0-dev.0.main.78
   - apiVersion: v2
     appVersion: f8f61c1
-    created: "2022-08-03T12:04:13.716625806Z"
+    created: "2022-08-03T15:37:08.792420714Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: fd8634abca0a41bd7b702308aeedc0b0042a35823ad1f364b814038925a85b8c
     name: cluster-addons
@@ -1862,7 +1874,7 @@ entries:
     version: 0.1.0-dev.0.main.77
   - apiVersion: v2
     appVersion: 91c7b7d
-    created: "2022-08-03T12:04:13.715196823Z"
+    created: "2022-08-03T15:37:08.791116494Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 9a8e728d8e8569553f13fa71419d7649ff24432ffcb6788d4568492e7afadd66
     name: cluster-addons
@@ -1872,7 +1884,7 @@ entries:
     version: 0.1.0-dev.0.main.74
   - apiVersion: v2
     appVersion: c0d54ac
-    created: "2022-08-03T12:04:13.713115248Z"
+    created: "2022-08-03T15:37:08.789768875Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 378feec7ef3b92aedd7d7f6ac838c419f08cb9de18612f090caa8703bf77faa2
     name: cluster-addons
@@ -1882,7 +1894,7 @@ entries:
     version: 0.1.0-dev.0.main.73
   - apiVersion: v2
     appVersion: 0fb5dd3
-    created: "2022-08-03T12:04:13.711435368Z"
+    created: "2022-08-03T15:37:08.788432755Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 46fe1630797cb974a68b7b993b287a342410876bc7b855ae4cd60a78aae43150
     name: cluster-addons
@@ -1892,7 +1904,7 @@ entries:
     version: 0.1.0-dev.0.main.72
   - apiVersion: v2
     appVersion: 0b8ded7
-    created: "2022-08-03T12:04:13.710091984Z"
+    created: "2022-08-03T15:37:08.787060735Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: ad00e2f56300de1d327fcf6e1c4e36aa938fa239f7154f06dd939e0d31992f1b
     name: cluster-addons
@@ -1902,7 +1914,7 @@ entries:
     version: 0.1.0-dev.0.main.71
   - apiVersion: v2
     appVersion: f2adbd9
-    created: "2022-08-03T12:04:13.708857898Z"
+    created: "2022-08-03T15:37:08.785124707Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: dc01444daec5574fc5be45f9f14a7fe55bf98fb280adae6fa65244ab3e56fd3c
     name: cluster-addons
@@ -1912,7 +1924,7 @@ entries:
     version: 0.1.0-dev.0.main.70
   - apiVersion: v2
     appVersion: 4e68ba5
-    created: "2022-08-03T12:04:13.707621313Z"
+    created: "2022-08-03T15:37:08.783638985Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: d02081b0339063f52dbf5804aa6a2f627a87760b35fe2d4e79245cbe2f97e1aa
     name: cluster-addons
@@ -1922,7 +1934,7 @@ entries:
     version: 0.1.0-dev.0.main.69
   - apiVersion: v2
     appVersion: 686e4b9
-    created: "2022-08-03T12:04:13.706353828Z"
+    created: "2022-08-03T15:37:08.782434467Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 709a7ebc19d3618b7d98b5b880a811b9eed67f41e356dae0c1df309721231897
     name: cluster-addons
@@ -1932,7 +1944,7 @@ entries:
     version: 0.1.0-dev.0.main.68
   - apiVersion: v2
     appVersion: b221419
-    created: "2022-08-03T12:04:13.705146542Z"
+    created: "2022-08-03T15:37:08.78127585Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: d69a667d51ecc51493a9e2655eef2ac4845f5116f57dd5c1f047b77dd053b082
     name: cluster-addons
@@ -1942,7 +1954,7 @@ entries:
     version: 0.1.0-dev.0.main.67
   - apiVersion: v2
     appVersion: "0121754"
-    created: "2022-08-03T12:04:13.703937257Z"
+    created: "2022-08-03T15:37:08.780080033Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: e1a71f36e8c278b3d8fe685d3531377fd92b8f5c5044f039f395be108bf02ccb
     name: cluster-addons
@@ -1952,7 +1964,7 @@ entries:
     version: 0.1.0-dev.0.main.66
   - apiVersion: v2
     appVersion: f571d1a
-    created: "2022-08-03T12:04:13.702733771Z"
+    created: "2022-08-03T15:37:08.778959516Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: b02d872f6b73b81194e3683196ad9fd98aad6d6d305d942be33fba4f09526b62
     name: cluster-addons
@@ -1962,7 +1974,7 @@ entries:
     version: 0.1.0-dev.0.main.65
   - apiVersion: v2
     appVersion: 1bfb5aa
-    created: "2022-08-03T12:04:13.701364887Z"
+    created: "2022-08-03T15:37:08.7778629Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 8c46f2f2a23775c3f8026f857859ab03b4a935301c4d98a4e5b42eefa0a04483
     name: cluster-addons
@@ -1972,7 +1984,7 @@ entries:
     version: 0.1.0-dev.0.main.64
   - apiVersion: v2
     appVersion: 2c7c7ce
-    created: "2022-08-03T12:04:13.699643607Z"
+    created: "2022-08-03T15:37:08.776761884Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 861a0f89bcc4f778ab42c7d842c4c90a7d544a12f2c8f2fcf302cfea928e8cec
     name: cluster-addons
@@ -1982,7 +1994,7 @@ entries:
     version: 0.1.0-dev.0.main.63
   - apiVersion: v2
     appVersion: "7221730"
-    created: "2022-08-03T12:04:13.69860722Z"
+    created: "2022-08-03T15:37:08.775611767Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: f65e8632faf05a0ee37e8f64d936ee9afb470997a24a214377ed77cbb4cc19ab
     name: cluster-addons
@@ -1992,7 +2004,7 @@ entries:
     version: 0.1.0-dev.0.main.62
   - apiVersion: v2
     appVersion: 22d2550
-    created: "2022-08-03T12:04:13.697557132Z"
+    created: "2022-08-03T15:37:08.773403335Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: d2a9e4ec5b5a5a5809bf85b8183f06a4fb04e4aab3da8ed7bb17c72a9e61f471
     name: cluster-addons
@@ -2002,7 +2014,7 @@ entries:
     version: 0.1.0-dev.0.main.61
   - apiVersion: v2
     appVersion: 0f4df27
-    created: "2022-08-03T12:04:13.696592243Z"
+    created: "2022-08-03T15:37:08.772453121Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: a2b37f8d4b05af6d4ec886f488fc3940d1a78cf047bc59e31051a115c7ba92c6
     name: cluster-addons
@@ -2012,7 +2024,7 @@ entries:
     version: 0.1.0-dev.0.main.60
   - apiVersion: v2
     appVersion: bbea44b
-    created: "2022-08-03T12:04:13.695625355Z"
+    created: "2022-08-03T15:37:08.771520807Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: f586ccad74b8d1627dc86721331d247bb3068781040c0faf3b9b8d2f6af4588e
     name: cluster-addons
@@ -2022,7 +2034,7 @@ entries:
     version: 0.1.0-dev.0.main.59
   - apiVersion: v2
     appVersion: 2a2c486
-    created: "2022-08-03T12:04:13.694752665Z"
+    created: "2022-08-03T15:37:08.770668094Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: c056edb99d54d8e049380e90a603babce440d85752056aedc021806ed4deeea6
     name: cluster-addons
@@ -2032,7 +2044,7 @@ entries:
     version: 0.1.0-dev.0.main.58
   - apiVersion: v2
     appVersion: fc0ceb4
-    created: "2022-08-03T12:04:13.693850676Z"
+    created: "2022-08-03T15:37:08.769806082Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 520a304bd51251e381877051f3ce83fa225098e6ba9b0d463ec2e304f1406cad
     name: cluster-addons
@@ -2042,7 +2054,7 @@ entries:
     version: 0.1.0-dev.0.main.57
   - apiVersion: v2
     appVersion: d2c10e6
-    created: "2022-08-03T12:04:13.692990586Z"
+    created: "2022-08-03T15:37:08.768929369Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 6d030d37fe74cb80794f41cbf0914df316fde75f1acc8cf6ff5d3116a8881cff
     name: cluster-addons
@@ -2052,7 +2064,7 @@ entries:
     version: 0.1.0-dev.0.main.56
   - apiVersion: v2
     appVersion: 1aa17b1
-    created: "2022-08-03T12:04:13.692149596Z"
+    created: "2022-08-03T15:37:08.767966755Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: c0d48852b0b37257b9692b65aa5735dcdd9883343f5a2486178938c9b0c1d283
     name: cluster-addons
@@ -2062,7 +2074,7 @@ entries:
     version: 0.1.0-dev.0.main.55
   - apiVersion: v2
     appVersion: "2849e94"
-    created: "2022-08-03T12:04:13.691251307Z"
+    created: "2022-08-03T15:37:08.767119042Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 692d5dd58bb2f3192200cc318ea9912b54f48d92656307692eee01657673eac7
     name: cluster-addons
@@ -2072,7 +2084,7 @@ entries:
     version: 0.1.0-dev.0.main.54
   - apiVersion: v2
     appVersion: 63e2610
-    created: "2022-08-03T12:04:13.690286318Z"
+    created: "2022-08-03T15:37:08.766222929Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 461b28cd5c956ffd7bb62359ae2e5a5d466ec9dd701c96728a64318ad5b1698f
     name: cluster-addons
@@ -2082,7 +2094,7 @@ entries:
     version: 0.1.0-dev.0.main.53
   - apiVersion: v2
     appVersion: 74bf7a2
-    created: "2022-08-03T12:04:13.689076132Z"
+    created: "2022-08-03T15:37:08.765482418Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: efe28cbcd70c75fe645ebb6bb7f5af3e7307e6b765c80e3210041a9ca9a48d55
     name: cluster-addons
@@ -2092,7 +2104,7 @@ entries:
     version: 0.1.0-dev.0.main.52
   - apiVersion: v2
     appVersion: 36d4970
-    created: "2022-08-03T12:04:13.688040745Z"
+    created: "2022-08-03T15:37:08.764670006Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 8a1b7f4eb58257caa8b549514c033a3ebfec514c87d89ad70159b6382fb2d443
     name: cluster-addons
@@ -2102,7 +2114,7 @@ entries:
     version: 0.1.0-dev.0.main.51
   - apiVersion: v2
     appVersion: 04d46a3
-    created: "2022-08-03T12:04:13.687062056Z"
+    created: "2022-08-03T15:37:08.763820794Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: d2a72a00ad3da7d28548512126c7128f42e17b5ae4dc1ce48ae13f9b0ef84fd5
     name: cluster-addons
@@ -2112,7 +2124,7 @@ entries:
     version: 0.1.0-dev.0.main.50
   - apiVersion: v2
     appVersion: "0404769"
-    created: "2022-08-03T12:04:13.686343465Z"
+    created: "2022-08-03T15:37:08.762638077Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 30a72a3193d993cd025892e7ded2bf3562fbafb14bcc0d084d16bae69e31906e
     name: cluster-addons
@@ -2122,7 +2134,7 @@ entries:
     version: 0.1.0-dev.0.main.49
   - apiVersion: v2
     appVersion: bf67ed7
-    created: "2022-08-03T12:04:13.685576074Z"
+    created: "2022-08-03T15:37:08.761606361Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: daf7868c52c2ffaa8f79d6bfe43d88086b1bc906fd268b02b805e02686d9b2c8
     name: cluster-addons
@@ -2132,7 +2144,7 @@ entries:
     version: 0.1.0-dev.0.main.48
   - apiVersion: v2
     appVersion: a5a39c9
-    created: "2022-08-03T12:04:13.684848482Z"
+    created: "2022-08-03T15:37:08.760553746Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 9e8a1afebc99b2742f8a1b9875bfb60c15bc251923d8c7be5998af58228032c5
     name: cluster-addons
@@ -2142,7 +2154,7 @@ entries:
     version: 0.1.0-dev.0.main.47
   - apiVersion: v2
     appVersion: 5cfb9f2
-    created: "2022-08-03T12:04:13.684114691Z"
+    created: "2022-08-03T15:37:08.759795135Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: b99e99da0c133409b1da38f20e7a24c120ee6005aae47bf677084a76ff690d7b
     name: cluster-addons
@@ -2152,7 +2164,7 @@ entries:
     version: 0.1.0-dev.0.main.46
   - apiVersion: v2
     appVersion: 5e87b53
-    created: "2022-08-03T12:04:13.6833336Z"
+    created: "2022-08-03T15:37:08.759018523Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: df876a9e73611c996dc0c4dd2f0642d4c5aa4785fb8a2f1f8547dfd5e3927275
     name: cluster-addons
@@ -2162,7 +2174,7 @@ entries:
     version: 0.1.0-dev.0.main.44
   - apiVersion: v2
     appVersion: 0be6d7b
-    created: "2022-08-03T12:04:13.682656708Z"
+    created: "2022-08-03T15:37:08.758339913Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 7992a3fb39b54946c59592b19dd966f3a2e0958f6429986f64f6a68a4bc66638
     name: cluster-addons
@@ -2172,7 +2184,7 @@ entries:
     version: 0.1.0-dev.0.main.43
   - apiVersion: v2
     appVersion: 868301c
-    created: "2022-08-03T12:04:13.681983416Z"
+    created: "2022-08-03T15:37:08.757681504Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: a457f86168753337224358ec5c00bcb77826d9d9338040bb38bd562ba0a190c1
     name: cluster-addons
@@ -2182,7 +2194,7 @@ entries:
     version: 0.1.0-dev.0.main.42
   - apiVersion: v2
     appVersion: 681f651
-    created: "2022-08-03T12:04:13.681327024Z"
+    created: "2022-08-03T15:37:08.756993194Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 5455846436390869324e1f7413b9de8027bbaed0f862b83f918dc498384a7610
     name: cluster-addons
@@ -2192,7 +2204,7 @@ entries:
     version: 0.1.0-dev.0.main.41
   - apiVersion: v2
     appVersion: 53a6a95
-    created: "2022-08-03T12:04:13.680666932Z"
+    created: "2022-08-03T15:37:08.756265283Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 8e6870d9178421e7159c2b1e6539a95a30e5a141607db8b1ff5661f218418052
     name: cluster-addons
@@ -2202,7 +2214,7 @@ entries:
     version: 0.1.0-dev.0.main.40
   - apiVersion: v2
     appVersion: "1831861"
-    created: "2022-08-03T12:04:13.68000124Z"
+    created: "2022-08-03T15:37:08.755610473Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 77132db88bf491d9ec2cff40652fd6463a312ea15312ba7a0628cbf09fb37758
     name: cluster-addons
@@ -2212,7 +2224,7 @@ entries:
     version: 0.1.0-dev.0.main.39
   - apiVersion: v2
     appVersion: 7fa6158
-    created: "2022-08-03T12:04:13.679337648Z"
+    created: "2022-08-03T15:37:08.754980564Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 287f19f4954d545cd1ff971a01757b719c34bd0a6c4a831d021944e1a9fa217d
     name: cluster-addons
@@ -2222,7 +2234,7 @@ entries:
     version: 0.1.0-dev.0.main.38
   - apiVersion: v2
     appVersion: 77c9d08
-    created: "2022-08-03T12:04:13.678409159Z"
+    created: "2022-08-03T15:37:08.754345755Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 3aef98de6c51068923c047c4ec9391e25a04798b5b7342a3ab1a28aa0a0082e7
     name: cluster-addons
@@ -2232,7 +2244,7 @@ entries:
     version: 0.1.0-dev.0.main.37
   - apiVersion: v2
     appVersion: 5b4d8db
-    created: "2022-08-03T12:04:13.677566269Z"
+    created: "2022-08-03T15:37:08.753728646Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: b5f3d9cf24d4f99c81b914316b202751b6a41208d14eaddac83026a576a38605
     name: cluster-addons
@@ -2242,7 +2254,7 @@ entries:
     version: 0.1.0-dev.0.main.36
   - apiVersion: v2
     appVersion: f27b25b
-    created: "2022-08-03T12:04:13.676458082Z"
+    created: "2022-08-03T15:37:08.753041636Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 981adb24329fa4b0b25aba0c97cc3e06945e5a332b9aeb368b8674a79d33c8ea
     name: cluster-addons
@@ -2252,7 +2264,7 @@ entries:
     version: 0.1.0-dev.0.main.35
   - apiVersion: v2
     appVersion: e85a877
-    created: "2022-08-03T12:04:13.675880989Z"
+    created: "2022-08-03T15:37:08.752256024Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: d205b36f77609324e4de86101b41500d4197044c72b65c35263613229380dd62
     name: cluster-addons
@@ -2262,7 +2274,7 @@ entries:
     version: 0.1.0-dev.0.main.34
   - apiVersion: v2
     appVersion: a042293
-    created: "2022-08-03T12:04:13.675279596Z"
+    created: "2022-08-03T15:37:08.751349011Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: adf53b0fd4fb9051ce19c0dba59a642fb44b7b99c37072e82f2e82a8687eca5c
     name: cluster-addons
@@ -2272,7 +2284,7 @@ entries:
     version: 0.1.0-dev.0.main.33
   - apiVersion: v2
     appVersion: 7bc3204
-    created: "2022-08-03T12:04:13.674679703Z"
+    created: "2022-08-03T15:37:08.750486798Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: e6e00ebbdead260abc825815d704660c749104a590f9f38ba1959db373145ad3
     name: cluster-addons
@@ -2282,7 +2294,7 @@ entries:
     version: 0.1.0-dev.0.main.32
   - apiVersion: v2
     appVersion: c38e01b
-    created: "2022-08-03T12:04:13.67408911Z"
+    created: "2022-08-03T15:37:08.749374582Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 5f023f944d41617227ac6e356f62517cc3900e6c9568d6d87fe830253c0f3af4
     name: cluster-addons
@@ -2292,7 +2304,7 @@ entries:
     version: 0.1.0-dev.0.main.31
   - apiVersion: v2
     appVersion: e0894d6
-    created: "2022-08-03T12:04:13.673520117Z"
+    created: "2022-08-03T15:37:08.748813874Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 7d16d0e9e87a05f37cf948a0bc5ca5c772cd8584071ddad1add0559a07b46100
     name: cluster-addons
@@ -2302,7 +2314,7 @@ entries:
     version: 0.1.0-dev.0.main.30
   - apiVersion: v2
     appVersion: 6be5ddc
-    created: "2022-08-03T12:04:13.673022322Z"
+    created: "2022-08-03T15:37:08.748278566Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: b44cb90b21c6b4110ad016961bc93778eaa0a5534d21bc25cc8dfabb1e7f1cf1
     name: cluster-addons
@@ -2312,7 +2324,7 @@ entries:
     version: 0.1.0-dev.0.main.29
   - apiVersion: v2
     appVersion: 76b0be9
-    created: "2022-08-03T12:04:13.672608627Z"
+    created: "2022-08-03T15:37:08.74785796Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 194abb45099a23bcbd4eea7797cdb99ebbef7229ea0157fbcd82b4b224b3ab19
     name: cluster-addons
@@ -2322,7 +2334,7 @@ entries:
     version: 0.1.0-dev.0.main.28
   - apiVersion: v2
     appVersion: b9669b9
-    created: "2022-08-03T12:04:13.672331631Z"
+    created: "2022-08-03T15:37:08.747565455Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 7ab685d33e73b8f7eeeb696f7a11d894f8b85ad3d818d632499f6d66084aff1d
     name: cluster-addons
@@ -2332,7 +2344,7 @@ entries:
     version: 0.1.0-dev.0.main.27
   - apiVersion: v2
     appVersion: b2ffcc8
-    created: "2022-08-03T12:04:13.672044234Z"
+    created: "2022-08-03T15:37:08.747253351Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 2f95eacc29e3166d4452743fe7c224efc18f40034f2b3fadff1f84aee3e29b8e
     name: cluster-addons
@@ -2342,7 +2354,7 @@ entries:
     version: 0.1.0-dev.0.main.26
   - apiVersion: v2
     appVersion: 480c0f7
-    created: "2022-08-03T12:04:13.671832737Z"
+    created: "2022-08-03T15:37:08.747029548Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 1b753a234edd2878e5e7250d73da855865208a583981210ba179fbf05c718e55
     name: cluster-addons
@@ -2352,7 +2364,7 @@ entries:
     version: 0.1.0-dev.0.main.25
   - apiVersion: v2
     appVersion: 2af968d
-    created: "2022-08-03T12:04:13.671614739Z"
+    created: "2022-08-03T15:37:08.746803044Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: d4b6e88303f5e4d29e278d756090dcb423fc75891d15beceb0e03f5147a81178
     name: cluster-addons
@@ -2362,7 +2374,7 @@ entries:
     version: 0.1.0-dev.0.main.24
   - apiVersion: v2
     appVersion: 7dabd72
-    created: "2022-08-03T12:04:13.671380442Z"
+    created: "2022-08-03T15:37:08.746550641Z"
     description: Helm chart that deploys cluster addons for a CAPI cluster.
     digest: 70ff6e33e2e5573beb959ffd52d55cf251f074c54ba4110c5ae5d9175bbb019c
     name: cluster-addons
@@ -2372,7 +2384,7 @@ entries:
     version: 0.1.0-dev.0.main.23
   - apiVersion: v2
     appVersion: 2a9258f
-    created: "2022-08-03T12:04:13.671138645Z"
+    created: "2022-08-03T15:37:08.746305237Z"
     dependencies:
     - name: tigera-operator
       repository: https://docs.projectcalico.org/charts
@@ -2386,7 +2398,7 @@ entries:
     version: 0.1.0-dev.0.main.22
   - apiVersion: v2
     appVersion: 58bcf86
-    created: "2022-08-03T12:04:13.668836172Z"
+    created: "2022-08-03T15:37:08.744105505Z"
     description: Helm chart for deploying cluster addons for a CAPI cluster.
     digest: f84739fe8b87f1b42d3c445060314914851b557d52f262da03b427e508f08d27
     name: cluster-addons
@@ -2396,7 +2408,7 @@ entries:
     version: 0.1.0-dev.0.main.21
   - apiVersion: v2
     appVersion: 1c36f5e
-    created: "2022-08-03T12:04:13.668361578Z"
+    created: "2022-08-03T15:37:08.743851501Z"
     description: Helm chart for deploying cluster addons for a CAPI cluster.
     digest: 26eee5901203b46cd09aa7c61959497f92ec81bc36f064f763ef769bc6548222
     name: cluster-addons
@@ -2406,7 +2418,7 @@ entries:
     version: 0.1.0-dev.0.main.20
   - apiVersion: v2
     appVersion: a525daa
-    created: "2022-08-03T12:04:13.54394755Z"
+    created: "2022-08-03T15:37:08.625390263Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2420,7 +2432,7 @@ entries:
     version: 0.1.0-dev.0.helm-operator.93
   - apiVersion: v2
     appVersion: 294e0dd
-    created: "2022-08-03T12:04:13.542100772Z"
+    created: "2022-08-03T15:37:08.623632737Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2434,7 +2446,7 @@ entries:
     version: 0.1.0-dev.0.fix-nvidia-operator-config-path.140
   - apiVersion: v2
     appVersion: 53fb2b3
-    created: "2022-08-03T12:04:13.5397526Z"
+    created: "2022-08-03T15:37:08.621502406Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2448,7 +2460,7 @@ entries:
     version: 0.1.0-dev.0.fix-nvidia-operator-config-path.139
   - apiVersion: v2
     appVersion: 26847c5
-    created: "2022-08-03T12:04:13.536936633Z"
+    created: "2022-08-03T15:37:08.619367774Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2462,7 +2474,7 @@ entries:
     version: 0.1.0-dev.0.fix-internal-network.166
   - apiVersion: v2
     appVersion: 506d0be
-    created: "2022-08-03T12:04:13.534000468Z"
+    created: "2022-08-03T15:37:08.616977439Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2476,7 +2488,7 @@ entries:
     version: 0.1.0-dev.0.fix-internal-network.165
   - apiVersion: v2
     appVersion: "4997e86"
-    created: "2022-08-03T12:04:13.531436098Z"
+    created: "2022-08-03T15:37:08.613491088Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2489,8 +2501,22 @@ entries:
     - cluster-addons-0.1.0-dev.0.fix-internal-network.162.tgz
     version: 0.1.0-dev.0.fix-internal-network.162
   - apiVersion: v2
+    appVersion: 68ec56f
+    created: "2022-08-03T15:37:08.611145554Z"
+    dependencies:
+    - name: addon
+      repository: file://../addon
+      version: '>=0-0'
+    description: Helm chart that deploys cluster addons for a CAPI cluster.
+    digest: ff4528fdc7a4b47f96734f2443a75bf401d155367390cfd35ae7a4a62a27a44b
+    name: cluster-addons
+    type: application
+    urls:
+    - cluster-addons-0.1.0-dev.0.feature-trusted-cas.169.tgz
+    version: 0.1.0-dev.0.feature-trusted-cas.169
+  - apiVersion: v2
     appVersion: 031582c
-    created: "2022-08-03T12:04:13.528887228Z"
+    created: "2022-08-03T15:37:08.608742318Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2504,7 +2530,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.149
   - apiVersion: v2
     appVersion: 3528b70
-    created: "2022-08-03T12:04:13.526527756Z"
+    created: "2022-08-03T15:37:08.606507386Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2518,7 +2544,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.148
   - apiVersion: v2
     appVersion: aefc9c4
-    created: "2022-08-03T12:04:13.523859688Z"
+    created: "2022-08-03T15:37:08.603638943Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2532,7 +2558,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.147
   - apiVersion: v2
     appVersion: 2fa45ad
-    created: "2022-08-03T12:04:13.520941022Z"
+    created: "2022-08-03T15:37:08.601082006Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2546,7 +2572,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-grafana-dashboard.144
   - apiVersion: v2
     appVersion: afa22e9
-    created: "2022-08-03T12:04:13.51857865Z"
+    created: "2022-08-03T15:37:08.598895974Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2560,7 +2586,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-grafana-dashboard.143
   - apiVersion: v2
     appVersion: d82f8b6
-    created: "2022-08-03T12:04:13.516185979Z"
+    created: "2022-08-03T15:37:08.596719642Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2574,7 +2600,7 @@ entries:
     version: 0.1.0-dev.0.feature-ignore-azs.161
   - apiVersion: v2
     appVersion: 5ace74e
-    created: "2022-08-03T12:04:13.51355771Z"
+    created: "2022-08-03T15:37:08.594276106Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2588,7 +2614,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.169
   - apiVersion: v2
     appVersion: 1c1e38e
-    created: "2022-08-03T12:04:13.510654644Z"
+    created: "2022-08-03T15:37:08.590723654Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2602,7 +2628,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.168
   - apiVersion: v2
     appVersion: 2fe4d26
-    created: "2022-08-03T12:04:13.50759958Z"
+    created: "2022-08-03T15:37:08.588360419Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2616,7 +2642,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.163
   - apiVersion: v2
     appVersion: eb42ecf
-    created: "2022-08-03T12:04:13.50506381Z"
+    created: "2022-08-03T15:37:08.586026885Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2630,7 +2656,7 @@ entries:
     version: 0.1.0-dev.0.feature-capo-v1alpha5.154
   - apiVersion: v2
     appVersion: 865e7e1
-    created: "2022-08-03T12:04:13.50252324Z"
+    created: "2022-08-03T15:37:08.58363895Z"
     dependencies:
     - name: addon
       repository: file://../addon
@@ -2645,7 +2671,7 @@ entries:
   openstack-cluster:
   - apiVersion: v2
     appVersion: a155dd3
-    created: "2022-08-03T12:04:14.091616168Z"
+    created: "2022-08-03T15:37:09.148083433Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: c101fa816e68f95e5ab7451c70c34350d2cd4848efda95ca603e6e0301c932bb
@@ -2656,7 +2682,7 @@ entries:
     version: 0.1.0-dev.0.mofed-integration.79
   - apiVersion: v2
     appVersion: 90bd870
-    created: "2022-08-03T12:04:14.016161261Z"
+    created: "2022-08-03T15:37:09.076601584Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2673,7 +2699,7 @@ entries:
     version: 0.1.0-dev.0.main.168
   - apiVersion: v2
     appVersion: 5ec4046
-    created: "2022-08-03T12:04:14.011878212Z"
+    created: "2022-08-03T15:37:09.07292933Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2690,7 +2716,7 @@ entries:
     version: 0.1.0-dev.0.main.167
   - apiVersion: v2
     appVersion: e158efd
-    created: "2022-08-03T12:04:14.006513475Z"
+    created: "2022-08-03T15:37:09.069002872Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2707,7 +2733,7 @@ entries:
     version: 0.1.0-dev.0.main.162
   - apiVersion: v2
     appVersion: a0bcee5
-    created: "2022-08-03T12:04:14.002414724Z"
+    created: "2022-08-03T15:37:09.063746795Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2724,7 +2750,7 @@ entries:
     version: 0.1.0-dev.0.main.161
   - apiVersion: v2
     appVersion: 8c3da0b
-    created: "2022-08-03T12:04:13.998329872Z"
+    created: "2022-08-03T15:37:09.06001244Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2741,7 +2767,7 @@ entries:
     version: 0.1.0-dev.0.main.160
   - apiVersion: v2
     appVersion: b6a660b
-    created: "2022-08-03T12:04:13.992974536Z"
+    created: "2022-08-03T15:37:09.056184884Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2758,7 +2784,7 @@ entries:
     version: 0.1.0-dev.0.main.159
   - apiVersion: v2
     appVersion: a53b6aa
-    created: "2022-08-03T12:04:13.988954983Z"
+    created: "2022-08-03T15:37:09.051272212Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2775,7 +2801,7 @@ entries:
     version: 0.1.0-dev.0.main.158
   - apiVersion: v2
     appVersion: fa6c1b3
-    created: "2022-08-03T12:04:13.984889831Z"
+    created: "2022-08-03T15:37:09.047593858Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2792,7 +2818,7 @@ entries:
     version: 0.1.0-dev.0.main.157
   - apiVersion: v2
     appVersion: 094e78c
-    created: "2022-08-03T12:04:13.980518583Z"
+    created: "2022-08-03T15:37:09.043921004Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2809,7 +2835,7 @@ entries:
     version: 0.1.0-dev.0.main.155
   - apiVersion: v2
     appVersion: b6ea279
-    created: "2022-08-03T12:04:13.975873138Z"
+    created: "2022-08-03T15:37:09.039691042Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2826,7 +2852,7 @@ entries:
     version: 0.1.0-dev.0.main.153
   - apiVersion: v2
     appVersion: 619d334
-    created: "2022-08-03T12:04:13.971876885Z"
+    created: "2022-08-03T15:37:09.035429879Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2843,7 +2869,7 @@ entries:
     version: 0.1.0-dev.0.main.152
   - apiVersion: v2
     appVersion: e05d38d
-    created: "2022-08-03T12:04:13.967732134Z"
+    created: "2022-08-03T15:37:09.031764826Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2860,7 +2886,7 @@ entries:
     version: 0.1.0-dev.0.main.151
   - apiVersion: v2
     appVersion: 48ec077
-    created: "2022-08-03T12:04:13.962389298Z"
+    created: "2022-08-03T15:37:09.027856868Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2877,7 +2903,7 @@ entries:
     version: 0.1.0-dev.0.main.150
   - apiVersion: v2
     appVersion: 20d5f36
-    created: "2022-08-03T12:04:13.958357145Z"
+    created: "2022-08-03T15:37:09.022692593Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2894,7 +2920,7 @@ entries:
     version: 0.1.0-dev.0.main.149
   - apiVersion: v2
     appVersion: 58ca23b
-    created: "2022-08-03T12:04:13.954327093Z"
+    created: "2022-08-03T15:37:09.018978838Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2911,7 +2937,7 @@ entries:
     version: 0.1.0-dev.0.main.148
   - apiVersion: v2
     appVersion: e863259
-    created: "2022-08-03T12:04:13.949047956Z"
+    created: "2022-08-03T15:37:09.015113581Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2928,7 +2954,7 @@ entries:
     version: 0.1.0-dev.0.main.147
   - apiVersion: v2
     appVersion: 64baf2e
-    created: "2022-08-03T12:04:13.945050103Z"
+    created: "2022-08-03T15:37:09.010075007Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2945,7 +2971,7 @@ entries:
     version: 0.1.0-dev.0.main.146
   - apiVersion: v2
     appVersion: d43ca26
-    created: "2022-08-03T12:04:13.941213848Z"
+    created: "2022-08-03T15:37:09.006465654Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2962,7 +2988,7 @@ entries:
     version: 0.1.0-dev.0.main.145
   - apiVersion: v2
     appVersion: f6cba31
-    created: "2022-08-03T12:04:13.936138808Z"
+    created: "2022-08-03T15:37:09.003017104Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2979,7 +3005,7 @@ entries:
     version: 0.1.0-dev.0.main.141
   - apiVersion: v2
     appVersion: 8589a10
-    created: "2022-08-03T12:04:13.93258415Z"
+    created: "2022-08-03T15:37:08.999301749Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -2996,7 +3022,7 @@ entries:
     version: 0.1.0-dev.0.main.136
   - apiVersion: v2
     appVersion: 8f14e9d
-    created: "2022-08-03T12:04:13.928962693Z"
+    created: "2022-08-03T15:37:08.995335891Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3013,7 +3039,7 @@ entries:
     version: 0.1.0-dev.0.main.134
   - apiVersion: v2
     appVersion: 322275f
-    created: "2022-08-03T12:04:13.925225838Z"
+    created: "2022-08-03T15:37:08.992020242Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3030,7 +3056,7 @@ entries:
     version: 0.1.0-dev.0.main.133
   - apiVersion: v2
     appVersion: 999b2c0
-    created: "2022-08-03T12:04:13.920849189Z"
+    created: "2022-08-03T15:37:08.988729694Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3047,7 +3073,7 @@ entries:
     version: 0.1.0-dev.0.main.132
   - apiVersion: v2
     appVersion: e8a4421
-    created: "2022-08-03T12:04:13.917343731Z"
+    created: "2022-08-03T15:37:08.984941839Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3064,7 +3090,7 @@ entries:
     version: 0.1.0-dev.0.main.131
   - apiVersion: v2
     appVersion: "1322175"
-    created: "2022-08-03T12:04:13.913657674Z"
+    created: "2022-08-03T15:37:08.981194084Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3081,7 +3107,7 @@ entries:
     version: 0.1.0-dev.0.main.130
   - apiVersion: v2
     appVersion: f31d8a0
-    created: "2022-08-03T12:04:13.909710221Z"
+    created: "2022-08-03T15:37:08.977956636Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3098,7 +3124,7 @@ entries:
     version: 0.1.0-dev.0.main.129
   - apiVersion: v2
     appVersion: 8385f3f
-    created: "2022-08-03T12:04:13.90559997Z"
+    created: "2022-08-03T15:37:08.974684488Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3115,7 +3141,7 @@ entries:
     version: 0.1.0-dev.0.main.128
   - apiVersion: v2
     appVersion: d7510dc
-    created: "2022-08-03T12:04:13.902160411Z"
+    created: "2022-08-03T15:37:08.970502327Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3132,7 +3158,7 @@ entries:
     version: 0.1.0-dev.0.main.127
   - apiVersion: v2
     appVersion: a1dd093
-    created: "2022-08-03T12:04:13.898684752Z"
+    created: "2022-08-03T15:37:08.967221779Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3149,7 +3175,7 @@ entries:
     version: 0.1.0-dev.0.main.126
   - apiVersion: v2
     appVersion: 1b57d25
-    created: "2022-08-03T12:04:13.894373003Z"
+    created: "2022-08-03T15:37:08.963998031Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3166,7 +3192,7 @@ entries:
     version: 0.1.0-dev.0.main.125
   - apiVersion: v2
     appVersion: f5009f3
-    created: "2022-08-03T12:04:13.891107241Z"
+    created: "2022-08-03T15:37:08.960806184Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3183,7 +3209,7 @@ entries:
     version: 0.1.0-dev.0.main.124
   - apiVersion: v2
     appVersion: f78cd29
-    created: "2022-08-03T12:04:13.88787218Z"
+    created: "2022-08-03T15:37:08.956804026Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3200,7 +3226,7 @@ entries:
     version: 0.1.0-dev.0.main.123
   - apiVersion: v2
     appVersion: "7233517"
-    created: "2022-08-03T12:04:13.884636218Z"
+    created: "2022-08-03T15:37:08.953803882Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3217,7 +3243,7 @@ entries:
     version: 0.1.0-dev.0.main.122
   - apiVersion: v2
     appVersion: fed5876
-    created: "2022-08-03T12:04:13.880649965Z"
+    created: "2022-08-03T15:37:08.950876739Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3234,7 +3260,7 @@ entries:
     version: 0.1.0-dev.0.main.121
   - apiVersion: v2
     appVersion: 2a26c83
-    created: "2022-08-03T12:04:13.877440003Z"
+    created: "2022-08-03T15:37:08.947900795Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3251,7 +3277,7 @@ entries:
     version: 0.1.0-dev.0.main.120
   - apiVersion: v2
     appVersion: 65b7380
-    created: "2022-08-03T12:04:13.873826146Z"
+    created: "2022-08-03T15:37:08.944015338Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3268,7 +3294,7 @@ entries:
     version: 0.1.0-dev.0.main.118
   - apiVersion: v2
     appVersion: 31b1a23
-    created: "2022-08-03T12:04:13.87090848Z"
+    created: "2022-08-03T15:37:08.940843492Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3285,7 +3311,7 @@ entries:
     version: 0.1.0-dev.0.main.117
   - apiVersion: v2
     appVersion: 49b2c35
-    created: "2022-08-03T12:04:13.86674793Z"
+    created: "2022-08-03T15:37:08.938162252Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3302,7 +3328,7 @@ entries:
     version: 0.1.0-dev.0.main.116
   - apiVersion: v2
     appVersion: 4e6d1fd
-    created: "2022-08-03T12:04:13.863930763Z"
+    created: "2022-08-03T15:37:08.935507413Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3319,7 +3345,7 @@ entries:
     version: 0.1.0-dev.0.main.115
   - apiVersion: v2
     appVersion: d172024
-    created: "2022-08-03T12:04:13.861160096Z"
+    created: "2022-08-03T15:37:08.932906075Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3336,7 +3362,7 @@ entries:
     version: 0.1.0-dev.0.main.114
   - apiVersion: v2
     appVersion: 8f32d7a
-    created: "2022-08-03T12:04:13.858422428Z"
+    created: "2022-08-03T15:37:08.929776829Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3353,7 +3379,7 @@ entries:
     version: 0.1.0-dev.0.main.113
   - apiVersion: v2
     appVersion: 0eb14ce
-    created: "2022-08-03T12:04:13.855564162Z"
+    created: "2022-08-03T15:37:08.926761685Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3370,7 +3396,7 @@ entries:
     version: 0.1.0-dev.0.main.112
   - apiVersion: v2
     appVersion: 9c807f7
-    created: "2022-08-03T12:04:13.852278001Z"
+    created: "2022-08-03T15:37:08.924172747Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3387,7 +3413,7 @@ entries:
     version: 0.1.0-dev.0.main.111
   - apiVersion: v2
     appVersion: b11f7b9
-    created: "2022-08-03T12:04:13.848458846Z"
+    created: "2022-08-03T15:37:08.921613809Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -3404,7 +3430,7 @@ entries:
     version: 0.1.0-dev.0.main.110
   - apiVersion: v2
     appVersion: bf453de
-    created: "2022-08-03T12:04:13.84559868Z"
+    created: "2022-08-03T15:37:08.91896007Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3420,7 +3446,7 @@ entries:
     version: 0.1.0-dev.0.main.109
   - apiVersion: v2
     appVersion: 5b94ef8
-    created: "2022-08-03T12:04:13.842933011Z"
+    created: "2022-08-03T15:37:08.91553142Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3436,7 +3462,7 @@ entries:
     version: 0.1.0-dev.0.main.108
   - apiVersion: v2
     appVersion: c2d418d
-    created: "2022-08-03T12:04:13.839913547Z"
+    created: "2022-08-03T15:37:08.912717279Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3452,7 +3478,7 @@ entries:
     version: 0.1.0-dev.0.main.107
   - apiVersion: v2
     appVersion: 9f883c4
-    created: "2022-08-03T12:04:13.835550999Z"
+    created: "2022-08-03T15:37:08.909910638Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3468,7 +3494,7 @@ entries:
     version: 0.1.0-dev.0.main.106
   - apiVersion: v2
     appVersion: 109a689
-    created: "2022-08-03T12:04:13.832573634Z"
+    created: "2022-08-03T15:37:08.907055696Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3484,7 +3510,7 @@ entries:
     version: 0.1.0-dev.0.main.105
   - apiVersion: v2
     appVersion: cd86dd7
-    created: "2022-08-03T12:04:13.82955137Z"
+    created: "2022-08-03T15:37:08.902726932Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3500,7 +3526,7 @@ entries:
     version: 0.1.0-dev.0.main.104
   - apiVersion: v2
     appVersion: 997ccfc
-    created: "2022-08-03T12:04:13.826483006Z"
+    created: "2022-08-03T15:37:08.899922391Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3516,7 +3542,7 @@ entries:
     version: 0.1.0-dev.0.main.102
   - apiVersion: v2
     appVersion: ce65787
-    created: "2022-08-03T12:04:13.823213745Z"
+    created: "2022-08-03T15:37:08.897051849Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3532,7 +3558,7 @@ entries:
     version: 0.1.0-dev.0.main.101
   - apiVersion: v2
     appVersion: 297c09b
-    created: "2022-08-03T12:04:13.819549988Z"
+    created: "2022-08-03T15:37:08.894196707Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3548,7 +3574,7 @@ entries:
     version: 0.1.0-dev.0.main.100
   - apiVersion: v2
     appVersion: f1959c2
-    created: "2022-08-03T12:04:14.089856589Z"
+    created: "2022-08-03T15:37:09.147034017Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3564,7 +3590,7 @@ entries:
     version: 0.1.0-dev.0.main.99
   - apiVersion: v2
     appVersion: 3194ad4
-    created: "2022-08-03T12:04:14.086196532Z"
+    created: "2022-08-03T15:37:09.144204576Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3580,7 +3606,7 @@ entries:
     version: 0.1.0-dev.0.main.98
   - apiVersion: v2
     appVersion: 6426a65
-    created: "2022-08-03T12:04:14.083226668Z"
+    created: "2022-08-03T15:37:09.141379434Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3596,7 +3622,7 @@ entries:
     version: 0.1.0-dev.0.main.97
   - apiVersion: v2
     appVersion: 614c27e
-    created: "2022-08-03T12:04:14.080252603Z"
+    created: "2022-08-03T15:37:09.137553778Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3612,7 +3638,7 @@ entries:
     version: 0.1.0-dev.0.main.96
   - apiVersion: v2
     appVersion: a62ba9f
-    created: "2022-08-03T12:04:14.077209239Z"
+    created: "2022-08-03T15:37:09.134765037Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3628,7 +3654,7 @@ entries:
     version: 0.1.0-dev.0.main.95
   - apiVersion: v2
     appVersion: b8f22f5
-    created: "2022-08-03T12:04:14.073188486Z"
+    created: "2022-08-03T15:37:09.131968696Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -3644,7 +3670,7 @@ entries:
     version: 0.1.0-dev.0.main.94
   - apiVersion: v2
     appVersion: 38f714d
-    created: "2022-08-03T12:04:14.070228421Z"
+    created: "2022-08-03T15:37:09.129154855Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 50348b27c5a87cb3cba27026b2d67dc69e8e2a98c6297041930cf5ef6faeb506
@@ -3655,7 +3681,7 @@ entries:
     version: 0.1.0-dev.0.main.87
   - apiVersion: v2
     appVersion: 8f7a2f4
-    created: "2022-08-03T12:04:14.068954636Z"
+    created: "2022-08-03T15:37:09.127725534Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: ad9147f8336d6f3b53b2c9bd0a545d70cfae420a9668a428da1d47ffc1af1dee
@@ -3666,7 +3692,7 @@ entries:
     version: 0.1.0-dev.0.main.86
   - apiVersion: v2
     appVersion: 5ffc623
-    created: "2022-08-03T12:04:14.06782915Z"
+    created: "2022-08-03T15:37:09.125582502Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 4371738d61ec62b68d2c7cb6da2163ef4c5e912615aaaef72c2918be130ec17b
@@ -3677,7 +3703,7 @@ entries:
     version: 0.1.0-dev.0.main.85
   - apiVersion: v2
     appVersion: 24c6bad
-    created: "2022-08-03T12:04:14.066708263Z"
+    created: "2022-08-03T15:37:09.124497086Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 70ce1a2873911e2892a160c50a864459a657c122b0ca55c3e066bf5d3b43b87d
@@ -3688,7 +3714,7 @@ entries:
     version: 0.1.0-dev.0.main.84
   - apiVersion: v2
     appVersion: 3c6f0d4
-    created: "2022-08-03T12:04:14.065523777Z"
+    created: "2022-08-03T15:37:09.123419371Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: b21703300ff22f77d2bb00681098a490bcba38dbd9a9ecffc3892a8bd225137b
@@ -3699,7 +3725,7 @@ entries:
     version: 0.1.0-dev.0.main.83
   - apiVersion: v2
     appVersion: f4948c5
-    created: "2022-08-03T12:04:14.064136193Z"
+    created: "2022-08-03T15:37:09.122318054Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: cf7e23c7beb7b7e263b3944c9f2b8dd840eda0752073fe48799954474e38a3f5
@@ -3710,7 +3736,7 @@ entries:
     version: 0.1.0-dev.0.main.82
   - apiVersion: v2
     appVersion: 9aaa27e
-    created: "2022-08-03T12:04:14.062958207Z"
+    created: "2022-08-03T15:37:09.121218338Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: de24586f7d4bb65994caccbf082003bc95cd2b3ce354fd79a48f1d8e6aaf0f25
@@ -3721,7 +3747,7 @@ entries:
     version: 0.1.0-dev.0.main.81
   - apiVersion: v2
     appVersion: 11f6d48
-    created: "2022-08-03T12:04:14.061426026Z"
+    created: "2022-08-03T15:37:09.120114922Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: b5b4d34264428c7ba6562f70e8a6bfca1129a7906d1148420fddd79608b88615
@@ -3732,7 +3758,7 @@ entries:
     version: 0.1.0-dev.0.main.80
   - apiVersion: v2
     appVersion: 77749b8
-    created: "2022-08-03T12:04:14.059641347Z"
+    created: "2022-08-03T15:37:09.119010706Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7bd77c11b6c46f5eb4b00f7e5d16681830de07faba8e2a240ed9685d9d423ec0
@@ -3743,7 +3769,7 @@ entries:
     version: 0.1.0-dev.0.main.79
   - apiVersion: v2
     appVersion: 860df38
-    created: "2022-08-03T12:04:14.05849726Z"
+    created: "2022-08-03T15:37:09.117873789Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 0a818e25a3632accce021272202c0596cf209045a1b20441b4015998d3f80f63
@@ -3754,7 +3780,7 @@ entries:
     version: 0.1.0-dev.0.main.78
   - apiVersion: v2
     appVersion: f8f61c1
-    created: "2022-08-03T12:04:14.057364874Z"
+    created: "2022-08-03T15:37:09.116788273Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 9598e3e7e22793cf579382d841da648b63180daac85cf703203a8a4db0afea43
@@ -3765,7 +3791,7 @@ entries:
     version: 0.1.0-dev.0.main.77
   - apiVersion: v2
     appVersion: 91c7b7d
-    created: "2022-08-03T12:04:14.056228887Z"
+    created: "2022-08-03T15:37:09.115449554Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: a3eabc64df941e873f6e5190212ccc3d8a320e76a5b540a05198cb24d034270f
@@ -3776,7 +3802,7 @@ entries:
     version: 0.1.0-dev.0.main.74
   - apiVersion: v2
     appVersion: c0d54ac
-    created: "2022-08-03T12:04:14.0551644Z"
+    created: "2022-08-03T15:37:09.113799529Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: ba19e0ce3e1043b9bb80d20185f306efa607a6b275466880c44f9f8058de6cba
@@ -3787,7 +3813,7 @@ entries:
     version: 0.1.0-dev.0.main.73
   - apiVersion: v2
     appVersion: 0fb5dd3
-    created: "2022-08-03T12:04:14.054094712Z"
+    created: "2022-08-03T15:37:09.112764514Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: a55d687f518f6dbec6a013121f560697d52aaa4ced67ce9ab0a8ecf67d996403
@@ -3798,7 +3824,7 @@ entries:
     version: 0.1.0-dev.0.main.72
   - apiVersion: v2
     appVersion: 0b8ded7
-    created: "2022-08-03T12:04:14.052966326Z"
+    created: "2022-08-03T15:37:09.111733899Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: c54ac0ba64a5718f33dee07487038efcfd3ea7811936ab59aa736b1586479d4c
@@ -3809,7 +3835,7 @@ entries:
     version: 0.1.0-dev.0.main.71
   - apiVersion: v2
     appVersion: f2adbd9
-    created: "2022-08-03T12:04:14.051870639Z"
+    created: "2022-08-03T15:37:09.110727984Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 5e2f2e04df7db44ed521e20aaa817ebf749d2e45a8391cea261fab862094a3e4
@@ -3820,7 +3846,7 @@ entries:
     version: 0.1.0-dev.0.main.70
   - apiVersion: v2
     appVersion: 4e68ba5
-    created: "2022-08-03T12:04:14.050791351Z"
+    created: "2022-08-03T15:37:09.10971717Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 49ba7daa2e26b36245574b18fd4150ecf9cbda1b60749c2910b303e0c7486d3a
@@ -3831,7 +3857,7 @@ entries:
     version: 0.1.0-dev.0.main.69
   - apiVersion: v2
     appVersion: 686e4b9
-    created: "2022-08-03T12:04:14.049619665Z"
+    created: "2022-08-03T15:37:09.108683854Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 8d158eb5782ef480d3bae20ba7a7dc11c2eb4ebde89ce32548aab04d849ac169
@@ -3842,7 +3868,7 @@ entries:
     version: 0.1.0-dev.0.main.68
   - apiVersion: v2
     appVersion: b221419
-    created: "2022-08-03T12:04:14.048050384Z"
+    created: "2022-08-03T15:37:09.10768954Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 668761fdf202a6f07e92cd7f120da16be4b0fccf614aa21325063d43d29d60c8
@@ -3853,7 +3879,7 @@ entries:
     version: 0.1.0-dev.0.main.67
   - apiVersion: v2
     appVersion: "0121754"
-    created: "2022-08-03T12:04:14.046386204Z"
+    created: "2022-08-03T15:37:09.106690125Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 81247f89e6a02204ab7130e0298eb5f7809894dda46a2c4c15fe8650312d189a
@@ -3864,7 +3890,7 @@ entries:
     version: 0.1.0-dev.0.main.66
   - apiVersion: v2
     appVersion: f571d1a
-    created: "2022-08-03T12:04:14.045313216Z"
+    created: "2022-08-03T15:37:09.10567961Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 13c87b2a30eb81e957d3b7ce75619c862bb02d52fad1a3ef9e2a7fe5617089a4
@@ -3875,7 +3901,7 @@ entries:
     version: 0.1.0-dev.0.main.65
   - apiVersion: v2
     appVersion: 1bfb5aa
-    created: "2022-08-03T12:04:14.044272529Z"
+    created: "2022-08-03T15:37:09.104640395Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 76377cddcbe40fbe6cf6be732d3dac3f02720933e647150e27338659f3301d29
@@ -3886,7 +3912,7 @@ entries:
     version: 0.1.0-dev.0.main.64
   - apiVersion: v2
     appVersion: 2c7c7ce
-    created: "2022-08-03T12:04:14.043232241Z"
+    created: "2022-08-03T15:37:09.103437977Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 24f48d86273e2501827fb1964ca125b86921bc3bcdf7beb69267f07f69bbfceb
@@ -3897,7 +3923,7 @@ entries:
     version: 0.1.0-dev.0.main.63
   - apiVersion: v2
     appVersion: "7221730"
-    created: "2022-08-03T12:04:14.042180253Z"
+    created: "2022-08-03T15:37:09.102094658Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: a9db08f36dd7c2e1b4697ed25a1dfb758bb4acb9c7e69dd394987dbe95ff433e
@@ -3908,7 +3934,7 @@ entries:
     version: 0.1.0-dev.0.main.62
   - apiVersion: v2
     appVersion: 22d2550
-    created: "2022-08-03T12:04:14.041089766Z"
+    created: "2022-08-03T15:37:09.100614836Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: c614e07e25a924b56d088139844be48022f5713fcf3005ccccef1ad184c5b7b7
@@ -3919,7 +3945,7 @@ entries:
     version: 0.1.0-dev.0.main.61
   - apiVersion: v2
     appVersion: 0f4df27
-    created: "2022-08-03T12:04:14.040036579Z"
+    created: "2022-08-03T15:37:09.099610221Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 8ecf237c1a71b590f8c68a062e1a25de10d42296333b841b301ad70cc745e8cf
@@ -3930,7 +3956,7 @@ entries:
     version: 0.1.0-dev.0.main.60
   - apiVersion: v2
     appVersion: bbea44b
-    created: "2022-08-03T12:04:14.038943392Z"
+    created: "2022-08-03T15:37:09.098611207Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7fa44fcc9f563b8ff6073c364b7be1fa4f1918287abc6a47604473febbf66bbd
@@ -3941,7 +3967,7 @@ entries:
     version: 0.1.0-dev.0.main.59
   - apiVersion: v2
     appVersion: 2a2c486
-    created: "2022-08-03T12:04:14.037868204Z"
+    created: "2022-08-03T15:37:09.097601992Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 574a79f59cbf902825c048cf708dbd2104d7bb4606c67a0de36af32d4cd2199a
@@ -3952,7 +3978,7 @@ entries:
     version: 0.1.0-dev.0.main.58
   - apiVersion: v2
     appVersion: fc0ceb4
-    created: "2022-08-03T12:04:14.036762217Z"
+    created: "2022-08-03T15:37:09.096559776Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 18bf62d945ac72c726d16acd0bcbe14469d1ce3d901734abe73919efca5299b9
@@ -3963,7 +3989,7 @@ entries:
     version: 0.1.0-dev.0.main.57
   - apiVersion: v2
     appVersion: d2c10e6
-    created: "2022-08-03T12:04:14.035295635Z"
+    created: "2022-08-03T15:37:09.095534561Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 1d2702c7761e7090673de62043b2a209d6c61c76a65639247b4a19e139459f32
@@ -3974,7 +4000,7 @@ entries:
     version: 0.1.0-dev.0.main.56
   - apiVersion: v2
     appVersion: 1aa17b1
-    created: "2022-08-03T12:04:14.033593755Z"
+    created: "2022-08-03T15:37:09.094560547Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 8208f018230d103de3fa9ee7e3cc65d0193edf37f9e3be5add39968c4f5ab14f
@@ -3985,7 +4011,7 @@ entries:
     version: 0.1.0-dev.0.main.55
   - apiVersion: v2
     appVersion: "2849e94"
-    created: "2022-08-03T12:04:14.032567967Z"
+    created: "2022-08-03T15:37:09.093565433Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: b142113c941da72f9047da727cd52ba04bd665f47239b99245cd288e28328204
@@ -3996,7 +4022,7 @@ entries:
     version: 0.1.0-dev.0.main.54
   - apiVersion: v2
     appVersion: 63e2610
-    created: "2022-08-03T12:04:14.031679078Z"
+    created: "2022-08-03T15:37:09.092597718Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 05414de2fc7d067032b2b06518b2917263d5cb3df4a01d8f3588d97f913a4f16
@@ -4007,7 +4033,7 @@ entries:
     version: 0.1.0-dev.0.main.53
   - apiVersion: v2
     appVersion: 74bf7a2
-    created: "2022-08-03T12:04:14.030892987Z"
+    created: "2022-08-03T15:37:09.091830307Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 89050f196167bd7d6501facd70560d9cd07d5ab11df3596cd93cb4510cde6cef
@@ -4018,7 +4044,7 @@ entries:
     version: 0.1.0-dev.0.main.52
   - apiVersion: v2
     appVersion: 36d4970
-    created: "2022-08-03T12:04:14.030261994Z"
+    created: "2022-08-03T15:37:09.090744191Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 16f308b65a8c1007498523c148916eeeb8a19077d8b4497a5cc09ebd1eb2a8f7
@@ -4029,7 +4055,7 @@ entries:
     version: 0.1.0-dev.0.main.51
   - apiVersion: v2
     appVersion: 04d46a3
-    created: "2022-08-03T12:04:14.029599702Z"
+    created: "2022-08-03T15:37:09.089547774Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7c9b644b9585daa232f8b1fbe990819bb2443d7def9d6fbf2052500a2499cf92
@@ -4040,7 +4066,7 @@ entries:
     version: 0.1.0-dev.0.main.50
   - apiVersion: v2
     appVersion: "0404769"
-    created: "2022-08-03T12:04:14.02893901Z"
+    created: "2022-08-03T15:37:09.088908064Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: b58fce91394e10080a661b9738849e9e0f0525274befa7f155c2b9cc44a39796
@@ -4051,7 +4077,7 @@ entries:
     version: 0.1.0-dev.0.main.49
   - apiVersion: v2
     appVersion: bf67ed7
-    created: "2022-08-03T12:04:14.028266818Z"
+    created: "2022-08-03T15:37:09.088241754Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 0162943cddb27d1e15bcdf01a6ae03d970cd7a41da172ed177d1cf8a474f389b
@@ -4062,7 +4088,7 @@ entries:
     version: 0.1.0-dev.0.main.48
   - apiVersion: v2
     appVersion: a5a39c9
-    created: "2022-08-03T12:04:14.027574526Z"
+    created: "2022-08-03T15:37:09.087603645Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: ad9564e89099ff87ab51c5df422d4b40823e59ceab32268a1c3e45661f0dd57a
@@ -4073,7 +4099,7 @@ entries:
     version: 0.1.0-dev.0.main.47
   - apiVersion: v2
     appVersion: 5cfb9f2
-    created: "2022-08-03T12:04:14.026914834Z"
+    created: "2022-08-03T15:37:09.086958736Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 338670b5a1c9ee300d6f31a4ce49dd19b12487af5feaa4e49f2d51a696b07f30
@@ -4084,7 +4110,7 @@ entries:
     version: 0.1.0-dev.0.main.46
   - apiVersion: v2
     appVersion: 5e87b53
-    created: "2022-08-03T12:04:14.026232242Z"
+    created: "2022-08-03T15:37:09.086307426Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: ab420a5c4c8ccee55d66802dd3f2062ef3ae629e87919662eafba74cd393b3c5
@@ -4095,7 +4121,7 @@ entries:
     version: 0.1.0-dev.0.main.44
   - apiVersion: v2
     appVersion: 0be6d7b
-    created: "2022-08-03T12:04:14.025519051Z"
+    created: "2022-08-03T15:37:09.085663017Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7bbf55bda77d589d7a324d1e25fdc0ac35013ce0d7299460bffb6f0ebde98654
@@ -4106,7 +4132,7 @@ entries:
     version: 0.1.0-dev.0.main.43
   - apiVersion: v2
     appVersion: 868301c
-    created: "2022-08-03T12:04:14.024884058Z"
+    created: "2022-08-03T15:37:09.085088708Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 64c16d0eee49f67a2318fc01d9f6be6b2ed05b0e89ed9f06066e7b201ecfa5f5
@@ -4117,7 +4143,7 @@ entries:
     version: 0.1.0-dev.0.main.42
   - apiVersion: v2
     appVersion: 681f651
-    created: "2022-08-03T12:04:14.02389077Z"
+    created: "2022-08-03T15:37:09.084474999Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 73d4e3aeea0a2d33d15863fe6ac465ab6f259400265ae319123680e8a7130368
@@ -4128,7 +4154,7 @@ entries:
     version: 0.1.0-dev.0.main.41
   - apiVersion: v2
     appVersion: 53a6a95
-    created: "2022-08-03T12:04:14.02307168Z"
+    created: "2022-08-03T15:37:09.08387059Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 00af6376861dccdb65d629580cdcfb54f27f960d8177056639c6ab65b044d6ed
@@ -4139,7 +4165,7 @@ entries:
     version: 0.1.0-dev.0.main.40
   - apiVersion: v2
     appVersion: "1831861"
-    created: "2022-08-03T12:04:14.02217529Z"
+    created: "2022-08-03T15:37:09.083276782Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 039c17eea8e6e748a92048e6268e9463032639515a0845714a193ade6791ddfc
@@ -4150,7 +4176,7 @@ entries:
     version: 0.1.0-dev.0.main.39
   - apiVersion: v2
     appVersion: 7fa6158
-    created: "2022-08-03T12:04:14.021276901Z"
+    created: "2022-08-03T15:37:09.082684273Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: ed763ac7dae382cbccc4e558262a793974fdb7075fd0cd53549f183654b7755f
@@ -4161,7 +4187,7 @@ entries:
     version: 0.1.0-dev.0.main.38
   - apiVersion: v2
     appVersion: 77c9d08
-    created: "2022-08-03T12:04:14.020683808Z"
+    created: "2022-08-03T15:37:09.082082264Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 489ee225f52317ec5f47c625a25703cbf04fc3b54da000ae51d38dad45ddc994
@@ -4172,7 +4198,7 @@ entries:
     version: 0.1.0-dev.0.main.37
   - apiVersion: v2
     appVersion: f27b25b
-    created: "2022-08-03T12:04:14.020085515Z"
+    created: "2022-08-03T15:37:09.081472755Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 84e8abe583897ae342f3a47d425fcd3c9998bae5cf23e0a73a2bf2fb93e5430f
@@ -4183,7 +4209,7 @@ entries:
     version: 0.1.0-dev.0.main.35
   - apiVersion: v2
     appVersion: e85a877
-    created: "2022-08-03T12:04:14.019596521Z"
+    created: "2022-08-03T15:37:09.080987848Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: b9e687c6b08cf96a2d4a494c4769b36c7afa38f09ec38b446d64f12abc49822b
@@ -4194,7 +4220,7 @@ entries:
     version: 0.1.0-dev.0.main.34
   - apiVersion: v2
     appVersion: a042293
-    created: "2022-08-03T12:04:14.019111626Z"
+    created: "2022-08-03T15:37:09.08046254Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 13481f595bc3a0384ccb2ed090c49af16b73b427d7d28004a20d99cb764e2b8f
@@ -4205,7 +4231,7 @@ entries:
     version: 0.1.0-dev.0.main.33
   - apiVersion: v2
     appVersion: 76b0be9
-    created: "2022-08-03T12:04:14.018597332Z"
+    created: "2022-08-03T15:37:09.07975803Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 691977580a43889d382bc282a39eded1e12cf22623b7d69ba162d15bc7108992
@@ -4216,7 +4242,7 @@ entries:
     version: 0.1.0-dev.0.main.28
   - apiVersion: v2
     appVersion: b9669b9
-    created: "2022-08-03T12:04:14.018132138Z"
+    created: "2022-08-03T15:37:09.07911392Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 657e898f00e37dfcb4bfba3533ca2bf67b3f5f35ddd138415ec83672f6526fc5
@@ -4227,7 +4253,7 @@ entries:
     version: 0.1.0-dev.0.main.27
   - apiVersion: v2
     appVersion: b2ffcc8
-    created: "2022-08-03T12:04:14.017634344Z"
+    created: "2022-08-03T15:37:09.07839901Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: f579498f2f400f0b850cf2b38ef81f973a45f0a980253ca66df1f581695d9b3e
@@ -4238,7 +4264,7 @@ entries:
     version: 0.1.0-dev.0.main.26
   - apiVersion: v2
     appVersion: a61a283
-    created: "2022-08-03T12:04:14.017163949Z"
+    created: "2022-08-03T15:37:09.077589898Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: a8f5c064a336bf90f1b544816406202aa6a7c9b8afb88548c52c2b533a051e12
@@ -4249,7 +4275,7 @@ entries:
     version: 0.1.0-dev.0.main.19
   - apiVersion: v2
     appVersion: f46e1fa
-    created: "2022-08-03T12:04:14.016663555Z"
+    created: "2022-08-03T15:37:09.077113291Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 7daff31113f1972c8bcfc94c35c3379701250fff75b9d9d1535bae694cf51b69
@@ -4259,7 +4285,7 @@ entries:
     - openstack-cluster-0.1.0-dev.0.main.18.tgz
     version: 0.1.0-dev.0.main.18
   - apiVersion: v2
-    created: "2022-08-03T12:04:13.87433794Z"
+    created: "2022-08-03T15:37:08.944644147Z"
     description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
       API.
     digest: 016cc74597d6333a0eda905db7f6fdcf78c5fe6cf20b376dd651cd756383c3e9
@@ -4270,7 +4296,7 @@ entries:
     version: 0.1.0-dev.0.main.12
   - apiVersion: v2
     appVersion: a525daa
-    created: "2022-08-03T12:04:13.816515024Z"
+    created: "2022-08-03T15:37:08.890621855Z"
     dependencies:
     - alias: addons
       name: cluster-addons
@@ -4286,7 +4312,7 @@ entries:
     version: 0.1.0-dev.0.helm-operator.93
   - apiVersion: v2
     appVersion: 294e0dd
-    created: "2022-08-03T12:04:13.81347306Z"
+    created: "2022-08-03T15:37:08.887332106Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4303,7 +4329,7 @@ entries:
     version: 0.1.0-dev.0.fix-nvidia-operator-config-path.140
   - apiVersion: v2
     appVersion: 53fb2b3
-    created: "2022-08-03T12:04:13.809678705Z"
+    created: "2022-08-03T15:37:08.883984257Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4320,7 +4346,7 @@ entries:
     version: 0.1.0-dev.0.fix-nvidia-operator-config-path.139
   - apiVersion: v2
     appVersion: 26847c5
-    created: "2022-08-03T12:04:13.805218658Z"
+    created: "2022-08-03T15:37:08.880609608Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4337,7 +4363,7 @@ entries:
     version: 0.1.0-dev.0.fix-internal-network.166
   - apiVersion: v2
     appVersion: 506d0be
-    created: "2022-08-03T12:04:13.800941208Z"
+    created: "2022-08-03T15:37:08.875779237Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4354,7 +4380,7 @@ entries:
     version: 0.1.0-dev.0.fix-internal-network.165
   - apiVersion: v2
     appVersion: "4997e86"
-    created: "2022-08-03T12:04:13.796752658Z"
+    created: "2022-08-03T15:37:08.871961981Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4370,8 +4396,25 @@ entries:
     - openstack-cluster-0.1.0-dev.0.fix-internal-network.162.tgz
     version: 0.1.0-dev.0.fix-internal-network.162
   - apiVersion: v2
+    appVersion: 68ec56f
+    created: "2022-08-03T15:37:08.868205026Z"
+    dependencies:
+    - alias: addons
+      condition: addons.enabled
+      name: cluster-addons
+      repository: file://../cluster-addons
+      version: '>=0-0'
+    description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
+      API.
+    digest: 32cd58584de75f38c30af60e87538803c266b09bd7c051578534fc13cdbccdcf
+    name: openstack-cluster
+    type: application
+    urls:
+    - openstack-cluster-0.1.0-dev.0.feature-trusted-cas.169.tgz
+    version: 0.1.0-dev.0.feature-trusted-cas.169
+  - apiVersion: v2
     appVersion: 031582c
-    created: "2022-08-03T12:04:13.791349722Z"
+    created: "2022-08-03T15:37:08.863928663Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4388,7 +4431,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.149
   - apiVersion: v2
     appVersion: 3528b70
-    created: "2022-08-03T12:04:13.787706365Z"
+    created: "2022-08-03T15:37:08.859918604Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4405,7 +4448,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.148
   - apiVersion: v2
     appVersion: aefc9c4
-    created: "2022-08-03T12:04:13.78391441Z"
+    created: "2022-08-03T15:37:08.856499454Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4422,7 +4465,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-prom-servicemonitor.147
   - apiVersion: v2
     appVersion: 2fa45ad
-    created: "2022-08-03T12:04:13.779922657Z"
+    created: "2022-08-03T15:37:08.8528039Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4439,7 +4482,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-grafana-dashboard.144
   - apiVersion: v2
     appVersion: afa22e9
-    created: "2022-08-03T12:04:13.775626608Z"
+    created: "2022-08-03T15:37:08.848104231Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4456,7 +4499,7 @@ entries:
     version: 0.1.0-dev.0.feature-nvidia-grafana-dashboard.143
   - apiVersion: v2
     appVersion: d82f8b6
-    created: "2022-08-03T12:04:13.771981351Z"
+    created: "2022-08-03T15:37:08.844747281Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4473,7 +4516,7 @@ entries:
     version: 0.1.0-dev.0.feature-ignore-azs.161
   - apiVersion: v2
     appVersion: 5ace74e
-    created: "2022-08-03T12:04:13.767916399Z"
+    created: "2022-08-03T15:37:08.841055127Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4490,7 +4533,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.169
   - apiVersion: v2
     appVersion: 1c1e38e
-    created: "2022-08-03T12:04:13.762530863Z"
+    created: "2022-08-03T15:37:08.836910066Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4507,7 +4550,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.168
   - apiVersion: v2
     appVersion: 2fe4d26
-    created: "2022-08-03T12:04:13.758342913Z"
+    created: "2022-08-03T15:37:08.832444901Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4524,7 +4567,7 @@ entries:
     version: 0.1.0-dev.0.feature-control-plane-omit-az.163
   - apiVersion: v2
     appVersion: eb42ecf
-    created: "2022-08-03T12:04:13.754127363Z"
+    created: "2022-08-03T15:37:08.828563644Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4541,7 +4584,7 @@ entries:
     version: 0.1.0-dev.0.feature-capo-v1alpha5.154
   - apiVersion: v2
     appVersion: 865e7e1
-    created: "2022-08-03T12:04:13.748873825Z"
+    created: "2022-08-03T15:37:08.824582286Z"
     dependencies:
     - alias: addons
       condition: addons.enabled
@@ -4556,4 +4599,4 @@ entries:
     urls:
     - openstack-cluster-0.1.0-dev.0.enhancement-namespace-helm-template-fns.135.tgz
     version: 0.1.0-dev.0.enhancement-namespace-helm-template-fns.135
-generated: "2022-08-03T12:04:13.462946709Z"
+generated: "2022-08-03T15:37:08.543656363Z"
