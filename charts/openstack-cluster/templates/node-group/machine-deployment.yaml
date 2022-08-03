@@ -6,10 +6,6 @@ kind: MachineDeployment
 metadata:
   name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
   labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
-  annotations:
-    # We let Cluster API clean up the cluster resources
-    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
-    helm.sh/resource-policy: keep
   {{- if $nodeGroup.autoscale }}
   {{-
     $machineCountMin := $nodeGroup.machineCountMin |
@@ -25,6 +21,7 @@ metadata:
   {{- if lt $machineCountMax $machineCountMin }}
   {{- fail (printf "maximum machine count < minimum machine count for node group '%s'" $nodeGroup.name) }}
   {{- end }}
+  annotations:
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: {{ quote $machineCountMin }}
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: {{ quote $machineCountMax }}
   {{- end }}
