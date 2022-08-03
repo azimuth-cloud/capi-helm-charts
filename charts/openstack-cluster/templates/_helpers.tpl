@@ -142,12 +142,10 @@ files:
   - {{ toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
-{{- if or $additionalPackages $preKubeadmCommands }}
+{{- if or $trustedCAs $additionalPackages $preKubeadmCommands }}
 preKubeadmCommands:
   {{- if $trustedCAs }}
   - update-ca-certificates
-  # Restart containerd to pick up the new certificates
-  - systemctl restart containerd
   {{- end }}
   {{- if $additionalPackages }}
   - apt update -y
