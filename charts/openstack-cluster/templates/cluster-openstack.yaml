@@ -14,11 +14,11 @@ spec:
     name: {{ include "openstack-cluster.cloudCredentialsSecretName" . }}
   cloudName: openstack
   {{- with .Values.controlPlaneEndpoint }}
-  controlPlaneEndpoint: {{ . | toYaml | nindent 4 }}
+  controlPlaneEndpoint: {{ toYaml . | nindent 4 }}
   {{- end }}
   {{- with .Values.clusterNetworking }}
   {{- with .dnsNameservers }}
-  dnsNameservers: {{ toYaml . | toYaml | nindent 4 }}
+  dnsNameservers: {{ toYaml . | nindent 4 }}
   {{- end }}
   managedSecurityGroups: {{ .manageSecurityGroups }}
   allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
