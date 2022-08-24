@@ -88,7 +88,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.23.0
+      version: v3.23.3
     release:
       namespace: tigera-operator
       # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
@@ -102,6 +102,9 @@ cni:
       calicoNetwork:
         # By default, disable BGP
         bgp: Disabled
+        # Use the interface that holds the Kubernetes internal IP
+        nodeAddressAutodetectionV4:
+          kubernetes: NodeInternalIP
         # Use a single IP pool with VXLAN
         # The special variable __KUBEADM_POD_CIDR__ is replaced with the pod CIDR from the
         # kubeadm configmap, if kubeadm is in use
