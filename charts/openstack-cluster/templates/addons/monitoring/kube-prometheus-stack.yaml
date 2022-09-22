@@ -1,0 +1,79 @@
+{{- define "openstack-cluster.kube-prometheus-stack.hookScript" -}}
+# Ensure that the dashboard configmaps belong to the Helm release for the manifest object
+helm-adopt \
+  kube-prometheus-stack-dashboards \
+  {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }} \
+  configmap/nvidia-dcgm-exporter-dashboard \
+  --namespace {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
+# With the version bump to 40.x, kube-prometheus-stack picks up prometheus-node-exporter 4.x
+# This changes the selector labels on the daemonset, which is an immutable field, so we remove
+# the daemonset with the old labels before upgrading
+# NOTE: Once the upgrade to 40.x has occurred, this will be a no-op
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#from-39x-to-40x
+kubectl delete daemonset \
+  -l release=kube-prometheus-stack,app=prometheus-node-exporter \
+  -n {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
+{{- end }}
+
+{{- if and .Values.addons.enabled .Values.addons.monitoring.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "kube-prometheus-stack") }}-config
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+    {{ .Values.addons.watchLabel }}: ""
+stringData:
+  values: |
+    {{- toYaml .Values.addons.monitoring.kubePrometheusStack.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "kube-prometheus-stack") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.addons.monitoring.kubePrometheusStack.chart | nindent 4 }}
+  targetNamespace: {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
+  releaseName: kube-prometheus-stack
+  valuesSources:
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "kube-prometheus-stack") }}-config
+        key: values
+---
+{{-
+  include
+  "openstack-cluster.hookJob"
+  (list
+    .
+    "pre-upgrade"
+    "kube-prometheus-stack-migrate"
+    "openstack-cluster.kube-prometheus-stack.hookScript"
+  )
+}}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "kube-prometheus-stack") }}-dashboards
+  labels: {{ include "openstack-cluster.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
+  releaseName: kube-prometheus-stack-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: nvidia-dcgm-exporter-dashboard
+          labels:
+            grafana_dashboard: "1"
+        data:
+          nvidia-dcgm-exporter-dashboard.json: |
+            {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev2.json" | nindent 12 }}
+{{- end }}

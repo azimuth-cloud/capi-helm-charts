@@ -1,0 +1,36 @@
+{{- if and .Values.addons.enabled .Values.addons.kubernetesDashboard.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "kubernetes-dashboard") }}-config
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list . "kubernetes-dashboard") | nindent 4 }}
+    {{ .Values.addons.watchLabel }}: ""
+stringData:
+  # Enable the metrics scraper by default
+  defaults: |
+    metricsScraper:
+      enabled: true
+  overrides: |
+    {{- toYaml .Values.addons.kubernetesDashboard.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "kubernetes-dashboard") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "kubernetes-dashboard") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.addons.kubernetesDashboard.chart | nindent 4 }}
+  targetNamespace: {{ .Values.addons.kubernetesDashboard.release.namespace }}
+  releaseName: kubernetes-dashboard
+  valuesSources:
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "kubernetes-dashboard") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "kubernetes-dashboard") }}-config
+        key: overrides
+{{- end }}

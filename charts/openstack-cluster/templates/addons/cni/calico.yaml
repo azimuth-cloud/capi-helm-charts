@@ -1,0 +1,61 @@
+#####
+# Use a pre-upgrade hook to make sure the installation is annotated as belonging to Helm
+#####
+{{- define "openstack-cluster.cni-calico.hookScript" -}}
+helm-adopt cni-calico {{ .Values.addons.cni.calico.release.namespace }} installation/default
+{{- end }}
+
+{{-
+  if and
+    .Values.addons.enabled
+    .Values.addons.cni.enabled
+    (eq .Values.addons.cni.type "calico")
+}}
+---
+{{-
+  include
+  "openstack-cluster.hookJob"
+  (list . "pre-upgrade" "cni-calico-migrate" "openstack-cluster.cni-calico.hookScript")
+}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "cni-calico") }}-config
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list . "cni-calico") | nindent 4 }}
+    {{ .Values.addons.watchLabel }}: ""
+stringData:
+  defaults: |
+    installation:
+      calicoNetwork:
+        bgp: Disabled
+        nodeAddressAutodetectionV4:
+          kubernetes: NodeInternalIP
+        ipPools:
+    {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+          - cidr: {{ "{{" }} cidr {{ "}}" }}
+            encapsulation: VXLAN
+    {% endfor %}
+  overrides: |
+    {{- toYaml .Values.addons.cni.calico.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "cni-calico") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "cni-calico") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.addons.cni.calico.chart | nindent 4 }}
+  targetNamespace: {{ .Values.addons.cni.calico.release.namespace }}
+  releaseName: cni-calico
+  valuesSources:
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "cni-calico") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "cni-calico") }}-config
+        key: overrides
+{{- end }}

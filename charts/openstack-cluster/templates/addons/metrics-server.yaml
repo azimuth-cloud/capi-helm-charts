@@ -1,0 +1,49 @@
+#####
+# Use a pre-upgrade hook to remove the old kustomize release
+#####
+{{- define "openstack-cluster.metrics-server.hookScript" -}}
+helm status -n kustomize-releases metrics-server || exit 0
+helm delete -n kustomize-releases metrics-server
+{{- end }}
+
+{{- if and .Values.addons.enabled .Values.addons.metricsServer.enabled }}
+---
+{{-
+  include
+  "openstack-cluster.hookJob"
+  (list . "pre-upgrade" "metrics-server-migrate" "openstack-cluster.metrics-server.hookScript")
+}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "metrics-server") }}-config
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list . "metrics-server") | nindent 4 }}
+    {{ .Values.addons.watchLabel }}: ""
+stringData:
+  defaults: |
+    args:
+      - --kubelet-insecure-tls
+  overrides: |
+    {{- toYaml .Values.addons.metricsServer.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "metrics-server") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "metrics-server") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.addons.metricsServer.chart | nindent 4 }}
+  targetNamespace: {{ .Values.addons.metricsServer.release.namespace }}
+  releaseName: metrics-server
+  valuesSources:
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "metrics-server") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "metrics-server") }}-config
+        key: overrides
+{{- end }}

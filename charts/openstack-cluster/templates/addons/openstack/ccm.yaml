@@ -1,0 +1,66 @@
+#####
+# Use a pre-upgrade hook to remove the old kustomize release
+#####
+{{- define "openstack-cluster.ccm-openstack.hookScript" -}}
+helm status -n kustomize-releases ccm-openstack || exit 0
+helm delete -n kustomize-releases ccm-openstack
+{{- end }}
+
+{{-
+  if and
+    .Values.addons.enabled
+    .Values.addons.openstack.enabled
+    .Values.addons.openstack.ccm.enabled
+}}
+---
+{{-
+  include
+  "openstack-cluster.hookJob"
+  (list . "pre-upgrade" "ccm-openstack-migrate" "openstack-cluster.ccm-openstack.hookScript")
+}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "ccm-openstack") }}-config
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list . "ccm-openstack") | nindent 4 }}
+    {{ .Values.addons.watchLabel }}: ""
+stringData:
+  defaults: |
+    secret:
+      create: false
+    cluster:
+      name: {{ include "openstack-cluster.clusterName" . }}
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: ""
+    tolerations:
+      - key: node.cloudprovider.kubernetes.io/uninitialized
+        value: "true"
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+  overrides: |
+    {{- toYaml .Values.addons.openstack.ccm.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "ccm-openstack") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "ccm-openstack") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.addons.openstack.ccm.chart | nindent 4 }}
+  targetNamespace: {{ .Values.addons.openstack.targetNamespace }}
+  releaseName: ccm-openstack
+  valuesSources:
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "ccm-openstack") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "ccm-openstack") }}-config
+        key: overrides
+{{- end }}

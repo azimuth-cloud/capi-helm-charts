@@ -1,0 +1,58 @@
+{{- if and .Values.addons.enabled .Values.addons.mellanoxNetworkOperator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}-config
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+    {{ .Values.addons.watchLabel }}: ""
+stringData:
+  defaults: |
+    # Use the shared NFD
+    nfd:
+      enabled: false
+    # Deploy the default NICClusterPolicy
+    deployCR: true
+    # Deploy the OFED driver onto nodes with a suitable NIC
+    ofedDriver:
+      deploy: true
+      # OFED takes ages to deploy on low-resource nodes
+      # The startup probe has a fixed failure threshold of 60
+      # So in order to give the drivers up to one hour to install, we use a period
+      # of 60 seconds for the startup probe
+      startupProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 60
+    # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
+    rdmaSharedDevicePlugin:
+      deploy: true
+    # Disable all other features for now
+    sriovNetworkOperator:
+      enabled: false
+    sriovDevicePlugin:
+      deploy: false
+    secondaryNetwork:
+      deploy: false
+  overrides: |
+    {{- toYaml .Values.addons.mellanoxNetworkOperator.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+spec:
+  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.addons.mellanoxNetworkOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.addons.mellanoxNetworkOperator.release.namespace }}
+  releaseName: mellanox-network-operator
+  valuesSources:
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}-config
+        key: overrides
+{{- end }}

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+#####
+# Script that adopts the specified resource into the specified release
+#####
+
+set -eo pipefail
+
+RELEASE_NAME=
+RELEASE_NAMESPACE=
+OBJECT=
+OBJECT_NAMESPACE=
+
+while :; do
+    case $1 in
+        --help)
+            echo "Adopts a resource into a Helm release."
+            echo ""
+            echo "Usage: helm-adopt RELEASE-NAME RELEASE-NAMESPACE OBJECT [--namespace OBJECT-NAMESPACE]"
+            exit
+            ;;
+        --release-namespace)
+            RELEASE_NAMESPACE="$2"
+            shift
+            ;;
+        --namespace)
+            OBJECT_NAMESPACE="$2"
+            shift
+            ;;
+        ?*)
+            if [ -z "$RELEASE_NAME" ]; then
+                RELEASE_NAME="$1"
+            elif [ -z "$RELEASE_NAMESPACE" ]; then
+                RELEASE_NAMESPACE="$1"
+            elif [ -z "$OBJECT" ]; then
+                OBJECT="$1"
+            else
+                echo "Too many arguments" >&2
+                exit 1
+            fi
+            ;;
+        *)
+            break
+    esac
+    shift
+done
+
+if [ -z "$RELEASE_NAME" ]; then
+    echo "RELEASE-NAME was not given" >&2
+    exit 1
+elif [ -z "$RELEASE_NAMESPACE" ]; then
+    echo "RELEASE-NAMESPACE was not given" >&2
+    exit 1
+elif [ -z "$OBJECT" ]; then
+    echo "OBJECT was not given" >&2
+    exit 1
+fi
+
+KUBECTL_ARGS="$OBJECT"
+[ -n "$OBJECT_NAMESPACE" ] && KUBECTL_ARGS="$KUBECTL_ARGS --namespace $OBJECT_NAMESPACE"
+
+kubectl get $KUBECTL_ARGS || exit 0
+kubectl label --overwrite $KUBECTL_ARGS "app.kubernetes.io/managed-by=Helm"
+kubectl annotate --overwrite $KUBECTL_ARGS "meta.helm.sh/release-name=$RELEASE_NAME"
+kubectl annotate --overwrite $KUBECTL_ARGS "meta.helm.sh/release-namespace=$RELEASE_NAMESPACE"

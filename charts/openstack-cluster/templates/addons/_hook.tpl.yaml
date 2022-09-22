@@ -1,0 +1,69 @@
+{{- define "openstack-cluster.hookJob" -}}
+{{- $ctx := index . 0 }}
+{{- $hook := index . 1 }}
+{{- $componentName := index . 2 }}
+{{- $scriptTemplate := index . 3 }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list $ctx $componentName) }}
+  labels: {{ include "openstack-cluster.componentLabels" (list $ctx $componentName) | nindent 4 }}
+  annotations:
+    helm.sh/hook: {{ $hook }}
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ $ctx.Values.addons.hooks.backoffLimit }}
+  activeDeadlineSeconds: {{ $ctx.Values.addons.hooks.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels: {{ include "openstack-cluster.componentSelectorLabels" (list $ctx $componentName) | nindent 8 }}
+    spec:
+      {{- with $ctx.Values.addons.hooks.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{ toYaml $ctx.Values.addons.hooks.podSecurityContext | nindent 8 }}
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ $componentName }}
+          image: {{
+            printf "%s:%s"
+              $ctx.Values.addons.hooks.image.repository
+              (default $ctx.Chart.AppVersion $ctx.Values.addons.hooks.image.tag)
+          }}
+          imagePullPolicy: {{ $ctx.Values.addons.hooks.image.pullPolicy }}
+          securityContext: {{ toYaml $ctx.Values.addons.hooks.securityContext | nindent 12 }}
+          args:
+            - /bin/bash
+            - -c
+            - |
+                set -ex
+                test -f "$KUBECONFIG" || exit 0
+                kubectl version || exit 0
+                {{- include $scriptTemplate $ctx | nindent 16 }}
+          env:
+            - name: KUBECONFIG
+              value: /etc/kubernetes/config
+          resources: {{ toYaml $ctx.Values.addons.hooks.resources | nindent 12 }}
+          volumeMounts:
+            - name: etc-kubernetes
+              mountPath: /etc/kubernetes
+              readOnly: true
+      hostNetwork: {{ $ctx.Values.addons.hooks.hostNetwork }}
+      {{- with $ctx.Values.addons.hooks.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ctx.Values.addons.hooks.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ctx.Values.addons.hooks.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: etc-kubernetes
+          secret:
+            secretName: {{ include "openstack-cluster.componentName" (list $ctx "kubeconfig") }}
+            optional: true
+            items:
+              - key: value
+                path: config
+{{- end }}
