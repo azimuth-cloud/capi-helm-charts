@@ -1,21 +1,8 @@
-#####
-# Use a pre-upgrade hook to make sure the installation is annotated as belonging to Helm
-#####
-{{- define "openstack-cluster.cni-calico.hookScript" -}}
-helm-adopt cni-calico {{ .Values.addons.cni.calico.release.namespace }} installation/default
-{{- end }}
-
 {{-
   if and
     .Values.addons.enabled
     .Values.addons.cni.enabled
     (eq .Values.addons.cni.type "calico")
-}}
----
-{{-
-  include
-  "openstack-cluster.hookJob"
-  (list . "pre-upgrade" "cni-calico-migrate" "openstack-cluster.cni-calico.hookScript")
 }}
 ---
 apiVersion: v1

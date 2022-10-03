@@ -1,14 +1,7 @@
 {{- define "openstack-cluster.kube-prometheus-stack.hookScript" -}}
-# Ensure that the dashboard configmaps belong to the Helm release for the manifest object
-helm-adopt \
-  kube-prometheus-stack-dashboards \
-  {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }} \
-  configmap/nvidia-dcgm-exporter-dashboard \
-  --namespace {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
 # With the version bump to 40.x, kube-prometheus-stack picks up prometheus-node-exporter 4.x
 # This changes the selector labels on the daemonset, which is an immutable field, so we remove
 # the daemonset with the old labels before upgrading
-# NOTE: Once the upgrade to 40.x has occurred, this will be a no-op
 # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#from-39x-to-40x
 kubectl delete daemonset \
   -l release=kube-prometheus-stack,app=prometheus-node-exporter \
@@ -16,6 +9,44 @@ kubectl delete daemonset \
 {{- end }}
 
 {{- if and .Values.addons.enabled .Values.addons.monitoring.enabled }}
+{{-
+  $addon := lookup
+    "addons.stackhpc.com/v1alpha1"
+    "HelmRelease"
+    .Release.Namespace
+    (include "openstack-cluster.componentName" (list . "kube-prometheus-stack"))
+}}
+{{-
+  $previousVersion := dig
+    "spec"
+    "chart"
+    "version"
+    .Values.addons.monitoring.kubePrometheusStack.chart.version
+    $addon
+}}
+{{-
+  if and
+    .Release.IsUpgrade
+    (or
+      (include "openstack-cluster.addons.isMigration" .)
+      (and
+        (semverCompare ">=40.0.0" .Values.addons.monitoring.kubePrometheusStack.chart.version)
+        (semverCompare "<40.0.0" $previousVersion)
+      )
+    )
+}}
+---
+{{-
+  include
+  "openstack-cluster.addons.hookJob"
+  (list
+    .
+    "pre-upgrade"
+    "kube-prometheus-stack-migrate"
+    "openstack-cluster.kube-prometheus-stack.hookScript"
+  )
+}}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
@@ -43,17 +74,6 @@ spec:
     - secret:
         name: {{ include "openstack-cluster.componentName" (list . "kube-prometheus-stack") }}-config
         key: values
----
-{{-
-  include
-  "openstack-cluster.hookJob"
-  (list
-    .
-    "pre-upgrade"
-    "kube-prometheus-stack-migrate"
-    "openstack-cluster.kube-prometheus-stack.hookScript"
-  )
-}}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests

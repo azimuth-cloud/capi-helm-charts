@@ -1,18 +1,7 @@
 {{- define "openstack-cluster.loki-stack.hookScript" -}}
-# Ensure that the dashboard configmaps belong to the Helm release for the manifest object
-helm-adopt \
-  loki-stack-dashboards \
-  {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }} \
-  configmap/loki-stack-grafana-datasource \
-  --namespace {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
-helm-adopt \
-  loki-stack-dashboards \
-  {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }} \
-  configmap/loki-stack-grafana-dashboard \
-  --namespace {{ .Values.addons.monitoring.kubePrometheusStack.release.namespace }}
-# At some point in the evolution of the promtail chart, the selector labels for the daemonset changed
-# This is an immutable field, so we remove the daemonset with the old labels before upgrading
-# NOTE: Once the upgrade to the new labels has occurred, this will be a no-op
+# With the version bump from 2.6.3 to 2.6.4, loki-stack picks up an updated promtail that
+# changes the selector labels on the daemonset, which is an immutable field
+# So we remove the daemonset with the old labels before upgrading
 kubectl delete daemonset \
   -l release=loki-stack,app=promtail \
   -n {{ .Values.addons.monitoring.lokiStack.release.namespace }}
@@ -24,6 +13,44 @@ kubectl delete daemonset \
     .Values.addons.monitoring.enabled
     .Values.addons.monitoring.lokiStack.enabled
 }}
+{{-
+  $addon := lookup
+    "addons.stackhpc.com/v1alpha1"
+    "HelmRelease"
+    .Release.Namespace
+    (include "openstack-cluster.componentName" (list . "loki-stack"))
+}}
+{{-
+  $previousVersion := dig
+    "spec"
+    "chart"
+    "version"
+    .Values.addons.monitoring.lokiStack.chart.version
+    $addon
+}}
+{{-
+  if and
+    .Release.IsUpgrade
+    (or
+      (include "openstack-cluster.addons.isMigration" .)
+      (and
+        (semverCompare ">=2.6.4" .Values.addons.monitoring.lokiStack.chart.version)
+        (semverCompare "<2.6.4" $previousVersion)
+      )
+    )
+}}
+---
+{{-
+  include
+  "openstack-cluster.addons.hookJob"
+  (list
+    .
+    "pre-upgrade"
+    "loki-stack-migrate"
+    "openstack-cluster.loki-stack.hookScript"
+  )
+}}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
@@ -51,17 +78,6 @@ spec:
     - secret:
         name: {{ include "openstack-cluster.componentName" (list . "loki-stack") }}-config
         key: values
----
-{{-
-  include
-  "openstack-cluster.hookJob"
-  (list
-    .
-    "pre-upgrade"
-    "loki-stack-migrate"
-    "openstack-cluster.loki-stack.hookScript"
-  )
-}}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests

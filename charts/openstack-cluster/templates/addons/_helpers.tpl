@@ -1,4 +1,30 @@
-{{- define "openstack-cluster.hookJob" -}}
+{{/*
+  Determines if this revision is a migration from the previous addon method by
+  checking for addon jobs for the cluster.
+*/}}
+{{- define "openstack-cluster.addons.isMigration" -}}
+  {{- $clusterName := include "openstack-cluster.clusterName" . }}
+  {{- $exists := false }}
+  {{- range $job := (lookup "batch/v1" "Job" .Release.Namespace "").items }}
+    {{-
+      if and
+        (hasKey $job.metadata.labels "app.kubernetes.io/name")
+        (hasKey $job.metadata.labels "app.kubernetes.io/instance")
+    }}
+      {{-
+        $exists = or
+          $exists
+          (and
+            (index $job.metadata.labels "app.kubernetes.io/name" | eq "addons")
+            (index $job.metadata.labels "app.kubernetes.io/instance" | eq $clusterName)
+          )
+      }}
+    {{- end }}
+  {{- end }}
+  {{- ternary "true" "" $exists }}
+{{- end }}
+
+{{- define "openstack-cluster.addons.hookJob" -}}
 {{- $ctx := index . 0 }}
 {{- $hook := index . 1 }}
 {{- $componentName := index . 2 }}

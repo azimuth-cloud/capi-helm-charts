@@ -1,27 +1,8 @@
-# Use a pre-upgrade hook to move the Helm release into the new namespace
-{{- define "openstack-cluster.csi-cinder.preUpgradeScript" -}}
-{{- $targetNamespace := .Values.addons.openstack.targetNamespace }}
-helm status -n kustomize-releases csi-cinder || exit 0
-helm-move csi-cinder kustomize-releases {{ $targetNamespace }}
-{{- with .Values.addons.openstack.csiCinder.storageClass }}
-{{- if .enabled }}
-helm-adopt csi-cinder-storageclass {{ $targetNamespace }} storageclass/{{ .name }}
-kubectl annotate storageclass/{{ .name }} "helm.sh/resource-policy=keep"
-{{- end }}
-{{- end }}
-{{- end }}
-
 {{-
   if and
     .Values.addons.enabled
     .Values.addons.openstack.enabled
     .Values.addons.openstack.csiCinder.enabled
-}}
----
-{{-
-  include
-  "openstack-cluster.hookJob"
-  (list . "pre-upgrade" "csi-cinder-migrate" "openstack-cluster.csi-cinder.preUpgradeScript")
 }}
 ---
 apiVersion: v1

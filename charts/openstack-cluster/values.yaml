@@ -326,7 +326,7 @@ addons:
   # Settings for hook jobs
   hooks:
     image:
-      repository: ghcr.io/stackhpc/k8s-utils
+      repository: ghcr.io/stackhpc/capi-helm-utils
       tag:  # Defaults to chart appVersion if not given
       pullPolicy: IfNotPresent
     imagePullSecrets: []
