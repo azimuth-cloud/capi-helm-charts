@@ -1,0 +1,47 @@
+{{- if and .Values.openstack.enabled .Values.openstack.ccm.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "ccm-openstack") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    secret:
+      create: false
+    cluster:
+      name: {{ include "cluster-addons.clusterName" . }}
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: ""
+    tolerations:
+      - key: node.cloudprovider.kubernetes.io/uninitialized
+        value: "true"
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+  overrides: |
+    {{- toYaml .Values.openstack.ccm.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "ccm-openstack") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.openstack.ccm.chart | nindent 4 }}
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: ccm-openstack
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
+        key: overrides
+{{- end }}

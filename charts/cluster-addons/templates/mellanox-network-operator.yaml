@@ -1,12 +1,12 @@
-{{- if and .Values.addons.enabled .Values.addons.mellanoxNetworkOperator.enabled }}
+{{- if .Values.mellanoxNetworkOperator.enabled }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
   labels:
-    {{- include "openstack-cluster.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
-    {{ .Values.addons.watchLabel }}: ""
+    {{- include "cluster-addons.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
     # Use the shared NFD
@@ -35,24 +35,24 @@ stringData:
     secondaryNetwork:
       deploy: false
   overrides: |
-    {{- toYaml .Values.addons.mellanoxNetworkOperator.release.values | nindent 4 }}
+    {{- toYaml .Values.mellanoxNetworkOperator.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}
-  labels: {{ include "openstack-cluster.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
 spec:
-  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.addons.mellanoxNetworkOperator.chart | nindent 4 }}
-  targetNamespace: {{ .Values.addons.mellanoxNetworkOperator.release.namespace }}
+  chart: {{ toYaml .Values.mellanoxNetworkOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.mellanoxNetworkOperator.release.namespace }}
   releaseName: mellanox-network-operator
   valuesSources:
     - secret:
-        name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
         key: defaults
     - secret:
-        name: {{ include "openstack-cluster.componentName" (list . "mellanox-network-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
         key: overrides
 {{- end }}

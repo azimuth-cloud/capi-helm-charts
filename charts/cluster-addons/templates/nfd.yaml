@@ -1,0 +1,62 @@
+{{-
+  if or
+    .Values.nodeFeatureDiscovery.enabled
+    .Values.nvidiaGPUOperator.enabled
+    .Values.mellanoxNetworkOperator.enabled
+}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "node-feature-discovery") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    master:
+      extraLabelNs:
+        - nvidia.com
+    worker:
+      # Allow the NFD pods to be scheduled on all pods
+      tolerations:
+        - effect: "NoSchedule"
+          operator: "Exists"
+      # We want to be able to identify nodes with high-performance hardware
+      # So the whitelisted device classes are:
+      #   02   - Network Controllers (e.g. Ethernet, Infiniband)
+      #   03   - Display Controllers (e.g. GPUs)
+      #   0b40 - Co-processors
+      #   12   - Processing Accelerators (e.g. specialised AI inference chips)
+      config:
+        sources:
+          pci:
+            deviceClassWhitelist:
+              - "02"
+              - "03"
+              - "0b40"
+              - "12"
+            deviceLabelFields:
+              - vendor
+  overrides: |
+    {{- toYaml .Values.nodeFeatureDiscovery.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "node-feature-discovery") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.nodeFeatureDiscovery.chart | nindent 4 }}
+  targetNamespace: {{ .Values.nodeFeatureDiscovery.release.namespace }}
+  releaseName: node-feature-discovery
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
+        key: overrides
+{{- end }}

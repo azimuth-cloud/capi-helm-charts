@@ -1,17 +1,12 @@
-{{-
-  if and
-    .Values.addons.enabled
-    .Values.addons.openstack.enabled
-    .Values.addons.openstack.csiCinder.enabled
-}}
+{{- if and .Values.openstack.enabled .Values.openstack.csiCinder.enabled }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "csi-cinder") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
   labels:
-    {{- include "openstack-cluster.componentLabels" (list . "csi-cinder") | nindent 4 }}
-    {{ .Values.addons.watchLabel }}: ""
+    {{- include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
 stringData:
   # By default, we disable the storage class deployed by the cinder-csi chart
   # We deploy our own instead as it gives us more control over the parameters
@@ -35,43 +30,43 @@ stringData:
             readOnly: true
     storageClass:
       enabled: false
-    clusterID: {{ include "openstack-cluster.clusterName" . }}
+    clusterID: {{ include "cluster-addons.clusterName" . }}
   overrides: |
-    {{- toYaml .Values.addons.openstack.csiCinder.values | nindent 4 }}
+    {{- toYaml .Values.openstack.csiCinder.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "csi-cinder") }}
-  labels: {{ include "openstack-cluster.componentLabels" (list . "csi-cinder") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
 spec:
-  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.addons.openstack.csiCinder.chart | nindent 4 }}
-  targetNamespace: {{ .Values.addons.openstack.targetNamespace }}
+  chart: {{ toYaml .Values.openstack.csiCinder.chart | nindent 4 }}
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
   releaseName: csi-cinder
   valuesSources:
     - secret:
-        name: {{ include "openstack-cluster.componentName" (list . "csi-cinder") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
         key: defaults
     - secret:
-        name: {{ include "openstack-cluster.componentName" (list . "csi-cinder") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
         key: overrides
-{{- if .Values.addons.openstack.csiCinder.storageClass.enabled }}
+{{- if .Values.openstack.csiCinder.storageClass.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "csi-cinder") }}-storageclass
-  labels: {{ include "openstack-cluster.componentLabels" (list . "csi-cinder") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-storageclass
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
 spec:
-  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  targetNamespace: {{ .Values.addons.openstack.targetNamespace }}
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
   releaseName: csi-cinder-storageclass
   manifestSources:
     - template: |
-        {{- with .Values.addons.openstack.csiCinder.storageClass }}
+        {{- with .Values.openstack.csiCinder.storageClass }}
         apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:

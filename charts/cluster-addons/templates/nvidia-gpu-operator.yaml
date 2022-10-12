@@ -1,12 +1,12 @@
-{{- if and .Values.addons.enabled .Values.addons.nvidiaGPUOperator.enabled }}
+{{- if .Values.nvidiaGPUOperator.enabled }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "nvidia-gpu-operator") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
   labels:
-    {{- include "openstack-cluster.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
-    {{ .Values.addons.watchLabel }}: ""
+    {{- include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
     # Use the shared NFD
@@ -28,24 +28,24 @@ stringData:
         - name: "CONTAINERD_CONFIG"
           value: "/etc/containerd/conf.d/nvidia.toml"
   overrides: |
-    {{- toYaml .Values.addons.nvidiaGPUOperator.release.values | nindent 4 }}
+    {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "openstack-cluster.componentName" (list . "nvidia-gpu-operator") }}
-  labels: {{ include "openstack-cluster.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
 spec:
-  clusterName: {{ include "openstack-cluster.clusterName" . }}
+  clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.addons.nvidiaGPUOperator.chart | nindent 4 }}
-  targetNamespace: {{ .Values.addons.nvidiaGPUOperator.release.namespace }}
+  chart: {{ toYaml .Values.nvidiaGPUOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.nvidiaGPUOperator.release.namespace }}
   releaseName: nvidia-gpu-operator
   valuesSources:
     - secret:
-        name: {{ include "openstack-cluster.componentName" (list . "nvidia-gpu-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
         key: defaults
     - secret:
-        name: {{ include "openstack-cluster.componentName" (list . "nvidia-gpu-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
         key: overrides
 {{- end }}

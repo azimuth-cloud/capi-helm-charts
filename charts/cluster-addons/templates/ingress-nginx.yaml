@@ -1,0 +1,29 @@
+{{- if .Values.ingress.nginx.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  values: |
+    {{- toYaml .Values.ingress.nginx.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.ingress.nginx.chart | nindent 4 }}
+  targetNamespace: {{ .Values.ingress.nginx.release.namespace }}
+  releaseName: ingress-nginx
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
+        key: values
+{{- end }}

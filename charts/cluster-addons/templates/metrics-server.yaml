@@ -1,0 +1,35 @@
+{{- if .Values.metricsServer.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "metrics-server") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "metrics-server") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    args:
+      - --kubelet-insecure-tls
+  overrides: |
+    {{- toYaml .Values.metricsServer.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "metrics-server") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "metrics-server") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.metricsServer.chart | nindent 4 }}
+  targetNamespace: {{ .Values.metricsServer.release.namespace }}
+  releaseName: metrics-server
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "metrics-server") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "metrics-server") }}-config
+        key: overrides
+{{- end }}

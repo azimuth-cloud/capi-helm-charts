@@ -1,0 +1,51 @@
+{{- if .Values.monitoring.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  values: |
+    {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.monitoring.kubePrometheusStack.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
+  releaseName: kube-prometheus-stack
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
+        key: values
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-dashboards
+  labels: {{ include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
+  releaseName: kube-prometheus-stack-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: nvidia-dcgm-exporter-dashboard
+          labels:
+            grafana_dashboard: "1"
+        data:
+          nvidia-dcgm-exporter-dashboard.json: |
+            {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev2.json" | nindent 12 }}
+{{- end }}
