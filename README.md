@@ -16,6 +16,16 @@ To list the available versions for the charts:
 helm search repo capi --devel --versions
 ```
 
+> **WARNING**
+>
+> The `openstack-cluster` chart depends on features in
+> [cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
+> that are not yet in a release.
+>
+> StackHPC maintain custom builds of `cluster-api-provider-openstack` for use with these charts.
+> You can find these in [the StackHPC fork](https://github.com/stackhpc/cluster-api-provider-openstack/releases)
+> of `cluster-api-provider-openstack`.
+
 Currently, the following charts are available:
 
 | Chart | Description |
