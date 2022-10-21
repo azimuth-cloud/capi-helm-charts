@@ -54,6 +54,7 @@ spec:
                 url: http://loki-stack.{{ .Values.monitoring.lokiStack.release.namespace }}:3100
                 access: proxy
                 version: 1
+                isDefault: false
     - template: |
         apiVersion: v1
         kind: ConfigMap
