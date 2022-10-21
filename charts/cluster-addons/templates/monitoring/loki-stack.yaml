@@ -8,7 +8,12 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  values: |
+  defaults: |
+    grafana:
+      sidecar:
+        datasources:
+          enabled: false
+  overrides: |
     {{- toYaml .Values.monitoring.lokiStack.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
@@ -25,7 +30,10 @@ spec:
   valuesSources:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
-        key: values
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
+        key: overrides
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
