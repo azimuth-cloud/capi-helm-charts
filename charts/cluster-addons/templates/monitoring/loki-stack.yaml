@@ -30,8 +30,8 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-dashboards
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "loki-stack-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack-dashboards") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true

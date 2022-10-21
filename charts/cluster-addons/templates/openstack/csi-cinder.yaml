@@ -57,8 +57,8 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-storageclass
-  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "csi-cinder-storageclass") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder-storageclass") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
