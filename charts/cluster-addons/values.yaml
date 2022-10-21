@@ -135,11 +135,14 @@ kubernetesDashboard:
 
 # Settings for ingress controllers
 ingress:
+  # Indicates if ingress controllers should be enabled
+  enabled: false
   # Settings for the Nginx ingress controller
   # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
   nginx:
     # Indicates if the Nginx ingress controller should be enabled
-    enabled: false
+    # The Nginx ingress controller is enabled by default if ingress controllers are enabled
+    enabled: true
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx

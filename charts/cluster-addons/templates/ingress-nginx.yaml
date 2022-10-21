@@ -1,4 +1,4 @@
-{{- if .Values.ingress.nginx.enabled }}
+{{- if and .Values.ingress.enabled .Values.ingress.nginx.enabled }}
 ---
 apiVersion: v1
 kind: Secret
