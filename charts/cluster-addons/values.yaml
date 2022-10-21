@@ -212,3 +212,39 @@ mellanoxNetworkOperator:
   release:
     namespace: network-operator
     values: {}
+
+# Settings for any custom addons
+custom: {}
+  # # Indexed by the name of the release on the target cluster
+  # my-custom-helm-release:
+  #   # Indicates that this is a Helm addon
+  #   kind: HelmRelease
+  #   spec:
+  #     # The namespace that the addon should be in
+  #     namespace: my-namespace
+  #     # Details of the Helm chart to use
+  #     chart:
+  #       # The chart repository that contains the chart to use
+  #       repo: https://my-project/charts
+  #       # The name of the chart to use
+  #       name: my-chart
+  #       # The version of the chart to use (must be an exact version)
+  #       version: 1.5.0
+  #     # The Helm values to use for the release
+  #     values: {}
+  # # Indexed by the name of the release on the target cluster
+  # my-custom-manifests:
+  #   # Indicates that this is a Manifests addon
+  #   kind: Manifests
+  #   spec:
+  #     # The namespace that the addon should be in
+  #     namespace: my-namespace
+  #     # The manifests for the addon, indexed by filename
+  #     manifests:
+  #       secret.yaml: |-
+  #         apiVersion: v1
+  #         kind: Secret
+  #         metadata:
+  #           name: my-secret
+  #         stringData:
+  #           secret-file: "secret-data"

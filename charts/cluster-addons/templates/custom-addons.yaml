@@ -1,0 +1,67 @@
+{{- range $name, $addon := .Values.custom }}
+{{- if eq $addon.kind "HelmRelease" }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ $name) }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  # Ensure that any template syntax in the values is ignored
+  values: |
+    {%- raw %}
+    {{- toYaml $addon.spec.values | nindent 4 }}
+    {%- endraw %}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ $name) }}
+  labels: {{ include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" $ }}
+  bootstrap: true
+  chart: {{ toYaml $addon.spec.chart | nindent 4 }}
+  targetNamespace: {{ $addon.spec.namespace }}
+  releaseName: {{ $name }}
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list $ $name) }}-config
+        key: values
+{{- else if eq $addon.kind "Manifests" }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ $name) }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  # Ensure that any template syntax in the manifests is ignored
+  {{- range $key, $manifest := $addon.spec.manifests }}
+  {{ $key }}: |
+    {%- raw %}
+    {{- $manifest | nindent 4 }}
+    {%- endraw %}
+  {{- end }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list $ $name) }}
+  labels: {{ include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" $ }}
+  bootstrap: true
+  targetNamespace: {{ $addon.spec.namespace }}
+  releaseName: {{ $name }}
+  manifestSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list $ $name) }}-config
+{{- else }}
+{{- printf "Unrecognised addon kind - %s" $addon.kind | fail }}
+{{- end }}
+{{- end }}
