@@ -9,8 +9,6 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    ipam:
-      mode: kubernetes
   overrides: |
     {{- toYaml .Values.cni.cilium.release.values | nindent 4 }}
 ---
