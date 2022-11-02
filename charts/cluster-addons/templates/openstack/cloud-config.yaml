@@ -23,7 +23,7 @@ spec:
             [Global]
             use-clouds=true
             clouds-file=/etc/config/clouds.yaml
-            cloud=openstack
+            cloud={{ .Values.clusterName | default "openstack" }}
         {%- if "cacert" in cloud_identity.data %}
             ca-file=/etc/config/cacert
         {%- else %}
