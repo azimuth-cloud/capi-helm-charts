@@ -1,13 +1,58 @@
-{{- define "cluster-addons.mellanox-network-operator.config" -}}
-{{- include "cluster-addons.job.defaults" (list . "mellanox-network-operator") }}
-installType: helm
-helm: {{ omit .Values.mellanoxNetworkOperator "enabled" | toYaml | nindent 2 }}
+{{- if .Values.mellanoxNetworkOperator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    # Use the shared NFD
+    nfd:
+      enabled: false
+    # Deploy the default NICClusterPolicy
+    deployCR: true
+    # Deploy the OFED driver onto nodes with a suitable NIC
+    ofedDriver:
+      deploy: true
+      # OFED takes ages to deploy on low-resource nodes
+      # The startup probe has a fixed failure threshold of 60
+      # So in order to give the drivers up to one hour to install, we use a period
+      # of 60 seconds for the startup probe
+      startupProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 60
+    # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
+    rdmaSharedDevicePlugin:
+      deploy: true
+    # Disable all other features for now
+    sriovNetworkOperator:
+      enabled: false
+    sriovDevicePlugin:
+      deploy: false
+    secondaryNetwork:
+      deploy: false
+  overrides: |
+    {{- toYaml .Values.mellanoxNetworkOperator.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.mellanoxNetworkOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.mellanoxNetworkOperator.release.namespace }}
+  releaseName: mellanox-network-operator
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
+        key: overrides
 {{- end }}
-
-{{-
-  include "addon.job" (list
-    .
-    "mellanox-network-operator"
-    "cluster-addons.mellanox-network-operator.config"
-  )
-}}

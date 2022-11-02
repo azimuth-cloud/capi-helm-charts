@@ -51,7 +51,9 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1alpha6
 kind: OpenStackMachineTemplate
 metadata:
   name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
-  labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
+    capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
   annotations:
     capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
     # We let Cluster API clean up the cluster resources

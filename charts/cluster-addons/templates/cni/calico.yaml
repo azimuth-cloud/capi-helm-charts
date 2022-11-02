@@ -1,0 +1,43 @@
+{{- if and .Values.cni.enabled (eq .Values.cni.type "calico") }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    installation:
+      calicoNetwork:
+        bgp: Disabled
+        nodeAddressAutodetectionV4:
+          kubernetes: NodeInternalIP
+        ipPools:
+    {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+          - cidr: {{ "{{" }} cidr {{ "}}" }}
+            encapsulation: VXLAN
+    {% endfor %}
+  overrides: |
+    {{- toYaml .Values.cni.calico.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.cni.calico.chart | nindent 4 }}
+  targetNamespace: {{ .Values.cni.calico.release.namespace }}
+  releaseName: cni-calico
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
+        key: overrides
+{{- end }}

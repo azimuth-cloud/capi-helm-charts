@@ -5,8 +5,9 @@ cluster on an [OpenStack](https://www.openstack.org/) cloud using
 [Cluster API](https://cluster-api.sigs.k8s.io/).
 
 As well as managing the Cluster API resources for the cluster, this chart optionally
-manages addons for the cluster using Kubernetes jobs. Some of these are required for
-a functional cluster, e.g. a
+manages addons for the cluster using addon resources from the
+[Cluster API Addon Provider](https://github.com/stackhpc/cluster-api-addon-provider).
+Some of these are required for a functional cluster, e.g. a
 [Container Network Interface (CNI) plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
 and the
 [OpenStack Cloud Controller Manager (CCM)](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md), and
@@ -25,6 +26,20 @@ First, you must set up a
 [Cluster API management cluster](https://cluster-api.sigs.k8s.io/user/concepts.html#management-cluster)
 with the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
 installed.
+
+> **WARNING**
+>
+> This chart depends on features in
+> [cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
+> that are not yet in a release.
+>
+> StackHPC maintain custom builds of `cluster-api-provider-openstack` for use with this chart.
+> You can find these in [the StackHPC fork](https://github.com/stackhpc/cluster-api-provider-openstack/releases)
+> of `cluster-api-provider-openstack`.
+
+Addons are managed by the
+[Cluster API Addon Provider](https://github.com/stackhpc/cluster-api-addon-provider),
+which must also be installed if you wish to use the addons functionality.
 
 In addition, Helm must be installed and configured to access your management cluster,
 and the chart repository containing this chart must be configured:
@@ -110,8 +125,7 @@ working cluster:
 
 ```yaml
 # The target Kubernetes version
-global:
-  kubernetesVersion: 1.22.1
+kubernetesVersion: 1.22.1
 
 # An image with the required software installed at the target version
 machineImage: ubuntu-2004-kube-v{{ .Values.kubernetesVersion }}
@@ -172,12 +186,8 @@ command again. Some examples of updates that can be performed are:
 
 ### Cluster addons
 
-The cluster addons are enabled by default, however by default only a CNI, the
-[Metrics Server](https://github.com/kubernetes-sigs/metrics-server) and the
-OpenStack CCM and Cinder CSI are enabled.
-
-You can configure which addons are deployed and the configuration of those addons
-by specifying values for the addons Helm chart:
+The cluster addons are enabled by default. You can configure which addons are deployed
+and the configuration of those addons by specifying values for the addons Helm chart:
 
 ```yaml
 addons:
@@ -194,8 +204,8 @@ The cluster addons also can be disabled completely using the following configura
 > **WARNING**
 >
 > If the cluster addons are disabled, you will need to manually install a CNI
-> plugin and the OpenStack Cloud Controller Manager before the cluster deployment
-> will complete successfully.
+> and the OpenStack Cloud Controller Manager before the cluster deployment will
+> complete successfully.
 
 ```yaml
 addons:

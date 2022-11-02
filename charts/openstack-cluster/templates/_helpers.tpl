@@ -28,55 +28,47 @@ Common labels
 helm.sh/chart: {{ include "openstack-cluster.chart" . }}
 capi.stackhpc.com/managed-by: {{ .Release.Service }}
 capi.stackhpc.com/infrastructure-provider: openstack
+{{- end -}}
+
+{{/*
+Selector labels for cluster-level resources
+*/}}
+{{- define "openstack-cluster.selectorLabels" -}}
 capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
 {{- end -}}
 
 {{/*
-Component labels
+Labels for cluster-level resources
 */}}
-{{- define "openstack-cluster.componentLabels" -}}
+{{- define "openstack-cluster.labels" -}}
+{{ include "openstack-cluster.commonLabels" . }}
+{{ include "openstack-cluster.selectorLabels" . }}
+{{- end -}}
+
+{{/*
+Selector labels for component-level resources
+*/}}
+{{- define "openstack-cluster.componentSelectorLabels" -}}
 {{- $ctx := index . 0 -}}
 {{- $componentName := index . 1 -}}
-{{- include "openstack-cluster.commonLabels" $ctx }}
+{{ include "openstack-cluster.selectorLabels" $ctx }}
 capi.stackhpc.com/component: {{ $componentName }}
 {{- end -}}
 
 {{/*
-Control plane selector labels
+Labels for component-level resources
 */}}
-{{- define "openstack-cluster.controlPlaneSelectorLabels" -}}
-capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
-capi.stackhpc.com/component: control-plane
-{{- end -}}
-
-{{/*
-Node group labels
-*/}}
-{{- define "openstack-cluster.nodeGroupLabels" -}}
-{{- $ctx := index . 0 -}}
-{{- $nodeGroupName := index . 1 -}}
-{{- include "openstack-cluster.commonLabels" $ctx }}
-capi.stackhpc.com/component: worker
-capi.stackhpc.com/node-group: {{ $nodeGroupName }}
-{{- end -}}
-
-{{/*
-Node group selector labels
-*/}}
-{{- define "openstack-cluster.nodeGroupSelectorLabels" -}}
-{{- $ctx := index . 0 -}}
-{{- $nodeGroupName := index . 1 -}}
-capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" $ctx }}
-capi.stackhpc.com/component: worker
-capi.stackhpc.com/node-group: {{ $nodeGroupName }}
+{{- define "openstack-cluster.componentLabels" -}}
+{{ include "openstack-cluster.commonLabels" (index . 0) }}
+{{ include "openstack-cluster.componentSelectorLabels" . }}
 {{- end -}}
 
 {{/*
 Name of the secret containing the cloud credentials.
 */}}
 {{- define "openstack-cluster.cloudCredentialsSecretName" -}}
-{{- if .Values.global.cloudCredentialsSecretName -}}
-{{- .Values.global.cloudCredentialsSecretName -}}
+{{- if .Values.cloudCredentialsSecretName -}}
+{{- .Values.cloudCredentialsSecretName -}}
 {{- else -}}
 {{ include "openstack-cluster.componentName" (list . "cloud-credentials") -}}
 {{- end -}}
@@ -175,7 +167,7 @@ version of the target cluster.
 {{- if .Values.autoscaler.image.tag -}}
 {{- .Values.autoscaler.image.tag -}}
 {{- else -}}
-{{- $kubeMinorVersion := .Values.global.kubernetesVersion | splitList "." | reverse | rest | reverse | join "." -}}
+{{- $kubeMinorVersion := .Values.kubernetesVersion | splitList "." | reverse | rest | reverse | join "." -}}
 {{- $defaultTag := printf "v%s.0" $kubeMinorVersion -}}
 {{- .Values.autoscaler.image.tags | dig $kubeMinorVersion $defaultTag -}}
 {{- end -}}

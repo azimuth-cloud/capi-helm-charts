@@ -5,7 +5,9 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
-  labels: {{ include "openstack-cluster.nodeGroupLabels" (list $ $nodeGroup.name) | nindent 4 }}
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
+    capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
   {{- if $nodeGroup.autoscale }}
   {{-
     $machineCountMin := $nodeGroup.machineCountMin |
@@ -32,13 +34,17 @@ spec:
   {{- end }}
   strategy: {{ toYaml $nodeGroup.rolloutStrategy | nindent 4 }}
   selector:
-    matchLabels: {{ include "openstack-cluster.nodeGroupSelectorLabels" (list $ $nodeGroup.name) | nindent 6 }}
+    matchLabels:
+      {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 6 }}
+      capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
   template:
     metadata:
-      labels: {{ include "openstack-cluster.nodeGroupSelectorLabels" (list $ $nodeGroup.name) | nindent 8 }}
+      labels:
+        {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 8 }}
+        capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
     spec:
       clusterName: {{ include "openstack-cluster.clusterName" $ }}
-      version: {{ $.Values.global.kubernetesVersion }}
+      version: {{ $.Values.kubernetesVersion }}
       {{- with $nodeGroup.failureDomain }}
       failureDomain: {{ . }}
       {{- end }}

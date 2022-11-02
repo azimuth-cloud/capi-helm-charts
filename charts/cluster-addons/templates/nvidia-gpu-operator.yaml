@@ -1,13 +1,51 @@
-{{- define "cluster-addons.nvidia-gpu-operator.config" -}}
-{{- include "cluster-addons.job.defaults" (list . "nvidia-gpu-operator") }}
-installType: helm
-helm: {{ omit .Values.nvidiaGPUOperator "enabled" | toYaml | nindent 2 }}
+{{- if .Values.nvidiaGPUOperator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    # Use the shared NFD
+    nfd:
+      enabled: false
+    # Export operator and node metrics in a Prometheus format.
+    # The component provides information on the status of the
+    # operator (e.g. reconciliation status, number of GPU enabled nodes).
+    nodeStatusExporter:
+      enabled: true
+    toolkit:
+      # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+      # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+      # Instead make a new config file specifically for nvidia runtime config,
+      # which is parsed as an "include" in the main containerd config file.
+      #
+      # https://github.com/NVIDIA/gpu-operator/issues/301
+      env:
+        - name: "CONTAINERD_CONFIG"
+          value: "/etc/containerd/conf.d/nvidia.toml"
+  overrides: |
+    {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.nvidiaGPUOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.nvidiaGPUOperator.release.namespace }}
+  releaseName: nvidia-gpu-operator
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
+        key: overrides
 {{- end }}
-
-{{-
-  include "addon.job" (list
-    .
-    "nvidia-gpu-operator"
-    "cluster-addons.nvidia-gpu-operator.config"
-  )
-}}

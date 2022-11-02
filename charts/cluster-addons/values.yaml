@@ -1,56 +1,11 @@
-# The name of the Kubernetes cluster we are deploying to
-# Defaults to the release name if not given for use as a dependency of openstack-cluster
-clusterName: "{{ .Release.Name }}"
+# The name of the Cluster API cluster
+# If not given, the release name is used
+clusterName:
 
-# The Kubernetes version of the target cluster
-# This is treated as a template at rendering time
-kubernetesVersion: v1.22
-
-# Indicates whether the addons are being deployed as part of a Cluster API cluster
-# If true then addons will wait for the cluster to become ready before installing, except
-# for the bootstrap addons which just wait for the API to become available
-clusterApi: false
-
-# Details of a secret containing a kubeconfig file for a remote cluster
-# If given, this is used in preference to a service account
-kubeconfigSecret:
-  # The name of the secret
-  # This is treated as a template during rendering
-  name:
-  # The key of the kubeconfig file in the secret
-  key: value
-
-# Options for the service account to use
-# A pre-existing service account can be used, or a new one can be created
-#
-# A service account is always required as it is used by the pre-delete hook
-# to suspend any install jobs that are still running prior to running the deletion
-#
-# The permissions required by the service account depend on whether the installation
-# is targetting a remote cluster or the local cluster
-#
-# Whether the installation target is local or remote, the service account needs to
-# have permission to list and patch jobs in the release namespace for the delete hook
-# in order to suspend any running install jobs
-#
-# When the installation targets the local cluster, the service account must also have
-# permission to create any resources that need to be installed, which could be into
-# other namespaces - the cluster-admin cluster role is normally used for this
-serviceAccount:
-  # Indicates whether to create a new service account
-  create: true
-  # The name of the cluster role to bind the created service account to
-  clusterRoleName: cluster-admin
-  # The name of the service account
-  # If create = true, this is the name of the created service account
-  # If create = false, this is the name of an existing service account to use
-  # This is treated as a template during rendering
-  name: "{{ include \"cluster-addons.fullname\" . }}-deployer"
-
-# Default settings for jobs
-jobDefaults:
+# Settings for hook jobs
+hooks:
   image:
-    repository: ghcr.io/stackhpc/k8s-utils
+    repository: ghcr.io/stackhpc/capi-helm-utils
     tag:  # Defaults to chart appVersion if not given
     pullPolicy: IfNotPresent
   imagePullSecrets: []
@@ -60,30 +15,23 @@ jobDefaults:
     runAsNonRoot: true
   securityContext:
     allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
+    readOnlyRootFilesystem: true
   resources: {}
   hostNetwork: false
   tolerations: []
   nodeSelector: {}
   affinity: {}
 
-# The available categories for dependencies and the addons that belong to them
-categories:
-  bootstrap:
-    - cloud-config
-    - ccm-openstack
-    - cni-calico
-    - cni-cilium
-    - prometheus-operator-crds
-  storage: [csi-cinder]
-  ingress: [ingress-nginx]
-
 # Settings for the CNI addon
 cni:
   # Indicates if a CNI should be deployed
   enabled: true
-  # The type of CNI to deploy - supported values are calico or cilium
+  # The CNI to deploy - supported values are calico or cilium
   type: calico
   # Settings for the calico CNI
+  # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
   calico:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
@@ -91,27 +39,9 @@ cni:
       version: v3.23.3
     release:
       namespace: tigera-operator
-      # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
-      values:
-        # Managing the installation separately makes deriving the pod CIDR cleaner
-        installation:
-          enabled: false
-    # The spec of the Calico installation
-    # See https://projectcalico.docs.tigera.io/reference/installation/api
-    installation:
-      calicoNetwork:
-        # By default, disable BGP
-        bgp: Disabled
-        # Use the interface that holds the Kubernetes internal IP
-        nodeAddressAutodetectionV4:
-          kubernetes: NodeInternalIP
-        # Use a single IP pool with VXLAN
-        # The special variable __KUBEADM_POD_CIDR__ is replaced with the pod CIDR from the
-        # kubeadm configmap, if kubeadm is in use
-        ipPools:
-          - cidr: __KUBEADM_POD_CIDR__
-            encapsulation: VXLAN
+      values: {}
   # Settings for the Cilium CNI
+  # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
   cilium:
     chart:
       repo: https://helm.cilium.io/
@@ -119,29 +49,16 @@ cni:
       version: 1.11.1
     release:
       namespace: kube-system
-      # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
-      values:
-        ipam:
-          mode: kubernetes
+      values: {}
 
 # Settings for the OpenStack integrations
 openstack:
   # Indicates if the OpenStack integrations should be enabled
   enabled: false
-  # The version of the OpenStack cloud provider to install
-  # By default, use the release branch for the Kubernetes version of the target cluster
-  version: release-{{ tpl .Values.kubernetesVersion . | trimPrefix "v" }}
-  # The base URL for OpenStack cloud provider manifests
-  # By default, pull the manifests from GitHub at the specified version
-  manifestsBaseURL: https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/{{ tpl .Values.openstack.version . }}
-  # The name of a secret containing a clouds.yaml file and optional cacert
-  # If the cacert is present, it should be referred to in the clouds.yaml file as /etc/config/cacert
-  # See https://docs.openstack.org/openstacksdk/latest/user/config/configuration.html#ssl-settings
-  cloudCredentialsSecretName:
-  # The name of the cloud to use in the clouds.yaml
-  cloudName: openstack
+  # The target namespace for the OpenStack integrations
+  targetNamespace: openstack-system
   # cloud-config options for the OpenStack integrations
-  # The [Global] section is configured to use the specified cloud from .Values.clouds
+  # The [Global] section is configured to use the target cloud
   # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
   # and https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage
   cloudConfig:
@@ -152,37 +69,24 @@ openstack:
   ccm:
     # Indicates if the OpenStack CCM should be enabled
     # By default, the CCM is enabled if the OpenStack integrations are enabled
+    # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/openstack-cloud-controller-manager/values.yaml
     enabled: true
-    # The prefix for RBAC manifests
-    # Unfortunately, this changes for different Kubernetes versions
-    rbacManifestsPrefix: >-
-      {{
-        tpl .Values.kubernetesVersion . |
-          trimPrefix "v" |
-          semverCompare ">=1.22" |
-          ternary "manifests/controller-manager" "cluster/addons/rbac"
-      }}
-    # The URLs to use for the manifests
-    manifests:
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-roles.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/{{ tpl .Values.openstack.ccm.rbacManifestsPrefix . }}/cloud-controller-manager-role-bindings.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml"
-    # Any kustomization to apply to the OpenStack CCM manifests
-    kustomization: {}
+    chart:
+      repo: https://kubernetes.github.io/cloud-provider-openstack
+      name: openstack-cloud-controller-manager
+      version: 1.3.0
+    values: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
     # Indicates if the Cinder CSI should be enabled
     # By default, it is enabled if the OpenStack integrations are enabled
+    # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/cinder-csi-plugin/values.yaml
     enabled: true
-    # The URLs to use for the manifests
-    manifests:
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/cinder-csi-controllerplugin-rbac.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/cinder-csi-controllerplugin.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/cinder-csi-nodeplugin-rbac.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/cinder-csi-nodeplugin.yaml"
-      - "{{ tpl .Values.openstack.manifestsBaseURL . }}/manifests/cinder-csi-plugin/csi-cinder-driver.yaml"
-    # Any kustomization to apply to the OpenStack CCM manifests
-    kustomization: {}
+    chart:
+      repo: https://kubernetes.github.io/cloud-provider-openstack
+      name: openstack-cinder-csi
+      version: 2.2.0
+    values: {}
     # Variables affecting the definition of the storage class
     storageClass:
       # Indicates if the storage class should be enabled
@@ -204,99 +108,58 @@ openstack:
       allowedTopologies:
 
 # Settings for the metrics server
+# https://github.com/kubernetes-sigs/metrics-server#helm-chart
 metricsServer:
   # Indicates if the metrics server should be deployed
   enabled: true
-  # The version of the metrics server to deploy
-  version: v0.6.1
-  # The URLs of the metrics server manifests
-  manifests:
-    - https://github.com/kubernetes-sigs/metrics-server/releases/download/{{ .Values.metricsServer.version }}/components.yaml
-  # Any kustomization to be applied to the metrics server manifests
-  kustomization:
-    patches:
-      - patch: |-
-          - op: add
-            path: /spec/template/spec/containers/0/args/-
-            value: --kubelet-insecure-tls
-        target:
-          kind: Deployment
-          name: metrics-server
+  chart:
+    repo: https://kubernetes-sigs.github.io/metrics-server
+    name: metrics-server
+    version: 3.8.2
+  release:
+    namespace: kube-system
+    values: {}
 
 # Settings for the Kubernetes dashboard
+# https://github.com/kubernetes/dashboard/tree/master/charts/helm-chart/kubernetes-dashboard
 kubernetesDashboard:
   # Indicates if the Kubernetes dashboard should be enabled
   enabled: false
   chart:
     repo: https://kubernetes.github.io/dashboard
     name: kubernetes-dashboard
-    version: 5.3.1
+    version: 5.10.0
   release:
     namespace: kubernetes-dashboard
-    values:
-      # Enable the metrics scraper by default
-      metricsScraper:
-        enabled: true
-
-# Settings for cert-manager
-certManager:
-  # Indicates if cert-manager should be enabled
-  enabled: false
-  chart:
-    repo: https://charts.jetstack.io
-    name: cert-manager
-    version: v1.5.5
-  release:
-    namespace: cert-manager
-    # See https://cert-manager.io/docs/installation/helm/ for available values
-    values:
-      # By default, make sure the cert-manager CRDs are installed
-      installCRDs: true
-      # Disable Prometheus support for now
-      prometheus:
-        enabled: false
-  # Settings for automatic ACME HTTP01 support using Let's Encrypt
-  # This is only enabled if ingress is also enabled
-  acmeHttp01Issuer:
-    enabled: yes
-    name: letsencrypt-http01
-    server: https://acme-v02.api.letsencrypt.org/directory
+    values: {}
 
 # Settings for ingress controllers
 ingress:
-  # Indicates if ingress controllers should be enabled
+  # Indicates if ingress controllers should be enabled
   enabled: false
   # Settings for the Nginx ingress controller
+  # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
   nginx:
     # Indicates if the Nginx ingress controller should be enabled
+    # The Nginx ingress controller is enabled by default if ingress controllers are enabled
     enabled: true
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.0.18
+      version: 4.2.5
     release:
       namespace: ingress-nginx
-      # See https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
       values: {}
 
 # Settings for cluster monitoring
 monitoring:
   # Indicates if the cluster monitoring should be enabled
   enabled: false
-  prometheusOperatorCrds:
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-    - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.54.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
   kubePrometheusStack:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 34.6.0
+      version: 40.1.0
     release:
       namespace: monitoring-system
       values: {}
@@ -305,52 +168,23 @@ monitoring:
     chart:
       repo: https://grafana.github.io/helm-charts
       name: loki-stack
-      version: 2.6.1
+      version: 2.8.2
     release:
       namespace: monitoring-system
       values: {}
 
 # Settings for node feature discovery
+# https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
 nodeFeatureDiscovery:
   # Indicates if node feature discovery should be enabled
   enabled: true
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.11.0
+    version: 0.11.2
   release:
     namespace: node-feature-discovery
-    values:
-      master:
-        extraLabelNs:
-          - nvidia.com
-      worker:
-        # Allow the NFD pods to be scheduled on master nodes
-        tolerations:
-          - key: "node-role.kubernetes.io/master"
-            operator: "Equal"
-            value: ""
-            effect: "NoSchedule"
-          - key: "nvidia.com/gpu"
-            operator: "Equal"
-            value: "present"
-            effect: "NoSchedule"
-        # We want to be able to identify nodes with high-performance hardware
-        # So the whitelisted device classes are:
-        #   02   - Network Controllers (e.g. Ethernet, Infiniband)
-        #   03   - Display Controllers (e.g. GPUs)
-        #   0b40 - Co-processors
-        #   12   - Processing Accelerators (e.g. specialised AI inference chips)
-        config:
-          sources:
-            pci:
-              deviceClassWhitelist:
-                - "02"
-                - "03"
-                - "0b40"
-                - "12"
-              deviceLabelFields:
-                - vendor
+    values: {}
 
 # Settings for the NVIDIA GPU operator
 nvidiaGPUOperator:
@@ -362,28 +196,10 @@ nvidiaGPUOperator:
   chart:
     repo: https://nvidia.github.io/gpu-operator
     name: gpu-operator
-    version: v1.10.0
+    version: v1.11.1
   release:
     namespace: gpu-operator
-    values:
-      # Use the shared NFD
-      nfd:
-        enabled: false
-      # Export operator and node metrics in a Prometheus format.
-      # The component provides information on the status of the
-      # operator (e.g. reconciliation status, number of GPU enabled nodes).
-      nodeStatusExporter:
-        enabled: true
-      toolkit:
-        # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
-        # breaks nvidia pod deployment on clusters with Harbor cache enabled.
-        # Instead make a new config file specifically for nvidia runtime config,
-        # which is parsed as an "include" in the main containerd config file.
-        #
-        # https://github.com/NVIDIA/gpu-operator/issues/301
-        env:
-          - name: "CONTAINERD_CONFIG"
-            value: "/etc/containerd/conf.d/nvidia.toml"
+    values: {}
 
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:
@@ -395,35 +211,43 @@ mellanoxNetworkOperator:
   chart:
     repo: https://mellanox.github.io/network-operator
     name: network-operator
-    version: 1.1.0
+    version: 1.3.0
   release:
     namespace: network-operator
-    values:
-      # Use the shared NFD
-      nfd:
-        enabled: false
-      # Deploy the default NICClusterPolicy
-      deployCR: true
-      # Deploy the OFED driver onto nodes with a suitable NIC
-      ofedDriver:
-        deploy: true
-        # OFED takes ages to deploy on low-resource nodes
-        # The startup probe has a fixed failure threshold of 60
-        # So in order to give the drivers up to one hour to install, we use a period
-        # of 60 seconds for the startup probe
-        startupProbe:
-          initialDelaySeconds: 60
-          periodSeconds: 60
-      # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
-      rdmaSharedDevicePlugin:
-        deploy: true
-      # Disable all other features for now
-      sriovNetworkOperator:
-        enabled: false
-      sriovDevicePlugin:
-        deploy: false
-      secondaryNetwork:
-        deploy: false
+    values: {}
 
-# Map of extra addons in the form "component name" -> "addon spec"
-extraAddons: {}
+# Settings for any custom addons
+custom: {}
+  # # Indexed by the name of the release on the target cluster
+  # my-custom-helm-release:
+  #   # Indicates that this is a Helm addon
+  #   kind: HelmRelease
+  #   spec:
+  #     # The namespace that the addon should be in
+  #     namespace: my-namespace
+  #     # Details of the Helm chart to use
+  #     chart:
+  #       # The chart repository that contains the chart to use
+  #       repo: https://my-project/charts
+  #       # The name of the chart to use
+  #       name: my-chart
+  #       # The version of the chart to use (must be an exact version)
+  #       version: 1.5.0
+  #     # The Helm values to use for the release
+  #     values: {}
+  # # Indexed by the name of the release on the target cluster
+  # my-custom-manifests:
+  #   # Indicates that this is a Manifests addon
+  #   kind: Manifests
+  #   spec:
+  #     # The namespace that the addon should be in
+  #     namespace: my-namespace
+  #     # The manifests for the addon, indexed by filename
+  #     manifests:
+  #       secret.yaml: |-
+  #         apiVersion: v1
+  #         kind: Secret
+  #         metadata:
+  #           name: my-secret
+  #         stringData:
+  #           secret-file: "secret-data"

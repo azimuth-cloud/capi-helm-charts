@@ -4,8 +4,3 @@ description: Helm chart that deploys cluster addons for a CAPI cluster.
 type: application
 version: 0.1.0
 appVersion: main
-
-dependencies:
-  - name: addon
-    version: ">=0-0"
-    repository: file://../addon

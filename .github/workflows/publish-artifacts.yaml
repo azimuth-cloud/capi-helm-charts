@@ -20,7 +20,7 @@ jobs:
         id: image-meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/stackhpc/k8s-utils
+          images: ghcr.io/stackhpc/capi-helm-utils
           # Produce the branch name or tag and the SHA as tags
           tags: |
             type=ref,event=branch

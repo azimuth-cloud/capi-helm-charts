@@ -1,0 +1,64 @@
+{{- if .Values.openstack.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cloud-config") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cloud-config") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: cloud-config
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cloud-config
+        data:
+          {{ "{{" }} cloud_identity.data | toyaml | indent(2) {{ "}}" }}
+        stringData:
+          cloud.conf: |
+            [Global]
+            use-clouds=true
+            clouds-file=/etc/config/clouds.yaml
+            cloud=openstack
+        {%- if "cacert" in cloud_identity.data %}
+            ca-file=/etc/config/cacert
+        {%- else %}
+            tls-insecure=true
+        {%- endif %}
+            [Networking]
+            {{- $networkingItems := default dict .Values.openstack.cloudConfig.Networking }}
+            {{- if hasKey $networkingItems "internal-network-name" }}
+            internal-network-name={{ index $networkingItems "internal-network-name" }}
+            {{- else }}
+            internal-network-name={{ "{{" }} infra_cluster.status.network.name {{ "}}" }}
+            {{- end }}
+            {{- range $netName, $netValue := omit $networkingItems "internal-network-name" }}
+            {{ $netName }}={{ $netValue }}
+            {{- end }}
+            [LoadBalancer]
+            {{- $lbItems := default dict .Values.openstack.cloudConfig.LoadBalancer }}
+            {{- if hasKey $lbItems "floating-network-id" }}
+            floating-network-id={{ index $lbItems "floating-network-id" }}
+            {{- else }}
+            floating-network-id={{ "{{" }} infra_cluster.status.externalNetwork.id {{ "}}" }}
+            {{- end }}
+            {{- range $lbName, $lbValue := omit $lbItems "floating-network-id" }}
+            {{ $lbName }}={{ $lbValue }}
+            {{- end }}
+            {{-
+              range $section, $items := omit
+                .Values.openstack.cloudConfig
+                "Global"
+                "LoadBalancer"
+                "Networking"
+            }}
+            [{{ $section }}]
+            {{- range $name, $value := $items }}
+            {{ $name }}={{ $value }}
+            {{- end }}
+            {{ end }}
+{{- end }}

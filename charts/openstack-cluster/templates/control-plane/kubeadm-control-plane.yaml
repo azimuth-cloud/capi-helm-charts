@@ -17,7 +17,7 @@ option of InitConfiguration and specifying a KubeProxyConfiguration.
 {{- $files := index . 1 | dig "files" list }}
 {{- $preKubeadmCommands := index . 1 | dig "preKubeadmCommands" list }}
 
-{{- if and $skipPhases (semverCompare "<1.22.0" $ctx.Values.global.kubernetesVersion) }}
+{{- if and $skipPhases (semverCompare "<1.22.0" $ctx.Values.kubernetesVersion) }}
 {{- fail "skipPhases is only supported for Kubernetes 1.22 and higher" }}
 {{- end }}
 
@@ -75,12 +75,12 @@ metadata:
     # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
 spec:
-  version: {{ .Values.global.kubernetesVersion | required ".Values.global.kubernetesVersion is required" }}
+  version: {{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" }}
   replicas: {{ .Values.controlPlane.machineCount }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
   machineTemplate:
     metadata:
-      labels: {{ include "openstack-cluster.controlPlaneSelectorLabels" . | nindent 8 }}
+      labels: {{ include "openstack-cluster.componentSelectorLabels" (list . "control-plane") | nindent 8 }}
     infrastructureRef:
       kind: OpenStackMachineTemplate
       apiVersion: infrastructure.cluster.x-k8s.io/v1alpha6
