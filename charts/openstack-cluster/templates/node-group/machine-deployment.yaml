@@ -44,7 +44,7 @@ spec:
         capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
     spec:
       clusterName: {{ include "openstack-cluster.clusterName" $ }}
-      version: {{ $.Values.global.kubernetesVersion }}
+      version: {{ $.Values.kubernetesVersion }}
       {{- with $nodeGroup.failureDomain }}
       failureDomain: {{ . }}
       {{- end }}

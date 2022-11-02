@@ -125,8 +125,7 @@ working cluster:
 
 ```yaml
 # The target Kubernetes version
-global:
-  kubernetesVersion: 1.22.1
+kubernetesVersion: 1.22.1
 
 # An image with the required software installed at the target version
 machineImage: ubuntu-2004-kube-v{{ .Values.kubernetesVersion }}

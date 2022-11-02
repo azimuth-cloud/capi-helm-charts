@@ -67,8 +67,8 @@ Labels for component-level resources
 Name of the secret containing the cloud credentials.
 */}}
 {{- define "openstack-cluster.cloudCredentialsSecretName" -}}
-{{- if .Values.global.cloudCredentialsSecretName -}}
-{{- .Values.global.cloudCredentialsSecretName -}}
+{{- if .Values.cloudCredentialsSecretName -}}
+{{- .Values.cloudCredentialsSecretName -}}
 {{- else -}}
 {{ include "openstack-cluster.componentName" (list . "cloud-credentials") -}}
 {{- end -}}
@@ -167,7 +167,7 @@ version of the target cluster.
 {{- if .Values.autoscaler.image.tag -}}
 {{- .Values.autoscaler.image.tag -}}
 {{- else -}}
-{{- $kubeMinorVersion := .Values.global.kubernetesVersion | splitList "." | reverse | rest | reverse | join "." -}}
+{{- $kubeMinorVersion := .Values.kubernetesVersion | splitList "." | reverse | rest | reverse | join "." -}}
 {{- $defaultTag := printf "v%s.0" $kubeMinorVersion -}}
 {{- .Values.autoscaler.image.tags | dig $kubeMinorVersion $defaultTag -}}
 {{- end -}}
