@@ -36,7 +36,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.23.3
+      version: v3.24.5
     release:
       namespace: tigera-operator
       values: {}
@@ -46,7 +46,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.11.1
+      version: 1.12.3
     release:
       namespace: kube-system
       values: {}
@@ -128,7 +128,7 @@ kubernetesDashboard:
   chart:
     repo: https://kubernetes.github.io/dashboard
     name: kubernetes-dashboard
-    version: 5.10.0
+    version: 6.0.0
   release:
     namespace: kubernetes-dashboard
     values: {}
@@ -146,7 +146,7 @@ ingress:
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.2.5
+      version: 4.4.0
     release:
       namespace: ingress-nginx
       values: {}
@@ -159,7 +159,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 40.1.0
+      version: 41.7.4
     release:
       namespace: monitoring-system
       values: {}
@@ -168,7 +168,7 @@ monitoring:
     chart:
       repo: https://grafana.github.io/helm-charts
       name: loki-stack
-      version: 2.8.2
+      version: 2.8.5
     release:
       namespace: monitoring-system
       values: {}
@@ -181,7 +181,7 @@ nodeFeatureDiscovery:
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.11.2
+    version: 0.11.3
   release:
     namespace: node-feature-discovery
     values: {}
@@ -196,7 +196,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://nvidia.github.io/gpu-operator
     name: gpu-operator
-    version: v1.11.1
+    version: v22.9.0
   release:
     namespace: gpu-operator
     values: {}
