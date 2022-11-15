@@ -1,12 +1,12 @@
 # The name of the Cluster API cluster
-# If not given, the release name is used
+# if not given, the release name is used
+---
 clusterName:
-
 # Settings for hook jobs
 hooks:
   image:
     repository: ghcr.io/stackhpc/capi-helm-utils
-    tag:  # Defaults to chart appVersion if not given
+    tag:  # Defaults to chart appVersion if not given
     pullPolicy: IfNotPresent
   imagePullSecrets: []
   backoffLimit: 1000
@@ -218,7 +218,7 @@ mellanoxNetworkOperator:
 
 # Settings for any custom addons
 custom: {}
-  # # Indexed by the name of the release on the target cluster
+  #  #Indexed by the name of the release on the target cluster
   # my-custom-helm-release:
   #   # Indicates that this is a Helm addon
   #   kind: HelmRelease
