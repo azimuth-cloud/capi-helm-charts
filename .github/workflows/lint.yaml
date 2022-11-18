@@ -1,6 +1,6 @@
 name: Lint Helm Charts
 # Run the tasks on every push
-on: push
+on: [pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
