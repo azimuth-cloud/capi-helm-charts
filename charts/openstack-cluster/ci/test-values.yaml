@@ -2,7 +2,7 @@
 kubernetesVersion: 1.24.2
 
 machineImageId: 9b5d513c-67b4-4fd6-8bf1-3bf4525c04c3
-
+asdf
 controlPlane:
   machineFlavor: vm.alaska.cpu.general.small
 
