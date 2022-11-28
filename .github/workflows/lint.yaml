@@ -1,4 +1,4 @@
-name: Lint Helm Charts
+name: ci
 # Run the tasks on every push
 on: [pull_request]
 jobs:
@@ -31,3 +31,11 @@ jobs:
 
       - name: Run chart-testing (lint)
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --validate-maintainers=false --extra-values clouds.yml
+  
+  install:
+    name: Install Helm Charts
+    needs:
+      - lint
+    uses: ./.github/workflows/install.yaml
+    secrets: inherit
+    if: github.repository == 'stackhpc/capi-helm-charts'

@@ -1,12 +1,9 @@
 name: Install Helm Charts
-on:
-  workflow_run:
-    workflows: ["Lint Helm Charts"]
-    types: 
-      - completed
+on: [workflow_call]
+
 jobs:
   install:
-    runs-on: azimuth-demo
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v3
