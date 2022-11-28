@@ -33,7 +33,6 @@ jobs:
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --validate-maintainers=false --extra-values clouds.yml
   
   install:
-    name: Install Helm Charts
     needs:
       - lint
     uses: ./.github/workflows/install.yaml
