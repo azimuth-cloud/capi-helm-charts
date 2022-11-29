@@ -30,4 +30,4 @@ jobs:
           TYLER_CLOUDS: ${{ secrets.TYLER_CLOUDS }}
       
       - name: Run Helm Install
-        run: ct install --target-branch ${{ github.event.repository.default_branch }} --all --helm-extra-args "--values clouds.yml --timeout 5s"
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --all --helm-extra-args "--values clouds.yml --timeout 1m"
