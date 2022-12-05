@@ -26,15 +26,15 @@ Common labels
 */}}
 {{- define "openstack-cluster.commonLabels" -}}
 helm.sh/chart: {{ include "openstack-cluster.chart" . }}
-capi.stackhpc.com/managed-by: {{ .Release.Service }}
-capi.stackhpc.com/infrastructure-provider: openstack
+{{ .Values.projectPrefix }}/managed-by: {{ .Release.Service }}
+{{ .Values.projectPrefix }}/infrastructure-provider: openstack
 {{- end -}}
 
 {{/*
 Selector labels for cluster-level resources
 */}}
 {{- define "openstack-cluster.selectorLabels" -}}
-capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
+{{ .Values.projectPrefix }}/cluster: {{ include "openstack-cluster.clusterName" . }}
 {{- end -}}
 
 {{/*
@@ -52,7 +52,7 @@ Selector labels for component-level resources
 {{- $ctx := index . 0 -}}
 {{- $componentName := index . 1 -}}
 {{ include "openstack-cluster.selectorLabels" $ctx }}
-capi.stackhpc.com/component: {{ $componentName }}
+{{ $ctx.Values.projectPrefix }}/component: {{ $componentName }}
 {{- end -}}
 
 {{/*

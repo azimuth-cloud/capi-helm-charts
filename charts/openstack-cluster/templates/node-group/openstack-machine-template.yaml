@@ -53,9 +53,9 @@ metadata:
   name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
   labels:
     {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
-    capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
+    {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
   annotations:
-    capi.stackhpc.com/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
+    {{ $.Values.projectPrefix }}/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
     # We let Cluster API clean up the cluster resources
     # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
