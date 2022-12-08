@@ -3,7 +3,7 @@ on: [workflow_call]
 
 jobs:
   install:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -19,12 +19,6 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.10.0
-
-      - name: Cat KUBECONFIG
-        run: sudo cat /etc/rancher/k3s/k3s.yaml > kubeconfig
-
-      - name: Set KUBECONFIG
-        run: export KUBECONFIG=${GITHUB_WORKSPACE}/kubeconfig
       
       - name: Copy cloud creds to file
         run: 'echo "$TYLER_CLOUDS" > clouds.yml'
