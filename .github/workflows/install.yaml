@@ -4,6 +4,9 @@ on: [workflow_call]
 jobs:
   install:
     runs-on: self-hosted
+    strategy:
+      matrix:
+        node: [kube-1.23.9, kube-1.24.2, kube-1.25.4]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -43,25 +46,25 @@ jobs:
           TYLER_CLOUDS: ${{ secrets.TYLER_CLOUDS }}
       
       - name: Install chart 
-        run: helm upgrade test-${{ github.sha }} charts/openstack-cluster -n namespace-${{ github.sha }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/test-values.yaml --dependency-update
+        run: helm upgrade test-${{ github.sha }}-${{ matrix.version }} charts/openstack-cluster -n namespace-${{ github.sha }}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}.yaml --dependency-update
 
       - name: Wait for cluster READY
-        run: kubectl wait -n namespace-${{ github.sha }} clusters.cluster.x-k8s.io/test-${{ github.sha }} --for=condition=Ready --timeout 20m
+        run: kubectl wait -n namespace-${{ github.sha }}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${{ github.sha }}-${{ matrix.version }} --for=condition=Ready --timeout 20m
 
       - name: Wait for addons manifest
-        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${{ github.sha }} --selector capi.stackhpc.com/cluster=test-${{ github.sha }} --timeout 20m
+        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${{ github.sha }}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${{ github.sha }}-${{ matrix.version }} --timeout 20m
       
       - name: Wait for addons helmreleases 
-        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${{ github.sha }} --selector capi.stackhpc.com/cluster=test-${{ github.sha }} --timeout 20m
+        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${{ github.sha }}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${{ github.sha }}-${{ matrix.version }} --timeout 20m
 
       - name: Grab kubeconfig 
-        run: kubectl -n namespace-${{ github.sha }} get secret test-${{ github.sha }}-kubeconfig -o jsonpath='{.data.value}' | base64 --decode > kubeconfig
+        run: kubectl -n namespace-${{ github.sha }}-${{ matrix.version }} get secret test-${{ github.sha }}-${{ matrix.version }}-kubeconfig -o jsonpath='{.data.value}' | base64 --decode > kubeconfig-${{ matrix.version }}
 
       - name: Run sonobuoy [smoke]
-        run: sonobuoy run --mode quick --kubeconfig kubeconfig --wait
+        run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
       - name: Delete release
-        run: helm delete -n namespace-${{ github.sha }} test-${{ github.sha }} --wait
+        run: helm delete -n namespace-${{ github.sha }}-${{ matrix.version }} test-${{ github.sha }}-${{ matrix.version }} --wait
       
       - name: Delete namespace 
-        run: kubectl delete namespace namespace-${{ github.sha }}
+        run: kubectl delete namespace namespace-${{ github.sha }}-${{ matrix.version }}
