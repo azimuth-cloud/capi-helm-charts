@@ -22,9 +22,9 @@ jobs:
       - name: Install sonobuoy
         if: steps.sonobuoy_exists.outputs.files_exists == 'false'
         run: >
-        wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.12/sonobuoy_0.56.12_linux_amd64.tar.gz
-        && tar -xf sonobuoy_0.56.12_linux_amd64.tar.gz
-        && sudo mv -n sonobuoy /usr/bin/
+          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.12/sonobuoy_0.56.12_linux_amd64.tar.gz
+          && tar -xf sonobuoy_0.56.12_linux_amd64.tar.gz
+          && sudo mv -n sonobuoy /usr/bin/
 
       - uses: actions/setup-python@v4
         with:
