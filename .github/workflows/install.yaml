@@ -7,6 +7,7 @@ jobs:
     strategy:
       matrix:
         version: [kube-1-23-9, kube-1-24-2, kube-1-25-4]
+    continue-on-error: true #don't cancel all jobs if one fails - cleanup
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -46,7 +47,7 @@ jobs:
           TYLER_CLOUDS: ${{ secrets.TYLER_CLOUDS }}
       
       - name: Install chart 
-        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}.yaml --dependency-update
+        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values.yaml --dependency-update
 
       - name: Wait for cluster READY
         run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 20m
