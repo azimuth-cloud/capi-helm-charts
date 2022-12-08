@@ -60,5 +60,8 @@ jobs:
       - name: Run sonobuoy [smoke]
         run: sonobuoy run --mode quick --kubeconfig kubeconfig --wait
 
-      - name: Delete resources
+      - name: Delete release
         run: helm delete -n namespace-${{ github.sha }} test-${{ github.sha }} --wait
+      
+      - name: Delete namespace 
+        run: kubectl delete namespace namespace-${{ github.sha }}
