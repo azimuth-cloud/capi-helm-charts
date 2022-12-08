@@ -31,3 +31,15 @@ jobs:
       
       - name: Install chart 
         run: helm --debug  upgrade test-${{ github.sha }} charts/openstack-cluster -n namespace-${{ github.sha }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/test-values.yaml --dependency-update
+
+      - name: Wait for cluster READY
+        run: kubectl wait -n namespace-${{ github.sha }} clusters.cluster.x-k8s.io/test-${{ github.sha }} --for=condition=Ready
+
+      - name: Wait for addons manifest
+        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${{ github.sha }}--selector capi.stackhpc.com/cluster=test-${{ github.sha }} --timeout 20m
+      
+      - name: Wait for addons helmreleases 
+        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${{ github.sha }}--selector capi.stackhpc.com/cluster=test-${{ github.sha }} --timeout 20m
+
+      - name: Delete resources
+        run: helm delete -n namespace-${{ github.sha }} test-${{ github.sha }}
