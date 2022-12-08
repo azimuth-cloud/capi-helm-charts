@@ -19,6 +19,9 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.10.0
+
+      - name: Set KUBECONFIG
+        run: export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
       
       - name: Copy cloud creds to file
         run: 'echo "$TYLER_CLOUDS" > clouds.yml'
