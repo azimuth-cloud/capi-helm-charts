@@ -83,7 +83,9 @@ jobs:
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
         
       - name: Delete release
+        if: ${{ always() }}
         run: helm delete -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} test-${GITHUB_SHA::7}-${{ matrix.version }} --wait
       
       - name: Delete namespace 
+        if: ${{ always() }}
         run: kubectl delete namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }}
