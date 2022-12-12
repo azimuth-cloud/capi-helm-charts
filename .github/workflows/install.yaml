@@ -65,7 +65,7 @@ jobs:
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
       - name: Clean sonobuoy 
-        run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait
+        run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
       
       - name: Upgrade cluster
         run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values-upgrade.yaml --dependency-update
