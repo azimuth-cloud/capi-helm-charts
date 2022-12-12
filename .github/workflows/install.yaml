@@ -61,6 +61,8 @@ jobs:
       - name: Grab kubeconfig 
         run: kubectl -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} get secret test-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig -o jsonpath='{.data.value}' | base64 --decode > kubeconfig-${{ matrix.version }}
 
+      - name: Wait for dns pods 
+        run: kubectl --kubeconfig kubeconfig-${{ matrix.version }} wait po -n kube-system -l k8s-app=kube-dns --for=condition=ready --timeout 20m
       - name: Run sonobuoy [smoke]
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
