@@ -3,8 +3,12 @@ kubernetesVersion: 1.25.4
 
 machineImageId: 48c078a5-fd89-4f61-9d6a-c4f48745c0ae
 
+apiServer:
+  enableLoadBalancer: false
+
 controlPlane:
   machineFlavor: vm.alaska.cpu.general.small
+  machineCount: 1
 
 nodeGroups:
   - machineCount: 2
