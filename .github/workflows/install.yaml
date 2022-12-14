@@ -51,10 +51,6 @@ jobs:
       
       - name: Install cert-manager
         run: kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.10.1/cert-manager.yaml
-
-      #debug
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       
       - name: Make kustomization directory 
         run: mkdir clusterapi
