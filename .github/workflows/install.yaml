@@ -101,9 +101,12 @@ jobs:
       - name: Install Cluster API add-on provider
         run: >
           helm install --repo https://stackhpc.github.io/cluster-api-addon-provider cluster-api-addon-provider --version 0.1.0-dev.0.main.21 -n capi-addon-system --create-namespace --wait --timeout 30m cluster-api-addon-provider
-    
+
       - name: Install chart 
         run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values.yaml --dependency-update
+
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
 
       - name: Wait for cluster READY
         run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 20m
