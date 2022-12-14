@@ -82,7 +82,7 @@ jobs:
             - https://github.com/stackhpc/cluster-api-provider-openstack/releases/download/v0.7.0-stackhpc.1/infrastructure-components.yaml
       
       - name: Install Cluster API resources
-        run: kubectl apply -k clusterapi/kustomization.yaml
+        run: kubectl apply -k clusterapi
 
       - name: Wait for Cluster API controllers to become ready
         run: >
