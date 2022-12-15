@@ -1,6 +1,9 @@
 name: Publish artifacts
-# Run the tasks on every push
-on: push
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build_push_utils_image:
     name: Build and push images

@@ -7,6 +7,9 @@ jobs:
     strategy:
       matrix:
         version: [kube-1-23-9, kube-1-24-2, kube-1-25-4]
+        capi: ["v1.2.5"]
+        capo: ["v0.7.0-stackhpc.1"]
+        addonprovider: ["0.1.0-dev.0.main.21"]
     continue-on-error: true #don't cancel all jobs if one fails - cleanup
     steps:
       - name: Checkout
@@ -85,8 +88,8 @@ jobs:
                     name: capi-kubeadm-control-plane-controller-manager
                     namespace: capi-kubeadm-control-plane-system
             resources:
-            - https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.5/cluster-api-components.yaml
-            - https://github.com/stackhpc/cluster-api-provider-openstack/releases/download/v0.7.0-stackhpc.1/infrastructure-components.yaml
+            - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ matrix.capi }}/cluster-api-components.yaml
+            - https://github.com/stackhpc/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
       
       - name: Install Cluster API resources
         run: kubectl apply -k clusterapi/
@@ -101,7 +104,7 @@ jobs:
       
       - name: Install Cluster API add-on provider
         run: >
-          helm install --repo https://stackhpc.github.io/cluster-api-addon-provider cluster-api-addon-provider --version 0.1.0-dev.0.main.21 -n capi-addon-system --create-namespace --wait --timeout 30m cluster-api-addon-provider
+          helm install --repo https://stackhpc.github.io/cluster-api-addon-provider cluster-api-addon-provider --version ${{ matrix.addonprovider }} -n capi-addon-system --create-namespace --wait --timeout 30m cluster-api-addon-provider
 
       - name: Install chart 
         run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values.yaml --dependency-update

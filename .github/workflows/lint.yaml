@@ -1,6 +1,12 @@
-name: ci
-# Run the tasks on every push
-on: [pull_request]
+name: helm lint
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
 jobs:
   lint:
     runs-on: ubuntu-latest
