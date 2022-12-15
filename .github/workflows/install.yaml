@@ -58,6 +58,7 @@ jobs:
       - name: Make kustomization directory 
         run: mkdir clusterapi
       
+      # From here: https://github.com/stackhpc/ansible-collection-azimuth-ops/blob/main/roles/clusterapi/defaults/main.yml
       - name: Overwrite file
         uses: "DamianReeves/write-file-action@master"
         with:
