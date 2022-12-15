@@ -1,4 +1,4 @@
-name: ci
+name: helm lint
 # Run the tasks on every push
 on: [pull_request]
 jobs:
