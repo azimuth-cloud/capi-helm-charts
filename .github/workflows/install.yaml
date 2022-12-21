@@ -4,6 +4,8 @@ on:
     workflows: [Helm Lint]
     types:
       - completed
+    #paths:
+    #  - charts/**
 
 jobs:
   install:
