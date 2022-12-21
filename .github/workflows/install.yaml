@@ -1,7 +1,7 @@
 name: Install Helm Charts
 on:
   workflow_run:
-    workflows: [Helm Lint]
+    workflows: [HelmLint]
     types:
       - completed
     #paths:
