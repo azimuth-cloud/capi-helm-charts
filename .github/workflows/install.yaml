@@ -1,5 +1,9 @@
 name: Install Helm Charts
-on: [workflow_call]
+on:
+  workflow_run:
+    workflows: [Helm Lint]
+    types:
+      - completed
 
 jobs:
   install:
