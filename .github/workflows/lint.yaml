@@ -29,11 +29,24 @@ jobs:
       - name: Set up chart-testing
         uses: scrungus/chart-testing-action@v3.7.3
       
-      - name: Copy cloud creds to file
-        run: 'echo "$TYLER_CLOUDS" > clouds.yml'
-        shell: bash
-        env:
-          TYLER_CLOUDS: ${{ secrets.TYLER_CLOUDS }}
+      - name: Dummy cloud creds
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: clouds.yml
+          write-mode: overwrite
+          contents: |
+            clouds:
+              openstack:
+                auth:
+                  auth_url: https://my.cloud:5000
+                  application_credential_id: "xxxx"
+                  application_credential_secret: "xxxx"
+                region_name: "RegionOne"
+                verify: false
+                interface: "public"
+                identity_api_version: 3
+                auth_type: "v3applicationcredential"
+
 
       - name: Run chart-testing (lint)
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --validate-maintainers=false --extra-values clouds.yml
