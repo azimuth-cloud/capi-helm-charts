@@ -50,10 +50,10 @@ jobs:
           version: v3.10.0
       
       - name: Copy cloud creds to file
-        run: 'echo "$TYLER_CLOUDS" > clouds.yml'
+        run: 'echo "$CLOUD" > clouds.yml'
         shell: bash
         env:
-          TYLER_CLOUDS: ${{ secrets.TYLER_CLOUDS }}
+          CLOUD: ${{ secrets.CLOUD }}
       
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.5.0
