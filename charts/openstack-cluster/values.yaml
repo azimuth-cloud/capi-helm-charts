@@ -24,6 +24,9 @@ machineImageId:
 # The name of the SSH key to inject into cluster machines
 machineSSHKeyName:
 
+# The prefix used for project labels and annotations
+projectPrefix: capi.stackhpc.com
+
 # Values for the Kubernetes cluster network
 kubeNetwork:
   # By default, use the private network range 172.16.0.0/12 for the cluster network
