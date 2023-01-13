@@ -1,0 +1,6 @@
+# Default owner for all files unless otherwise specified
+*  @mkjpryor
+
+# Tyler looks after the CI, so make him a code owner on CI-related files as well
+/.github/  @mkjpryor @scrungus
+ci/. @mkjpryor @scrungus
