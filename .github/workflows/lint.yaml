@@ -57,5 +57,7 @@ jobs:
           install.yaml \
           --repo ${{ github.repository }} \
           --ref ${{ github.sha }}
+        env:
+          GH_TOKEN: ${{ github.token }}
 
     
