@@ -1,5 +1,5 @@
 name: Install Helm Charts
-on: [workflow_dispatch]
+on: [workflow_call]
 jobs:
   install:
     runs-on: ubuntu-latest
