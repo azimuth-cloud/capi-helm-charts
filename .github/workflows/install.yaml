@@ -131,26 +131,29 @@ jobs:
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
       # debug
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+      # - name: Setup upterm session
+      #   uses: lhotari/action-upterm@v1
 
-      #- name: Clean sonobuoy 
-      #  run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
+      - name: Clean sonobuoy 
+        run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
       
-      #- name: Upgrade cluster
-      #  run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values-upgrade.yaml --dependency-update
+      - name: Upgrade cluster
+        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values-upgrade.yaml --dependency-update
       
-      #- name: Wait for cluster READY
-      #  run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 20m
+      - name: Wait for cluster NOT READY
+        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready=false --timeout 20m
 
-      #- name: Wait for addons manifest
-      #  run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
-      
-      #- name: Wait for addons helmreleases 
-      #  run: kubectl wait helmreleases --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+      - name: Wait for cluster READY
+        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 20m
 
-      #- name: Run sonobuoy [smoke]
-      #  run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
+      - name: Wait for addons manifest
+        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+      
+      - name: Wait for addons helmreleases 
+        run: kubectl wait helmreleases --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+
+      - name: Run sonobuoy [smoke]
+        run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
         
       - name: Delete release
         if: ${{ always() }}
