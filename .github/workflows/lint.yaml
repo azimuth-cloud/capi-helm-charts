@@ -51,4 +51,11 @@ jobs:
       - name: Run chart-testing (lint)
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --validate-maintainers=false --extra-values clouds.yml
 
+      - name: Trigger chart installs
+        run: |
+          gh workflow run \
+          install.yaml \
+          --repo ${{ github.repository }} \
+          --ref ${{ github.sha }}
+
     

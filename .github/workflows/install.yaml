@@ -1,20 +1,14 @@
 name: Install Helm Charts
-on:
-  workflow_run:
-    workflows: [HelmLint]
-    types:
-      - completed
-    #paths:
-    #  - charts/**
+on: workflow_dispatch
 
 jobs:
   install:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [kube-1-23-9, kube-1-24-2, kube-1-25-4]
+        version: [kube-1-23-9, kube-1-24-2, kube-1-25-4, kube-1-26-0]
         capi: ["v1.2.5"]
-        capo: ["v0.7.0-stackhpc.1"]
+        capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
     continue-on-error: true #don't cancel all jobs if one fails - cleanup
     steps:
@@ -116,8 +110,8 @@ jobs:
         run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values.yaml --dependency-update
 
       # debug
-      #- name: Setup upterm session
-      #  uses: lhotari/action-upterm@v1
+      - name: Setup upterm session
+       uses: lhotari/action-upterm@v1
 
       - name: Wait for cluster READY
         run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 30m
