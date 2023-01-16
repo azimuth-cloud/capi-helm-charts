@@ -51,12 +51,23 @@ jobs:
       - name: Run chart-testing (lint)
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --validate-maintainers=false --extra-values clouds.yml
 
-      - name: Trigger chart installs
+      - name: Trigger chart installs (on pr)
+        if: github.event_name == 'pull_request'
         run: |
           gh workflow run \
           install.yaml \
           --repo ${{ github.repository }} \
-          --ref ${{ github.ref }}
+          --ref ${{ github.event.pull_request.head.ref }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Trigger chart installs (on pull)
+        if: github.event_name == 'push'
+        run: |
+          gh workflow run \
+          install.yaml \
+          --repo ${{ github.repository }} \
+          --ref ${{ github.event.push.head.ref }}
         env:
           GH_TOKEN: ${{ github.token }}
 
