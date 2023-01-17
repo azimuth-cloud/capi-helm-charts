@@ -155,7 +155,11 @@ jobs:
 
       - name: Run sonobuoy [smoke]
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
-        
+
+      - name: Print logs
+        if: ${{ always() }}
+        run: kubectl -n capo-system logs deploy/capo-controller-manager | grep test-${GITHUB_SHA::7}-${{ matrix.version }} | tail -n 200
+
       - name: Delete release
         if: ${{ always() }}
         run: helm delete -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} test-${GITHUB_SHA::7}-${{ matrix.version }} --wait
