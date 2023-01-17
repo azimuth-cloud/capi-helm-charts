@@ -114,7 +114,7 @@ jobs:
       #   uses: lhotari/action-upterm@v1
 
       - name: Wait for cluster READY
-        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 60m
+        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 30m
 
       - name: Wait for addons manifest
         run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
