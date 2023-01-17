@@ -107,7 +107,7 @@ jobs:
           helm install --repo https://stackhpc.github.io/cluster-api-addon-provider cluster-api-addon-provider --version ${{ matrix.addonprovider }} -n capi-addon-system --create-namespace --wait --timeout 30m cluster-api-addon-provider
 
       - name: Install chart 
-        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values.yaml --dependency-update
+        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml --dependency-update
 
       # debug
       # - name: Setup upterm session
@@ -139,7 +139,7 @@ jobs:
         run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
       
       - name: Upgrade cluster
-        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values-upgrade.yaml --dependency-update
+        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml --dependency-update
       
       - name: Wait for cluster NOT READY
         run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready=false --timeout 20m
