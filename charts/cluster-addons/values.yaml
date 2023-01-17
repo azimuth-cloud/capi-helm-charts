@@ -67,14 +67,12 @@ openstack:
       name: openstack-cinder-csi
       version: 2.28.1
     values: {}
-    # Variables affecting the definition of the storage class
-    storageClass:
+    # Variables affecting the definition of the default storage class
+    defaultStorageClass:
       # Indicates if the storage class should be enabled
       enabled: true
       # The name of the storage class
       name: csi-cinder
-      # Indicates if the storage class should be annotated as the default storage class
-      isDefault: true
       # The reclaim policy for the storage class
       reclaimPolicy: Delete
       # Indicates if volume expansion is allowed
@@ -86,6 +84,20 @@ openstack:
       volumeType:
       # The allowed topologies for the storage class
       allowedTopologies:
+    # Variables affecting the definition of additional (non-default) storage classes
+    additionalStorageClasses: []
+      # - name: csi-cinder-fast
+      #   # The reclaim policy for the storage class
+      #   reclaimPolicy: Delete
+      #   # Indicates if volume expansion is allowed
+      #   allowVolumeExpansion: true
+      #   # The Cinder availability zone to use for volumes provisioned by the storage class
+      #   availabilityZone: nova
+      #   # The Cinder volume type to use for volumes provisioned by the storage class
+      #   # If not given, the default volume type will be used
+      #   volumeType: fast
+      #   # The allowed topologies for the storage class
+      #   allowedTopologies:
 
   k8sKeystoneAuth:
     enabled: false
