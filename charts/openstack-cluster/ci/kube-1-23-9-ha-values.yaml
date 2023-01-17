@@ -5,7 +5,6 @@ machineImageId: e8c65726-2667-4d22-a45e-80eb19311a8d
 
 controlPlane:
   machineFlavor: vm.alaska.cpu.general.small
-  machineCount: 2
 
 nodeGroups:
   - machineCount: 2
