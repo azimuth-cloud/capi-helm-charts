@@ -1,0 +1,6 @@
+docker.io:
+  images:
+    grafana/loki:
+      - 2.6.1
+    grafana/promtail:
+      - 2.7.0

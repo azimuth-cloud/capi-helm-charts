@@ -1,17 +1,6 @@
 name: sync images
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/sync-images.yaml
-      - skopeo-manifests/**
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/sync-images.yaml
-      - skopeo-manifests/**
+  workflow_call:
 
 jobs:
   sync_images:
@@ -21,17 +10,17 @@ jobs:
         component:
           - calico
           - ccm-openstack
-          # - cilium
-          # - cluster-autoscaler
-          # - csi-cinder
-          # - ingress-nginx
-          # - kube-prometheus-stack
-          # - kubernetes-dashboard
-          # - loki-stack
-          # - mellanox-network-operator
-          # - metrics-server
-          # - nfd
-          # - nvidia-gpu-operator
+          - cilium
+          - cluster-autoscaler
+          - csi-cinder
+          - ingress-nginx
+          - kube-prometheus-stack
+          - kubernetes-dashboard
+          - loki-stack
+          - mellanox-network-operator
+          - metrics-server
+          - nfd
+          - nvidia-gpu-operator
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
