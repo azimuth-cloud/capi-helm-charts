@@ -9,10 +9,14 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    image:
+      repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/k8scloudprovider/openstack-cloud-controller-manager
     secret:
       create: false
     cluster:
       name: {{ include "cluster-addons.clusterName" . }}
+    controllerExtraArgs: |-
+      - --use-service-account-credentials=false
     nodeSelector:
       node-role.kubernetes.io/control-plane: ""
     tolerations:

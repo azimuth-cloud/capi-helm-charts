@@ -8,7 +8,52 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  values: |
+  defaults: |
+    alertmanager:
+      alertmanagerSpec:
+        image:
+          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+    prometheusOperator:
+      admissionWebhooks:
+        patch:
+          image:
+            registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
+      image:
+        registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+      prometheusConfigReloader:
+        image:
+          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+      thanosImage:
+        registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+    prometheus:
+      prometheusSpec:
+        image:
+          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+    thanosRuler:
+      thanosRulerSpec:
+        image:
+          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+    kube-state-metrics:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/kube-state-metrics/kube-state-metrics
+    prometheus-node-exporter:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/prometheus/node-exporter
+    grafana:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana
+      sidecar:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/kiwigrid/k8s-sidecar
+      downloadDashboardsImage:
+        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/curlimages/curl
+      initChownData:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/busybox
+      imageRenderer:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana-image-renderer
+  overrides: |
     {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
@@ -25,7 +70,10 @@ spec:
   valuesSources:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
-        key: values
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
+        key: overrides
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests

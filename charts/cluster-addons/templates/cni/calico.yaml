@@ -9,7 +9,10 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    tigeraOperator:
+      registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
     installation:
+      registry: {{ include "cluster-addons.imagePrefix" . }}docker.io
       calicoNetwork:
         bgp: Disabled
         nodeAddressAutodetectionV4:
