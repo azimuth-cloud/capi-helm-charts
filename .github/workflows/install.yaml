@@ -112,7 +112,7 @@ jobs:
       # debug
       - name: Setup upterm session
         uses: lhotari/action-upterm@v1
-        if: ${{ matrix.version }} == "kube-1-24-2"
+        if: matrix.version == 'kube-1-24-2'
 
       - name: Wait for cluster READY
         run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 60m
