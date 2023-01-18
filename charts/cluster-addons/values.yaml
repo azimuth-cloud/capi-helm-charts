@@ -3,7 +3,7 @@
 global:
   # The prefix to use for images
   # Assumes the images have been synced using Skopeo using the configuration file
-  # in this repository with the "--scoped" flag
+  # in this repository with the "--scoped" flag
   # This setting is shared with the parent cluster
   # By default, use the mirrors on GitHub packages
   imagePrefix: ghcr.io/stackhpc/capi/

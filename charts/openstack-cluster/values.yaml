@@ -3,7 +3,7 @@
 global:
   # The prefix to use for images
   # Assumes the images have been synced using Skopeo using the configuration file
-  # in this repository with the "--scoped" flag
+  # in this repository with the "--scoped" flag
   # This setting is shared with the addons
   # By default, use the mirrors on GitHub packages
   imagePrefix: ghcr.io/stackhpc/capi/
@@ -300,7 +300,7 @@ autoscaler:
     repository: k8s.gcr.io/autoscaling/cluster-autoscaler
     pullPolicy: IfNotPresent
     # The cluster-autoscaler docs recommend using a version that matches the
-    # Kubernetes version, but versions should be (mostly) backwards-compatible
+    # Kubernetes version, but versions should be (mostly) backwards-compatible
     tag: v1.26.1
   imagePullSecrets: []
   # Pod-level security context
