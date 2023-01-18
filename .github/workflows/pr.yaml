@@ -7,17 +7,17 @@ on:
 jobs:
   # Run the lint on every PR, even from external repos
   lint:
-    uses: ./.github/workflows/includes/lint.yaml
+    uses: ./.github/workflows/lint.yaml
 
   # Only run image sync and test on the main repo
   sync_images:
     needs: [lint]
-    uses: ./.github/workflows/includes/sync-images.yaml
+    uses: ./.github/workflows/sync-images.yaml
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
   test:
     needs: [sync_images]
-    uses: ./.github/workflows/includes/test.yaml
+    uses: ./.github/workflows/test.yaml
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
