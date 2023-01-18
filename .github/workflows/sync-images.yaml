@@ -39,11 +39,6 @@ jobs:
       - name: Install skopeo
         run: sudo apt-get -y update && sudo apt-get install -y skopeo
 
-      - name: Log in with skopeo
-        run: >-
-          echo ${{ secrets.GITHUB_TOKEN }} |
-            skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
-
       - name: Check component manifest for changes
         uses: dorny/paths-filter@v2
         id: changes
@@ -58,6 +53,8 @@ jobs:
           skopeo sync \
             --src yaml \
             --dest docker \
+            --dest-username ${{ github.actor }} \
+            --dest-password ${{ secrets.GITHUB_TOKEN }} \
             --scoped \
             --all \
             skopeo-manifests/${{ matrix.component }}.yml \
