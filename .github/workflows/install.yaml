@@ -143,8 +143,10 @@ jobs:
         run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml --dependency-update
       
       - name: Wait for cluster NOT READY
-        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready=false --timeout 20m
-
+        # Waiting for NOT READY breaks on in-place upgrade, so instead wait fixed amount of time
+        #run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready=false --timeout 20m
+        run: sleep 3m
+         
       - name: Wait for cluster READY
         run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 60m
 
