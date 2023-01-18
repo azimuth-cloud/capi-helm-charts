@@ -54,11 +54,11 @@ jobs:
 
       - name: Sync component images
         if: ${{ steps.changes.outputs.manifest == 'true' }}
-        run: >-
-          skopeo sync
-            --src yaml
-            --dest docker
-            --scoped
-            --all
-            skopeo-manifests/${{ matrix.component }}.yml
+        run: |-
+          skopeo sync \
+            --src yaml \
+            --dest docker \
+            --scoped \
+            --all \
+            skopeo-manifests/${{ matrix.component }}.yml \
             ghcr.io/stackhpc/capi
