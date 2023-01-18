@@ -1,0 +1,62 @@
+name: sync images
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/sync-images.yaml
+      - skopeo-manifests/**
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/sync-images.yaml
+      - skopeo-manifests/**
+
+jobs:
+  sync_images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component:
+          - calico
+          # - ccm-openstack
+          # - cilium
+          # - cluster-autoscaler
+          # - csi-cinder
+          # - ingress-nginx
+          # - kube-prometheus-stack
+          # - kubernetes-dashboard
+          # - loki-stack
+          # - mellanox-network-operator
+          # - metrics-server
+          # - nfd
+          # - nvidia-gpu-operator
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Install skopeo
+        run: sudo apt-get -y update && sudo apt-get install -y skopeo
+
+      - name: Log in with skopeo
+        run: >-
+          echo ${{ secrets.GITHUB_TOKEN }} |
+            skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Check component manifest for changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            manifest:
+              - skopeo-manifests/${{ matrix.component }}.yml
+
+      - name: Sync component images
+        if: ${{ steps.changes.outputs.manifest == 'true' }}
+        run: >-
+          skopeo sync
+            --src yaml skopeo-manifests/${{ matrix.component }}.yml
+            --dest docker ghcr.io/stackhpc/capi
+            --scoped
+            --all

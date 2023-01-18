@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - .github/workflows/publish-artifacts.yaml
+      - charts/**
+      - utils/**
 
 jobs:
   build_push_utils_image:
