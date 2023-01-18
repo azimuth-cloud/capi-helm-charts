@@ -51,11 +51,5 @@ jobs:
         if: ${{ steps.changes.outputs.manifest == 'true' }}
         run: |-
           skopeo sync \
-            --src yaml \
-            --dest docker \
-            --dest-username ${{ github.actor }} \
-            --dest-password ${{ secrets.GITHUB_TOKEN }} \
-            --scoped \
-            --all \
-            skopeo-manifests/${{ matrix.component }}.yml \
-            ghcr.io/stackhpc/capi
+            --help
+          exit 1
