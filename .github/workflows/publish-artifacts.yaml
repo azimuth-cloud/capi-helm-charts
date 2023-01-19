@@ -1,12 +1,6 @@
-name: Publish artifacts
+name: publish artifacts
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/publish-artifacts.yaml
-      - charts/**
-      - utils/**
+  workflow_call:
 
 jobs:
   build_push_utils_image:
