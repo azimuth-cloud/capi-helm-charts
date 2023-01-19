@@ -130,6 +130,7 @@ jobs:
         run: kubectl --kubeconfig kubeconfig-${{ matrix.version }} wait po -n kube-system -l k8s-app=kube-dns --for=condition=ready --timeout 20m
 
       - name: Run sonobuoy [smoke]
+        timeout-minutes: 20
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
       # debug
@@ -157,6 +158,7 @@ jobs:
         run: kubectl wait helmreleases --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
 
       - name: Run sonobuoy [smoke]
+        timeout-minutes: 20
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
       - name: Print logs
