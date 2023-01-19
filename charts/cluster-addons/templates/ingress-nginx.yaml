@@ -10,6 +10,15 @@ metadata:
 stringData:
   defaults: |
     controller:
+      # Indicates whether ingress controller metrics should be included in prometheus
+      metrics:
+        # Enable by default if cluster monitoring is enabled
+        enabled: {{ .Values.monitoring.enabled }}
+        serviceMonitor:
+          enabled: {{ .Values.monitoring.enabled }}
+          namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}  # monitoring-system
+          additionalLabels: 
+            release: kube-prometheus-stack 
       image:
         registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
     admissionWebhooks:
