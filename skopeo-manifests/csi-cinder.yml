@@ -1,0 +1,19 @@
+docker.io:
+  images:
+    k8scloudprovider/cinder-csi-plugin:
+      - v1.25.0
+
+k8s.gcr.io:
+  images:
+    sig-storage/csi-attacher:
+      - v3.4.0
+    sig-storage/csi-node-driver-registrar:
+      - v2.5.0
+    sig-storage/csi-provisioner:
+      - v3.1.0
+    sig-storage/csi-resizer:
+      - v1.4.0
+    sig-storage/csi-snapshotter:
+      - v5.0.1
+    sig-storage/livenessprobe:
+      - v2.6.0

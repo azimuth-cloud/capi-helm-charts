@@ -1,0 +1,4 @@
+docker.io:
+  images:
+    k8scloudprovider/openstack-cloud-controller-manager:
+      - v1.25.0

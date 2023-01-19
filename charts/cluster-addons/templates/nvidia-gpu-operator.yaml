@@ -9,6 +9,40 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    validator:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    operator:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
+      initContainer:
+        repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
+    driver:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
+      manager:
+        repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    devicePlugin:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
+    dcgm:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    dcgmExporter:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/k8s
+    gfd:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
+    migManager:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    gds:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    vgpuManager:
+      repository: {{ include "cluster-addons.imagePrefix" . | quote }}
+      driverManager:
+        repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    vgpuDeviceManager:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    vfioManager:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
+      driverManager:
+        repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
+    sandboxDevicePlugin:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia
     # Use the shared NFD
     nfd:
       enabled: false
@@ -17,7 +51,9 @@ stringData:
     # operator (e.g. reconciliation status, number of GPU enabled nodes).
     nodeStatusExporter:
       enabled: true
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
     toolkit:
+      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/k8s
       # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
       # breaks nvidia pod deployment on clusters with Harbor cache enabled.
       # Instead make a new config file specifically for nvidia runtime config,
