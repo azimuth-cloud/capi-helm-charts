@@ -53,6 +53,17 @@ stringData:
       imageRenderer:
         image:
           repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana-image-renderer
+    prometheus:
+      prometheusSpec:
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              # Omit storageClassName field to use default storage class
+              # storageClassName: 
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
   overrides: |
     {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
 ---
