@@ -119,7 +119,7 @@ jobs:
         run: |-
           helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
             --repo https://stackhpc.github.io/cluster-api-addon-provider \
-            --version ${{ matrix.addonprovider }}
+            --version ${{ matrix.addonprovider }} \
             --namespace capi-addon-system \
             --create-namespace \
             --install \
