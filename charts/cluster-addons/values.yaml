@@ -163,7 +163,6 @@ ingress:
       version: 4.4.2
     release:
       namespace: ingress-nginx
-      values: {}
 
 # Settings for cluster monitoring
 monitoring:
@@ -176,7 +175,38 @@ monitoring:
       version: 43.3.1
     release:
       namespace: monitoring-system
-      values: {}
+      values:
+        # Disable alertmanager by default
+        alertmanager:
+          enabled: false
+
+        # Alertmanager does not come with pre-configured alert sinks so we have to
+        # write our own (and store it in a separate values to keep secrets hidden).
+        # 
+        # Example config to send alerts to a slack channel:
+        # 
+        # Note - 'null' receiver must be include as default kube-prometheus-stack 
+        #         alerting rules require it.
+        #         If it is not included then alertmanager pods will fail to launch
+        #         and errors will be printed in prometheus operator pod logs.
+        # 
+        # alertmanager:
+        #   enabled: true
+        #     config:
+        #     global:
+        #       slack_api_url: '<insert-secret-slack-webhook-url>'
+        #     route:
+        #       receiver: 'slack-notifications'
+        #       group_by: ['namespace']
+        #     receivers:
+        #     - name: 'null'
+        #     - name: 'slack-notifications'
+        #       slack_configs:
+        #       - channel: '#<insert-channel-name>'
+        #         send_resolved: true
+        #     - name: 'gmail-notifications'
+        #       TODO: Add example here
+
   lokiStack:
     enabled: true
     chart:
