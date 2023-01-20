@@ -1,4 +1,4 @@
-name: helm lint
+name: Helm Lint
 on:
   workflow_call:
 
