@@ -1,0 +1,4 @@
+k8s.gcr.io:
+  images:
+    autoscaling/cluster-autoscaler:
+      - v1.26.1

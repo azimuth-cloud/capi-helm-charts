@@ -8,7 +8,18 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  values: |
+  defaults: |
+    controller:
+      image:
+        registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
+    admissionWebhooks:
+      patch:
+        image:
+          registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
+    defaultBackend:
+      image:
+        registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
+  overrides: |
     {{- toYaml .Values.ingress.nginx.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
@@ -25,5 +36,8 @@ spec:
   valuesSources:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
-        key: values
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
+        key: overrides
 {{- end }}

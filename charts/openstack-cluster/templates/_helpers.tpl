@@ -26,15 +26,15 @@ Common labels
 */}}
 {{- define "openstack-cluster.commonLabels" -}}
 helm.sh/chart: {{ include "openstack-cluster.chart" . }}
-capi.stackhpc.com/managed-by: {{ .Release.Service }}
-capi.stackhpc.com/infrastructure-provider: openstack
+{{ .Values.projectPrefix }}/managed-by: {{ .Release.Service }}
+{{ .Values.projectPrefix }}/infrastructure-provider: openstack
 {{- end -}}
 
 {{/*
 Selector labels for cluster-level resources
 */}}
 {{- define "openstack-cluster.selectorLabels" -}}
-capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
+{{ .Values.projectPrefix }}/cluster: {{ include "openstack-cluster.clusterName" . }}
 {{- end -}}
 
 {{/*
@@ -52,7 +52,7 @@ Selector labels for component-level resources
 {{- $ctx := index . 0 -}}
 {{- $componentName := index . 1 -}}
 {{ include "openstack-cluster.selectorLabels" $ctx }}
-capi.stackhpc.com/component: {{ $componentName }}
+{{ $ctx.Values.projectPrefix }}/component: {{ $componentName }}
 {{- end -}}
 
 {{/*
@@ -153,22 +153,6 @@ preKubeadmCommands:
 Produces the image for the cluster autoscaler.
 */}}
 {{- define "openstack-cluster.autoscaler.image" -}}
-{{- $tag := include "openstack-cluster.autoscaler.imageTag" . -}}
-{{- printf "%s:%s" .Values.autoscaler.image.repository $tag -}}
-{{- end }}
-
-{{/*
-Produces the image tag for the cluster autoscaler.
-
-If an explicit tag is given that is used, otherwise a tag is derived from the
-version of the target cluster.
-*/}}
-{{- define "openstack-cluster.autoscaler.imageTag" -}}
-{{- if .Values.autoscaler.image.tag -}}
-{{- .Values.autoscaler.image.tag -}}
-{{- else -}}
-{{- $kubeMinorVersion := .Values.kubernetesVersion | splitList "." | reverse | rest | reverse | join "." -}}
-{{- $defaultTag := printf "v%s.0" $kubeMinorVersion -}}
-{{- .Values.autoscaler.image.tags | dig $kubeMinorVersion $defaultTag -}}
-{{- end -}}
+{{- $prefix := .Values.autoscaler.image.prefix | default .Values.global.imagePrefix | default "" }}
+{{- printf "%s%s:%s" $prefix .Values.autoscaler.image.repository .Values.autoscaler.image.tag -}}
 {{- end }}

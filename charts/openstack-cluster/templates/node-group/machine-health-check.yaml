@@ -8,13 +8,13 @@ metadata:
   name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
   labels:
     {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
-    capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
+    {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" $ }}
   selector:
     matchLabels:
       {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 6 }}
-      capi.stackhpc.com/node-group: {{ $nodeGroup.name }}
+      {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
   {{- toYaml $nodeGroup.healthCheck.spec | nindent 2 }}
 {{- end }}
 {{- end }}

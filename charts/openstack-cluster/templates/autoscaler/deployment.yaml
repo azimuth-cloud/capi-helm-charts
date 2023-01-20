@@ -7,13 +7,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
-      capi.stackhpc.com/component: autoscaler
+      {{ .Values.projectPrefix }}/cluster: {{ include "openstack-cluster.clusterName" . }}
+      {{ .Values.projectPrefix }}/component: autoscaler
   template:
     metadata:
       labels:
-        capi.stackhpc.com/cluster: {{ include "openstack-cluster.clusterName" . }}
-        capi.stackhpc.com/component: autoscaler
+        {{ .Values.projectPrefix }}/cluster: {{ include "openstack-cluster.clusterName" . }}
+        {{ .Values.projectPrefix }}/component: autoscaler
     spec:
       serviceAccountName: {{ include "openstack-cluster.componentName" (list . "autoscaler") }}
       {{- with .Values.autoscaler.imagePullSecrets }}
@@ -32,6 +32,12 @@ spec:
             - --kubeconfig=/mnt/kubeconfig/value
             - --clusterapi-cloud-config-authoritative
             - --node-group-auto-discovery=clusterapi:namespace={{ .Release.Namespace }},clusterName={{ include "openstack-cluster.clusterName" . }}
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: 8085
+          ports:
+            - containerPort: 8085
           resources: {{ toYaml .Values.autoscaler.resources | nindent 12 }}
           volumeMounts:
             - name: kubeconfig
@@ -45,6 +51,9 @@ spec:
       {{- end }}
       {{- with .Values.autoscaler.tolerations }}
       tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autoscaler.topologySpreadConstraints }}
+      topologySpreadConstraints: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
         # Mount the kubeconfig for the workload cluster from the secret

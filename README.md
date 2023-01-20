@@ -1,5 +1,7 @@
 # capi-helm-charts
-![Lint Helm Charts](https://github.com/stackhpc/capi-helm-charts/actions/workflows/lint.yaml/badge.svg)
+![Lint](https://github.com/stackhpc/capi-helm-charts/actions/workflows/lint.yaml/badge.svg?branch=main)
+![Test Helm](https://github.com/stackhpc/capi-helm-charts/actions/workflows/install.yaml/badge.svg?branch=main)
+![Publish Charts](https://github.com/stackhpc/capi-helm-charts/actions/workflows/publish-artifacts.yaml/badge.svg?branch=main)
 
 This repository contains [Helm charts](https://helm.sh/) for deploying [Kubernetes](https://kubernetes.io/)
 clusters using [Cluster API](https://cluster-api.sigs.k8s.io/).

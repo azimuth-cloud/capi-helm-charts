@@ -1,0 +1,24 @@
+name: test and publish
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yaml
+
+  sync_images:
+    needs: [lint]
+    uses: ./.github/workflows/sync-images.yaml
+    secrets: inherit
+
+  test:
+    needs: [sync_images]
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+
+  publish:
+    needs: [test]
+    uses: ./.github/workflows/publish-artifacts.yaml
+    secrets: inherit

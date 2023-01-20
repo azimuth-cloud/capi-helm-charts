@@ -9,6 +9,38 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    image:
+      repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/cilium
+    certgen:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/certgen
+    hubble:
+      relay:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/hubble-relay
+      ui:
+        backend:
+          image:
+            repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/hubble-ui-backend
+        frontend:
+          image:
+            repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/hubble-ui
+    operator:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/operator
+    nodeinit:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/startup-script
+    preflight:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/cilium
+    clustermesh:
+      apiserver:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/cilium/clustermesh-apiserver
+      etcd:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/coreos/etcd"
   overrides: |
     {{- toYaml .Values.cni.cilium.release.values | nindent 4 }}
 ---

@@ -1,0 +1,36 @@
+#####
+# This file defines images that are required for deployments of the CAPI Helm charts,
+# allowing them to be synchronised to another repository using skopeo
+
+# In particular, they are synchronised to ghcr.io/stackhpc/capi, which is used in the
+# CAPI Helm charts by default
+#####
+
+docker.io:
+  images:
+    mellanox/nv-peer-mem-driver-1.1-0:
+      - amd64-ubuntu20.04
+
+ghcr.io:
+  images:
+    k8snetworkplumbingwg/multus-cni:
+      - v3.8
+    k8snetworkplumbingwg/plugins:
+      - v0.8.7-amd64
+    k8snetworkplumbingwg/sriov-network-device-plugin:
+      - v3.5.1
+    k8snetworkplumbingwg/whereabouts:
+      - v0.5.2-amd64
+    mellanox/ib-kubernetes:
+      - v1.0.2
+
+nvcr.io:
+  images:
+    nvidia/cloud-native/ipoib-cni:
+      - v1.1.0
+    nvidia/cloud-native/k8s-rdma-shared-dev-plugin:
+      - v1.3.2
+    nvidia/cloud-native/network-operator:
+      - v1.4.0
+    nvidia/mellanox/mofed:
+      - 5.8-1.0.1.1.2-ubuntu20.04-amd64

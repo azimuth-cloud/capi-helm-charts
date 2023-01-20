@@ -1,5 +1,14 @@
-# The name of an existing secret containing a clouds.yaml and optional cacert
 ---
+
+global:
+  # The prefix to use for images
+  # Assumes the images have been synced using Skopeo using the configuration file
+  # in this repository with the "--scoped" flag
+  # This setting is shared with the addons
+  # By default, use the mirrors on GitHub packages
+  imagePrefix: ghcr.io/stackhpc/capi/
+
+# The name of an existing secret containing a clouds.yaml and optional cacert
 cloudCredentialsSecretName:
 # OR
 # Content for the clouds.yaml file
@@ -23,6 +32,9 @@ machineImageId:
 
 # The name of the SSH key to inject into cluster machines
 machineSSHKeyName:
+
+# The prefix used for project labels and annotations
+projectPrefix: capi.stackhpc.com
 
 # Values for the Kubernetes cluster network
 kubeNetwork:
@@ -283,17 +295,13 @@ nodeGroups:
 autoscaler:
   # The image to use for the autoscaler component
   image:
+    # Defaults to the global image prefix if not given
+    prefix:
     repository: k8s.gcr.io/autoscaling/cluster-autoscaler
     pullPolicy: IfNotPresent
-    # The tag depends on the Kubernetes version on the target cluster, but can be overridden
-    tag:
-    # These are the current latest versions for each Kubernetes minor version
-    # If a tag is not specified here for the target Kubernetes version, vX.Y.0 is used
-    tags:
-      "1.25": v1.25.0
-      "1.24": v1.24.0
-      "1.23": v1.23.1
-      "1.22": v1.22.3
+    # The cluster-autoscaler docs recommend using a version that matches the
+    # Kubernetes version, but versions should be (mostly) backwards-compatible
+    tag: v1.26.1
   imagePullSecrets: []
   # Pod-level security context
   podSecurityContext:
@@ -311,6 +319,8 @@ autoscaler:
   nodeSelector: {}
   # Tolerations for pods
   tolerations: []
+  # Topology spread constraints for pods
+  topologySpreadConstraints: []
   # Affinity rules for pods
   affinity: {}
 

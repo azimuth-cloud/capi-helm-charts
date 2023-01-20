@@ -9,6 +9,12 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    loki:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/loki
+    promtail:
+      image:
+        registry: {{ include "cluster-addons.imagePrefix" . }}docker.io
     grafana:
       sidecar:
         datasources:

@@ -1,8 +1,6 @@
-name: Publish artifacts
+name: publish artifacts
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   build_push_utils_image:
