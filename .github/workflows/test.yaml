@@ -20,12 +20,6 @@ jobs:
       - name: Install tools
         run: sudo apt install -y zip unzip 
       
-      - name: Check if sonobuoy is installed
-        id: sonobuoy_exists
-        uses: andstor/file-existence-action@v2
-        with:
-          files: /usr/bin/sonobuoy
-      
       - name: Install sonobuoy
         if: steps.sonobuoy_exists.outputs.files_exists == 'false'
         run: >
@@ -53,10 +47,16 @@ jobs:
         uses: helm/kind-action@v1.5.0
       
       - name: Install cert-manager
-        run: >
-          helm repo add jetstack https://charts.jetstack.io
-          && helm repo update 
-          && helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.10.1 --set installCRDs=true --wait
+        run: |-
+          helm upgrade cert-manager cert-manager \
+            --repo https://charts.jetstack.io \
+            --version v1.10.1 \
+            --namespace cert-manager \
+            --create-namespace  \
+            --install \
+            --set installCRDs=true \
+            --wait \
+            --timeout 10m
       
       - name: Make kustomization directory 
         run: mkdir clusterapi
@@ -101,61 +101,100 @@ jobs:
           && kubectl rollout status --namespace capi-kubeadm-control-plane-system deployment/capi-kubeadm-control-plane-controller-manager --timeout 10m
           && kubectl rollout status --namespace capo-system deployment/capo-controller-manager --timeout 10m
       
-      
       - name: Install Cluster API add-on provider
-        run: >
-          helm install --repo https://stackhpc.github.io/cluster-api-addon-provider cluster-api-addon-provider --version ${{ matrix.addonprovider }} -n capi-addon-system --create-namespace --wait --timeout 30m cluster-api-addon-provider
+        run: |-
+          helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
+            --repo https://stackhpc.github.io/cluster-api-addon-provider \
+            --version ${{ matrix.addonprovider }} \
+            --namespace capi-addon-system \
+            --create-namespace \
+            --install \
+            --wait \
+            --timeout 10m
 
       - name: Install chart 
-        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --create-namespace --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml --dependency-update
-
-      # debug
-      # - name: Setup upterm session
-      #   uses: lhotari/action-upterm@v1
-      #   if: matrix.version == 'kube-1-24-2'
+        run: |- 
+          helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          charts/openstack-cluster \
+          -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --create-namespace --install -f clouds.yml \
+          -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
+          --dependency-update
 
       - name: Wait for cluster READY
-        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 60m
+        run: |- 
+          kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --for=condition=Ready \
+          --timeout 60m
 
       - name: Wait for addons manifest
-        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+        run: |- 
+          kubectl wait manifests --all \
+          --for=jsonpath='{.status.phase}'=Deployed \
+          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
+           --timeout 20m
       
       - name: Wait for addons helmreleases 
-        run: kubectl wait helmreleases --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+        run: |- 
+          kubectl wait helmreleases --all \
+          --for=jsonpath='{.status.phase}'=Deployed \
+          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --timeout 20m
 
       - name: Grab kubeconfig 
-        run: kubectl -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} get secret test-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig -o jsonpath='{.data.value}' | base64 --decode > kubeconfig-${{ matrix.version }}
+        run: |- 
+          kubectl -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} get secret \
+          test-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig \
+          -o jsonpath='{.data.value}' | base64 --decode > kubeconfig-${{ matrix.version }}
 
       - name: Wait for dns pods 
-        run: kubectl --kubeconfig kubeconfig-${{ matrix.version }} wait po -n kube-system -l k8s-app=kube-dns --for=condition=ready --timeout 20m
+        run: |- 
+          kubectl --kubeconfig kubeconfig-${{ matrix.version }} wait po \
+          -n kube-system -l k8s-app=kube-dns --for=condition=ready --timeout 20m
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
         run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
 
-      # debug
-      # - name: Setup upterm session
-      #   uses: lhotari/action-upterm@v1
-
       - name: Clean sonobuoy 
         run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
       
       - name: Upgrade cluster
-        run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml --dependency-update
+        run: |- 
+          helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          charts/openstack-cluster \
+          -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --install -f clouds.yml \
+          -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml \
+          --dependency-update
       
       - name: Wait for cluster NOT READY
-        # Waiting for NOT READY breaks on in-place upgrade, so instead wait fixed amount of time
-        #run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready=false --timeout 20m
         run: sleep 3m
          
       - name: Wait for cluster READY
-        run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 60m
+        run: |- 
+          kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --for=condition=Ready --timeout 60m
 
       - name: Wait for addons manifest
-        run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+        run: |- 
+          kubectl wait manifests --all \
+          --for=jsonpath='{.status.phase}'=Deployed \
+          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --timeout 20m
       
       - name: Wait for addons helmreleases 
-        run: kubectl wait helmreleases --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+        run: |- 
+          kubectl wait helmreleases --all \
+          --for=jsonpath='{.status.phase}'=Deployed \
+          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
+          --timeout 20m
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
