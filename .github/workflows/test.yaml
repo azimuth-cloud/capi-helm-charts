@@ -1,5 +1,7 @@
-name: Install Helm Charts
-on: [workflow_call]
+name: Test Helm Charts
+on: 
+  workflow_call:
+
 jobs:
   install:
     runs-on: ubuntu-latest
@@ -14,8 +16,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       
       - name: Install tools
         run: sudo apt install -y zip unzip 
@@ -36,12 +36,6 @@ jobs:
         with:
           version: v3.10.0
       
-      - name: Copy cloud creds to file
-        run: 'echo "$CLOUD" > clouds.yml'
-        shell: bash
-        env:
-          CLOUD: ${{ secrets.CLOUD }}
-      
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.5.0
       
@@ -57,49 +51,72 @@ jobs:
             --wait \
             --timeout 10m
       
-      - name: Make kustomization directory 
-        run: mkdir clusterapi
+      - name: Ensure Cluster API kustomization directory exists
+        run: mkdir -p clusterapi
       
       # From here: https://github.com/stackhpc/ansible-collection-azimuth-ops/blob/main/roles/clusterapi/defaults/main.yml
-      - name: Overwrite file
-        uses: "DamianReeves/write-file-action@master"
+      - name: Write Cluster API kustomization file
+        uses: DamianReeves/write-file-action@master
         with:
           path: clusterapi/kustomization.yaml
           write-mode: overwrite
           contents: |
-            patches:
-            -   patch: "- op: replace\n  path: /spec/template/spec/containers/0/args\n  value:\n
-                    \   - --leader-elect\n    - --metrics-bind-addr=localhost:8080"
-                target:
-                    kind: Deployment
-                    name: capi-controller-manager
-                    namespace: capi-system
-            -   patch: "- op: replace\n  path: /spec/template/spec/containers/0/args\n  value:\n
-                    \   - --leader-elect\n    - --metrics-bind-addr=localhost:8080"
-                target:
-                    kind: Deployment
-                    name: capi-kubeadm-bootstrap-controller-manager
-                    namespace: capi-kubeadm-bootstrap-system
-            -   patch: "- op: replace\n  path: /spec/template/spec/containers/0/args\n  value:\n
-                    \   - --leader-elect\n    - --metrics-bind-addr=localhost:8080"
-                target:
-                    kind: Deployment
-                    name: capi-kubeadm-control-plane-controller-manager
-                    namespace: capi-kubeadm-control-plane-system
             resources:
-            - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ matrix.capi }}/cluster-api-components.yaml
-            - https://github.com/stackhpc/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ matrix.capi }}/cluster-api-components.yaml
+              - https://github.com/stackhpc/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
+            patches:
+              - patch: |-
+                  - op: replace
+                    path: /spec/template/spec/containers/0/args
+                    value:
+                      - --leader-elect
+                      - --metrics-bind-addr=localhost:8080
+                target:
+                  kind: Deployment
+                  namespace: capi-system
+                  name: capi-controller-manager
+              - patch: |-
+                  - op: replace
+                    path: /spec/template/spec/containers/0/args
+                    value:
+                      - --leader-elect
+                      - --metrics-bind-addr=localhost:8080
+                target:
+                  kind: Deployment
+                  namespace: capi-kubeadm-bootstrap-system
+                  name: capi-kubeadm-bootstrap-controller-manager
+              - patch: |-
+                  - op: replace
+                    path: /spec/template/spec/containers/0/args
+                    value:
+                      - --leader-elect
+                      - --metrics-bind-addr=localhost:8080
+                target:
+                  kind: Deployment
+                  namespace: capi-kubeadm-control-plane-system
+                  name: capi-kubeadm-control-plane-controller-manager
       
       - name: Install Cluster API resources
         run: kubectl apply -k clusterapi/
 
       - name: Wait for Cluster API controllers to become ready
-        run: >
-          kubectl rollout status --namespace capi-system deployment/capi-controller-manager --timeout 10m
-          && kubectl rollout status --namespace capi-kubeadm-bootstrap-system deployment/capi-kubeadm-bootstrap-controller-manager --timeout 10m
-          && kubectl rollout status --namespace capi-kubeadm-control-plane-system deployment/capi-kubeadm-control-plane-controller-manager --timeout 10m
-          && kubectl rollout status --namespace capo-system deployment/capo-controller-manager --timeout 10m
-      
+        run: |-
+          kubectl rollout status deployment/capi-controller-manager \
+            --namespace capi-system \
+            --timeout 5m \
+          && \
+          kubectl rollout status deployment/capi-kubeadm-bootstrap-controller-manager \
+            --namespace capi-kubeadm-bootstrap-system \
+            --timeout 5m \
+          && \
+          kubectl rollout status deployment/capi-kubeadm-control-plane-controller-manager \
+            --namespace capi-kubeadm-control-plane-system \
+            --timeout 5m \
+          && \
+          kubectl rollout status deployment/capo-controller-manager \
+            --namespace capo-system \
+            --timeout 10m
+
       - name: Install Cluster API add-on provider
         run: |-
           helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
@@ -110,103 +127,108 @@ jobs:
             --install \
             --wait \
             --timeout 10m
+      
+      - name: Write cloud credential
+        run: 'echo "$CLOUD" > clouds.yml'
+        shell: bash
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
 
-      - name: Install chart 
+      - name: Create cluster 
         run: |- 
-          helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          charts/openstack-cluster \
-          -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --create-namespace --install -f clouds.yml \
-          -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
-          --dependency-update
+          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+            --install \
+            --dependency-update \
+            --values clouds.yml \
+            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml
 
       - name: Wait for cluster READY
         run: |- 
-          kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --for=condition=Ready \
-          --timeout 60m
+          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
+            --for=condition=Ready \
+            --timeout 30m
 
-      - name: Wait for addons manifest
-        run: |- 
-          kubectl wait manifests --all \
-          --for=jsonpath='{.status.phase}'=Deployed \
-          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
-           --timeout 20m
-      
-      - name: Wait for addons helmreleases 
-        run: |- 
-          kubectl wait helmreleases --all \
-          --for=jsonpath='{.status.phase}'=Deployed \
-          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --timeout 20m
+      - name: Wait for addons to deploy
+        run: |-
+          kubectl wait manifests \
+            --all \
+            --for=jsonpath='{.status.phase}'=Deployed \
+            --timeout 20m \
+          && \
+          kubectl wait helmreleases \
+            --all \
+            --for=jsonpath='{.status.phase}'=Deployed \
+            --timeout 20m
 
-      - name: Grab kubeconfig 
-        run: |- 
-          kubectl -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} get secret \
-          test-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig \
-          -o jsonpath='{.data.value}' | base64 --decode > kubeconfig-${{ matrix.version }}
+      - name: Write kubeconfig
+        run: |-
+          kubectl get secret ci-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig \
+            -o go-template='{{ .data.value | base64decode }}' \
+            > kubeconfig
 
       - name: Wait for dns pods 
-        run: |- 
-          kubectl --kubeconfig kubeconfig-${{ matrix.version }} wait po \
-          -n kube-system -l k8s-app=kube-dns --for=condition=ready --timeout 20m
+        run: |-
+          kubectl wait po \
+            --namespace kube-system \
+            --selector k8s-app=kube-dns \
+            --for=condition=ready \
+            --timeout 20m
+        env:
+          KUBECONFIG: ./kubeconfig
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
-        run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
+        run: sonobuoy run --mode quick --wait
+        env:
+          KUBECONFIG: ./kubeconfig
 
       - name: Clean sonobuoy 
-        run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
+        run: sonobuoy delete --wait --all
+        env:
+          KUBECONFIG: ./kubeconfig
       
       - name: Upgrade cluster
         run: |- 
-          helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          charts/openstack-cluster \
-          -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --install -f clouds.yml \
-          -f charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml \
-          --dependency-update
+          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+            --install \
+            --dependency-update \
+            --values clouds.yml \
+            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml
       
       - name: Wait for cluster NOT READY
         run: sleep 3m
          
       - name: Wait for cluster READY
         run: |- 
-          kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --for=condition=Ready --timeout 60m
+          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
+            --for=condition=Ready \
+            --timeout 30m
 
-      - name: Wait for addons manifest
-        run: |- 
-          kubectl wait manifests --all \
-          --for=jsonpath='{.status.phase}'=Deployed \
-          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --timeout 20m
-      
-      - name: Wait for addons helmreleases 
-        run: |- 
-          kubectl wait helmreleases --all \
-          --for=jsonpath='{.status.phase}'=Deployed \
-          --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} \
-          --timeout 20m
+      - name: Wait for addons to deploy
+        run: |-
+          kubectl wait manifests \
+            --all \
+            --for=jsonpath='{.status.phase}'=Deployed \
+            --timeout 20m \
+          && \
+          kubectl wait helmreleases \
+            --all \
+            --for=jsonpath='{.status.phase}'=Deployed \
+            --timeout 20m
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
-        run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
+        run: sonobuoy run --mode quick --wait
+        env:
+          KUBECONFIG: ./kubeconfig
 
       - name: Print logs
         if: ${{ always() }}
-        run: kubectl -n capo-system logs deploy/capo-controller-manager | grep test-${GITHUB_SHA::7}-${{ matrix.version }} | tail -n 200
+        run: |-
+          kubectl -n capo-system logs \
+          deploy/capo-controller-manager \
+          | grep test-${GITHUB_SHA::7}-${{ matrix.version }} | tail -n 200
 
       - name: Delete release
         if: ${{ always() }}
-        run: helm delete -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} test-${GITHUB_SHA::7}-${{ matrix.version }} --wait
-      
-      - name: Delete namespace 
-        if: ${{ always() }}
-        run: kubectl delete namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }}
+        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
