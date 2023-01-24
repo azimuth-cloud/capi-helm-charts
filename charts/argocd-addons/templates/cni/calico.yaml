@@ -1,0 +1,44 @@
+{{- define "cluster-addons.cni.calico.defaults" -}}
+tigeraOperator:
+  registry: {{ .Values.imagePrefix }}quay.io
+installation:
+  registry: {{ .Values.imagePrefix }}docker.io/
+  calicoNetwork:
+    bgp: Disabled
+    nodeAddressAutodetectionV4:
+      kubernetes: NodeInternalIP
+    ipPools:
+      {{- range .Values.cluster.podCidrs }}
+      - cidr: {{ . }}
+        encapsulation: VXLAN
+      {{- end }}
+{{- end }}
+
+
+{{- if and .Values.cni.enabled (eq .Values.cni.type "calico") }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
+spec:
+  destination:
+    {{- include "cluster-addons.argo.destination" . | nindent 4 }}
+    namespace: {{ .Values.cni.calico.release.namespace }}
+  project: {{ .Values.argo.project }}
+  source:
+    repoURL: {{ .Values.cni.calico.chart.repo }}
+    chart: {{ .Values.cni.calico.chart.name }}
+    targetRevision: {{ quote .Values.cni.calico.chart.version }}
+    helm:
+      releaseName: cni-calico
+      values: |
+        {{-
+          include "cluster-addons.cni.calico.defaults" . |
+            fromYaml |
+            merge .Values.cni.calico.release.values |
+            toYaml |
+            nindent 8
+        }}
+{{- end }}

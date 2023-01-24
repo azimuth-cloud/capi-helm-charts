@@ -1,0 +1,253 @@
+---
+
+# Argo information
+argo:
+  # The destination for the Argo applications, excluding namespace
+  destination:
+    # The name of the target cluster
+    # If given, this is used in precedence over server
+    name:
+    # The API server address of the target cluster
+    server: https://kubernetes.default.svc
+  # The project to put the Argo applications in
+  project: default
+
+# Information about the cluster
+cluster:
+  podCidrs:
+    - 172.16.0.0/13
+
+# The prefix to use for images
+# Assumes the images have been synced using Skopeo using the configuration file
+# in this repository with the "--scoped" flag
+# This setting is shared with the parent cluster
+# By default, use the mirrors on GitHub packages
+imagePrefix: ghcr.io/stackhpc/capi/
+
+# Settings for the CNI addon
+cni:
+  # Indicates if a CNI should be deployed
+  enabled: true
+  # The CNI to deploy - supported values are calico or cilium
+  type: calico
+  # Settings for the calico CNI
+  # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
+  calico:
+    chart:
+      repo: https://projectcalico.docs.tigera.io/charts
+      name: tigera-operator
+      version: v3.24.5
+    release:
+      namespace: tigera-operator
+      values: {}
+  # Settings for the Cilium CNI
+  # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
+  cilium:
+    chart:
+      repo: https://helm.cilium.io/
+      name: cilium
+      version: 1.12.5
+    release:
+      namespace: kube-system
+      values: {}
+
+# Settings for the OpenStack integrations
+openstack:
+  # Indicates if the OpenStack integrations should be enabled
+  enabled: false
+  # The target namespace for the OpenStack integrations
+  targetNamespace: openstack-system
+  # cloud-config options for the OpenStack integrations
+  # The [Global] section is configured to use the target cloud
+  # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
+  # and https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage
+  cloudConfig:
+    # By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ
+    BlockStorage:
+      ignore-volume-az: true
+  # Settings for the Cloud Controller Manager (CCM)
+  ccm:
+    # Indicates if the OpenStack CCM should be enabled
+    # By default, the CCM is enabled if the OpenStack integrations are enabled
+    # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/openstack-cloud-controller-manager/values.yaml
+    enabled: true
+    chart:
+      repo: https://kubernetes.github.io/cloud-provider-openstack
+      name: openstack-cloud-controller-manager
+      version: 1.4.0
+    values: {}
+  # Settings for the Cinder CSI plugin
+  csiCinder:
+    # Indicates if the Cinder CSI should be enabled
+    # By default, it is enabled if the OpenStack integrations are enabled
+    # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/cinder-csi-plugin/values.yaml
+    enabled: true
+    chart:
+      repo: https://kubernetes.github.io/cloud-provider-openstack
+      name: openstack-cinder-csi
+      version: 2.3.0
+    values: {}
+    # Variables affecting the definition of the storage class
+    storageClass:
+      # Indicates if the storage class should be enabled
+      enabled: true
+      # The name of the storage class
+      name: csi-cinder
+      # Indicates if the storage class should be annotated as the default storage class
+      isDefault: true
+      # The reclaim policy for the storage class
+      reclaimPolicy: Delete
+      # Indicates if volume expansion is allowed
+      allowVolumeExpansion: true
+      # The Cinder availability zone to use for volumes provisioned by the storage class
+      availabilityZone: nova
+      # The Cinder volume type to use for volumes provisioned by the storage class
+      # If not given, the default volume type will be used
+      volumeType:
+      # The allowed topologies for the storage class
+      allowedTopologies:
+
+# Settings for the metrics server
+# https://github.com/kubernetes-sigs/metrics-server#helm-chart
+metricsServer:
+  # Indicates if the metrics server should be deployed
+  enabled: true
+  chart:
+    repo: https://kubernetes-sigs.github.io/metrics-server
+    name: metrics-server
+    version: 3.8.3
+  release:
+    namespace: kube-system
+    values: {}
+
+# Settings for the Kubernetes dashboard
+# https://github.com/kubernetes/dashboard/tree/master/charts/helm-chart/kubernetes-dashboard
+kubernetesDashboard:
+  # Indicates if the Kubernetes dashboard should be enabled
+  enabled: false
+  chart:
+    repo: https://kubernetes.github.io/dashboard
+    name: kubernetes-dashboard
+    version: 6.0.0
+  release:
+    namespace: kubernetes-dashboard
+    values: {}
+
+# Settings for ingress controllers
+ingress:
+  # Indicates if ingress controllers should be enabled
+  enabled: false
+  # Settings for the Nginx ingress controller
+  # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
+  nginx:
+    # Indicates if the Nginx ingress controller should be enabled
+    # The Nginx ingress controller is enabled by default if ingress controllers are enabled
+    enabled: true
+    chart:
+      repo: https://kubernetes.github.io/ingress-nginx
+      name: ingress-nginx
+      version: 4.4.2
+    release:
+      namespace: ingress-nginx
+      values: {}
+
+# Settings for cluster monitoring
+monitoring:
+  # Indicates if the cluster monitoring should be enabled
+  enabled: false
+  kubePrometheusStack:
+    chart:
+      repo: https://prometheus-community.github.io/helm-charts
+      name: kube-prometheus-stack
+      version: 43.3.1
+    release:
+      namespace: monitoring-system
+      values: {}
+  lokiStack:
+    enabled: true
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: loki-stack
+      version: 2.8.9
+    release:
+      namespace: monitoring-system
+      values: {}
+
+# Settings for node feature discovery
+# https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
+nodeFeatureDiscovery:
+  # Indicates if node feature discovery should be enabled
+  enabled: true
+  chart:
+    repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+    name: node-feature-discovery
+    version: 0.12.0
+  release:
+    namespace: node-feature-discovery
+    values: {}
+
+# Settings for the NVIDIA GPU operator
+nvidiaGPUOperator:
+  # Indicates if the NVIDIA GPU operator should be enabled
+  # Note that because it uses node feature discovery to run only on nodes
+  # with an NVIDIA GPU available, the overhead of enabling this on clusters
+  # that do not need it now but may need it in the future is low
+  enabled: true
+  chart:
+    repo: https://nvidia.github.io/gpu-operator
+    name: gpu-operator
+    version: v22.9.1
+  release:
+    namespace: gpu-operator
+    values: {}
+
+# Settings for the Mellanox network operator
+mellanoxNetworkOperator:
+  # Indicates if the network operator should be enabled
+  # Note that because it uses node feature discovery to run only on nodes
+  # with a Mellanox NIC available, the overhead of enabling this on clusters
+  # that do not need it now but may need it in the future is low
+  enabled: true
+  chart:
+    repo: https://mellanox.github.io/network-operator
+    name: network-operator
+    version: 1.4.0
+  release:
+    namespace: network-operator
+    values: {}
+
+# Settings for any custom addons
+custom: {}
+  #  #Indexed by the name of the release on the target cluster
+  # my-custom-helm-release:
+  #   # Indicates that this is a Helm addon
+  #   kind: HelmRelease
+  #   spec:
+  #     # The namespace that the addon should be in
+  #     namespace: my-namespace
+  #     # Details of the Helm chart to use
+  #     chart:
+  #       # The chart repository that contains the chart to use
+  #       repo: https://my-project/charts
+  #       # The name of the chart to use
+  #       name: my-chart
+  #       # The version of the chart to use (must be an exact version)
+  #       version: 1.5.0
+  #     # The Helm values to use for the release
+  #     values: {}
+  # # Indexed by the name of the release on the target cluster
+  # my-custom-manifests:
+  #   # Indicates that this is a Manifests addon
+  #   kind: Manifests
+  #   spec:
+  #     # The namespace that the addon should be in
+  #     namespace: my-namespace
+  #     # The manifests for the addon, indexed by filename
+  #     manifests:
+  #       secret.yaml: |-
+  #         apiVersion: v1
+  #         kind: Secret
+  #         metadata:
+  #           name: my-secret
+  #         stringData:
+  #           secret-file: "secret-data"
