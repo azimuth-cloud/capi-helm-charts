@@ -34,15 +34,6 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
-  # When using the Argo addon provider, we want to use server-side apply because some of
-  # the CRDs are too large for the annotation applied by kubectl apply
-  # https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#server-side-apply
-  #
-  # We use the annotation rather than the spec to specify server-side apply so that the
-  # resource is compatible with both the legacy and Argo addon providers
-  annotations:
-    addons.stackhpc.com/sync-options: |
-      { "serverSideApply": true }
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
