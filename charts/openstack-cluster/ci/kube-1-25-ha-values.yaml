@@ -1,10 +1,7 @@
 ---
-kubernetesVersion: 1.23.9
+kubernetesVersion: 1.25.4
 
-machineImageId: e8c65726-2667-4d22-a45e-80eb19311a8d
-
-apiServer:
-  enableLoadBalancer: false
+machineImageId: 48c078a5-fd89-4f61-9d6a-c4f48745c0ae
 
 controlPlane:
   machineFlavor: vm.alaska.cpu.general.small

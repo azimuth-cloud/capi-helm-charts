@@ -1,10 +1,11 @@
 ---
-kubernetesVersion: 1.24.2
+kubernetesVersion: 1.23.15
 
-machineImageId: 9b5d513c-67b4-4fd6-8bf1-3bf4525c04c3
+machineImageId: c2f235c1-ad10-4e96-8568-aac864945686
 
 controlPlane:
   machineFlavor: vm.alaska.cpu.general.small
+  machineCount: 1
 
 nodeGroups:
   - machineCount: 2

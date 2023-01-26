@@ -1,0 +1,13 @@
+---
+kubernetesVersion: 1.24.9
+
+machineImageId: ad1405d6-5270-4d5b-b403-a6cba3762f8e
+
+controlPlane:
+  machineFlavor: vm.alaska.cpu.general.small
+  machineCount: 1
+
+nodeGroups:
+  - machineCount: 2
+    machineFlavor: vm.alaska.cpu.general.small
+    name: test-group1

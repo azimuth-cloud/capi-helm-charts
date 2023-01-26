@@ -1,5 +1,5 @@
-name: test helm charts
-on:
+name: Test Helm Charts
+on: 
   workflow_call:
 
 jobs:
@@ -7,11 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [kube-1-23-9, kube-1-24-2, kube-1-25-4]
-        capi: ["v1.2.5"]
-        capo: ["v0.7.0-stackhpc.1"]
+        version: [kube-1-23, kube-1-24, kube-1-25, kube-1-26]
+        capi: ["v1.3.2"]
+        capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
-    continue-on-error: true # don't cancel all jobs if one fails - cleanup
+      max-parallel: 1
+    continue-on-error: true #don't cancel all jobs if one fails - cleanup
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -48,11 +49,12 @@ jobs:
             --install \
             --set installCRDs=true \
             --wait \
-            --timeout 5m
+            --timeout 10m
       
       - name: Ensure Cluster API kustomization directory exists
         run: mkdir -p clusterapi
       
+      # From here: https://github.com/stackhpc/ansible-collection-azimuth-ops/blob/main/roles/clusterapi/defaults/main.yml
       - name: Write Cluster API kustomization file
         uses: DamianReeves/write-file-action@master
         with:
@@ -124,28 +126,24 @@ jobs:
             --create-namespace \
             --install \
             --wait \
-            --timeout 5m
+            --timeout 10m
       
       - name: Write cloud credential
-        run: 'echo "$TYLER_CLOUDS" > clouds.yml'
+        run: 'echo "$CLOUD" > clouds.yml'
         shell: bash
         env:
-          TYLER_CLOUDS: ${{ secrets.TYLER_CLOUDS }}
+          CLOUD: ${{ secrets.CLOUD }}
 
-      - name: Create cluster
-        run: |-
+      - name: Create cluster 
+        run: |- 
           helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
             --install \
             --dependency-update \
             --values clouds.yml \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-values.yaml
+            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml
 
-      # debug
-      #- name: Setup upterm session
-      #  uses: lhotari/action-upterm@v1
-
-      - name: Wait for cluster to become ready
-        run: |-
+      - name: Wait for cluster READY
+        run: |- 
           kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
             --for=condition=Ready \
             --timeout 30m
@@ -179,28 +177,58 @@ jobs:
           KUBECONFIG: ./kubeconfig
 
       - name: Run sonobuoy [smoke]
+        timeout-minutes: 20
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
 
-      #- name: Clean sonobuoy 
-      #  run: sonobuoy delete --kubeconfig kubeconfig-${{ matrix.version }} --wait --all
+      - name: Clean sonobuoy 
+        run: sonobuoy delete --wait --all
+        env:
+          KUBECONFIG: ./kubeconfig
       
-      #- name: Upgrade cluster
-      #  run: helm upgrade test-${GITHUB_SHA::7}-${{ matrix.version }} charts/openstack-cluster -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} --install -f clouds.yml -f charts/openstack-cluster/ci/${{ matrix.version }}-values-upgrade.yaml --dependency-update
+      - name: Upgrade cluster
+        run: |- 
+          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+            --install \
+            --dependency-update \
+            --values clouds.yml \
+            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml
       
-      #- name: Wait for cluster READY
-      #  run: kubectl wait -n namespace-${GITHUB_SHA::7}-${{ matrix.version }} clusters.cluster.x-k8s.io/test-${GITHUB_SHA::7}-${{ matrix.version }} --for=condition=Ready --timeout 20m
+      - name: Wait for cluster NOT READY
+        run: sleep 3m
+         
+      - name: Wait for cluster READY
+        run: |- 
+          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
+            --for=condition=Ready \
+            --timeout 30m
 
-      #- name: Wait for addons manifest
-      #  run: kubectl wait manifests --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
-      
-      #- name: Wait for addons helmreleases 
-      #  run: kubectl wait helmreleases --all --for=jsonpath='{.status.phase}'=Deployed --namespace namespace-${GITHUB_SHA::7}-${{ matrix.version }} --selector capi.stackhpc.com/cluster=test-${GITHUB_SHA::7}-${{ matrix.version }} --timeout 20m
+      - name: Wait for addons to deploy
+        run: |-
+          kubectl wait manifests \
+            --all \
+            --for=jsonpath='{.status.phase}'=Deployed \
+            --timeout 20m \
+          && \
+          kubectl wait helmreleases \
+            --all \
+            --for=jsonpath='{.status.phase}'=Deployed \
+            --timeout 20m
 
-      #- name: Run sonobuoy [smoke]
-      #  run: sonobuoy run --mode quick --kubeconfig kubeconfig-${{ matrix.version }} --wait
-        
+      - name: Run sonobuoy [smoke]
+        timeout-minutes: 20
+        run: sonobuoy run --mode quick --wait
+        env:
+          KUBECONFIG: ./kubeconfig
+
+      - name: Print logs
+        if: ${{ always() }}
+        run: |-
+          kubectl -n capo-system logs \
+          deploy/capo-controller-manager \
+          | grep test-${GITHUB_SHA::7}-${{ matrix.version }} | tail -n 200
+
       - name: Delete release
         if: ${{ always() }}
-        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait
+        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
