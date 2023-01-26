@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         version: [kube-1-23-9, kube-1-24-2, kube-1-25-4, kube-1-26-0]
-        capi: ["v1.3.1"]
+        capi: ["v1.3.2"]
         capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
       max-parallel: 1
