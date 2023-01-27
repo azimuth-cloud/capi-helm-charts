@@ -8,7 +8,6 @@ metadata:
   labels:
     {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
     {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
-    cluster.x-k8s.io/cluster-name: {{ include "openstack-cluster.clusterName" $ }}
   {{- if $nodeGroup.autoscale }}
   {{-
     $machineCountMin := $nodeGroup.machineCountMin |
@@ -38,6 +37,7 @@ spec:
     matchLabels:
       {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 6 }}
       {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
+      cluster.x-k8s.io/cluster-name: {{ include "openstack-cluster.clusterName" $ }}
   template:
     metadata:
       labels:
