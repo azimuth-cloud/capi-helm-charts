@@ -39,8 +39,10 @@ spec:
   {{- end }}
   {{- end }}
   {{- with .Values.apiServer }}
+  {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
-    enabled: {{ .enableLoadBalancer }}
+    enabled: true
+  {{- end }}
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}
