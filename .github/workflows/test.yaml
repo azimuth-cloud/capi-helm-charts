@@ -14,6 +14,9 @@ jobs:
       max-parallel: 1
     continue-on-error: true #don't cancel all jobs if one fails - cleanup
     steps:
+      - name: Fail
+        run: exit 1
+        
       - name: Checkout
         uses: actions/checkout@v3
       

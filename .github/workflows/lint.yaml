@@ -6,9 +6,6 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Fail
-        run: exit 1
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
