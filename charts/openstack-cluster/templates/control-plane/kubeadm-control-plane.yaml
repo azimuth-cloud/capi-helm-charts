@@ -75,7 +75,7 @@ metadata:
     # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
 spec:
-  version: {{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" }}
+  version: v{{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" | trimPrefix "v" }}
   replicas: {{ .Values.controlPlane.machineCount }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
   machineTemplate:
@@ -85,6 +85,7 @@ spec:
       kind: OpenStackMachineTemplate
       apiVersion: infrastructure.cluster.x-k8s.io/v1alpha6
       name: {{ include "openstack-cluster.controlplane.mt.name" . }}
+      namespace: {{ .Release.Namespace }}
     {{- with .Values.controlPlane.nodeDrainTimeout }}
     nodeDrainTimeout: {{ . }}
     {{- end }}

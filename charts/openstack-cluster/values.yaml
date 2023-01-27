@@ -145,7 +145,7 @@ controlPlane:
     # # If not specified, the machine availability zone is used
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
-  nodeDrainTimeout: 5m
+  nodeDrainTimeout: 5m0s
   # The rollout strategy to use for the control plane nodes
 
   # By default, the strategy allows the control plane to begin provisioning new nodes
