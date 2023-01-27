@@ -1,8 +1,8 @@
 name: test and publish
 on:
   push:
-    branches:
-      - main
+    #branches:
+    #  - main
 
 jobs:
   lint:
