@@ -234,7 +234,7 @@ nodeGroupDefaults:
     # # If not specified, the machine availability zone is used
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
-  nodeDrainTimeout: 5m
+  nodeDrainTimeout: 5m0s
   # The rollout strategy to use for the node group
   # By default, this is set to do a rolling update within the existing resource envelope
   # of the node group, even if that means the node group temporarily has zero nodes
