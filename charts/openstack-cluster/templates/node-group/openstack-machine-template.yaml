@@ -56,5 +56,10 @@ metadata:
     {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
   annotations:
     {{ $.Values.projectPrefix }}/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
+    # We let Cluster API clean up the cluster resources
+    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    helm.sh/resource-policy: keep
+    # Same, but for Argo
+    argocd.argoproj.io/sync-options: Prune=false
 spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
 {{- end }}

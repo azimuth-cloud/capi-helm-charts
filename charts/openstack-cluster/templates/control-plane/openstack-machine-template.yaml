@@ -47,5 +47,10 @@ metadata:
   labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
   annotations:
     {{ .Values.projectPrefix }}/template-checksum: {{ include "openstack-cluster.controlplane.mt.checksum" . }}
+    # We let Cluster API clean up the cluster resources
+    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    helm.sh/resource-policy: keep
+    # Same, but for Argo
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   {{- include "openstack-cluster.controlplane.mt.spec" . | nindent 2 }}
