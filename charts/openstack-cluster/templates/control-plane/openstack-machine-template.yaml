@@ -47,10 +47,10 @@ metadata:
   labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
   annotations:
     {{ .Values.projectPrefix }}/template-checksum: {{ include "openstack-cluster.controlplane.mt.checksum" . }}
-    # We let Cluster API clean up the cluster resources
-    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    # Cluster API complains when old templates disappear before it has rolled all the machines over
+    # When deploying with Helm, leave the resource behind and let Cluster API clean it up
     helm.sh/resource-policy: keep
-    # Same, but for Argo
-    argocd.argoproj.io/sync-options: Prune=false
+    # For Argo, we can do better and make sure it is removed only once the cluster becomes healthy again
+    argocd.argoproj.io/sync-options: PruneLast=true
 spec:
   {{- include "openstack-cluster.controlplane.mt.spec" . | nindent 2 }}
