@@ -192,7 +192,7 @@ monitoring:
         # 
         # alertmanager:
         #   enabled: true
-        #     config:
+        #   config:
         #     global:
         #       slack_api_url: '<insert-secret-slack-webhook-url>'
         #     route:
