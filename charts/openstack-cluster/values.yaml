@@ -36,6 +36,9 @@ machineSSHKeyName:
 # The prefix used for project labels and annotations
 projectPrefix: capi.stackhpc.com
 
+# Any extra annotations to add to the cluster
+clusterAnnotations: {}
+
 # Values for the Kubernetes cluster network
 kubeNetwork:
   # By default, use the private network range 172.16.0.0/12 for the cluster network
