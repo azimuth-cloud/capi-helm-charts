@@ -9,8 +9,8 @@ metadata:
     {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
     {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
   annotations:
-    # Argo should manage this resource even though it has an owner ref for the cluster
-    argocd.argoproj.io/managed-resource: "true"
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
     {{- if $nodeGroup.autoscale }}
     {{-
       $machineCountMin := $nodeGroup.machineCountMin |
