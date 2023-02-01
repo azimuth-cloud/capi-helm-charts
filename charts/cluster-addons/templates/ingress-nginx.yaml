@@ -17,8 +17,7 @@ stringData:
         serviceMonitor:
           enabled: {{ .Values.monitoring.enabled }}
           namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
-          additionalLabels: 
-            release: kube-prometheus-stack 
+          additionalLabels: {{ toYaml .Values.monitoring.serviceMonitorLabels | nindent 12 }}
       image:
         registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
     admissionWebhooks:

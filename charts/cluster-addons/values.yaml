@@ -168,6 +168,16 @@ ingress:
 monitoring:
   # Indicates if the cluster monitoring should be enabled
   enabled: false
+  # labels to be added to ServiceMonitor resources
+  # must match labels from .serviceMonitorSelector.matchLabels
+  # field of Prometheus resource created by kube-prometheus-stack
+  # in order for Prometheus to scrape metrics from the services
+  serviceMonitorLabels:
+    release: kube-prometheus-stack
+  # Size of the volume to provision on the target cloud for persistent storage of prometheus data
+  prometheusVolumeCapacity: 10Gi
+  # Config for the kube-prometheus-stack helm chart
+  # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack
   kubePrometheusStack:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
