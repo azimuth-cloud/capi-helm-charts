@@ -27,6 +27,9 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
