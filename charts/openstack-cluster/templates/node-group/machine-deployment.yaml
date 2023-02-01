@@ -8,27 +8,27 @@ metadata:
   labels:
     {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
     {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
-  {{- if $nodeGroup.autoscale }}
-  {{-
-    $machineCountMin := $nodeGroup.machineCountMin |
-      required (printf "no minimum machine count specified for node group '%s'" $nodeGroup.name)
-  }}
-  {{- if lt $machineCountMin 1.0 }}
-  {{- fail "autoscaling node groups with a minimum machine count < 1 are not currently supported" }}
-  {{- end }}
-  {{-
-    $machineCountMax := $nodeGroup.machineCountMax |
-      required (printf "no maximum machine count specified for node group '%s'" $nodeGroup.name)
-  }}
-  {{- if lt $machineCountMax $machineCountMin }}
-  {{- fail (printf "maximum machine count < minimum machine count for node group '%s'" $nodeGroup.name) }}
-  {{- end }}
   annotations:
     # Argo should manage this resource even though it has an owner ref for the cluster
     argocd.argoproj.io/managed-resource: "true"
+    {{- if $nodeGroup.autoscale }}
+    {{-
+      $machineCountMin := $nodeGroup.machineCountMin |
+        required (printf "no minimum machine count specified for node group '%s'" $nodeGroup.name)
+    }}
+    {{- if lt $machineCountMin 1.0 }}
+    {{- fail "autoscaling node groups with a minimum machine count < 1 are not currently supported" }}
+    {{- end }}
+    {{-
+      $machineCountMax := $nodeGroup.machineCountMax |
+        required (printf "no maximum machine count specified for node group '%s'" $nodeGroup.name)
+    }}
+    {{- if lt $machineCountMax $machineCountMin }}
+    {{- fail (printf "maximum machine count < minimum machine count for node group '%s'" $nodeGroup.name) }}
+    {{- end }}
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: {{ quote $machineCountMin }}
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: {{ quote $machineCountMax }}
-  {{- end }}
+    {{- end }}
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" $ }}
   {{- if not $nodeGroup.autoscale }}
