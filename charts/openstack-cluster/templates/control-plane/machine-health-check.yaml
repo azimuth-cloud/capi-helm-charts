@@ -5,6 +5,9 @@ kind: MachineHealthCheck
 metadata:
   name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
   labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+  annotations:
+    # Argo should manage this resource even though it has an owner ref for the cluster
+    argocd.argoproj.io/managed-resource: "true"
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" . }}
   selector:

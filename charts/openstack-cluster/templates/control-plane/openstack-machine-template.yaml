@@ -50,7 +50,6 @@ metadata:
     # Cluster API complains when old templates disappear before it has rolled all the machines over
     # When deploying with Helm, leave the resource behind and let Cluster API clean it up
     helm.sh/resource-policy: keep
-    # For Argo, we can do better and make sure it is removed only once the cluster becomes healthy again
-    argocd.argoproj.io/sync-options: PruneLast=true
+    # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
   {{- include "openstack-cluster.controlplane.mt.spec" . | nindent 2 }}

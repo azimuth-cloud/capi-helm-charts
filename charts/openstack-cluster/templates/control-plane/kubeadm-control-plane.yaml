@@ -74,8 +74,7 @@ metadata:
     # We let Cluster API clean up the control plane resource
     # Deleting it ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
-    # Same, but for Argo
-    argocd.argoproj.io/sync-options: Prune=false
+    # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
   version: v{{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" | trimPrefix "v" }}
   replicas: {{ .Values.controlPlane.machineCount }}
