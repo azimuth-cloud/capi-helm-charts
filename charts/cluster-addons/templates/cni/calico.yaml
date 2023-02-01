@@ -12,15 +12,19 @@ stringData:
     tigeraOperator:
       registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
     installation:
-      registry: {{ include "cluster-addons.imagePrefix" . }}docker.io
+      registry: {{ include "cluster-addons.imagePrefix" . }}docker.io/
       calicoNetwork:
         bgp: Disabled
         nodeAddressAutodetectionV4:
           kubernetes: NodeInternalIP
         ipPools:
     {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
-          - cidr: {{ "{{" }} cidr {{ "}}" }}
+          - blockSize: 26
+            cidr: {{ "{{" }} cidr {{ "}}" }}
+            disableBGPExport: false
             encapsulation: VXLAN
+            natOutgoing: Enabled
+            nodeSelector: all()
     {% endfor %}
   overrides: |
     {{- toYaml .Values.cni.calico.release.values | nindent 4 }}
@@ -30,6 +34,9 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true

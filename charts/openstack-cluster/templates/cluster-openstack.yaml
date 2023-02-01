@@ -5,9 +5,10 @@ metadata:
   name: {{ include "openstack-cluster.clusterName" . }}
   labels: {{ include "openstack-cluster.labels" . | nindent 4 }}
   annotations:
-    # We let Cluster API clean up the cluster resources
-    # Deleting them ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    # We let Cluster API clean up this resource
+    # Deleting it ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
+    # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
   identityRef:
     kind: Secret
@@ -39,8 +40,10 @@ spec:
   {{- end }}
   {{- end }}
   {{- with .Values.apiServer }}
+  {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
-    enabled: {{ .enableLoadBalancer }}
+    enabled: true
+  {{- end }}
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}

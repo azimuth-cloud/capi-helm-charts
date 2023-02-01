@@ -36,6 +36,9 @@ machineSSHKeyName:
 # The prefix used for project labels and annotations
 projectPrefix: capi.stackhpc.com
 
+# Any extra annotations to add to the cluster
+clusterAnnotations: {}
+
 # Values for the Kubernetes cluster network
 kubeNetwork:
   # By default, use the private network range 172.16.0.0/12 for the cluster network
@@ -145,7 +148,7 @@ controlPlane:
     # # If not specified, the machine availability zone is used
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
-  nodeDrainTimeout: 5m
+  nodeDrainTimeout: 5m0s
   # The rollout strategy to use for the control plane nodes
 
   # By default, the strategy allows the control plane to begin provisioning new nodes
@@ -202,10 +205,10 @@ controlPlane:
       unhealthyConditions:
         - type: Ready
           status: Unknown
-          timeout: 300s
+          timeout: 5m0s
         - type: Ready
           status: "False"
-          timeout: 300s
+          timeout: 5m0s
 
 # Defaults for node groups
 # Each of these can be overridden in the specification for an individual node group
@@ -234,7 +237,7 @@ nodeGroupDefaults:
     # # If not specified, the machine availability zone is used
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
-  nodeDrainTimeout: 5m
+  nodeDrainTimeout: 5m0s
   # The rollout strategy to use for the node group
   # By default, this is set to do a rolling update within the existing resource envelope
   # of the node group, even if that means the node group temporarily has zero nodes
@@ -270,16 +273,16 @@ nodeGroupDefaults:
       # By default, unhealthy worker nodes are always remediated
       maxUnhealthy: 100%
       # If a node takes longer than 10 mins to startup, remediate it
-      nodeStartupTimeout: 10m
+      nodeStartupTimeout: 10m0s
       # By default, consider a worker node that has not been Ready for
       # more than 5 mins unhealthy
       unhealthyConditions:
         - type: Ready
           status: Unknown
-          timeout: 300s
+          timeout: 5m0s
         - type: Ready
           status: "False"
-          timeout: 300s
+          timeout: 5m0s
 
 # The worker node groups for the cluster
 nodeGroups:
