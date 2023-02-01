@@ -16,7 +16,7 @@ stringData:
         enabled: {{ .Values.monitoring.enabled }}
         serviceMonitor:
           enabled: {{ .Values.monitoring.enabled }}
-          namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}  # monitoring-system
+          namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
           additionalLabels: 
             release: kube-prometheus-stack 
       image:
