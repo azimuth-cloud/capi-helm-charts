@@ -12,7 +12,7 @@ jobs:
         capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
       max-parallel: 1
-    continue-on-error: true #don't cancel all jobs if one fails - cleanup
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
