@@ -107,32 +107,12 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: nvidia-dcgm-exporter-dashboard
+          name: additional-grafana-dashboard
           labels:
             grafana_dashboard: "1"
         data:
           nvidia-dcgm-exporter-dashboard.json: |
-            {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev2.json" | nindent 12 }}
----
-apiVersion: addons.stackhpc.com/v1alpha1
-kind: Manifests
-metadata:
-  name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack-dashboards") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "kube-prometheus-stack-dashboards") | nindent 4 }}
-spec:
-  clusterName: {{ include "cluster-addons.clusterName" . }}
-  bootstrap: true
-  targetNamespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
-  releaseName: kube-prometheus-stack-dashboards
-  manifestSources:
-    - template: |
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: nginx-ingress-dashboard
-          labels:
-            grafana_dashboard: "1"
-        data:
+            {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev3.json" | nindent 12 }}
           nginx-ingress-dashboard.json: |
             {{- .Files.Get "grafana-dashboards/nginx-ingress-dashboard.json" | nindent 12 }}
 {{- end }}
