@@ -63,7 +63,7 @@ stringData:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: {{- .Values.monitoring.prometheusVolumeCapacity }}
+                  storage: {{ .Values.monitoring.prometheusVolumeCapacity }}
   overrides: |
     {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
 ---
