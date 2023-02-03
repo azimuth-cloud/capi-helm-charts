@@ -232,7 +232,7 @@ jobs:
           KUBECONFIG: ./kubeconfig
         if: matrix.version != 'kube-1-26' || github.event.pull_request.draft == true
       
-      - name: Run sonobuoy [smoke]
+      - name: Run sonobuoy full
         timeout-minutes: 20
         run: sonobuoy run --wait
         env:
