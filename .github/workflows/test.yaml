@@ -11,15 +11,15 @@ jobs:
         capi: ["v1.3.2"]
         capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
-        shouldRun:
-          - true
+        shouldNotRun:
+          - ${{ github.event.pull_request.draft }}
         exclude: 
           - version: kube-1-23
-            shouldRun: true
+            shouldNotRun: true
           - version: kube-1-24
-            shouldRun: true
+            shouldNotRun: true
           - version: kube-1-25
-            shouldRun: true
+            shouldNotRun: true
       max-parallel: 1
       fail-fast: false
     steps:
