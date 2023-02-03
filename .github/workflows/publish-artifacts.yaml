@@ -1,6 +1,8 @@
 name: publish artifacts
 on:
-  workflow_call:
+  push:
+  release:
+    types: [created]
 
 jobs:
   build_push_utils_image:

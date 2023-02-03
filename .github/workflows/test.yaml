@@ -11,6 +11,15 @@ jobs:
         capi: ["v1.3.2"]
         capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
+        shouldRun:
+          - github.event.pull_request.draft
+        exclude:
+          - version: kube-1-23
+            shouldRun: true
+          - version: kube-1-24
+            shouldRun: true
+          - version: kube-1-25
+            shouldRun: true
       max-parallel: 1
       fail-fast: false
     steps:
@@ -221,6 +230,14 @@ jobs:
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
+        if: matrix.version != kube-1-26 or github.event.pull_request.draft == true
+      
+      - name: Run sonobuoy [smoke]
+        timeout-minutes: 20
+        run: sonobuoy run --wait
+        env:
+          KUBECONFIG: ./kubeconfig
+        if: matrix.version == kube-1-26 and github.event.pull_request.draft == false
 
       - name: Print logs
         if: ${{ always() }}
