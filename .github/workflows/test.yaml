@@ -190,6 +190,7 @@ jobs:
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
+        if: github.event.pull_request.draft == false
 
       - name: Clean sonobuoy 
         run: sonobuoy delete --wait --all
@@ -206,6 +207,7 @@ jobs:
       
       - name: Wait for cluster NOT READY
         run: sleep 3m
+        if: github.event.pull_request.draft == false
          
       - name: Wait for cluster READY
         run: |- 
