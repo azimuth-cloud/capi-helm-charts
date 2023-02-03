@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - "feature/*"
+      - "fix/*"
 
 jobs:
   lint:
