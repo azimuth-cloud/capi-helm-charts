@@ -12,7 +12,7 @@ jobs:
         capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
         shouldRun:
-          - false
+          - truet
         exclude: 
           - version: kube-1-23
             shouldRun: true
