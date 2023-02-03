@@ -13,7 +13,7 @@ jobs:
         addonprovider: ["0.1.0-dev.0.main.21"]
         shouldRun:
           - github.event.pull_request.draft
-        exclude:
+        exclude: 
           - version: kube-1-23
             shouldRun: true
           - version: kube-1-24
