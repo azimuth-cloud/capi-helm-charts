@@ -113,6 +113,8 @@ spec:
         data:
           nvidia-dcgm-exporter-dashboard.json: |
             {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev3.json" | nindent 12 }}
+          {{- if .Values.ingress.enabled }}
           nginx-ingress-dashboard.json: |
             {{- .Files.Get "grafana-dashboards/nginx-ingress-dashboard.json" | nindent 12 }}
+          {{- end }}
 {{- end }}
