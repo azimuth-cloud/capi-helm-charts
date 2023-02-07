@@ -187,10 +187,7 @@ monitoring:
       version: 43.3.1
     release:
       namespace: monitoring-system
-      values:
-        # Disable alertmanager by default
-        alertmanager:
-          enabled: false
+      values: {}
 
         #############################################################################
         # Alertmanager does not come with pre-configured alert sinks so we have to
