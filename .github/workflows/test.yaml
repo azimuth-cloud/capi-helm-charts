@@ -245,12 +245,19 @@ jobs:
           KUBECONFIG: ./kubeconfig
         if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
 
-      - name: Print logs
+      - name: Output logs
         if: ${{ always() }}
         run: |-
           kubectl -n capo-system logs \
           deploy/capo-controller-manager \
-          | grep test-${GITHUB_SHA::7}-${{ matrix.version }} | tail -n 200
+          > logs.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: my-artifact
+          path: logs.txt
 
       - name: Delete release
         if: ${{ always() }}
