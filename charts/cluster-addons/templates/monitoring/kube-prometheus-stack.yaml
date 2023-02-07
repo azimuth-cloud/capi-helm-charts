@@ -29,6 +29,14 @@ stringData:
       prometheusSpec:
         image:
           registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+        retentionSize: {{ .Values.monitoring.prometheusMetricsRetentionSize }}
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: {{ .Values.monitoring.prometheusVolumeCapacity }}
     thanosRuler:
       thanosRulerSpec:
         image:
@@ -53,18 +61,6 @@ stringData:
       imageRenderer:
         image:
           repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana-image-renderer
-    prometheus:
-      prometheusSpec:
-        retentionSize: {{ .Values.monitoring.prometheusMetricsRetentionSize }}
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              # Omit storageClassName field to use default storage class
-              # storageClassName: 
-              accessModes: ["ReadWriteOnce"]
-              resources:
-                requests:
-                  storage: {{ .Values.monitoring.prometheusVolumeCapacity }}
   overrides: |
     {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
 ---
