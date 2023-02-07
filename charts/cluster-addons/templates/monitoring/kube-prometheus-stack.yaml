@@ -55,6 +55,7 @@ stringData:
           repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana-image-renderer
     prometheus:
       prometheusSpec:
+        retentionSize: {{ .Values.monitoring.prometheusMetricsRetentionSize }}
         storageSpec:
           volumeClaimTemplate:
             spec:

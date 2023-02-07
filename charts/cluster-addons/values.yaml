@@ -176,6 +176,8 @@ monitoring:
     release: kube-prometheus-stack
   # Size of the volume to provision on the target cloud for persistent storage of prometheus data
   prometheusVolumeCapacity: 10Gi
+  # Should be less than prometheusVolumeCapacity
+  prometheusMetricsRetentionSize: 9.9GB
   # Config for the kube-prometheus-stack helm chart
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack
   kubePrometheusStack:
@@ -190,13 +192,14 @@ monitoring:
         alertmanager:
           enabled: false
 
+        #############################################################################
         # Alertmanager does not come with pre-configured alert sinks so we have to
         # write our own (and store it elsewhere to keep credential/secrets hidden).
         #
         # Example config to send alerts to a slack channel:
         #
         # Note - 'null' receiver must be include as default kube-prometheus-stack
-        #         alerting rules require it.
+        #         alerting rules (specifically the WatchDog alert) require it.
         #         If it is not included then alertmanager pods will fail to launch
         #         and errors will be printed in prometheus operator pod logs.
         #
@@ -216,6 +219,7 @@ monitoring:
         #         send_resolved: true
         #     - name: 'gmail-notifications'
         #       TODO: Add example here
+        #############################################################################
 
   lokiStack:
     enabled: true
