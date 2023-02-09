@@ -245,6 +245,10 @@ jobs:
           KUBECONFIG: ./kubeconfig
         if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
 
+      - name: Delete release
+        if: ${{ always() }}
+        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
+      
       - name: Output logs
         if: ${{ always() }}
         run: |-
@@ -258,7 +262,3 @@ jobs:
         with:
           name: my-artifact
           path: logs.txt
-
-      - name: Delete release
-        if: ${{ always() }}
-        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
