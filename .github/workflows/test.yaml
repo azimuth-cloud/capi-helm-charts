@@ -244,6 +244,26 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig
         if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
+      
+      - name: Retrieve sonobuoy results
+        run: output=$(sonobuoy retrieve --extract) && mkdir ./results; tar xzf $output -C ./results
+      
+      - name: Upload sonobuoy log artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: capo-controller
+          path: ./results
+        
+      - name: Get sonobuoy report
+        run: output=$(sonobuoy retrieve) && sonobuoy results $output --mode report > sonobuoy_report.txt
+        
+      - name: Upload sonobuoy report artifact
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: capo-controller
+          path: sonobuoy_report.txt
 
       - name: Delete release
         if: ${{ always() }}
@@ -256,7 +276,7 @@ jobs:
           deploy/capo-controller-manager \
           > logs.txt
 
-      - name: Upload artifacts
+      - name: Upload log artifacts
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
