@@ -239,7 +239,7 @@ jobs:
         if: matrix.version != 'kube-1-26' || github.event.pull_request.draft == true
       
       - name: Run sonobuoy full
-        timeout-minutes: 90
+        timeout-minutes: 120
         run: sonobuoy run --wait
         env:
           KUBECONFIG: ./kubeconfig
@@ -260,5 +260,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: my-artifact
+          name: capo-controller
           path: logs.txt
