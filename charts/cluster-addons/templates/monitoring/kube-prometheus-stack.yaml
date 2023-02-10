@@ -29,14 +29,14 @@ stringData:
       prometheusSpec:
         image:
           registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
-        retentionSize: {{ .Values.monitoring.prometheusMetricsRetentionSize }}
+        retentionSize: {{ mulf 0.95 .Values.monitoring.prometheusVolumeCapacity }}GB
         storageSpec:
           volumeClaimTemplate:
             spec:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: {{ .Values.monitoring.prometheusVolumeCapacity }}
+                  storage: {{ .Values.monitoring.prometheusVolumeCapacity }}Gi
     thanosRuler:
       thanosRulerSpec:
         image:

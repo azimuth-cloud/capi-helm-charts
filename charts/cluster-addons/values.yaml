@@ -174,10 +174,8 @@ monitoring:
   # in order for Prometheus to scrape metrics from the services
   serviceMonitorLabels:
     release: kube-prometheus-stack
-  # Size of the volume to provision on the target cloud for persistent storage of prometheus data
-  prometheusVolumeCapacity: 10Gi
-  # Should be less than prometheusVolumeCapacity
-  prometheusMetricsRetentionSize: 9.9GB
+  # Size of the volume in GB to provision on the target cloud for persistent storage of prometheus data
+  prometheusVolumeCapacity: 10
   # Config for the kube-prometheus-stack helm chart
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack
   kubePrometheusStack:
