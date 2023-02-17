@@ -245,13 +245,10 @@ jobs:
           KUBECONFIG: ./kubeconfig
         if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
       
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-      
       - name: Retrieve sonobuoy results
         env:
           KUBECONFIG: ./kubeconfig
-        run: output=$(sonobuoy retrieve --extract) && mkdir ./results; tar xzf $output -C ./results
+        run: output=$(sonobuoy retrieve) && mkdir ./results; tar xzf $output -C ./results
       
       - name: Upload sonobuoy log artifacts
         uses: actions/upload-artifact@v3
