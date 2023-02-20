@@ -4,10 +4,10 @@ kubernetesVersion: 1.23.15
 machineImageId: c2f235c1-ad10-4e96-8568-aac864945686
 
 controlPlane:
-  machineFlavor: vm.alaska.cpu.general.small
+  machineFlavor: vm.ska.cpu.general.small
   machineCount: 1
 
 nodeGroups:
   - machineCount: 2
-    machineFlavor: vm.alaska.cpu.general.small
+    machineFlavor: vm.ska.cpu.general.small
     name: test-group1
