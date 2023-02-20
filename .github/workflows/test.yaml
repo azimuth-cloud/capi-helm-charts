@@ -245,6 +245,9 @@ jobs:
           KUBECONFIG: ./kubeconfig
         if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
       
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
       - name: Retrieve sonobuoy results
         env:
           KUBECONFIG: ./kubeconfig
