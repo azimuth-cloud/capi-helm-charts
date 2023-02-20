@@ -18,4 +18,4 @@ while true; do
     sleep "${STATUS_INTERVAL_SEC}"
 done
 
-output=$(sonobuoy retrieve --kubeconfig kubeconfig) && mkdir ./results; tar xzf $output -C ./results
+mkdir ./results && tar xzf $result_file -C ./results
