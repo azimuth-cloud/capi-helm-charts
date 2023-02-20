@@ -249,6 +249,7 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig
           STATUS_INTERVAL_SEC: 15
+        shell: bash
         run: |-
           retries=0
           retry_limit=10
