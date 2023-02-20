@@ -262,7 +262,7 @@ jobs:
         if: ${{ always() }}
         run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
       
-      - name: Output logs
+      - name: Output logs 
         if: ${{ always() }}
         run: |-
           kubectl -n capo-system logs \
