@@ -246,12 +246,14 @@ jobs:
         if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
 
       - name: Retrieve sonobuoy results
+        continue-on-error: true
         env:
           KUBECONFIG: ./kubeconfig
-          STATUS_INTERVAL_SEC: 15
+          STATUS_INTERVAL_SEC: 20
         run: chmod +x ./sonobuoy-artifacts.sh && ./sonobuoy-artifacts.sh
       
       - name: Upload sonobuoy log artifacts
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:

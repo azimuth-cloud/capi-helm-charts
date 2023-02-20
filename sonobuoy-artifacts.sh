@@ -2,7 +2,7 @@
 set -x 
 
 retries=0
-retry_limit=10
+retry_limit=20
 while true; do
     result_file=$(sonobuoy retrieve)
     RC=$?
@@ -11,10 +11,10 @@ while true; do
     fi
     retries=$(( retries + 1 ))
     if [[ ${retries} -eq ${retry_limit} ]]; then
-        log_info "Retries timed out. Check 'sonobuoy retrieve' command."
+        echo "Retries timed out. Check 'sonobuoy retrieve' command."
         exit 1
     fi
-    log_info "Error retrieving results. Waiting ${STATUS_INTERVAL_SEC}s to retry...[${retries}/${retry_limit}]"
+    echo "Error retrieving results. Waiting ${STATUS_INTERVAL_SEC}s to retry...[${retries}/${retry_limit}]"
     sleep "${STATUS_INTERVAL_SEC}"
 done
 
