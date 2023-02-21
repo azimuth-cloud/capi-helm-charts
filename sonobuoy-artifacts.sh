@@ -20,6 +20,4 @@ done
 
 #mkdir ./results && tar xzf $result_file -C ./results
 
-sudo apt install jq -y 
-
-sonobuoy results $tarball --mode=detailed | jq '.' > results.txt
+sonobuoy results $result_file --mode=detailed | jq '.' > results.txt
