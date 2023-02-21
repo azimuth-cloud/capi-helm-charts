@@ -257,7 +257,7 @@ jobs:
         if: ${{ always() }} 
         with:
           name: capo-controller
-          path: ./results
+          path: ./results.txt
 
       - name: Delete release
         if: ${{ always() }}

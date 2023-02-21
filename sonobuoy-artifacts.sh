@@ -18,4 +18,8 @@ while true; do
     sleep "${STATUS_INTERVAL_SEC}"
 done
 
-mkdir ./results && tar xzf $result_file -C ./results
+#mkdir ./results && tar xzf $result_file -C ./results
+
+sudo apt install jq -y 
+
+sonobuoy results $tarball --mode=detailed | jq '.' > results.txt
