@@ -20,4 +20,4 @@ done
 
 #mkdir ./results && tar xzf $result_file -C ./results
 
-sonobuoy results $result_file --mode=detailed | jq '.' > results.txt
+sonobuoy results $result_file --mode=detailed > results.txt
