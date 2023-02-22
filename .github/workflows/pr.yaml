@@ -1,8 +1,13 @@
 name: test pr
 on:
   pull_request:
+    types: [opened,synchronize,ready_for_review,edited,reopened]
     branches:
       - main
+
+concurrency: 
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   # Run the lint on every PR, even from external repos

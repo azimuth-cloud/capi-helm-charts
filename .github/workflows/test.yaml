@@ -11,6 +11,15 @@ jobs:
         capi: ["v1.3.2"]
         capo: ["v0.7.0-stackhpc.3"]
         addonprovider: ["0.1.0-dev.0.main.21"]
+        shouldNotRun:
+          - ${{ github.event.pull_request.draft }}
+        exclude: 
+          - version: kube-1-23
+            shouldNotRun: true
+          - version: kube-1-24
+            shouldNotRun: true
+          - version: kube-1-25
+            shouldNotRun: true
       max-parallel: 1
       fail-fast: false
     steps:
@@ -181,11 +190,13 @@ jobs:
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
+        if: github.event.pull_request.draft == false
 
       - name: Clean sonobuoy 
         run: sonobuoy delete --wait --all
         env:
           KUBECONFIG: ./kubeconfig
+        if: github.event.pull_request.draft == false
       
       - name: Upgrade cluster
         run: |- 
@@ -194,15 +205,18 @@ jobs:
             --dependency-update \
             --values clouds.yml \
             --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml
+        if: github.event.pull_request.draft == false
       
       - name: Wait for cluster NOT READY
         run: sleep 3m
+        if: github.event.pull_request.draft == false
          
       - name: Wait for cluster READY
         run: |- 
           kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
             --for=condition=Ready \
             --timeout 30m
+        if: github.event.pull_request.draft == false
 
       - name: Wait for addons to deploy
         run: |-
@@ -215,20 +229,50 @@ jobs:
             --all \
             --for=jsonpath='{.status.phase}'=Deployed \
             --timeout 20m
+        if: github.event.pull_request.draft == false
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
+        if: matrix.version != 'kube-1-26' || github.event.pull_request.draft == true
+      
+      - name: Run sonobuoy full
+        timeout-minutes: 120
+        run: sonobuoy run --wait
+        env:
+          KUBECONFIG: ./kubeconfig
+        if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
 
-      - name: Print logs
-        if: ${{ always() }}
-        run: |-
-          kubectl -n capo-system logs \
-          deploy/capo-controller-manager \
-          | grep test-${GITHUB_SHA::7}-${{ matrix.version }} | tail -n 200
+      - name: Retrieve sonobuoy results
+        continue-on-error: true
+        env:
+          KUBECONFIG: ./kubeconfig
+          STATUS_INTERVAL_SEC: 20
+        run: ./scripts/sonobuoy-artifacts.sh
+      
+      - name: Upload sonobuoy log artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: capo-controller
+          path: ./results.txt
 
       - name: Delete release
         if: ${{ always() }}
         run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
+      
+      - name: Output logs 
+        if: ${{ always() }}
+        run: |-
+          kubectl -n capo-system logs \
+          deploy/capo-controller-manager \
+          > logs.txt
+
+      - name: Upload log artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: capo-controller
+          path: logs.txt
