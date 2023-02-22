@@ -250,7 +250,7 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig
           STATUS_INTERVAL_SEC: 20
-        run: chmod +x ./sonobuoy-artifacts.sh && ./sonobuoy-artifacts.sh
+        run: ./scripts/sonobuoy-artifacts.sh
       
       - name: Upload sonobuoy log artifacts
         uses: actions/upload-artifact@v3
