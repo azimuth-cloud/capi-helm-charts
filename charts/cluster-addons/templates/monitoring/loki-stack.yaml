@@ -12,6 +12,9 @@ stringData:
     loki:
       image:
         repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/loki
+      persistence:
+        enabled: true
+        size: {{ .Values.monitoring.lokiVolumeCapacity }}Gi
     promtail:
       image:
         registry: {{ include "cluster-addons.imagePrefix" . }}docker.io

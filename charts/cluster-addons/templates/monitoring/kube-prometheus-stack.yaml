@@ -29,6 +29,14 @@ stringData:
       prometheusSpec:
         image:
           registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
+        retentionSize: {{ mulf 0.95 .Values.monitoring.prometheusVolumeCapacity }}GB
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: {{ .Values.monitoring.prometheusVolumeCapacity }}Gi
     thanosRuler:
       thanosRulerSpec:
         image:
@@ -96,10 +104,14 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: nvidia-dcgm-exporter-dashboard
+          name: additional-grafana-dashboard
           labels:
             grafana_dashboard: "1"
         data:
           nvidia-dcgm-exporter-dashboard.json: |
-            {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev2.json" | nindent 12 }}
+            {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev3.json" | nindent 12 }}
+          {{- if .Values.ingress.enabled }}
+          nginx-ingress-dashboard.json: |
+            {{- .Files.Get "grafana-dashboards/nginx-ingress-dashboard.json" | nindent 12 }}
+          {{- end }}
 {{- end }}
