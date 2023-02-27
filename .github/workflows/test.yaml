@@ -184,6 +184,9 @@ jobs:
             --timeout 20m
         env:
           KUBECONFIG: ./kubeconfig
+          
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
