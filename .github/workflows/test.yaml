@@ -189,6 +189,9 @@ jobs:
         run: |-
           echo "total_pods=$(kubectl get pods --all-namespaces | wc -l)" >> $GITHUB_ENV
           echo "running_pods=$(kubectl get pods --all-namespaces --field-selector=status.phase=Running | wc -l)" >> $GITHUB_ENV
+      
+      - name: Print pod counts
+        run: |-
           echo total pods = $total_pods
           echo running pods = $running_pods
       
@@ -241,6 +244,20 @@ jobs:
             --for=jsonpath='{.status.phase}'=Deployed \
             --timeout 20m
         if: github.event.pull_request.draft == false
+        
+      - name: Get pod counts
+        run: |-
+          echo "total_pods=$(kubectl get pods --all-namespaces | wc -l)" >> $GITHUB_ENV
+          echo "running_pods=$(kubectl get pods --all-namespaces --field-selector=status.phase=Running | wc -l)" >> $GITHUB_ENV
+      
+      - name: Print pod counts
+        run: |-
+          echo total pods = $total_pods
+          echo running pods = $running_pods
+      
+      - name: Check all pods are running
+        if: ${{ env.total_pods != env.running_pods }} 
+        run: exit 1
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
