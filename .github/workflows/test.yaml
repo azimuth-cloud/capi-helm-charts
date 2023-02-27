@@ -156,6 +156,9 @@ jobs:
           kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
             --for=condition=Ready \
             --timeout 30m
+      
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1 
 
       - name: Wait for addons to deploy
         run: |-
@@ -184,9 +187,6 @@ jobs:
             --timeout 20m
         env:
           KUBECONFIG: ./kubeconfig
-          
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1 
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
