@@ -186,7 +186,7 @@ jobs:
           KUBECONFIG: ./kubeconfig
           
       - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+        uses: lhotari/action-upterm@v1 
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
