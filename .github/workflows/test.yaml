@@ -156,9 +156,6 @@ jobs:
           kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
             --for=condition=Ready \
             --timeout 30m
-      
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1 
 
       - name: Wait for addons to deploy
         run: |-
@@ -187,6 +184,17 @@ jobs:
             --timeout 20m
         env:
           KUBECONFIG: ./kubeconfig
+      
+      - name: Get pod counts
+        run: |-
+          echo "total_pods=$(kubectl get pods --all-namespaces | wc -l)" >> $GITHUB_ENV
+          echo "running_pods=$(kubectl get pods --all-namespaces --field-selector=status.phase=Running | wc -l)" >> $GITHUB_ENV
+          echo total pods = $total_pods
+          echo running pods = $running_pods
+      
+      - name: Check all pods are running
+        if: ${{ env.total_pods != env.running_pods }} 
+        run: exit 1
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
