@@ -13,6 +13,8 @@ stringData:
       registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
     installation:
       registry: {{ include "cluster-addons.imagePrefix" . }}docker.io/
+      nodeMetricsPort: 9091
+      typhaMetricsPort: 9093
       calicoNetwork:
         bgp: Disabled
         nodeAddressAutodetectionV4:
@@ -50,4 +52,110 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
         key: overrides
+{{- if .Values.monitoring.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico-monitoring") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico-monitoring") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.cni.calico.release.namespace }}
+  releaseName: cni-calico-monitoring
+  manifestSources:
+    # calico-kube-controllers
+    - template: |
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: calico-kube-controllers-metrics
+          namespace: calico-system
+        spec:
+          endpoints:
+            - port: metrics-port
+          namespaceSelector:
+            matchNames:
+              - calico-system
+          selector:
+            matchLabels:
+              k8s-app: calico-kube-controllers
+    # calico-node
+    - template: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: calico-node-metrics
+          namespace: calico-system
+          labels:
+            k8s-app: calico-node
+        spec:
+          clusterIP: None
+          ports:
+            - name: metrics-port
+              port: 9091
+          selector:
+            k8s-app: calico-node
+        ---
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: calico-node-metrics
+          namespace: calico-system
+        spec:
+          endpoints:
+            - port: metrics-port
+          namespaceSelector:
+            matchNames:
+              - calico-system
+          selector:
+            matchLabels:
+              k8s-app: calico-node
+    # calico-typha
+    - template: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: calico-typha-metrics
+          namespace: calico-system
+          labels:
+            k8s-app: calico-typha
+        spec:
+          clusterIP: None
+          ports:
+            - name: metrics-port
+              port: 9093
+          selector:
+            k8s-app: calico-typha
+        ---
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: calico-typha-metrics
+          namespace: calico-system
+        spec:
+          endpoints:
+            - port: metrics-port
+          namespaceSelector:
+            matchNames:
+              - calico-system
+          selector:
+            matchLabels:
+              k8s-app: calico-typha
+    # dashboard
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cni-calico-dashboard
+          labels:
+            grafana_dashboard: "1"
+        data:
+          cni-calico-dashboard.json: |
+            {{- .Files.Get "grafana-dashboards/cni-calico-dashboard.json" | nindent 12 }}
+{{- end }}
 {{- end }}
