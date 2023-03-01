@@ -13,7 +13,7 @@ stringData:
       # Don't apply the namespace grouping by default
       config:
         route:
-          group_by: []
+          group_by: ['...']
       alertmanagerSpec:
         image:
           registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
