@@ -10,14 +10,12 @@ metadata:
 stringData:
   defaults: |
     controller:
-      # Indicates whether ingress controller metrics should be included in prometheus
+      {{- if .Values.monitoring.enabled }}
       metrics:
-        # Enable by default if cluster monitoring is enabled
-        enabled: {{ .Values.monitoring.enabled }}
+        enabled: true
         serviceMonitor:
-          enabled: {{ .Values.monitoring.enabled }}
-          namespace: {{ .Values.monitoring.kubePrometheusStack.release.namespace }}
-          additionalLabels: {{ toYaml .Values.monitoring.serviceMonitorLabels | nindent 12 }}
+          enabled: true
+      {{- end }}
       image:
         registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
     admissionWebhooks:
@@ -51,4 +49,31 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
         key: overrides
+{{- if .Values.monitoring.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx-dashboards") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.ingress.nginx.release.namespace }}
+  releaseName: ingress-nginx-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: ingress-nginx-dashboards
+          labels:
+            grafana_dashboard: "1"
+        data:
+          nginx-ingress-dashboard.json: |
+            {{- .Files.Get "grafana-dashboards/ingress-nginx-dashboard.json" | nindent 12 }}
+{{- end }}
 {{- end }}

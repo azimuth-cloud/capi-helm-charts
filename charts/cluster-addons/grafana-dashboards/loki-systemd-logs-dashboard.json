@@ -25,12 +25,6 @@
       "version": "1.0.0"
     },
     {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    },
-    {
       "type": "panel",
       "id": "text",
       "name": "Text",
@@ -84,7 +78,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(count_over_time({namespace=\"$namespace\", pod=~\"$pod\"} |~ \"$search\"[$__interval]))",
+          "expr": "sum(count_over_time({unit=~\"$unit\", hostname=~\"$hostname\"} |~ \"$search\"[$__interval]))",
           "refId": "A"
         }
       ],
@@ -149,7 +143,7 @@
       },
       "targets": [
         {
-          "expr": "{namespace=\"$namespace\", pod=~\"$pod\"} |~ \"$search\"",
+          "expr": "{unit=~\"$unit\", hostname=~\"$hostname\"} |~ \"$search\"",
           "refId": "A"
         }
       ],
@@ -165,18 +159,18 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": ".+",
         "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(kube_pod_info, namespace)",
+        "datasource": "Loki",
+        "definition": "label_values(unit)",
         "hide": 0,
         "includeAll": false,
         "index": -1,
         "label": null,
         "multi": false,
-        "name": "namespace",
+        "name": "unit",
         "options": [],
-        "query": "label_values(kube_pod_info, namespace)",
+        "query": "label_values(unit)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -188,18 +182,18 @@
         "useTags": false
       },
       {
-        "allValue": ".*",
+        "allValue": ".+",
         "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(kube_pod_info{namespace=~\"$namespace\"}, pod)",
+        "datasource": "Loki",
+        "definition": "label_values({unit=~\"$unit\"}, hostname)",
         "hide": 0,
         "includeAll": true,
         "index": -1,
         "label": null,
         "multi": true,
-        "name": "pod",
+        "name": "hostname",
         "options": [],
-        "query": "label_values(kube_pod_info{namespace=~\"$namespace\"}, pod)",
+        "query": "label_values({unit=~\"$unit\"}, hostname)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -241,11 +235,11 @@
     ]
   },
   "timezone": "",
-  "title": "Loki / Logs",
-  "uid": "209fd89b771c318dd442225414a50b59",
+  "title": "Loki / Systemd Logs",
+  "uid": "fa1bd43aed803111be9cc923cada9811",
   "variables": {
     "list": []
   },
   "version": 1,
-  "description": "Search logs stored in Loki"
+  "description": "Search systemd logs stored in Loki"
 }

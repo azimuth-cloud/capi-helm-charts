@@ -168,54 +168,29 @@ ingress:
 monitoring:
   # Indicates if the cluster monitoring should be enabled
   enabled: false
-  # labels to be added to ServiceMonitor resources
-  # must match labels from .serviceMonitorSelector.matchLabels
-  # field of Prometheus resource created by kube-prometheus-stack
-  # in order for Prometheus to scrape metrics from the services
-  serviceMonitorLabels:
-    release: kube-prometheus-stack
-  # Size of the volume in GB to provision on the target cloud for persistent storage of prometheus data
-  prometheusVolumeCapacity: 10
   # Config for the kube-prometheus-stack helm chart
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack
   kubePrometheusStack:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 43.3.1
+      version: 45.4.0
     release:
       namespace: monitoring-system
-      values: {}
-
-        #############################################################################
-        # Alertmanager does not come with pre-configured alert sinks so we have to
-        # write our own (and store it elsewhere to keep credential/secrets hidden).
-        #
-        # Example config to send alerts to a slack channel:
-        #
-        # Note - 'null' receiver must be include as default kube-prometheus-stack
-        #         alerting rules (specifically the WatchDog alert) require it.
-        #         If it is not included then alertmanager pods will fail to launch
-        #         and errors will be printed in prometheus operator pod logs.
-        #
-        # alertmanager:
-        #   enabled: true
-        #   config:
-        #     global:
-        #       slack_api_url: '<insert-secret-slack-webhook-url>'
-        #     route:
-        #       receiver: 'slack-notifications'
-        #       group_by: ['namespace']
-        #     receivers:
-        #     - name: 'null'
-        #     - name: 'slack-notifications'
-        #       slack_configs:
-        #       - channel: '#<insert-channel-name>'
-        #         send_resolved: true
-        #     - name: 'gmail-notifications'
-        #       TODO: Add example here
-        #############################################################################
-
+      values:
+        prometheus:
+          prometheusSpec:
+            # Enable persistence by default
+            # The amount of data that is retained will be 90 days or 95% of the size of the
+            # persistent volume, whichever is reached first
+            retention: 90d
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
   lokiStack:
     enabled: true
     chart:
@@ -224,9 +199,12 @@ monitoring:
       version: 2.8.9
     release:
       namespace: monitoring-system
-      values: {}
-  # Size of the volume in GB to provision on the target cloud for persistent storage of loki data
-  lokiVolumeCapacity: 10
+      values:
+        loki:
+          # Enable persistence by default
+          persistence:
+            enabled: true
+            size: 10Gi
 
 # Settings for node feature discovery
 # https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
