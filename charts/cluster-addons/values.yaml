@@ -212,6 +212,12 @@ monitoring:
       namespace: monitoring-system
       values:
         loki:
+          # Enable retention and configure a default retention period of 31 days
+          config:
+            compactor:
+              retention_enabled: true
+            limits_config:
+              retention_period: 744h
           # Enable persistence by default
           persistence:
             enabled: true
