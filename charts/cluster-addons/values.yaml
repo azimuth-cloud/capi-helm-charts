@@ -178,9 +178,20 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
+        # Enable persistence by default for prometheus and alertmanager
+        alertmanager:
+          alertmanagerSpec:
+            # By default, retain 7 days of data
+            retention: 168h
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
         prometheus:
           prometheusSpec:
-            # Enable persistence by default
             # The amount of data that is retained will be 90 days or 95% of the size of the
             # persistent volume, whichever is reached first
             retention: 90d
