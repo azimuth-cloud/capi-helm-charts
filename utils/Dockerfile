@@ -18,31 +18,7 @@ RUN apt-get update && \
     apt-get install -y curl git jq python3 python3-pip tini && \
     rm -rf /var/lib/apt/lists/*
 
-ARG KUBECTL_VN_1_22=v1.22.13
-RUN set -ex; \
-    OS_ARCH="$(uname -m)"; \
-    case "$OS_ARCH" in \
-        x86_64) kubectl_arch=amd64 ;; \
-        aarch64) kubectl_arch=arm64 ;; \
-        *) false ;; \
-    esac; \
-    curl -fsSL https://dl.k8s.io/release/${KUBECTL_VN_1_22}/bin/linux/${kubectl_arch}/kubectl -o /usr/bin/kubectl-v1.22; \
-    chmod +x /usr/bin/kubectl-v1.22; \
-    /usr/bin/kubectl-v1.22 version --client
-
-ARG KUBECTL_VN_1_23=v1.23.10
-RUN set -ex; \
-    OS_ARCH="$(uname -m)"; \
-    case "$OS_ARCH" in \
-        x86_64) kubectl_arch=amd64 ;; \
-        aarch64) kubectl_arch=arm64 ;; \
-        *) false ;; \
-    esac; \
-    curl -fsSL https://dl.k8s.io/release/${KUBECTL_VN_1_23}/bin/linux/${kubectl_arch}/kubectl -o /usr/bin/kubectl-v1.23; \
-    chmod +x /usr/bin/kubectl-v1.23; \
-    /usr/bin/kubectl-v1.23 version --client
-
-ARG KUBECTL_VN_1_24=v1.24.4
+ARG KUBECTL_VN_1_24=v1.24.11
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -54,7 +30,7 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.24; \
     /usr/bin/kubectl-v1.24 version --client
 
-ARG KUBECTL_VN_1_25=v1.25.0
+ARG KUBECTL_VN_1_25=v1.25.7
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -66,10 +42,22 @@ RUN set -ex; \
     chmod +x /usr/bin/kubectl-v1.25; \
     /usr/bin/kubectl-v1.25 version --client
 
+ARG KUBECTL_VN_1_26=v1.26.2
+RUN set -ex; \
+    OS_ARCH="$(uname -m)"; \
+    case "$OS_ARCH" in \
+        x86_64) kubectl_arch=amd64 ;; \
+        aarch64) kubectl_arch=arm64 ;; \
+        *) false ;; \
+    esac; \
+    curl -fsSL https://dl.k8s.io/release/${KUBECTL_VN_1_26}/bin/linux/${kubectl_arch}/kubectl -o /usr/bin/kubectl-v1.26; \
+    chmod +x /usr/bin/kubectl-v1.26; \
+    /usr/bin/kubectl-v1.26 version --client
+
 ENV HELM_CACHE_HOME /tmp/helm/cache
 ENV HELM_CONFIG_HOME /tmp/helm/config
 ENV HELM_DATA_HOME /tmp/helm/data
-ARG HELM_VERSION=v3.9.4
+ARG HELM_VERSION=v3.11.2
 RUN set -ex; \
     OS_ARCH="$(uname -m)"; \
     case "$OS_ARCH" in \
@@ -81,7 +69,7 @@ RUN set -ex; \
       tar -xz --strip-components 1 -C /usr/bin linux-${helm_arch}/helm; \
     helm version
 
-ENV KUBECTL_VN_LATEST v1.25
+ENV KUBECTL_VN_LATEST v1.26
 COPY ./bin/* /usr/bin/
 
 USER $UTILS_UID
