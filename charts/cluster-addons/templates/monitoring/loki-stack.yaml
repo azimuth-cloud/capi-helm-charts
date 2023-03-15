@@ -4,22 +4,6 @@
       .Values.monitoring.enabled
       .Values.monitoring.lokiStack.enabled
 }}
-{{-
-  $lokiPersistenceEnabled :=
-    dig
-      "loki"
-      "persistence"
-      "enabled"
-      false
-      .Values.monitoring.lokiStack.release.values
-}}
-{{-
-  $lokiVolumeSize :=
-    ternary
-      .Values.monitoring.lokiStack.release.values.loki.persistence.size
-      ""
-      $lokiPersistenceEnabled
-}}
 {{- if $lokiEnabled }}
 ---
 apiVersion: v1
@@ -150,99 +134,33 @@ spec:
 {{- end }}
 {{- if .Release.IsUpgrade }}
 ---
-# This hook checks whether we need to resize PVC volumes
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki-stack-manage-pvcs") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack-manage-pvcs") | nindent 4 }}
-  annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-spec:
-  backoffLimit: {{ .Values.hooks.backoffLimit }}
-  activeDeadlineSeconds: {{ .Values.hooks.activeDeadlineSeconds }}
-  template:
-    metadata:
-      labels: {{ include "cluster-addons.componentSelectorLabels" (list . "loki-stack-manage-pvcs") | nindent 8 }}
-    spec:
-      {{- with .Values.hooks.imagePullSecrets }}
-      imagePullSecrets: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      securityContext: {{ toYaml .Values.hooks.podSecurityContext | nindent 8 }}
-      restartPolicy: OnFailure
-      containers:
-        - name: manage-pvcs
-          image: {{
-            printf "%s:%s"
-              .Values.hooks.image.repository
-              (default .Chart.AppVersion .Values.hooks.image.tag)
-          }}
-          imagePullPolicy: {{ .Values.hooks.image.pullPolicy }}
-          securityContext: {{ toYaml .Values.hooks.securityContext | nindent 12 }}
-          args:
-            - /bin/bash
-            - -c
-            - |
-                set -ex
-                test -f "$KUBECONFIG" || exit 0
-                kubectl version || exit 0
-
-                {{- if $lokiEnabled }}
-                EXISTING_SIZE="$(
-                  kubectl get statefulset loki-stack \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --ignore-not-found \
-                    --output jsonpath='{.spec.volumeClaimTemplates[0].spec.resources.requests.storage}'
-                )"
-                if [ "$EXISTING_SIZE" != "{{ $lokiVolumeSize }}" ]; then
-                  kubectl delete statefulset loki-stack \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --ignore-not-found
-                fi
-                {{- end }}
-
-                {{- if and $lokiEnabled $lokiPersistenceEnabled }}
-                pvcs=($( \
-                  kubectl get pvc \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --selector app=loki,release=loki-stack \
-                    --output name \
-                ))
-                for pvc in "${pvcs[@]}"; do
-                  kubectl patch $pvc \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --patch '{"spec": {"resources": {"requests": {"storage": "{{ $lokiVolumeSize }}"}}}}'
-                done
-                {{- else }}
-                kubectl delete pvc \
-                  --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                  --selector app=loki,release=loki-stack \
-                  --wait=false
-                {{- end }}
-          env:
-            - name: KUBECONFIG
-              value: /etc/kubernetes/config
-          resources: {{ toYaml .Values.hooks.resources | nindent 12 }}
-          volumeMounts:
-            - name: etc-kubernetes
-              mountPath: /etc/kubernetes
-              readOnly: true
-      hostNetwork: {{ .Values.hooks.hostNetwork }}
-      {{- with .Values.hooks.nodeSelector }}
-      nodeSelector: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.hooks.affinity }}
-      affinity: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.hooks.tolerations }}
-      tolerations: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      volumes:
-        - name: etc-kubernetes
-          secret:
-            secretName: {{ include "cluster-addons.componentName" (list . "kubeconfig") }}
-            items:
-              - key: value
-                path: config
+{{-
+  $lokiPersistenceEnabled :=
+    dig
+      "loki"
+      "persistence"
+      "enabled"
+      false
+      .Values.monitoring.lokiStack.release.values
+}}
+{{-
+  $lokiVolumeSize :=
+    ternary
+      .Values.monitoring.lokiStack.release.values.loki.persistence.size
+      ""
+      $lokiPersistenceEnabled
+}}
+{{-
+  include
+    "cluster-addons.monitoring.pvcManage"
+    (list
+      .
+      .Values.monitoring.lokiStack.release.namespace
+      "loki-stack"
+      "app=loki,release=loki-stack"
+      $lokiEnabled
+      $lokiPersistenceEnabled
+      $lokiVolumeSize
+    )
+}}
 {{- end }}
