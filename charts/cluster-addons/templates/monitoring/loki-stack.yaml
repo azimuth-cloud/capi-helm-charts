@@ -79,6 +79,44 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
         key: overrides
+  # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks
+  # to ensure that it happens correctly
+  lifecycleHooks:
+    preUpgrade:
+      - apiVersion: apps/v1
+        kind: StatefulSet
+        name: loki-stack
+        action: delete
+    {{- if .Values.monitoring.lokiStack.release.values.loki.persistence.enabled }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: patch
+        options:
+          data:
+            spec:
+              resources:
+                requests:
+                  storage: {{ .Values.monitoring.lokiStack.release.values.loki.persistence.size }}
+    {{- else }}
+    postUpgrade:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: delete
+    {{- end }}
+    # After deleting the release, remove the PVCs
+    postDelete:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: delete
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
