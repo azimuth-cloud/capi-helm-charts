@@ -1,4 +1,32 @@
 {{- if .Values.monitoring.enabled }}
+{{-
+  $alertmanagerVolumeSize :=
+    dig
+      "alertmanager"
+      "alertmanagerSpec"
+      "storage"
+      "volumeClaimTemplate"
+      "spec"
+      "resources"
+      "requests"
+      "storage"
+      ""
+      .Values.monitoring.kubePrometheusStack.release.values
+}}
+{{-
+  $prometheusVolumeSize :=
+    dig
+      "prometheus"
+      "prometheusSpec"
+      "storageSpec"
+      "volumeClaimTemplate"
+      "spec"
+      "resources"
+      "requests"
+      "storage"
+      ""
+      .Values.monitoring.kubePrometheusStack.release.values
+}}
 ---
 apiVersion: v1
 kind: Secret
@@ -43,23 +71,10 @@ stringData:
         # Tell Prometheus to pick up all monitors, regardless of labels
         podMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
-        {{-
-          $storageSize := dig
-            "prometheus"
-            "prometheusSpec"
-            "storageSpec"
-            "volumeClaimTemplate"
-            "spec"
-            "resources"
-            "requests"
-            "storage"
-            ""
-            .Values.monitoring.kubePrometheusStack.release.values
-        }}
-        {{- if $storageSize }}
+        {{- if $prometheusVolumeSize }}
         # Set the retention size to 95% of the given volume size
-        {{- $storageAmount := mustRegexFind "^([0-9]*[.])?[0-9]+" $storageSize | float64 }}
-        {{- $storageUnits := mustRegexFind "(K|M|G|T|E|P)i?$" $storageSize }}
+        {{- $storageAmount := mustRegexFind "^([0-9]*[.])?[0-9]+" $prometheusVolumeSize | float64 }}
+        {{- $storageUnits := mustRegexFind "(K|M|G|T|E|P)i?$" $prometheusVolumeSize }}
         retentionSize: {{ mulf 0.95 $storageAmount }}{{ $storageUnits }}B
         {{- end }}
     thanosRuler:
@@ -113,6 +128,67 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
         key: overrides
+  # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks to
+  # ensure that it happens correctly
+  lifecycleHooks:
+    {{- if or $alertmanagerVolumeSize $prometheusVolumeSize }}
+    preUpgrade:
+      {{- with $alertmanagerVolumeSize }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          alertmanager: kube-prometheus-stack-alertmanager
+        action: patch
+        options:
+          data:
+            spec:
+              resources:
+                requests:
+                  storage: {{ . }}
+      {{- end }}
+      {{- with $prometheusVolumeSize }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          operator.prometheus.io/name: kube-prometheus-stack-prometheus
+        action: patch
+        options:
+          data:
+            spec:
+              resources:
+                requests:
+                  storage: {{ . }}
+      {{- end }}
+    {{- end }}
+    {{- if or (not $alertmanagerVolumeSize) (not $prometheusVolumeSize) }}
+    postUpgrade:
+      {{- if not $alertmanagerVolumeSize }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          alertmanager: kube-prometheus-stack-alertmanager
+        action: delete
+      {{- end }}
+      {{- if not $prometheusVolumeSize }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          operator.prometheus.io/name: kube-prometheus-stack-prometheus
+        action: delete
+      {{- end }}
+    {{- end }}
+    # After deleting the release, remove the PVCs
+    postDelete:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          alertmanager: kube-prometheus-stack-alertmanager
+        action: delete
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          operator.prometheus.io/name: kube-prometheus-stack-prometheus
+        action: delete
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests

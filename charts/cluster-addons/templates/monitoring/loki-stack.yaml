@@ -1,10 +1,4 @@
-{{-
-  $lokiEnabled :=
-    and
-      .Values.monitoring.enabled
-      .Values.monitoring.lokiStack.enabled
-}}
-{{- if $lokiEnabled }}
+{{- if and .Values.monitoring.enabled .Values.monitoring.lokiStack.enabled }}
 ---
 apiVersion: v1
 kind: Secret
@@ -85,6 +79,44 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
         key: overrides
+  # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks
+  # to ensure that it happens correctly
+  lifecycleHooks:
+    preUpgrade:
+      - apiVersion: apps/v1
+        kind: StatefulSet
+        name: loki-stack
+        action: delete
+    {{- if .Values.monitoring.lokiStack.release.values.loki.persistence.enabled }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: patch
+        options:
+          data:
+            spec:
+              resources:
+                requests:
+                  storage: {{ .Values.monitoring.lokiStack.release.values.loki.persistence.size }}
+    {{- else }}
+    postUpgrade:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: delete
+    {{- end }}
+    # After deleting the release, remove the PVCs
+    postDelete:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: delete
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
@@ -131,115 +163,4 @@ spec:
             {{- .Files.Get "grafana-dashboards/loki-systemd-logs-dashboard.json" | nindent 12 }}
           loki-metrics-dashboard.json: |
             {{- .Files.Get "grafana-dashboards/loki-metrics-dashboard.json" | nindent 12 }}
-{{- end }}
-{{- if .Release.IsUpgrade }}
----
-{{-
-  $lokiPersistenceEnabled :=
-    dig
-      "loki"
-      "persistence"
-      "enabled"
-      false
-      .Values.monitoring.lokiStack.release.values
-}}
-{{-
-  $lokiVolumeSize :=
-    ternary
-      .Values.monitoring.lokiStack.release.values.loki.persistence.size
-      ""
-      $lokiPersistenceEnabled
-}}
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki-stack-manage-pvcs") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack-manage-pvcs") | nindent 4 }}
-  annotations:
-    helm.sh/hook: pre-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-spec:
-  backoffLimit: {{ .Values.hooks.backoffLimit }}
-  activeDeadlineSeconds: {{ .Values.hooks.activeDeadlineSeconds }}
-  template:
-    metadata:
-      labels: {{ include "cluster-addons.componentSelectorLabels" (list . "loki-stack-manage-pvcs") | nindent 8 }}
-    spec:
-      {{- with .Values.hooks.imagePullSecrets }}
-      imagePullSecrets: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      securityContext: {{ toYaml .Values.hooks.podSecurityContext | nindent 8 }}
-      restartPolicy: OnFailure
-      containers:
-        - name: manage-pvcs
-          image: {{
-            printf "%s:%s"
-              .Values.hooks.image.repository
-              (default .Chart.AppVersion .Values.hooks.image.tag)
-          }}
-          imagePullPolicy: {{ .Values.hooks.image.pullPolicy }}
-          securityContext: {{ toYaml .Values.hooks.securityContext | nindent 12 }}
-          args:
-            - /bin/bash
-            - -c
-            - |
-                set -ex
-                test -f "$KUBECONFIG" || exit 0
-                kubectl version || exit 0
-                {{- if $lokiEnabled }}
-                EXISTING_SIZE="$(
-                  kubectl get statefulset loki-stack \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --ignore-not-found \
-                    --output jsonpath='{.spec.volumeClaimTemplates[0].spec.resources.requests.storage}'
-                )"
-                if [ "$EXISTING_SIZE" != "{{ $lokiVolumeSize }}" ]; then
-                  kubectl delete statefulset loki-stack \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --ignore-not-found
-                fi
-                {{- end }}
-                {{- if and $lokiEnabled $lokiPersistenceEnabled }}
-                pvcs=($(
-                  kubectl get pvc \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --selector app=loki,release=loki-stack \
-                    --output name
-                ))
-                for pvc in "${pvcs[@]}"; do
-                  kubectl patch $pvc \
-                    --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                    --patch '{"spec": {"resources": {"requests": {"storage": "{{ $lokiVolumeSize }}"}}}}'
-                done
-                {{- else }}
-                kubectl delete pvc \
-                  --namespace {{ .Values.monitoring.lokiStack.release.namespace }} \
-                  --selector app=loki,release=loki-stack \
-                  --wait=false
-                {{- end }}
-          env:
-            - name: KUBECONFIG
-              value: /etc/kubernetes/config
-          resources: {{ toYaml .Values.hooks.resources | nindent 12 }}
-          volumeMounts:
-            - name: etc-kubernetes
-              mountPath: /etc/kubernetes
-              readOnly: true
-      hostNetwork: {{ .Values.hooks.hostNetwork }}
-      {{- with .Values.hooks.nodeSelector }}
-      nodeSelector: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.hooks.affinity }}
-      affinity: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.hooks.tolerations }}
-      tolerations: {{ toYaml . | nindent 8 }}
-      {{- end }}
-      volumes:
-        - name: etc-kubernetes
-          secret:
-            secretName: {{ include "cluster-addons.componentName" (list . "kubeconfig") }}
-            items:
-              - key: value
-                path: config
 {{- end }}
