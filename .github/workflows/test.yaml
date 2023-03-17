@@ -199,6 +199,9 @@ jobs:
         if: ${{ env.total_pods != env.running_pods }} 
         run: exit 1
 
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
         run: sonobuoy run --mode quick --wait
