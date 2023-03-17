@@ -261,6 +261,22 @@ jobs:
       - name: Check all pods are running
         if: ${{ env.total_pods != env.running_pods }} 
         run: exit 1
+      
+      - name: Check Deployments are Ready
+        run: |-
+          kubectl get -A deployments \
+          | awk '$1 && $1!="NAMESPACE" $2 && $2!="NAME" { print $1" "$2 }' \
+          | xargs -l bash -c 'kubectl rollout status -n $0 deployment $1 --timeout 5m'
+        env:
+          KUBECONFIG: ./kubeconfig
+      
+      - name: Check DaemonSets are Ready
+        run: |-
+          kubectl get -A daemonset \
+          | awk '$1 && $1!="NAMESPACE" $2 && $2!="NAME" { print $1" "$2 }' \
+          | xargs -l bash -c 'kubectl rollout status -n $0 daemonset $1 --timeout 5m'
+        env:
+          KUBECONFIG: ./kubeconfig
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
