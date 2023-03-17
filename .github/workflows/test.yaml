@@ -199,8 +199,21 @@ jobs:
         if: ${{ env.total_pods != env.running_pods }} 
         run: exit 1
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+      - name: Check Deployments are Ready
+        run: |-
+          kubectl get -A deployments \
+          | awk '$1 && $1!="NAMESPACE" $2 && $2!="NAME" { print $1" "$2 }' \
+          | xargs -l bash -c 'kubectl rollout status -n $0 deployment $1 --timeout 5m'
+        env:
+          KUBECONFIG: ./kubeconfig
+      
+      - name: Check DaemonSets are Ready
+        run: |-
+          kubectl get -A daemonset \
+          | awk '$1 && $1!="NAMESPACE" $2 && $2!="NAME" { print $1" "$2 }' \
+          | xargs -l bash -c 'kubectl rollout status -n $0 daemonset $1 --timeout 5m'
+        env:
+          KUBECONFIG: ./kubeconfig
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
@@ -252,14 +265,16 @@ jobs:
         run: |-
           echo "total_pods=$(kubectl get pods --all-namespaces | wc -l)" >> $GITHUB_ENV
           echo "running_pods=$(kubectl get pods --all-namespaces --field-selector=status.phase=Running | wc -l)" >> $GITHUB_ENV
+        if: github.event.pull_request.draft == false
       
       - name: Print pod counts
         run: |-
           echo total pods = $total_pods
           echo running pods = $running_pods
+        if: github.event.pull_request.draft == false
       
       - name: Check all pods are running
-        if: ${{ env.total_pods != env.running_pods }} 
+        if: ${{ env.total_pods != env.running_pods }} && github.event.pull_request.draft == false
         run: exit 1
       
       - name: Check Deployments are Ready
@@ -269,6 +284,7 @@ jobs:
           | xargs -l bash -c 'kubectl rollout status -n $0 deployment $1 --timeout 5m'
         env:
           KUBECONFIG: ./kubeconfig
+        if: github.event.pull_request.draft == false
       
       - name: Check DaemonSets are Ready
         run: |-
@@ -277,6 +293,7 @@ jobs:
           | xargs -l bash -c 'kubectl rollout status -n $0 daemonset $1 --timeout 5m'
         env:
           KUBECONFIG: ./kubeconfig
+        if: github.event.pull_request.draft == false
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
