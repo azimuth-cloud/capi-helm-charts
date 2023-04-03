@@ -47,7 +47,7 @@ spec:
         {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
     spec:
       clusterName: {{ include "openstack-cluster.clusterName" $ }}
-      version: v{{ trimPrefix "v" $.Values.kubernetesVersion }}
+      version: v{{ $nodeGroup.kubernetesVersion | default $.Values.kubernetesVersion | trimPrefix "v" }}
       {{- with $nodeGroup.failureDomain }}
       failureDomain: {{ . }}
       {{- end }}

@@ -16,12 +16,16 @@ template:
     {{- if .Values.controlPlane.machineRootVolume.diskSize }}
     rootVolume: {{ toYaml .Values.controlPlane.machineRootVolume | nindent 6 }}
     {{- end }}
-    {{- if .Values.machineImageId }}
+    {{- if .Values.controlPlane.machineImageId }}
+    imageUUID: {{ .Values.controlPlane.machineImageId }}
+    {{- else if .Values.controlPlane.machineImage }}
+    image: {{ tpl .Values.controlPlane.machineImage . }}
+    {{- else if .Values.machineImageId }}
     imageUUID: {{ .Values.machineImageId }}
     {{- else if .Values.machineImage }}
     image: {{ tpl .Values.machineImage . }}
     {{- else }}
-    {{- fail "Either machineImage or machineImageId is required" }}
+    {{- fail "Either controlPlane.machineImageId, controlPlane.machineImage, machineImage or machineImageId is required" }}
     {{- end }}
     {{- with .Values.controlPlane.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}

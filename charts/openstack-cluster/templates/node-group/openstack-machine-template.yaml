@@ -18,12 +18,16 @@ template:
     {{- if $nodeGroup.machineRootVolume.diskSize }}
     rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
     {{- end }}
-    {{- if $ctx.Values.machineImageId }}
+    {{- if $nodeGroup.machineImageId }}
+    imageUUID: {{ $nodeGroup.machineImageId }}
+    {{- else if $nodeGroup.machineImage }}
+    image: {{ tpl $nodeGroup.machineImage $ctx }}
+    {{- else if $ctx.Values.machineImageId }}
     imageUUID: {{ $ctx.Values.machineImageId }}
     {{- else if $ctx.Values.machineImage }}
     image: {{ tpl $ctx.Values.machineImage $ctx }}
     {{- else }}
-    {{- fail "Either machineImage or machineImageId is required" }}
+    {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
     {{- end }}
     {{- with $nodeGroup.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
