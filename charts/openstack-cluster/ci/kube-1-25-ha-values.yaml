@@ -1,7 +1,8 @@
 ---
-kubernetesVersion: 1.25.4
+kubernetesVersion: 1.25.8
 
-machineImageId: 48c078a5-fd89-4f61-9d6a-c4f48745c0ae
+# ubuntu-focal-kube-v1.25.8-230411-1429
+machineImageId: 23e36a86-24f5-496c-874f-d54b2c829cf6
 
 controlPlane:
   machineFlavor: vm.ska.cpu.general.small
