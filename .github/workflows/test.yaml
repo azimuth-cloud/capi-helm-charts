@@ -31,8 +31,8 @@ jobs:
       
       - name: Install sonobuoy
         run: >
-          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.12/sonobuoy_0.56.12_linux_amd64.tar.gz
-          && tar -xf sonobuoy_0.56.12_linux_amd64.tar.gz
+          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.16/sonobuoy_0.56.16_linux_amd64.tar.gz
+          && tar -xf sonobuoy_0.56.16_linux_amd64.tar.gz
           && sudo mv -n sonobuoy /usr/bin/
 
       - uses: actions/setup-python@v4
@@ -52,7 +52,7 @@ jobs:
         run: |-
           helm upgrade cert-manager cert-manager \
             --repo https://charts.jetstack.io \
-            --version v1.10.1 \
+            --version v1.11.1 \
             --namespace cert-manager \
             --create-namespace  \
             --install \
