@@ -249,7 +249,10 @@ nvidiaGPUOperator:
     version: v22.9.1
   release:
     namespace: gpu-operator
-    values: {}
+    values:
+      dcgmExporter:
+        serviceMonitor:
+          enabled: true
 
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:
