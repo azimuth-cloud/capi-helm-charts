@@ -219,9 +219,9 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-alerting
   labels: 
-    {{- include "cluster-addons.componentLabels" (list . "ingress-nginx-dashboards") | nindent 4 }}
+    {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
     {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
 spec:
   groups:
