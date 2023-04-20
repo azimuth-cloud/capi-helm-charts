@@ -219,9 +219,10 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: nginx-ingress-alerting-rules
-  labels:
-    release: kube-prometheus-stack
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}
+  labels: 
+    {{- include "cluster-addons.componentLabels" (list . "ingress-nginx-dashboards") | nindent 4 }}
+    {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
 spec:
   groups:
   - name: ingress_nginx.rules
@@ -231,7 +232,7 @@ spec:
           nginx_ingress_controller_ssl_expire_time_seconds < (time() + (30 * 24 * 3600))
         for: 1h
         annotations:
-          message: "{% raw %}The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry.{% endraw %}"
+          message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
         labels:
           severity: warning
       - alert: NginxIngressCertificateExpiresVerySoon
@@ -239,7 +240,7 @@ spec:
           nginx_ingress_controller_ssl_expire_time_seconds < (time() + (7 * 24 * 3600))
         for: 1m
         annotations:
-          message: "{% raw %}The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry.{% endraw %}"
+          message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
         labels:
           severity: critical
 {{- end }}
