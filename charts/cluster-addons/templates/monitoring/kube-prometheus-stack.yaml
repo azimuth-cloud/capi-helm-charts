@@ -214,4 +214,33 @@ spec:
         data:
           nvidia-dcgm-exporter-dashboard.json: |
             {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev3.json" | nindent 12 }}
+---
+{{- if and .Values.ingress.enabled .Values.ingress.nginx.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nginx-ingress-alerting-rules
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+  - name: ingress_nginx.rules
+    rules:
+      - alert: NginxIngressCertificateExpiresSoon
+        expr: |
+          nginx_ingress_controller_ssl_expire_time_seconds < (time() + (30 * 24 * 3600))
+        for: 1h
+        annotations:
+          message: "{% raw %}The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry.{% endraw %}"
+        labels:
+          severity: warning
+      - alert: NginxIngressCertificateExpiresVerySoon
+        expr: |
+          nginx_ingress_controller_ssl_expire_time_seconds < (time() + (7 * 24 * 3600))
+        for: 1m
+        annotations:
+          message: "{% raw %}The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry.{% endraw %}"
+        labels:
+          severity: critical
+{{- end }}
 {{- end }}
