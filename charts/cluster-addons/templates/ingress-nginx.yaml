@@ -75,5 +75,48 @@ spec:
         data:
           nginx-ingress-dashboard.json: |
             {{- .Files.Get "grafana-dashboards/ingress-nginx-dashboard.json" | nindent 12 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-alerting-rules
+  labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.ingress.nginx.release.namespace }}
+  releaseName: ingress-nginx-alerting-rules
+  manifestSources:
+    - template: |
+        apiVersion: monitoring.coreos.com/v1
+        kind: PrometheusRule
+        metadata:
+          name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-alerting-rules
+          labels: 
+            {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
+            {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+        spec:
+          groups:
+          - name: ingress_nginx.rules
+            rules:
+              - alert: NginxIngressCertificateExpiresSoon
+                expr: |
+                  nginx_ingress_controller_ssl_expire_time_seconds < (time() + (30 * 24 * 3600))
+                for: 1h
+                annotations:
+                  message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
+                labels:
+                  severity: warning
+              - alert: NginxIngressCertificateExpiresVerySoon
+                expr: |
+                  nginx_ingress_controller_ssl_expire_time_seconds < (time() + (7 * 24 * 3600))
+                for: 1m
+                annotations:
+                  message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
+                labels:
+                  severity: critical
 {{- end }}
 {{- end }}

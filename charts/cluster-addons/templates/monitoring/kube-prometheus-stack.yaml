@@ -68,9 +68,10 @@ stringData:
       prometheusSpec:
         image:
           registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
-        # Tell Prometheus to pick up all monitors, regardless of labels
+        # Tell Prometheus to pick up all monitors and alerting rules, regardless of labels
         podMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
         {{- if $prometheusVolumeSize }}
         # Set the retention size to 95% of the given volume size
         {{- $storageAmount := mustRegexFind "^([0-9]*[.])?[0-9]+" $prometheusVolumeSize | float64 }}
