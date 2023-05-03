@@ -148,6 +148,7 @@ jobs:
         run: |-
           helm template ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
             --values clouds.yml \
+            --dependency-update \
             --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
             --debug
 
