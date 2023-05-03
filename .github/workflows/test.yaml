@@ -143,6 +143,14 @@ jobs:
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
+
+      - name: Template cluster
+        run: |-
+          helm template ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+            --values clouds.yml \
+            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
+            --debug
+
       - name: Create cluster 
         run: |- 
           helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
