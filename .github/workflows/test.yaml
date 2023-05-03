@@ -265,7 +265,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: capo-controller
+          name: sonobuoy-logs
           path: ./results.txt
 
       - name: Delete release
@@ -283,5 +283,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: capo-controller
+          name: capo-controller-logs
           path: logs.txt
