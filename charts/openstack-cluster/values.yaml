@@ -99,7 +99,7 @@ trustedCAs: {}
 additionalPackages: []
   # - nfs-common
 
-# Settings for the Kubernetes API server 
+# Settings for the Kubernetes API server
 apiServer:
   # Indicates whether to deploy a load balancer for the API server
   enableLoadBalancer: true
