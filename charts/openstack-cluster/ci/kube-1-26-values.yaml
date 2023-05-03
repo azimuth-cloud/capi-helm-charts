@@ -4,7 +4,7 @@ kubernetesVersion: 1.26.0
 machineImageId: 5eae91aa-0c96-472e-ba8c-edd6162281f7
 
 apiServer:
-  enableLoadBalancer: true
+  enableLoadBalancer: false
 
 controlPlane:
   machineFlavor: vm.ska.cpu.general.small
