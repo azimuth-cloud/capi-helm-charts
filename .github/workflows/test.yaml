@@ -9,7 +9,7 @@ jobs:
       matrix:
         version: [kube-1-23, kube-1-24, kube-1-25, kube-1-26]
         capi: ["v1.3.2"]
-        capo: ["v0.7.0-stackhpc.3"]
+        capo: ["v0.7.2"]
         addonprovider: ["0.1.0-dev.0.main.26"]
         shouldNotRun:
           - ${{ github.event.pull_request.draft }}
@@ -72,7 +72,7 @@ jobs:
           contents: |
             resources:
               - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ matrix.capi }}/cluster-api-components.yaml
-              - https://github.com/stackhpc/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
             patches:
               - patch: |-
                   - op: replace
@@ -142,6 +142,15 @@ jobs:
         shell: bash
         env:
           CLOUD: ${{ secrets.CLOUD }}
+
+
+      - name: Template cluster
+        run: |-
+          helm template ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+            --values clouds.yml \
+            --dependency-update \
+            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
+            --debug
 
       - name: Create cluster 
         run: |- 
@@ -256,7 +265,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: capo-controller
+          name: sonobuoy-logs
           path: ./results.txt
 
       - name: Delete release
@@ -274,5 +283,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: capo-controller
+          name: capo-controller-logs
           path: logs.txt
