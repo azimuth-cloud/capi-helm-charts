@@ -43,7 +43,7 @@ spec:
   {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
     enabled: true
-  {{ - if .loadBalancerProvider }}
+  {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
   {{- end }}
   {{- end }}

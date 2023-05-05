@@ -104,7 +104,7 @@ apiServer:
   # Indicates whether to deploy a load balancer for the API server
   enableLoadBalancer: true
   # Indicates what loadbalancer provider to use. Default is amphora
-  loadBalancerProvider: nil
+  loadBalancerProvider: 
 
   # Indicates whether to associate a floating IP with the API server
   associateFloatingIP: true
