@@ -103,8 +103,9 @@ additionalPackages: []
 apiServer:
   # Indicates whether to deploy a load balancer for the API server
   enableLoadBalancer: true
-  # Indicates what loadbalancer provider to use
-  loadBalancerProvider: ovn
+  # Indicates what loadbalancer provider to use. Default is amphora
+  #loadBalancerProvider:
+  
   # Indicates whether to associate a floating IP with the API server
   associateFloatingIP: true
   # The specific floating IP to associate with the API server
