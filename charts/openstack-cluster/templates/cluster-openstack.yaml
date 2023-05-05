@@ -43,7 +43,9 @@ spec:
   {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
     enabled: true
+  {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
+  {{- end }}
   {{- end }}
 
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
