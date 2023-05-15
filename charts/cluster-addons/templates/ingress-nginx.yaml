@@ -91,6 +91,7 @@ spec:
   releaseName: ingress-nginx-alerting-rules
   manifestSources:
     - template: |
+        {% raw %}
         apiVersion: monitoring.coreos.com/v1
         kind: PrometheusRule
         metadata:
@@ -115,5 +116,6 @@ spec:
                   message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
                 labels:
                   severity: critical
+        {% endraw %}
 {{- end }}
 {{- end }}
