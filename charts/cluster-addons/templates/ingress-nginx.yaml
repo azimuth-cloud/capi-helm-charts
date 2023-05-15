@@ -95,9 +95,6 @@ spec:
         kind: PrometheusRule
         metadata:
           name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-alerting-rules
-          labels: 
-            {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
-            {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
         spec:
           groups:
           - name: ingress_nginx.rules
