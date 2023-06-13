@@ -267,6 +267,7 @@ jobs:
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
+            --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
             --set kubernetesVersion=${{ matrix.version }} \
             --set machineImageId=${{ matrix.image }}
 
@@ -324,6 +325,7 @@ jobs:
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
+            --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
             --set kubernetesVersion=${{ matrix.upgrade-version }} \
             --set machineImageId=${{ matrix.upgrade-image }}
         if: ${{ !github.event.pull_request.draft }}
