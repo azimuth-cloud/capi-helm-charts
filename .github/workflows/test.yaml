@@ -2,24 +2,113 @@ name: Test Helm Charts
 on: 
   workflow_call:
 
+env:
+  HELM_VERSION: v3.11.3
+  CAPI_VERSION: v1.4.3
+  CAPO_VERSION: v0.7.3
+  ADDON_PROVIDER_VERSION: 0.1.0-dev.0.main.26
+  SONOBUOY_VERSION: 0.56.16
+  CERTMANAGER_VERSION: v1.12.1
+  IMAGES_BASE_URL: https://object.arcus.openstack.hpc.cam.ac.uk/swift/v1/AUTH_f0dc9cb312144d0aa44037c9149d2513/azimuth-images-prerelease/
+
 jobs:
-  install:
+  ensure-images:
     runs-on: ubuntu-latest
+    # We output the image IDs for each image
+    outputs:
+      kube-1-24-image: ${{ steps.kube-1-24.outputs.image-id }}
+      kube-1-24-version: 1.24.14
+      kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
+      kube-1-25-version: 1.25.10
+      kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
+      kube-1-26-version: 1.26.5
+      kube-1-27-image: ${{ steps.kube-1-27.outputs.image-id }}
+      kube-1-27-version: 1.27.2
+    steps:
+      - name: Write cloud credential
+        run: >
+          echo "$CLOUD" > clouds.yml
+        shell: bash
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
+
+      - name: Install OpenStack CLI
+        run: pip install python-openstackclient
+
+      - name: Ensure Kubernetes 1.24 image
+        id: kube-1-24
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.24.14-230602-1702
+        if: ${{ !github.event.pull_request.draft }}
+
+      - name: Ensure Kubernetes 1.25 image
+        id: kube-1-25
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.25.10-230602-1732
+        if: ${{ !github.event.pull_request.draft }}
+
+      - name: Ensure Kubernetes 1.26 image
+        id: kube-1-26
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.26.5-230602-1757
+        if: ${{ !github.event.pull_request.draft }}
+
+      - name: Ensure Kubernetes 1.27 image
+        id: kube-1-27
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.27.2-230602-1824
+
+  test:
+    runs-on: ubuntu-latest
+    needs: ensure-images
     strategy:
       matrix:
-        version: [kube-1-23, kube-1-24, kube-1-25, kube-1-26]
-        capi: ["v1.3.2"]
-        capo: ["v0.7.2"]
-        addonprovider: ["0.1.0-dev.0.main.26"]
-        shouldNotRun:
-          - ${{ github.event.pull_request.draft }}
-        exclude: 
-          - version: kube-1-23
-            shouldNotRun: true
-          - version: kube-1-24
-            shouldNotRun: true
-          - version: kube-1-25
-            shouldNotRun: true
+        include:
+          - name: kube-1-24
+            image: ${{ needs.ensure-images.kube-1-24-image }}
+            version: ${{ needs.ensure-images.kube-1-24-version }}
+            upgrade-image: ${{ needs.ensure-images.kube-1-25-image }}
+            upgrade-version: ${{ needs.ensure-images.kube-1-25-version }}
+            should-run: ${{ !github.event.pull_request.draft }}
+            latest: false
+          - name: kube-1-25
+            image: ${{ needs.ensure-images.kube-1-25-image }}
+            version: ${{ needs.ensure-images.kube-1-25-version }}
+            upgrade-image: ${{ needs.ensure-images.kube-1-26-image }}
+            upgrade-version: ${{ needs.ensure-images.kube-1-26-version }}
+            should-run: ${{ !github.event.pull_request.draft }}
+            latest: false
+          - name: kube-1-26
+            image: ${{ needs.ensure-images.kube-1-26-image }}
+            version: ${{ needs.ensure-images.kube-1-26-version }}
+            upgrade-image: ${{ needs.ensure-images.kube-1-27-image }}
+            upgrade-version: ${{ needs.ensure-images.kube-1-27-version }}
+            should-run: ${{ !github.event.pull_request.draft }}
+            latest: false
+          - name: kube-1-27
+            image: ${{ needs.ensure-images.kube-1-27-image }}
+            version: ${{ needs.ensure-images.kube-1-27-version }}
+            should-run: true
+            latest: true
+        exclude:
+          - should-run: false
       max-parallel: 1
       fail-fast: false
     steps:
@@ -27,13 +116,13 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Install tools
-        run: sudo apt install -y zip unzip 
+        run: sudo apt install -y zip unzip
       
       - name: Install sonobuoy
         run: >
-          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.12/sonobuoy_0.56.12_linux_amd64.tar.gz
-          && tar -xf sonobuoy_0.56.12_linux_amd64.tar.gz
-          && sudo mv -n sonobuoy /usr/bin/
+          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
+          tar -xf sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
+          sudo mv -n sonobuoy /usr/bin/
 
       - uses: actions/setup-python@v4
         with:
@@ -43,7 +132,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.10.0
+          version: ${{ env.HELM_VERSION }}
       
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.5.0
@@ -52,7 +141,7 @@ jobs:
         run: |-
           helm upgrade cert-manager cert-manager \
             --repo https://charts.jetstack.io \
-            --version v1.10.1 \
+            --version ${CERTMANAGER_VERSION} \
             --namespace cert-manager \
             --create-namespace  \
             --install \
@@ -71,8 +160,8 @@ jobs:
           write-mode: overwrite
           contents: |
             resources:
-              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ matrix.capi }}/cluster-api-components.yaml
-              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ env.CAPI_VERSION }}/cluster-api-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ env.CAPO_VERSION }}/infrastructure-components.yaml
             patches:
               - patch: |-
                   - op: replace
@@ -130,7 +219,7 @@ jobs:
         run: |-
           helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
             --repo https://stackhpc.github.io/cluster-api-addon-provider \
-            --version ${{ matrix.addonprovider }} \
+            --version ${ADDON_PROVIDER_VERSION} \
             --namespace capi-addon-system \
             --create-namespace \
             --install \
@@ -138,31 +227,49 @@ jobs:
             --timeout 10m
       
       - name: Write cloud credential
-        run: 'echo "$CLOUD" > clouds.yml'
+        run: >
+          echo "$CLOUD" > clouds.yml
         shell: bash
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
+      - name: Write common Helm values
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: values-common.yaml
+          write-mode: overwrite
+          contents: |
+            controlPlane:
+              machineFlavor: vm.ska.cpu.general.small
+              machineCount: 1
+            nodeGroups:
+              - machineCount: 2
+                machineFlavor: vm.ska.cpu.general.small
+                name: test-group1
 
       - name: Template cluster
         run: |-
-          helm template ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+          helm template ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
             --values clouds.yml \
             --dependency-update \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
+            --values values-common.yaml \
+            --set kubernetesVersion=${{ matrix.version }} \
+            --set machineImageId=${{ matrix.image }} \
             --debug
 
       - name: Create cluster 
         run: |- 
-          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+          helm upgrade ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
             --install \
             --dependency-update \
             --values clouds.yml \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml
+            --values values-common.yaml \
+            --set kubernetesVersion=${{ matrix.version }} \
+            --set machineImageId=${{ matrix.image }}
 
       - name: Wait for cluster READY
         run: |- 
-          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
+          kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ matrix.name }} \
             --for=condition=Ready \
             --timeout 30m
 
@@ -180,11 +287,11 @@ jobs:
 
       - name: Write kubeconfig
         run: |-
-          kubectl get secret ci-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig \
+          kubectl get secret ci-${{ github.run_id }}-${{ matrix.name }}-kubeconfig \
             -o go-template='{{ .data.value | base64decode }}' \
             > kubeconfig
 
-      - name: Wait for dns pods 
+      - name: Wait for dns pods
         run: |-
           kubectl wait po \
             --namespace kube-system \
@@ -199,33 +306,35 @@ jobs:
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: github.event.pull_request.draft == false
+        if: ${{ !github.event.pull_request.draft }}
 
       - name: Clean sonobuoy 
         run: sonobuoy delete --wait --all
         env:
           KUBECONFIG: ./kubeconfig
-        if: github.event.pull_request.draft == false
+        if: ${{ !github.event.pull_request.draft }}
       
       - name: Upgrade cluster
         run: |- 
-          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
+          helm upgrade ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
             --install \
             --dependency-update \
             --values clouds.yml \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml
-        if: github.event.pull_request.draft == false
+            --values values-common.yaml \
+            --set kubernetesVersion=${{ matrix.upgrade-version }} \
+            --set machineImageId=${{ matrix.upgrade-image }}
+        if: ${{ !github.event.pull_request.draft }}
       
       - name: Wait for cluster NOT READY
         run: sleep 3m
-        if: github.event.pull_request.draft == false
+        if: ${{ !github.event.pull_request.draft }}
          
       - name: Wait for cluster READY
         run: |- 
-          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
+          kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ matrix.name }} \
             --for=condition=Ready \
             --timeout 30m
-        if: github.event.pull_request.draft == false
+        if: ${{ !github.event.pull_request.draft }}
 
       - name: Wait for addons to deploy
         run: |-
@@ -238,21 +347,21 @@ jobs:
             --all \
             --for=jsonpath='{.status.phase}'=Deployed \
             --timeout 20m
-        if: github.event.pull_request.draft == false
+        if: ${{ !github.event.pull_request.draft }}
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: matrix.version != 'kube-1-26' || github.event.pull_request.draft == true
+        if: ${{ !matrix.latest || github.event.pull_request.draft }}
       
       - name: Run sonobuoy full
         timeout-minutes: 120
         run: sonobuoy run --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
+        if: ${{ matrix.latest && !github.event.pull_request.draft }}
 
       - name: Retrieve sonobuoy results
         continue-on-error: true
@@ -270,18 +379,20 @@ jobs:
 
       - name: Delete release
         if: ${{ always() }}
-        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
+        run: helm delete ci-${{ github.run_id }}-${{ matrix.name }} --wait
       
-      - name: Output logs 
+      - name: Output controller logs
         if: ${{ always() }}
-        run: |-
-          kubectl -n capo-system logs \
-          deploy/capo-controller-manager \
-          > logs.txt
+        run: >
+          kubectl -n capi-system logs deploy/capi-controller-manager > capi-logs.txt
+          kubectl -n capi-kubeadm-control-plane-system logs deploy/capi-kubeadm-control-plane-controller-manager > capi-kubeadm-control-plane-logs.txt
+          kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
+          kubectl -n capo-system logs deploy/capo-controller-manager > capo-logs.txt
+          kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
 
-      - name: Upload log artifacts
+      - name: Upload controller log artifacts
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: capo-controller-logs
-          path: logs.txt
+          name: cluster-api-controller-logs
+          path: ./*-logs.txt
