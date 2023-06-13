@@ -124,8 +124,8 @@ jobs:
       fail-fast: false
     steps:
       - run: |
-          echo "${{ matrix.image }}"
-          echo "${{ matrix.version }}"
+          echo "${{ needs.ensure-images.kube-1-27-image }}"
+          echo "${{ needs.ensure-images.kube-1-27-version }}"
           exit 1
 
       - name: Checkout
