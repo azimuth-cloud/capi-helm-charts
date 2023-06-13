@@ -24,10 +24,10 @@ jobs:
       - name: Set up chart-testing
         uses: scrungus/chart-testing-action@v3.7.3
       
-      - name: Dummy cloud creds
+      - name: Dummy values
         uses: DamianReeves/write-file-action@master
         with:
-          path: clouds.yml
+          path: values.yml
           write-mode: overwrite
           contents: |
             clouds:
@@ -41,6 +41,15 @@ jobs:
                 interface: "public"
                 identity_api_version: 3
                 auth_type: "v3applicationcredential"
+            kubernetesVersion: 1.27.2
+            machineImageId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+            controlPlane:
+              machineFlavor: vm.ska.cpu.general.small
+              machineCount: 1
+            nodeGroups:
+              - machineCount: 2
+                machineFlavor: vm.ska.cpu.general.small
+                name: test-group1
 
       - name: Run chart-testing (lint)
         run: |-
@@ -48,4 +57,4 @@ jobs:
             --target-branch ${{ github.event.repository.default_branch }} \
             --all \
             --validate-maintainers=false \
-            --extra-values clouds.yml
+            --extra-values values.yml
