@@ -258,15 +258,18 @@ jobs:
                 machineFlavor: vm.ska.cpu.general.small
                 name: test-group1
 
-      - name: Template cluster
-        run: |-
-          helm template ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
-            --values clouds.yml \
-            --dependency-update \
-            --values values-common.yaml \
-            --set kubernetesVersion=${{ matrix.version }} \
-            --set machineImageId=${{ matrix.image }} \
-            --debug
+      # Not sure about this
+      # It has potential to expose secrets in the stdout of the GitHub Actions
+      # - name: Template cluster
+      #   run: |-
+      #     helm template ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
+      #       --dependency-update \
+      #       --values clouds.yml \
+      #       --values values-common.yaml \
+      #       --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
+      #       --set kubernetesVersion=${{ matrix.version }} \
+      #       --set machineImageId=${{ matrix.image }} \
+      #       --debug
 
       - name: Create cluster 
         run: |- 
