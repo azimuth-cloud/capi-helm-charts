@@ -83,36 +83,45 @@ jobs:
     needs: ensure-images
     strategy:
       matrix:
+        name:
+          - kube-1-24
+          - kube-1-25
+          - kube-1-26
+          - kube-1-27
+        should-run:
+          - ${{ !github.event.pull_request.draft }}
         include:
           - name: kube-1-24
             image: ${{ needs.ensure-images.kube-1-24-image }}
             version: ${{ needs.ensure-images.kube-1-24-version }}
             upgrade-image: ${{ needs.ensure-images.kube-1-25-image }}
             upgrade-version: ${{ needs.ensure-images.kube-1-25-version }}
-            should-run: ${{ !github.event.pull_request.draft }}
             latest: false
           - name: kube-1-25
             image: ${{ needs.ensure-images.kube-1-25-image }}
             version: ${{ needs.ensure-images.kube-1-25-version }}
             upgrade-image: ${{ needs.ensure-images.kube-1-26-image }}
             upgrade-version: ${{ needs.ensure-images.kube-1-26-version }}
-            should-run: ${{ !github.event.pull_request.draft }}
             latest: false
           - name: kube-1-26
             image: ${{ needs.ensure-images.kube-1-26-image }}
             version: ${{ needs.ensure-images.kube-1-26-version }}
             upgrade-image: ${{ needs.ensure-images.kube-1-27-image }}
             upgrade-version: ${{ needs.ensure-images.kube-1-27-version }}
-            should-run: ${{ !github.event.pull_request.draft }}
             latest: false
           - name: kube-1-27
             image: ${{ needs.ensure-images.kube-1-27-image }}
             version: ${{ needs.ensure-images.kube-1-27-version }}
-            should-run: true
             latest: true
+        exclude:
+          - name: kube-1-24
+            should-run: false
+          - name: kube-1-25
+            should-run: false
+          - name: kube-1-26
+            should-run: false
       max-parallel: 1
       fail-fast: false
-    if: ${{ matrix.should-run }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
