@@ -110,10 +110,9 @@ jobs:
             version: ${{ needs.ensure-images.kube-1-27-version }}
             should-run: true
             latest: true
-        exclude:
-          - should-run: false
       max-parallel: 1
       fail-fast: false
+    if: ${{ matrix.should-run }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
