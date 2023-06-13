@@ -92,26 +92,26 @@ jobs:
           - ${{ !github.event.pull_request.draft }}
         include:
           - name: kube-1-24
-            image: ${{ needs.ensure-images.kube-1-24-image }}
-            version: ${{ needs.ensure-images.kube-1-24-version }}
-            upgrade-image: ${{ needs.ensure-images.kube-1-25-image }}
-            upgrade-version: ${{ needs.ensure-images.kube-1-25-version }}
+            image: ${{ needs.ensure-images.outputs.kube-1-24-image }}
+            version: ${{ needs.ensure-images.outputs.kube-1-24-version }}
+            upgrade-image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
+            upgrade-version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
             latest: false
           - name: kube-1-25
-            image: ${{ needs.ensure-images.kube-1-25-image }}
-            version: ${{ needs.ensure-images.kube-1-25-version }}
-            upgrade-image: ${{ needs.ensure-images.kube-1-26-image }}
-            upgrade-version: ${{ needs.ensure-images.kube-1-26-version }}
+            image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
+            version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
+            upgrade-image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
+            upgrade-version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
             latest: false
           - name: kube-1-26
-            image: ${{ needs.ensure-images.kube-1-26-image }}
-            version: ${{ needs.ensure-images.kube-1-26-version }}
-            upgrade-image: ${{ needs.ensure-images.kube-1-27-image }}
-            upgrade-version: ${{ needs.ensure-images.kube-1-27-version }}
+            image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
+            version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
+            upgrade-image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
+            upgrade-version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
             latest: false
           - name: kube-1-27
-            image: ${{ needs.ensure-images.kube-1-27-image }}
-            version: ${{ needs.ensure-images.kube-1-27-version }}
+            image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
+            version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
             latest: true
         exclude:
           - name: kube-1-24
@@ -123,11 +123,6 @@ jobs:
       max-parallel: 1
       fail-fast: false
     steps:
-      - run: |
-          echo "${{ needs.ensure-images.kube-1-27-image }}"
-          echo "${{ needs.ensure-images.kube-1-27-version }}"
-          exit 1
-
       - name: Checkout
         uses: actions/checkout@v3
       
