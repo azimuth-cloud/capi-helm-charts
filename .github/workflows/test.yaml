@@ -123,6 +123,11 @@ jobs:
       max-parallel: 1
       fail-fast: false
     steps:
+      - run: |
+          echo "${{ matrix.image }}"
+          echo "${{ matrix.version }}"
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v3
       
