@@ -19,9 +19,6 @@ on:
       kube-1-27-version:
         value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-version }}
 
-env:
-  IMAGES_BASE_URL: https://object.arcus.openstack.hpc.cam.ac.uk/swift/v1/AUTH_f0dc9cb312144d0aa44037c9149d2513/azimuth-images-prerelease/
-
 jobs:
   ensure-capi-images:
     runs-on: ubuntu-latest
@@ -56,35 +53,27 @@ jobs:
 
       - name: Ensure Kubernetes 1.24 image
         id: kube-1-24
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.24.14-230602-1702
+        uses: ./.github/actions/ensure-image
+        with:
+          image-name: ubuntu-focal-kube-v1.24.14-230602-1702
         if: ${{ !github.event.pull_request.draft }}
 
       - name: Ensure Kubernetes 1.25 image
         id: kube-1-25
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.25.10-230602-1732
+        uses: ./.github/actions/ensure-image
+        with:
+          image-name: ubuntu-focal-kube-v1.25.10-230602-1732
         if: ${{ !github.event.pull_request.draft }}
 
       - name: Ensure Kubernetes 1.26 image
         id: kube-1-26
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.26.5-230602-1757
+        uses: ./.github/actions/ensure-image
+        with:
+          image-name: ubuntu-focal-kube-v1.26.5-230602-1757
         if: ${{ !github.event.pull_request.draft }}
 
       - name: Ensure Kubernetes 1.27 image
         id: kube-1-27
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.27.2-230602-1824
+        uses: ./.github/actions/ensure-image
+        with:
+          image-name: ubuntu-focal-kube-v1.27.2-230602-1824

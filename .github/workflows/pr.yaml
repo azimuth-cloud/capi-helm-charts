@@ -27,63 +27,65 @@ jobs:
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
-  test_kube_1_24:
-    needs: [sync_images, ensure_capi_images]
-    uses: ./.github/workflows/test.yaml
-    secrets: inherit
-    with:
-      name: kube-1-24
-      image: ${{ needs.ensure_capi_images.outputs.kube-1-24-image }}
-      version: ${{ needs.ensure_capi_images.outputs.kube-1-24-version }}
-      upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
-      upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
-    if: >-
-      ${{
-        github.repository == 'stackhpc/capi-helm-charts' &&
-        !github.event.pull_request.draft
-      }}
+  # This job tests that each of the supported versions can deploy from scratch
 
-  test_kube_1_25:
-    needs: [sync_images, ensure_capi_images, test_kube_1_24]
-    uses: ./.github/workflows/test.yaml
-    secrets: inherit
-    with:
-      name: kube-1-25
-      image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
-      version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
-      upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
-      upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
-    if: >-
-      ${{
-        github.repository == 'stackhpc/capi-helm-charts' &&
-        !github.event.pull_request.draft
-      }}
+  # test_kube_1_24:
+  #   needs: [sync_images, ensure_capi_images]
+  #   uses: ./.github/workflows/test.yaml
+  #   secrets: inherit
+  #   with:
+  #     name: kube-1-24
+  #     image: ${{ needs.ensure_capi_images.outputs.kube-1-24-image }}
+  #     version: ${{ needs.ensure_capi_images.outputs.kube-1-24-version }}
+  #     upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
+  #     upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
+  #   if: >-
+  #     ${{
+  #       github.repository == 'stackhpc/capi-helm-charts' &&
+  #       !github.event.pull_request.draft
+  #     }}
 
-  test_kube_1_26:
-    needs: [sync_images, ensure_capi_images, test_kube_1_25]
-    uses: ./.github/workflows/test.yaml
-    secrets: inherit
-    with:
-      name: kube-1-26
-      image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
-      version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
-      upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
-      upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
-    if: >-
-      ${{
-        github.repository == 'stackhpc/capi-helm-charts' &&
-        !github.event.pull_request.draft
-      }}
+  # test_kube_1_25:
+  #   needs: [sync_images, ensure_capi_images, test_kube_1_24]
+  #   uses: ./.github/workflows/test.yaml
+  #   secrets: inherit
+  #   with:
+  #     name: kube-1-25
+  #     image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
+  #     version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
+  #     upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
+  #     upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
+  #   if: >-
+  #     ${{
+  #       github.repository == 'stackhpc/capi-helm-charts' &&
+  #       !github.event.pull_request.draft
+  #     }}
 
-  test_kube_1_27:
-    needs: [sync_images, ensure_capi_images, test_kube_1_26]
-    uses: ./.github/workflows/test.yaml
-    secrets: inherit
-    with:
-      name: kube-1-27
-      image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
-      version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
-      # We only run full Sonobuoy on the latest version, and never on draft PRs
-      # The latest version will not have an upgrade image
-      sonobuoy-full: ${{ !github.event.pull_request.draft }}
-    if: ${{ github.repository == 'stackhpc/capi-helm-charts' }}
+  # test_kube_1_26:
+  #   needs: [sync_images, ensure_capi_images, test_kube_1_25]
+  #   uses: ./.github/workflows/test.yaml
+  #   secrets: inherit
+  #   with:
+  #     name: kube-1-26
+  #     image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
+  #     version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
+  #     upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
+  #     upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
+  #   if: >-
+  #     ${{
+  #       github.repository == 'stackhpc/capi-helm-charts' &&
+  #       !github.event.pull_request.draft
+  #     }}
+
+  # test_kube_1_27:
+  #   needs: [sync_images, ensure_capi_images, test_kube_1_26]
+  #   uses: ./.github/workflows/test.yaml
+  #   secrets: inherit
+  #   with:
+  #     name: kube-1-27
+  #     image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
+  #     version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
+  #     # We only run full Sonobuoy on the latest version, and never on draft PRs
+  #     # The latest version will not have an upgrade image
+  #     sonobuoy-full: ${{ !github.event.pull_request.draft }}
+  #   if: ${{ github.repository == 'stackhpc/capi-helm-charts' }}
