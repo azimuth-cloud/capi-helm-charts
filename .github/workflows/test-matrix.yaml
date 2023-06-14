@@ -65,13 +65,12 @@ jobs:
             should-run: true
       max-parallel: 1
       fail-fast: false
-    steps:
-      - uses: ./.github/workflows/test.yaml
-        secrets: inherit
-        if: ${{ matrix.should-run }}
-        with:
-          name: ${{ matrix.name }}
-          image: ${{ matrix.image }}
-          version: ${{ matrix.version }}
-          upgrade-image: ${{ matrix.upgrade-image }}
-          upgrade-version: ${{ matrix.upgrade-version }}
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    if: ${{ matrix.should-run }}
+    with:
+      name: ${{ matrix.name }}
+      image: ${{ matrix.image }}
+      version: ${{ matrix.version }}
+      upgrade-image: ${{ matrix.upgrade-image }}
+      upgrade-version: ${{ matrix.upgrade-version }}
