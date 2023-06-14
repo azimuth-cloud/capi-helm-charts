@@ -90,29 +90,29 @@ jobs:
           - kube-1-27
         should-run:
           - ${{ !github.event.pull_request.draft }}
-        include:
-          - name: kube-1-24
-            image: ${{ needs.ensure-images.outputs.kube-1-24-image }}
-            version: ${{ needs.ensure-images.outputs.kube-1-24-version }}
-            upgrade-image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
-            upgrade-version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
-            latest: false
-          - name: kube-1-25
-            image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
-            version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
-            upgrade-image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
-            upgrade-version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
-            latest: false
-          - name: kube-1-26
-            image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
-            version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
-            upgrade-image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
-            upgrade-version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
-            latest: false
-          - name: kube-1-27
-            image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
-            version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
-            latest: true
+        # include:
+        #   - name: kube-1-24
+        #     image: ${{ needs.ensure-images.outputs.kube-1-24-image }}
+        #     version: ${{ needs.ensure-images.outputs.kube-1-24-version }}
+        #     upgrade-image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
+        #     upgrade-version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
+        #     latest: false
+        #   - name: kube-1-25
+        #     image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
+        #     version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
+        #     upgrade-image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
+        #     upgrade-version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
+        #     latest: false
+        #   - name: kube-1-26
+        #     image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
+        #     version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
+        #     upgrade-image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
+        #     upgrade-version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
+        #     latest: false
+        #   - name: kube-1-27
+        #     image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
+        #     version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
+        #     latest: true
         exclude:
           - name: kube-1-24
             should-run: false
@@ -260,16 +260,16 @@ jobs:
 
       # Not sure about this
       # It has potential to expose secrets in the stdout of the GitHub Actions
-      # - name: Template cluster
-      #   run: |-
-      #     helm template ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
-      #       --dependency-update \
-      #       --values clouds.yml \
-      #       --values values-common.yaml \
-      #       --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
-      #       --set kubernetesVersion=${{ matrix.version }} \
-      #       --set machineImageId=${{ matrix.image }} \
-      #       --debug
+      - name: Template cluster
+        run: |-
+          helm template ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
+            --dependency-update \
+            --values clouds.yml \
+            --values values-common.yaml \
+            --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
+            --set kubernetesVersion=${{ matrix.version }} \
+            --set machineImageId=${{ matrix.image }} \
+            --debug
 
       - name: Create cluster 
         run: |- 
@@ -399,7 +399,7 @@ jobs:
       
       - name: Output controller logs
         if: ${{ always() }}
-        run: >
+        run: |
           kubectl -n capi-system logs deploy/capi-controller-manager > capi-logs.txt
           kubectl -n capi-kubeadm-control-plane-system logs deploy/capi-kubeadm-control-plane-controller-manager > capi-kubeadm-control-plane-logs.txt
           kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
