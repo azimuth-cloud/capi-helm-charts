@@ -67,7 +67,6 @@ jobs:
       fail-fast: false
     uses: ./.github/workflows/test.yaml
     secrets: inherit
-    if: ${{ matrix.should-run }}
     with:
       name: ${{ matrix.name }}
       image: ${{ matrix.image }}
