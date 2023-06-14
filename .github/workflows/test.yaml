@@ -307,7 +307,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: sonobuoy-logs
+          name: sonobuoy-logs-${{ inputs.name }}
           path: ./results.txt
 
       - name: Delete release
