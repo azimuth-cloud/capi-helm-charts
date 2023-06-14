@@ -162,6 +162,11 @@ jobs:
           path: values-common.yaml
           write-mode: overwrite
           contents: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
             controlPlane:
               machineFlavor: vm.ska.cpu.general.small
               machineCount: 1
@@ -178,7 +183,6 @@ jobs:
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
-            --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
             --set kubernetesVersion=${{ inputs.version }} \
             --set machineImageId=${{ inputs.image }} \
             --debug
@@ -190,7 +194,6 @@ jobs:
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
-            --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
             --set kubernetesVersion=${{ inputs.version }} \
             --set machineImageId=${{ inputs.image }}
 
@@ -248,7 +251,6 @@ jobs:
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
-            --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
             --set kubernetesVersion=${{ inputs.upgrade-version }} \
             --set machineImageId=${{ inputs.upgrade-image }}
         if: ${{ !github.event.pull_request.draft }}
@@ -325,5 +327,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: cluster-api-controller-logs
+          name: cluster-api-controller-logs-${{ inputs.name }}
           path: ./*-logs.txt
