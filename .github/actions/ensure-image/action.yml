@@ -30,6 +30,7 @@ runs:
   steps:
     - id: ensure-image
       run: ./scripts/ensure-image.sh
+      shell: bash
       env:
         OS_CLIENT_CONFIG_FILE: ${{ inputs.os-client-config-file }}
         OS_CLOUD: ${{ inputs.os-cloud }}
