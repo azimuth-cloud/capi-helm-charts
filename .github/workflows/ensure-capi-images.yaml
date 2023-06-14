@@ -1,0 +1,90 @@
+name: Ensure CAPI images
+on:
+  workflow_call:
+    outputs:
+      kube-1-24-image:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-24-image }}
+      kube-1-24-version:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-24-version }}
+      kube-1-25-image:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-25-image }}
+      kube-1-25-version:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-25-version }}
+      kube-1-26-image:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-26-image }}
+      kube-1-26-version:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-26-version }}
+      kube-1-27-image:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-image }}
+      kube-1-27-version:
+        value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-version }}
+
+env:
+  IMAGES_BASE_URL: https://object.arcus.openstack.hpc.cam.ac.uk/swift/v1/AUTH_f0dc9cb312144d0aa44037c9149d2513/azimuth-images-prerelease/
+
+jobs:
+  ensure-capi-images:
+    runs-on: ubuntu-latest
+    # We output the image IDs for each image
+    outputs:
+      kube-1-24-image: ${{ steps.kube-1-24.outputs.image-id }}
+      kube-1-24-version: 1.24.14
+      kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
+      kube-1-25-version: 1.25.10
+      kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
+      kube-1-26-version: 1.26.5
+      kube-1-27-image: ${{ steps.kube-1-27.outputs.image-id }}
+      kube-1-27-version: 1.27.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Write cloud credential
+        run: >
+          echo "$CLOUD" > clouds.yml
+        shell: bash
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
+
+      - name: Install OpenStack CLI
+        run: pip install python-openstackclient
+
+      - name: Ensure Kubernetes 1.24 image
+        id: kube-1-24
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.24.14-230602-1702
+        if: ${{ !github.event.pull_request.draft }}
+
+      - name: Ensure Kubernetes 1.25 image
+        id: kube-1-25
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.25.10-230602-1732
+        if: ${{ !github.event.pull_request.draft }}
+
+      - name: Ensure Kubernetes 1.26 image
+        id: kube-1-26
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.26.5-230602-1757
+        if: ${{ !github.event.pull_request.draft }}
+
+      - name: Ensure Kubernetes 1.27 image
+        id: kube-1-27
+        run: ./scripts/ensure-image.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+          IMAGE_NAME: ubuntu-focal-kube-v1.27.2-230602-1824

@@ -1,6 +1,27 @@
-name: Test Helm Charts
-on: 
+name: Test OpenStack cluster chart
+on:
   workflow_call:
+    inputs:
+      name:
+        type: string
+        description: The name of the test
+        required: true
+      image:
+        type: string
+        description: The ID of the image to use
+        required: true
+      version:
+        type: string
+        description: The Kubernetes version for the image
+        required: true
+      upgrade-image:
+        type: string
+        description: The ID of the image to use for upgrade
+        required: false
+      upgrade-version:
+        type: string
+        description: The Kubernetes version for the upgrade
+        required: false
 
 env:
   HELM_VERSION: v3.11.3
@@ -9,119 +30,10 @@ env:
   ADDON_PROVIDER_VERSION: 0.1.0-dev.0.main.26
   SONOBUOY_VERSION: 0.56.16
   CERTMANAGER_VERSION: v1.12.1
-  IMAGES_BASE_URL: https://object.arcus.openstack.hpc.cam.ac.uk/swift/v1/AUTH_f0dc9cb312144d0aa44037c9149d2513/azimuth-images-prerelease/
 
 jobs:
-  ensure-images:
+  test-chart:
     runs-on: ubuntu-latest
-    # We output the image IDs for each image
-    outputs:
-      kube-1-24-image: ${{ steps.kube-1-24.outputs.image-id }}
-      kube-1-24-version: 1.24.14
-      kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
-      kube-1-25-version: 1.25.10
-      kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
-      kube-1-26-version: 1.26.5
-      kube-1-27-image: ${{ steps.kube-1-27.outputs.image-id }}
-      kube-1-27-version: 1.27.2
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Write cloud credential
-        run: >
-          echo "$CLOUD" > clouds.yml
-        shell: bash
-        env:
-          CLOUD: ${{ secrets.CLOUD }}
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          check-latest: true
-
-      - name: Install OpenStack CLI
-        run: pip install python-openstackclient
-
-      - name: Ensure Kubernetes 1.24 image
-        id: kube-1-24
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.24.14-230602-1702
-        if: ${{ !github.event.pull_request.draft }}
-
-      - name: Ensure Kubernetes 1.25 image
-        id: kube-1-25
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.25.10-230602-1732
-        if: ${{ !github.event.pull_request.draft }}
-
-      - name: Ensure Kubernetes 1.26 image
-        id: kube-1-26
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.26.5-230602-1757
-        if: ${{ !github.event.pull_request.draft }}
-
-      - name: Ensure Kubernetes 1.27 image
-        id: kube-1-27
-        run: ./scripts/ensure-image.sh
-        env:
-          OS_CLOUD: openstack
-          OS_CLIENT_CONFIG_FILE: ./clouds.yml
-          IMAGE_NAME: ubuntu-focal-kube-v1.27.2-230602-1824
-
-  test:
-    runs-on: ubuntu-latest
-    needs: ensure-images
-    strategy:
-      matrix:
-        name:
-          - kube-1-24
-          - kube-1-25
-          - kube-1-26
-          - kube-1-27
-        should-run:
-          - ${{ !github.event.pull_request.draft }}
-        # include:
-        #   - name: kube-1-24
-        #     image: ${{ needs.ensure-images.outputs.kube-1-24-image }}
-        #     version: ${{ needs.ensure-images.outputs.kube-1-24-version }}
-        #     upgrade-image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
-        #     upgrade-version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
-        #     latest: false
-        #   - name: kube-1-25
-        #     image: ${{ needs.ensure-images.outputs.kube-1-25-image }}
-        #     version: ${{ needs.ensure-images.outputs.kube-1-25-version }}
-        #     upgrade-image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
-        #     upgrade-version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
-        #     latest: false
-        #   - name: kube-1-26
-        #     image: ${{ needs.ensure-images.outputs.kube-1-26-image }}
-        #     version: ${{ needs.ensure-images.outputs.kube-1-26-version }}
-        #     upgrade-image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
-        #     upgrade-version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
-        #     latest: false
-        #   - name: kube-1-27
-        #     image: ${{ needs.ensure-images.outputs.kube-1-27-image }}
-        #     version: ${{ needs.ensure-images.outputs.kube-1-27-version }}
-        #     latest: true
-        exclude:
-          - name: kube-1-24
-            should-run: false
-          - name: kube-1-25
-            should-run: false
-          - name: kube-1-26
-            should-run: false
-      max-parallel: 1
-      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -262,29 +174,29 @@ jobs:
       # It has potential to expose secrets in the stdout of the GitHub Actions
       - name: Template cluster
         run: |-
-          helm template ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
+          helm template ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
             --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
-            --set kubernetesVersion=${{ matrix.version }} \
-            --set machineImageId=${{ matrix.image }} \
+            --set kubernetesVersion=${{ inputs.version }} \
+            --set machineImageId=${{ inputs.image }} \
             --debug
 
       - name: Create cluster 
         run: |- 
-          helm upgrade ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
+          helm upgrade ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
             --install \
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
             --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
-            --set kubernetesVersion=${{ matrix.version }} \
-            --set machineImageId=${{ matrix.image }}
+            --set kubernetesVersion=${{ inputs.version }} \
+            --set machineImageId=${{ inputs.image }}
 
       - name: Wait for cluster READY
         run: |- 
-          kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ matrix.name }} \
+          kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ inputs.name }} \
             --for=condition=Ready \
             --timeout 30m
 
@@ -302,7 +214,7 @@ jobs:
 
       - name: Write kubeconfig
         run: |-
-          kubectl get secret ci-${{ github.run_id }}-${{ matrix.name }}-kubeconfig \
+          kubectl get secret ci-${{ github.run_id }}-${{ inputs.name }}-kubeconfig \
             -o go-template='{{ .data.value | base64decode }}' \
             > kubeconfig
 
@@ -331,14 +243,14 @@ jobs:
       
       - name: Upgrade cluster
         run: |- 
-          helm upgrade ci-${{ github.run_id }}-${{ matrix.name }} ./charts/openstack-cluster \
+          helm upgrade ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
             --install \
             --dependency-update \
             --values clouds.yml \
             --values values-common.yaml \
             --set clouds.openstack.auth.project_id=${{ secrets.PROJECT_ID }} \
-            --set kubernetesVersion=${{ matrix.upgrade-version }} \
-            --set machineImageId=${{ matrix.upgrade-image }}
+            --set kubernetesVersion=${{ inputs.upgrade-version }} \
+            --set machineImageId=${{ inputs.upgrade-image }}
         if: ${{ !github.event.pull_request.draft }}
       
       - name: Wait for cluster NOT READY
@@ -347,7 +259,7 @@ jobs:
          
       - name: Wait for cluster READY
         run: |- 
-          kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ matrix.name }} \
+          kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ inputs.name }} \
             --for=condition=Ready \
             --timeout 30m
         if: ${{ !github.event.pull_request.draft }}
@@ -365,19 +277,24 @@ jobs:
             --timeout 20m
         if: ${{ !github.event.pull_request.draft }}
 
+      #####
+      # We only run full Sonobuoy on the latest version, and never on draft PRs
+      # The latest version will not have an upgrade image
+      #####
+
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ !matrix.latest || github.event.pull_request.draft }}
+        if: ${{ inputs.upgrade-image || github.event.pull_request.draft }}
       
       - name: Run sonobuoy full
         timeout-minutes: 120
         run: sonobuoy run --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ matrix.latest && !github.event.pull_request.draft }}
+        if: ${{ !inputs.upgrade-image && !github.event.pull_request.draft }}
 
       - name: Retrieve sonobuoy results
         continue-on-error: true
@@ -395,7 +312,7 @@ jobs:
 
       - name: Delete release
         if: ${{ always() }}
-        run: helm delete ci-${{ github.run_id }}-${{ matrix.name }} --wait
+        run: helm delete ci-${{ github.run_id }}-${{ inputs.name }} --wait
       
       - name: Output controller logs
         if: ${{ always() }}

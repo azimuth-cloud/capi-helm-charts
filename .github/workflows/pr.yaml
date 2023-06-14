@@ -21,8 +21,15 @@ jobs:
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
-  test:
-    needs: [sync_images]
-    uses: ./.github/workflows/test.yaml
+  ensure_capi_images:
+    needs: [lint]
+    uses: ./.github/workflows/ensure-capi-images.yaml
     secrets: inherit
+    if: github.repository == 'stackhpc/capi-helm-charts'
+
+  test:
+    needs: [sync_images, ensure_capi_images]
+    uses: ./.github/workflows/test-matrix.yaml
+    secrets: inherit
+    with: ${{ needs.ensure_capi_images.outputs }}
     if: github.repository == 'stackhpc/capi-helm-charts'
