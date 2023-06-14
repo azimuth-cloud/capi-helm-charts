@@ -27,17 +27,60 @@ jobs:
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
-  test:
+  test-kube-1-24:
     needs: [sync_images, ensure_capi_images]
-    uses: ./.github/workflows/test-matrix.yaml
+    uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
-      kube-1-24-image: ${{ needs.ensure_capi_images.outputs.kube-1-24-image }}
-      kube-1-24-version: ${{ needs.ensure_capi_images.outputs.kube-1-24-version }}
-      kube-1-25-image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
-      kube-1-25-version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
-      kube-1-26-image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
-      kube-1-26-version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
-      kube-1-27-image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
-      kube-1-27-version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
-    if: github.repository == 'stackhpc/capi-helm-charts'
+      name: kube-1-24
+      image: ${{ needs.ensure_capi_images.outputs.kube-1-24-image }}
+      version: ${{ needs.ensure_capi_images.outputs.kube-1-24-version }}
+      upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
+      upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
+    if: >-
+      ${{
+        github.repository == 'stackhpc/capi-helm-charts' &&
+        !github.event.pull_request.draft
+      }}
+
+  test-kube-1-25:
+    needs: [sync_images, ensure_capi_images]
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    with:
+      name: kube-1-25
+      image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
+      version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
+      upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
+      upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
+    if: >-
+      ${{
+        github.repository == 'stackhpc/capi-helm-charts' &&
+        !github.event.pull_request.draft
+      }}
+
+  test-kube-1-26:
+    needs: [sync_images, ensure_capi_images]
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    with:
+      name: kube-1-26
+      image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
+      version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
+      upgrade-image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
+      upgrade-version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
+    if: >-
+      ${{
+        github.repository == 'stackhpc/capi-helm-charts' &&
+        !github.event.pull_request.draft
+      }}
+
+  test-kube-1-27:
+    needs: [sync_images, ensure_capi_images]
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    with:
+      name: kube-1-27
+      image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
+      version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
+    if: ${{ github.repository == 'stackhpc/capi-helm-charts' }}
