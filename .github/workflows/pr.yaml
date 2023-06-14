@@ -91,4 +91,7 @@ jobs:
       name: kube-1-27
       image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
       version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
+      # We only run full Sonobuoy on the latest version, and never on draft PRs
+      # The latest version will not have an upgrade image
+      sonobuoy-full: ${{ !github.event.pull_request.draft }}
     if: ${{ github.repository == 'stackhpc/capi-helm-charts' }}

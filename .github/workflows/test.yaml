@@ -22,6 +22,11 @@ on:
         type: string
         description: The Kubernetes version for the upgrade
         required: false
+      sonobuoy-full:
+        type: boolean
+        description: Indicates whether to run Sonobuoy full on the final cluster
+        required: false
+        default: false
 
 env:
   HELM_VERSION: v3.11.3
@@ -177,15 +182,15 @@ jobs:
 
       # Not sure about this
       # It has potential to expose secrets in the stdout of the GitHub Actions
-      - name: Template cluster
-        run: |-
-          helm template ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
-            --dependency-update \
-            --values clouds.yml \
-            --values values-common.yaml \
-            --set kubernetesVersion=${{ inputs.version }} \
-            --set machineImageId=${{ inputs.image }} \
-            --debug
+      # - name: Template cluster
+      #   run: |-
+      #     helm template ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
+      #       --dependency-update \
+      #       --values clouds.yml \
+      #       --values values-common.yaml \
+      #       --set kubernetesVersion=${{ inputs.version }} \
+      #       --set machineImageId=${{ inputs.image }} \
+      #       --debug
 
       - name: Create cluster 
         run: |- 
@@ -236,13 +241,13 @@ jobs:
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ !inputs.upgrade-image }}
 
       - name: Clean sonobuoy 
         run: sonobuoy delete --wait --all
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ !inputs.upgrade-image }}
       
       - name: Upgrade cluster
         run: |- 
@@ -253,18 +258,18 @@ jobs:
             --values values-common.yaml \
             --set kubernetesVersion=${{ inputs.upgrade-version }} \
             --set machineImageId=${{ inputs.upgrade-image }}
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ !inputs.upgrade-image }}
       
       - name: Wait for cluster NOT READY
         run: sleep 3m
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ !inputs.upgrade-image }}
          
       - name: Wait for cluster READY
         run: |- 
           kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ inputs.name }} \
             --for=condition=Ready \
             --timeout 30m
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ !inputs.upgrade-image }}
 
       - name: Wait for addons to deploy
         run: |-
@@ -277,24 +282,21 @@ jobs:
             --all \
             --for=jsonpath='{.status.phase}'=Deployed \
             --timeout 20m
-        if: ${{ !github.event.pull_request.draft }}
-
-      # We only run full Sonobuoy on the latest version, and never on draft PRs
-      # The latest version will not have an upgrade image
+        if: ${{ !inputs.upgrade-image }}
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ inputs.upgrade-image || github.event.pull_request.draft }}
+        if: ${{ !inputs.sonobuoy-full }}
       
-      - name: Run sonobuoy full
+      - name: Run sonobuoy [full]
         timeout-minutes: 120
         run: sonobuoy run --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ !inputs.upgrade-image && !github.event.pull_request.draft }}
+        if: ${{ inputs.sonobuoy-full }}
 
       - name: Retrieve sonobuoy results
         continue-on-error: true
