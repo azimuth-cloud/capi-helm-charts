@@ -241,13 +241,13 @@ jobs:
         run: sonobuoy run --mode quick --wait
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ !inputs.upgrade-image }}
+        if: "${{ inputs.upgrade-image != '' }}"
 
       - name: Clean sonobuoy 
         run: sonobuoy delete --wait --all
         env:
           KUBECONFIG: ./kubeconfig
-        if: ${{ !inputs.upgrade-image }}
+        if: "${{ inputs.upgrade-image != '' }}"
       
       - name: Upgrade cluster
         run: |- 
@@ -258,18 +258,18 @@ jobs:
             --values values-common.yaml \
             --set kubernetesVersion=${{ inputs.upgrade-version }} \
             --set machineImageId=${{ inputs.upgrade-image }}
-        if: ${{ !inputs.upgrade-image }}
+        if: "${{ inputs.upgrade-image != '' }}"
       
       - name: Wait for cluster NOT READY
         run: sleep 3m
-        if: ${{ !inputs.upgrade-image }}
+        if: "${{ inputs.upgrade-image != '' }}"
          
       - name: Wait for cluster READY
         run: |- 
           kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ inputs.name }} \
             --for=condition=Ready \
             --timeout 30m
-        if: ${{ !inputs.upgrade-image }}
+        if: "${{ inputs.upgrade-image != '' }}"
 
       - name: Wait for addons to deploy
         run: |-
@@ -282,7 +282,7 @@ jobs:
             --all \
             --for=jsonpath='{.status.phase}'=Deployed \
             --timeout 20m
-        if: ${{ !inputs.upgrade-image }}
+        if: "${{ inputs.upgrade-image != '' }}"
 
       - name: Run sonobuoy [smoke]
         timeout-minutes: 20
