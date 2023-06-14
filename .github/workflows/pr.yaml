@@ -27,9 +27,7 @@ jobs:
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
-  test-kube-1-24:
-    # Use a concurrency group to run one test at a time in each run
-    concurrency: test-${{ github.run_id }}
+  test_kube_1_24:
     needs: [sync_images, ensure_capi_images]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
@@ -45,10 +43,8 @@ jobs:
         !github.event.pull_request.draft
       }}
 
-  test-kube-1-25:
-    # Use a concurrency group to run one test at a time in each run
-    concurrency: test-${{ github.run_id }}
-    needs: [sync_images, ensure_capi_images]
+  test_kube_1_25:
+    needs: [sync_images, ensure_capi_images, test_kube_1_24]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
@@ -63,10 +59,8 @@ jobs:
         !github.event.pull_request.draft
       }}
 
-  test-kube-1-26:
-    # Use a concurrency group to run one test at a time in each run
-    concurrency: test-${{ github.run_id }}
-    needs: [sync_images, ensure_capi_images]
+  test_kube_1_26:
+    needs: [sync_images, ensure_capi_images, test_kube_1_25]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
@@ -81,10 +75,8 @@ jobs:
         !github.event.pull_request.draft
       }}
 
-  test-kube-1-27:
-    # Use a concurrency group to run one test at a time in each run
-    concurrency: test-${{ github.run_id }}
-    needs: [sync_images, ensure_capi_images]
+  test_kube_1_27:
+    needs: [sync_images, ensure_capi_images, test_kube_1_26]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
