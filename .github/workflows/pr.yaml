@@ -31,5 +31,13 @@ jobs:
     needs: [sync_images, ensure_capi_images]
     uses: ./.github/workflows/test-matrix.yaml
     secrets: inherit
-    with: ${{ needs.ensure_capi_images.outputs }}
+    with:
+      kube-1-24-image: ${{ needs.ensure_capi_images.outputs.kube-1-24-image }}
+      kube-1-24-version: ${{ needs.ensure_capi_images.outputs.kube-1-24-version }}
+      kube-1-25-image: ${{ needs.ensure_capi_images.outputs.kube-1-25-image }}
+      kube-1-25-version: ${{ needs.ensure_capi_images.outputs.kube-1-25-version }}
+      kube-1-26-image: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
+      kube-1-26-version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
+      kube-1-27-image: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
+      kube-1-27-version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
     if: github.repository == 'stackhpc/capi-helm-charts'
