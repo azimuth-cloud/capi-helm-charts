@@ -26,10 +26,10 @@ inputs:
   image-id:
     description: The ID of the image to use
     required: true
-  sonobuoy-full:
-    type: boolean
-    description: Indicates whether to run Sonobuoy in full (true) or smoke (false) mode
+  sonobuoy-mode:
+    description: Specify "full" to do a full Sonobuoy run, anything else runs a smoke test only
     required: true
+    default: smoke
 
 runs:
   using: "composite"
@@ -96,14 +96,14 @@ runs:
       run: sonobuoy run --mode quick --wait
       env:
         KUBECONFIG: ./kubeconfig
-      if: ${{ !inputs.sonobuoy-full }}
+      if: ${{ inputs.sonobuoy-full != "full" }}
 
     - name: Run sonobuoy [full]
       shell: bash
       run: sonobuoy run --wait
       env:
         KUBECONFIG: ./kubeconfig
-      if: ${{ inputs.sonobuoy-full }}
+      if: ${{ inputs.sonobuoy-full == "full" }}
 
     - name: Retrieve sonobuoy results
       shell: bash
