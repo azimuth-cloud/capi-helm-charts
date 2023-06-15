@@ -27,6 +27,16 @@ jobs:
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
+  test:
+    needs: [sync_image, ensure_capi_images]
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    with:
+      # Pass the images as JSON
+      images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+    if: github.repository == 'stackhpc/capi-helm-charts'
+
+
   # This job tests that each of the supported versions can deploy from scratch
 
   # test_kube_1_24:

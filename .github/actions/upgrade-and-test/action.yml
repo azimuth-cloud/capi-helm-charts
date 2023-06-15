@@ -1,0 +1,118 @@
+name: Upgrade and test cluster
+
+description: >-
+  Run a Helm upgrade using the specified values, wait for the cluster to
+  become ready and run Sonobuoy against it
+
+inputs:
+  name:
+    description: The name of the cluster
+    required: true
+  os-client-config-file:
+    description: The path of the OpenStack clouds file
+    required: true
+    default: ./clouds.yml
+  os-cloud:
+    description: The name of the cloud within the OpenStack clouds file
+    required: true
+    default: openstack
+  values-common-path:
+    description: The path to a file containing common values
+    required: true
+    default: ./values-common.yaml
+  kubernetes-version:
+    description: The Kubernetes version in the image
+    required: true
+  image-id:
+    description: The ID of the image to use
+    required: true
+  sonobuoy-full:
+    description: Indicates whether to run Sonobuoy in full (true) or smoke (false) mode
+    required: true
+    default: false
+  clean:
+    description: Indicates whether to clean up the cluster at the end
+    required: true
+    default: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install or upgrade cluster
+      run: |-
+        helm upgrade ${{ inputs.name }} ./charts/openstack-cluster \
+          --install \
+          --dependency-update \
+          --values ${{ inputs.os-client-config-file }} \
+          --values ${{ inputs.values-common-path }} \
+          --set cloudName=${{ inputs.os-cloud }} \
+          --set kubernetesVersion=${{ inputs.kubernetes-version }} \
+          --set machineImageId=${{ inputs.image-id }}
+
+    # Wait for the upgrade to start before checking if it is complete
+    # This is to make sure the controller has actioned the update before
+    # progressing to wait for ready
+    - name: Wait for cluster not ready
+      run: |-
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=ready=false \
+          --timeout 30m
+
+    - name: Wait for cluster ready
+      run: |-
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=ready \
+          --timeout 30m
+
+    - name: Wait for machine deployments to be running
+      run: |-
+        kubectl wait machinedeployments \
+          --for=jsonpath='{.status.phase}'=Running \
+          --timeout 30m
+
+    - name: Wait for addons to deploy
+      run: |-
+        kubectl wait manifests \
+          --all \
+          --for=jsonpath='{.status.phase}'=Deployed \
+          --timeout 20m \
+        && \
+        kubectl wait helmreleases \
+          --all \
+          --for=jsonpath='{.status.phase}'=Deployed \
+          --timeout 20m
+
+    - name: Write kubeconfig
+      run: |-
+        kubectl get secret ${{ inputs.name }}-kubeconfig \
+          -o go-template='{{ .data.value | base64decode }}' \
+          > kubeconfig
+
+    - name: Run sonobuoy [smoke]
+      timeout-minutes: 20
+      run: sonobuoy run --mode quick --wait
+      env:
+        KUBECONFIG: ./kubeconfig
+      if: ${{ !inputs.sonobuoy-full }}
+
+    - name: Run sonobuoy [full]
+      timeout-minutes: 120
+      run: sonobuoy run --wait
+      env:
+        KUBECONFIG: ./kubeconfig
+      if: ${{ inputs.sonobuoy-full }}
+
+    - name: Retrieve sonobuoy results
+      run: sonobuoy retrieve --filename ./sonobuoy-results-${{ inputs.name }}.tar.gz
+      env:
+        KUBECONFIG: ./kubeconfig
+
+    - name: Upload sonobuoy results artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: sonobuoy-results-${{ inputs.name }}
+        path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
+
+    - name: Delete cluster
+      if: ${{ always() }}
+      run: helm delete ${{ inputs.name }} --wait
