@@ -100,7 +100,6 @@ runs:
       env:
         KUBECONFIG: ./kubeconfig
       if: ${{ !inputs.sonobuoy-full }}
-      timeout-minutes: 20
 
     - name: Run sonobuoy [full]
       shell: bash
@@ -108,7 +107,6 @@ runs:
       env:
         KUBECONFIG: ./kubeconfig
       if: ${{ inputs.sonobuoy-full }}
-      timeout-minutes: 120
 
     - name: Retrieve sonobuoy results
       shell: bash
