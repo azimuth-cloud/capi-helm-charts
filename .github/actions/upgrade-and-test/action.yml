@@ -39,6 +39,7 @@ runs:
   using: "composite"
   steps:
     - name: Install or upgrade cluster
+      shell: bash
       run: |-
         helm upgrade ${{ inputs.name }} ./charts/openstack-cluster \
           --install \
@@ -53,24 +54,28 @@ runs:
     # This is to make sure the controller has actioned the update before
     # progressing to wait for ready
     - name: Wait for cluster not ready
+      shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
           --for=condition=ready=false \
           --timeout 30m
 
     - name: Wait for cluster ready
+      shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
           --for=condition=ready \
           --timeout 30m
 
     - name: Wait for machine deployments to be running
+      shell: bash
       run: |-
         kubectl wait machinedeployments \
           --for=jsonpath='{.status.phase}'=Running \
           --timeout 30m
 
     - name: Wait for addons to deploy
+      shell: bash
       run: |-
         kubectl wait manifests \
           --all \
@@ -83,26 +88,30 @@ runs:
           --timeout 20m
 
     - name: Write kubeconfig
+      shell: bash
       run: |-
         kubectl get secret ${{ inputs.name }}-kubeconfig \
           -o go-template='{{ .data.value | base64decode }}' \
           > kubeconfig
 
     - name: Run sonobuoy [smoke]
-      timeout-minutes: 20
+      shell: bash
       run: sonobuoy run --mode quick --wait
       env:
         KUBECONFIG: ./kubeconfig
       if: ${{ !inputs.sonobuoy-full }}
+      timeout-minutes: 20
 
     - name: Run sonobuoy [full]
-      timeout-minutes: 120
+      shell: bash
       run: sonobuoy run --wait
       env:
         KUBECONFIG: ./kubeconfig
       if: ${{ inputs.sonobuoy-full }}
+      timeout-minutes: 120
 
     - name: Retrieve sonobuoy results
+      shell: bash
       run: sonobuoy retrieve --filename ./sonobuoy-results-${{ inputs.name }}.tar.gz
       env:
         KUBECONFIG: ./kubeconfig
@@ -114,5 +123,6 @@ runs:
         path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
 
     - name: Delete cluster
-      if: ${{ always() }}
+      shell: bash
       run: helm delete ${{ inputs.name }} --wait
+      if: ${{ always() && inputs.clean }}
