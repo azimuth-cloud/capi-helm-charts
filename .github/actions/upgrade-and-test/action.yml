@@ -96,14 +96,14 @@ runs:
       run: sonobuoy run --mode quick --wait
       env:
         KUBECONFIG: ./kubeconfig
-      if: ${{ inputs.sonobuoy-full != "full" }}
+      if: "${{ inputs.sonobuoy-full != 'full' }}"
 
     - name: Run sonobuoy [full]
       shell: bash
       run: sonobuoy run --wait
       env:
         KUBECONFIG: ./kubeconfig
-      if: ${{ inputs.sonobuoy-full == "full" }}
+      if: "${{ inputs.sonobuoy-full == 'full' }}"
 
     - name: Retrieve sonobuoy results
       shell: bash
