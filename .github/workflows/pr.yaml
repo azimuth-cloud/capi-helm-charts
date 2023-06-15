@@ -28,7 +28,7 @@ jobs:
     if: github.repository == 'stackhpc/capi-helm-charts'
 
   test:
-    needs: [sync_image, ensure_capi_images]
+    needs: [sync_images, ensure_capi_images]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
