@@ -27,10 +27,12 @@ inputs:
     description: The ID of the image to use
     required: true
   sonobuoy-full:
+    type: boolean
     description: Indicates whether to run Sonobuoy in full (true) or smoke (false) mode
     required: true
     default: false
   clean:
+    type: boolean
     description: Indicates whether to clean up the cluster at the end
     required: true
     default: true
@@ -124,4 +126,4 @@ runs:
     - name: Delete cluster
       shell: bash
       run: helm delete ${{ inputs.name }} --wait
-      if: ${{ always() && inputs.clean }}
+      if: ${{ inputs.clean || failure() || cancelled() }}
