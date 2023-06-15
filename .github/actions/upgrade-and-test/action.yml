@@ -71,6 +71,7 @@ runs:
       shell: bash
       run: |-
         kubectl wait machinedeployments \
+          --all \
           --for=jsonpath='{.status.phase}'=Running \
           --timeout 30m
 
