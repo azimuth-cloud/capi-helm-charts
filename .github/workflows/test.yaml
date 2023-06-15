@@ -162,10 +162,15 @@ jobs:
       - name: Test clean Kubernetes 1.24 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: kube-1-24
+          name: ci-${{ github.run_id }}-kube-1-24
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-24-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-24-image }}
+          sonobuoy-full: false
         if: ${{ !github.event.pull_request.draft }}
+
+      - name: Delete Kubernetes 1.24 deployment
+        run: helm delete ci-${{ github.run_id }}-kube-1-24 --wait
+        if: ${{ always() }}
 
       # Not sure about this
       # It has potential to expose secrets in the stdout of the GitHub Actions

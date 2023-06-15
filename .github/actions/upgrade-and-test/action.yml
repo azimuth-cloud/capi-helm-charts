@@ -30,12 +30,6 @@ inputs:
     type: boolean
     description: Indicates whether to run Sonobuoy in full (true) or smoke (false) mode
     required: true
-    default: false
-  clean:
-    type: boolean
-    description: Indicates whether to clean up the cluster at the end
-    required: true
-    default: true
 
 runs:
   using: "composite"
@@ -122,8 +116,3 @@ runs:
       with:
         name: sonobuoy-results-${{ inputs.name }}
         path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
-
-    - name: Delete cluster
-      shell: bash
-      run: helm delete ${{ inputs.name }} --wait
-      if: ${{ inputs.clean || failure() || cancelled() }}
