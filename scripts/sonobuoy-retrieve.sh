@@ -1,10 +1,19 @@
 #!/bin/bash
-set -x 
+
+set -e
+
+#####
+# This script wraps sonobuoy retrieve with a retry
+#
+# https://github.com/vmware-tanzu/sonobuoy/issues/1633#issuecomment-1112667471
+#####
+
+
 
 retries=0
 retry_limit=20
 while true; do
-    result_file=$(sonobuoy retrieve)
+    result_file=$(sonobuoy retrieve "$@")
     RC=$?
     if [[ ${RC} -eq 0 ]]; then
         break
@@ -17,7 +26,3 @@ while true; do
     echo "Error retrieving results. Waiting ${STATUS_INTERVAL_SEC}s to retry...[${retries}/${retry_limit}]"
     sleep "${STATUS_INTERVAL_SEC}"
 done
-
-#mkdir ./results && tar xzf $result_file -C ./results
-
-sonobuoy results $result_file --mode=detailed > results.txt

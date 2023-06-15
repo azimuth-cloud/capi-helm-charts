@@ -107,7 +107,7 @@ runs:
 
     - name: Retrieve sonobuoy results
       shell: bash
-      run: sonobuoy retrieve --filename ./sonobuoy-results-${{ inputs.name }}.tar.gz
+      run: ./scripts/sonobuoy-retrieve.sh --filename ./sonobuoy-results-${{ inputs.name }}.tar.gz
       env:
         KUBECONFIG: ./kubeconfig
 

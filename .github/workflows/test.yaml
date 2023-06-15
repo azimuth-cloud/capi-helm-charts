@@ -165,7 +165,6 @@ jobs:
           name: ci-${{ github.run_id }}-kube-1-24
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-24-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-24-image }}
-          sonobuoy-full: false
         if: ${{ !github.event.pull_request.draft }}
 
       - name: Delete Kubernetes 1.24 deployment
