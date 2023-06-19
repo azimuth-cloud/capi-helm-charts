@@ -71,15 +71,20 @@ runs:
           --set machineImageId=${{ inputs.image-id }}
       if: "${{ inputs.chart-version != '' }}"
 
-    # Wait for the upgrade to start before checking if it is complete
+    # Wait for any upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
     # progressing to wait for ready
+    # However, in some cases the cluster will never become unready, e.g.
+    # in the chart upgrade tests if there are no changes to templates
+    # In this case, we time out after 2m which should be enough time for
+    # the controllers to react
     - name: Wait for cluster not ready
       shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
           --for=condition=ready=false \
-          --timeout 30m
+          --timeout 2m
+      continue-on-error: true
 
     - name: Wait for cluster ready
       shell: bash
