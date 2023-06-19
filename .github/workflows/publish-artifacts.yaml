@@ -1,8 +1,6 @@
 name: publish artifacts
 on:
   push:
-  release:
-    types: [created]
 
 jobs:
   build_push_utils_image:
