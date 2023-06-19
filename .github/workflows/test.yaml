@@ -160,21 +160,20 @@ jobs:
                 name: test-group1
 
       #####
-      # On a draft PR, we just run the smoke test on a clean 1.27 deployment
+      # On every PR, including draft PRs, we run the smoke test on a clean deployment
+      # of the latest supported version
       #####
 
       - name: Test clean Kubernetes 1.27 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}
+          name: ci-${{ github.run_id }}-kube-latest
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
           sonobuoy-upload: "yes"
-        if: ${{ github.event.pull_request.draft }}
 
       - name: Delete Kubernetes 1.27 deployment
-        run: helm delete ci-${{ github.run_id }} --wait
-        if: ${{ github.event.pull_request.draft && always() }}
+        run: helm delete ci-${{ github.run_id }}-kube-latest --wait
 
       #####
       # On a reviewable PR, test that we can upgrade from a cluster deployed using the latest tag
