@@ -170,7 +170,7 @@ jobs:
 
       - name: Delete Kubernetes 1.25 deployment
         run: helm delete ci-${{ github.run_id }}-kube-1-25 --wait
-        if: ${{ always() }}
+        if: ${{ !github.event.pull_request.draft && always() }}
 
       - name: Test clean Kubernetes 1.26 deployment
         uses: ./.github/actions/upgrade-and-test
@@ -183,7 +183,7 @@ jobs:
 
       - name: Delete Kubernetes 1.26 deployment
         run: helm delete ci-${{ github.run_id }}-kube-1-26 --wait
-        if: ${{ always() }}
+        if: ${{ !github.event.pull_request.draft && always() }}
 
       - name: Test clean Kubernetes 1.27 deployment
         uses: ./.github/actions/upgrade-and-test
@@ -224,7 +224,7 @@ jobs:
 
       - name: Delete upgrade deployment
         run: helm delete ci-${{ github.run_id }}-upgrade --wait
-        if: ${{ always() }}
+        if: ${{ !github.event.pull_request.draft && always() }}
       
       - name: Output controller logs
         if: ${{ always() }}
@@ -239,5 +239,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: cluster-api-controller-logs-${{ inputs.name }}
+          name: cluster-api-controller-logs
           path: ./*-logs.txt
