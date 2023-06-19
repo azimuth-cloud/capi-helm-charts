@@ -6,6 +6,11 @@ on:
         type: string
         description: JSON-encoded dictionary of images and versions
         required: true
+      tests-full:
+        type: boolean
+        description: Indicates whether to run the full test suite or just a smoke test
+        required: true
+        default: false
 
 env:
   HELM_VERSION: v3.11.3
@@ -160,7 +165,7 @@ jobs:
                 name: test-group1
 
       #####
-      # On draft PRs, just run the smoke test on a clean deployment of the latest supported version
+      # For the smoke test, we do a clean deployment of the latest supported version
       #####
 
       - name: Test clean Kubernetes 1.27 deployment
@@ -170,14 +175,14 @@ jobs:
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
           sonobuoy-upload: "yes"
-        if: ${{ github.event.pull_request.draft }}
+        if: ${{ !inputs.tests-full }}
 
       - name: Delete Kubernetes 1.27 deployment
         run: helm delete ci-${{ github.run_id }}-kube-latest --wait
-        if: ${{ github.event.pull_request.draft && always() }}
+        if: ${{ !inputs.tests-full && always() }}
 
       #####
-      # On a reviewable PR, test that we can upgrade from a cluster deployed using the latest tag
+      # On a full test, first test that we can upgrade from a cluster deployed using the latest tag
       #####
 
       - name: Get latest tag
@@ -186,7 +191,7 @@ jobs:
           set -eo pipefail
           TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
           echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ inputs.tests-full }}
 
       - name: Deploy Kubernetes 1.27 with latest tag for chart upgrade test
         uses: ./.github/actions/upgrade-and-test
@@ -195,7 +200,7 @@ jobs:
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
           chart-version: ${{ steps.latest-tag.outputs.tag-name }}
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ inputs.tests-full }}
 
       - name: Upgrade to current chart
         uses: ./.github/actions/upgrade-and-test
@@ -203,14 +208,14 @@ jobs:
           name: ci-${{ github.run_id }}-chart-upgrade
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ inputs.tests-full }}
 
       - name: Delete chart upgrade deployment
         run: helm delete ci-${{ github.run_id }}-chart-upgrade --wait
-        if: ${{ !github.event.pull_request.draft && always() }}
+        if: ${{ inputs.tests-full && always() }}
 
       #####
-      # On a reviewable PR, run a full upgrade test
+      # On a full test, next run a full upgrade test
       # This will run a sonobuoy smoke test after every step with a full test at the end
       #####
 
@@ -220,7 +225,7 @@ jobs:
           name: ci-${{ github.run_id }}-kube-upgrade
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ inputs.tests-full }}
 
       - name: Upgrade to Kubernetes 1.26
         uses: ./.github/actions/upgrade-and-test
@@ -228,7 +233,7 @@ jobs:
           name: ci-${{ github.run_id }}-kube-upgrade
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ inputs.tests-full }}
 
       - name: Upgrade to Kubernetes 1.27
         uses: ./.github/actions/upgrade-and-test
@@ -238,11 +243,11 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
           sonobuoy-mode: full
           sonobuoy-upload: "yes"
-        if: ${{ !github.event.pull_request.draft }}
+        if: ${{ inputs.tests-full }}
 
       - name: Delete Kubernetes upgrade deployment
         run: helm delete ci-${{ github.run_id }}-kube-upgrade --wait
-        if: ${{ !github.event.pull_request.draft && always() }}
+        if: ${{ inputs.tests-full && always() }}
 
       - name: Output controller logs
         if: ${{ always() }}
