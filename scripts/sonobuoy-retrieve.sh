@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -x
 
 #####
 # This script wraps sonobuoy retrieve with a retry
@@ -11,12 +11,8 @@ set -e
 
 retries=0
 retry_limit=20
-while true; do
-    result_file=$(sonobuoy retrieve "$@")
-    RC=$?
-    if [[ ${RC} -eq 0 ]]; then
-        break
-    fi
+
+until sonobuoy retrieve "$@"; do
     retries=$(( retries + 1 ))
     if [[ ${retries} -eq ${retry_limit} ]]; then
         echo "Retries timed out. Check 'sonobuoy retrieve' command."
