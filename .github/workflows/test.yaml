@@ -159,153 +159,72 @@ jobs:
                 machineFlavor: vm.ska.cpu.general.small
                 name: test-group1
 
-      - name: Test clean Kubernetes 1.24 deployment
+      - name: Test clean Kubernetes 1.25 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-kube-1-24
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-24-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-24-image }}
+          name: ci-${{ github.run_id }}-kube-1-25
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
+          sonobuoy-upload: "yes"
         if: ${{ !github.event.pull_request.draft }}
 
-      - name: Delete Kubernetes 1.24 deployment
-        run: helm delete ci-${{ github.run_id }}-kube-1-24 --wait
+      - name: Delete Kubernetes 1.25 deployment
+        run: helm delete ci-${{ github.run_id }}-kube-1-25 --wait
         if: ${{ always() }}
 
-      # Not sure about this
-      # It has potential to expose secrets in the stdout of the GitHub Actions
-      # - name: Template cluster
-      #   run: |-
-      #     helm template ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
-      #       --dependency-update \
-      #       --values clouds.yml \
-      #       --values values-common.yaml \
-      #       --set kubernetesVersion=${{ inputs.version }} \
-      #       --set machineImageId=${{ inputs.image }} \
-      #       --debug
+      - name: Test clean Kubernetes 1.26 deployment
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-1-26
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
+          sonobuoy-upload: "yes"
+        if: ${{ !github.event.pull_request.draft }}
 
-      # - name: Create cluster 
-      #   run: |- 
-      #     helm upgrade ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
-      #       --install \
-      #       --dependency-update \
-      #       --values clouds.yml \
-      #       --values values-common.yaml \
-      #       --set kubernetesVersion=${{ inputs.version }} \
-      #       --set machineImageId=${{ inputs.image }}
+      - name: Delete Kubernetes 1.26 deployment
+        run: helm delete ci-${{ github.run_id }}-kube-1-26 --wait
+        if: ${{ always() }}
 
-      # - name: Wait for cluster READY
-      #   run: |- 
-      #     kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ inputs.name }} \
-      #       --for=condition=Ready \
-      #       --timeout 30m
+      - name: Test clean Kubernetes 1.27 deployment
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-1-27
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          sonobuoy-mode: "${{ github.event.pull_request.draft && 'smoke' || 'full' }}"
+          sonobuoy-upload: "yes"
 
-      # - name: Wait for addons to deploy
-      #   run: |-
-      #     kubectl wait manifests \
-      #       --all \
-      #       --for=jsonpath='{.status.phase}'=Deployed \
-      #       --timeout 20m \
-      #     && \
-      #     kubectl wait helmreleases \
-      #       --all \
-      #       --for=jsonpath='{.status.phase}'=Deployed \
-      #       --timeout 20m
+      - name: Delete Kubernetes 1.27 deployment
+        run: helm delete ci-${{ github.run_id }}-kube-1-27 --wait
+        if: ${{ always() }}
 
-      # - name: Write kubeconfig
-      #   run: |-
-      #     kubectl get secret ci-${{ github.run_id }}-${{ inputs.name }}-kubeconfig \
-      #       -o go-template='{{ .data.value | base64decode }}' \
-      #       > kubeconfig
+      - name: Deploy Kubernetes 1.25 for upgrade test
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
+        if: ${{ !github.event.pull_request.draft }}
 
-      # - name: Wait for dns pods
-      #   run: |-
-      #     kubectl wait po \
-      #       --namespace kube-system \
-      #       --selector k8s-app=kube-dns \
-      #       --for=condition=ready \
-      #       --timeout 20m
-      #   env:
-      #     KUBECONFIG: ./kubeconfig
+      - name: Upgrade to Kubernetes 1.26
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
+        if: ${{ !github.event.pull_request.draft }}
 
-      # - name: Run sonobuoy [smoke]
-      #   timeout-minutes: 20
-      #   run: sonobuoy run --mode quick --wait
-      #   env:
-      #     KUBECONFIG: ./kubeconfig
-      #   if: "${{ inputs.upgrade-image != '' }}"
+      - name: Upgrade to Kubernetes 1.27
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+        if: ${{ !github.event.pull_request.draft }}
 
-      # - name: Clean sonobuoy 
-      #   run: sonobuoy delete --wait --all
-      #   env:
-      #     KUBECONFIG: ./kubeconfig
-      #   if: "${{ inputs.upgrade-image != '' }}"
-      
-      # - name: Upgrade cluster
-      #   run: |- 
-      #     helm upgrade ci-${{ github.run_id }}-${{ inputs.name }} ./charts/openstack-cluster \
-      #       --install \
-      #       --dependency-update \
-      #       --values clouds.yml \
-      #       --values values-common.yaml \
-      #       --set kubernetesVersion=${{ inputs.upgrade-version }} \
-      #       --set machineImageId=${{ inputs.upgrade-image }}
-      #   if: "${{ inputs.upgrade-image != '' }}"
-      
-      # - name: Wait for cluster NOT READY
-      #   run: sleep 3m
-      #   if: "${{ inputs.upgrade-image != '' }}"
-         
-      # - name: Wait for cluster READY
-      #   run: |- 
-      #     kubectl wait clusters.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ inputs.name }} \
-      #       --for=condition=Ready \
-      #       --timeout 30m
-      #   if: "${{ inputs.upgrade-image != '' }}"
-
-      # - name: Wait for addons to deploy
-      #   run: |-
-      #     kubectl wait manifests \
-      #       --all \
-      #       --for=jsonpath='{.status.phase}'=Deployed \
-      #       --timeout 20m \
-      #     && \
-      #     kubectl wait helmreleases \
-      #       --all \
-      #       --for=jsonpath='{.status.phase}'=Deployed \
-      #       --timeout 20m
-      #   if: "${{ inputs.upgrade-image != '' }}"
-
-      # - name: Run sonobuoy [smoke]
-      #   timeout-minutes: 20
-      #   run: sonobuoy run --mode quick --wait
-      #   env:
-      #     KUBECONFIG: ./kubeconfig
-      #   if: ${{ !inputs.sonobuoy-full }}
-      
-      # - name: Run sonobuoy [full]
-      #   timeout-minutes: 120
-      #   run: sonobuoy run --wait
-      #   env:
-      #     KUBECONFIG: ./kubeconfig
-      #   if: ${{ inputs.sonobuoy-full }}
-
-      # - name: Retrieve sonobuoy results
-      #   continue-on-error: true
-      #   env:
-      #     KUBECONFIG: ./kubeconfig
-      #     STATUS_INTERVAL_SEC: 20
-      #   run: ./scripts/sonobuoy-artifacts.sh
-      
-      # - name: Upload sonobuoy log artifacts
-      #   uses: actions/upload-artifact@v3
-      #   if: ${{ always() }} 
-      #   with:
-      #     name: sonobuoy-logs-${{ inputs.name }}
-      #     path: ./results.txt
-
-      # - name: Delete release
-      #   if: ${{ always() }}
-      #   run: helm delete ci-${{ github.run_id }}-${{ inputs.name }} --wait
+      - name: Delete upgrade deployment
+        run: helm delete ci-${{ github.run_id }}-upgrade --wait
+        if: ${{ always() }}
       
       - name: Output controller logs
         if: ${{ always() }}

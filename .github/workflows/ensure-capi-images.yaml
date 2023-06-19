@@ -2,10 +2,6 @@ name: Ensure CAPI images
 on:
   workflow_call:
     outputs:
-      kube-1-24-image:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-24-image }}
-      kube-1-24-version:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-24-version }}
       kube-1-25-image:
         value: ${{ jobs.ensure-capi-images.outputs.kube-1-25-image }}
       kube-1-25-version:
@@ -24,8 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     # We output the image IDs for each image
     outputs:
-      kube-1-24-image: ${{ steps.kube-1-24.outputs.image-id }}
-      kube-1-24-version: 1.24.14
       kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
       kube-1-25-version: 1.25.10
       kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
@@ -50,13 +44,6 @@ jobs:
 
       - name: Install OpenStack CLI
         run: pip install python-openstackclient
-
-      - name: Ensure Kubernetes 1.24 image
-        id: kube-1-24
-        uses: ./.github/actions/ensure-image
-        with:
-          image-name: ubuntu-focal-kube-v1.24.14-230602-1702
-        if: ${{ !github.event.pull_request.draft }}
 
       - name: Ensure Kubernetes 1.25 image
         id: kube-1-25
