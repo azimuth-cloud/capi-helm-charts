@@ -9,7 +9,6 @@ set -e
 #####
 
 
-
 retries=0
 retry_limit=20
 while true; do
@@ -23,6 +22,6 @@ while true; do
         echo "Retries timed out. Check 'sonobuoy retrieve' command."
         exit 1
     fi
-    echo "Error retrieving results. Waiting ${STATUS_INTERVAL_SEC}s to retry...[${retries}/${retry_limit}]"
-    sleep "${STATUS_INTERVAL_SEC}"
+    echo "Error retrieving results. Waiting 30s to retry...[${retries}/${retry_limit}]"
+    sleep 30
 done
