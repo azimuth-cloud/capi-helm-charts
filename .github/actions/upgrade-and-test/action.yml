@@ -16,6 +16,12 @@ inputs:
     description: The name of the cloud within the OpenStack clouds file
     required: true
     default: openstack
+  chart-version:
+    description: >-
+      Use the specified chart version from the repo if given. If not,
+      use the chart from the directory in the current checkout.
+    required: true
+    default: ""
   values-common-path:
     description: The path to a file containing common values
     required: true
@@ -38,7 +44,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install or upgrade cluster
+    - name: Install or upgrade cluster from directory
       shell: bash
       run: |-
         helm upgrade ${{ inputs.name }} ./charts/openstack-cluster \
@@ -49,6 +55,21 @@ runs:
           --set cloudName=${{ inputs.os-cloud }} \
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
+      if: "${{ inputs.chart-version == '' }}"
+
+    - name: Install or upgrade cluster from repository
+      shell: bash
+      run: |-
+        helm upgrade ${{ inputs.name }} openstack-cluster \
+          --repo https://stackhpc.github.io/capi-helm-charts \
+          --version ${{ inputs.chart-version }} \
+          --install \
+          --values ${{ inputs.os-client-config-file }} \
+          --values ${{ inputs.values-common-path }} \
+          --set cloudName=${{ inputs.os-cloud }} \
+          --set kubernetesVersion=${{ inputs.kubernetes-version }} \
+          --set machineImageId=${{ inputs.image-id }}
+      if: "${{ inputs.chart-version != '' }}"
 
     # Wait for the upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
