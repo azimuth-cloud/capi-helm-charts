@@ -159,49 +159,32 @@ jobs:
                 machineFlavor: vm.ska.cpu.general.small
                 name: test-group1
 
-      - name: Test clean Kubernetes 1.25 deployment
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-1-25
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
-          sonobuoy-upload: "yes"
-        if: ${{ !github.event.pull_request.draft }}
-
-      - name: Delete Kubernetes 1.25 deployment
-        run: helm delete ci-${{ github.run_id }}-kube-1-25 --wait
-        if: ${{ !github.event.pull_request.draft && always() }}
-
-      - name: Test clean Kubernetes 1.26 deployment
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-1-26
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
-          sonobuoy-upload: "yes"
-        if: ${{ !github.event.pull_request.draft }}
-
-      - name: Delete Kubernetes 1.26 deployment
-        run: helm delete ci-${{ github.run_id }}-kube-1-26 --wait
-        if: ${{ !github.event.pull_request.draft && always() }}
+      #####
+      # On a draft PR, we just run the smoke test on a clean 1.27 deployment
+      #####
 
       - name: Test clean Kubernetes 1.27 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-kube-1-27
+          name: ci-${{ github.run_id }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-          sonobuoy-mode: "${{ github.event.pull_request.draft && 'smoke' || 'full' }}"
           sonobuoy-upload: "yes"
+        if: ${{ github.event.pull_request.draft }}
 
       - name: Delete Kubernetes 1.27 deployment
-        run: helm delete ci-${{ github.run_id }}-kube-1-27 --wait
-        if: ${{ always() }}
+        run: helm delete ci-${{ github.run_id }} --wait
+        if: ${{ github.event.pull_request.draft && always() }}
+
+      #####
+      # On a reviewable PR, we run a full upgrade test
+      # This will run a sonobuoy smoke test after every step with a full test at the end
+      #####
 
       - name: Deploy Kubernetes 1.25 for upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-upgrade
+          name: ci-${{ github.run_id }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
         if: ${{ !github.event.pull_request.draft }}
@@ -209,7 +192,7 @@ jobs:
       - name: Upgrade to Kubernetes 1.26
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-upgrade
+          name: ci-${{ github.run_id }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
         if: ${{ !github.event.pull_request.draft }}
@@ -217,13 +200,15 @@ jobs:
       - name: Upgrade to Kubernetes 1.27
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-upgrade
+          name: ci-${{ github.run_id }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          sonobuoy-mode: full
+          sonobuoy-upload: "yes"
         if: ${{ !github.event.pull_request.draft }}
 
       - name: Delete upgrade deployment
-        run: helm delete ci-${{ github.run_id }}-upgrade --wait
+        run: helm delete ci-${{ github.run_id }} --wait
         if: ${{ !github.event.pull_request.draft && always() }}
       
       - name: Output controller logs
