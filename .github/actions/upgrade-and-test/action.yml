@@ -122,3 +122,10 @@ runs:
         name: sonobuoy-results-${{ inputs.name }}
         path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
       if: "${{ inputs.sonobuoy-upload == 'yes' }}"
+
+    - name: Remove sonobuoy artifacts from cluster
+      shell: bash
+      run: sonobuoy delete --wait --all
+      env:
+        KUBECONFIG: ./kubeconfig
+      if: ${{ always() }}
