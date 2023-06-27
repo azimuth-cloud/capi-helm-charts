@@ -1,31 +1,26 @@
-name: test pr
+name: test main
 on:
-  pull_request:
-    types: [opened,synchronize,ready_for_review,edited,reopened]
+  push:
     branches:
       - main
 
-concurrency: 
+concurrency:
   group: ${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
-  # Run the lint on every PR, even from external repos
   lint:
     uses: ./.github/workflows/lint.yaml
 
-  # Only run image sync and test on the main repo
   sync_images:
     needs: [lint]
     uses: ./.github/workflows/sync-images.yaml
     secrets: inherit
-    if: github.repository == 'stackhpc/capi-helm-charts'
 
   ensure_capi_images:
     needs: [lint]
     uses: ./.github/workflows/ensure-capi-images.yaml
     secrets: inherit
-    if: github.repository == 'stackhpc/capi-helm-charts'
 
   test:
     needs: [sync_images, ensure_capi_images]
@@ -34,7 +29,5 @@ jobs:
     with:
       # Pass the images as JSON
       images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
-      # If the PR is in draft, just run smoke tests
-      # If the PR is in review, run the full test suite
-      tests-full: ${{ !github.event.pull_request.draft }}
-    if: github.repository == 'stackhpc/capi-helm-charts'
+      # Only run the smoke tests on main
+      tests-full: false

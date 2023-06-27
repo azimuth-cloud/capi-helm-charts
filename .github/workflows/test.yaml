@@ -1,39 +1,40 @@
-name: Test Helm Charts
-on: 
+name: Test OpenStack cluster chart
+on:
   workflow_call:
+    inputs:
+      images:
+        type: string
+        description: JSON-encoded dictionary of images and versions
+        required: true
+      tests-full:
+        type: boolean
+        description: Indicates whether to run the full test suite or just a smoke test
+        required: true
+        default: false
+
+env:
+  HELM_VERSION: v3.11.3
+  CAPI_VERSION: v1.4.3
+  CAPO_VERSION: v0.7.3
+  ADDON_PROVIDER_VERSION: 0.1.0-dev.0.main.26
+  SONOBUOY_VERSION: 0.56.16
+  CERTMANAGER_VERSION: v1.12.1
 
 jobs:
-  install:
+  test-chart:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [kube-1-23, kube-1-24, kube-1-25, kube-1-26]
-        capi: ["v1.3.2"]
-        capo: ["v0.7.2"]
-        addonprovider: ["0.1.0-dev.0.main.26"]
-        shouldNotRun:
-          - ${{ github.event.pull_request.draft }}
-        exclude: 
-          - version: kube-1-23
-            shouldNotRun: true
-          - version: kube-1-24
-            shouldNotRun: true
-          - version: kube-1-25
-            shouldNotRun: true
-      max-parallel: 1
-      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       
       - name: Install tools
-        run: sudo apt install -y zip unzip 
+        run: sudo apt install -y zip unzip
       
       - name: Install sonobuoy
         run: >
-          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.12/sonobuoy_0.56.12_linux_amd64.tar.gz
-          && tar -xf sonobuoy_0.56.12_linux_amd64.tar.gz
-          && sudo mv -n sonobuoy /usr/bin/
+          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
+          tar -xf sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
+          sudo mv -n sonobuoy /usr/bin/
 
       - uses: actions/setup-python@v4
         with:
@@ -43,7 +44,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.10.0
+          version: ${{ env.HELM_VERSION }}
       
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.5.0
@@ -52,7 +53,7 @@ jobs:
         run: |-
           helm upgrade cert-manager cert-manager \
             --repo https://charts.jetstack.io \
-            --version v1.10.1 \
+            --version ${CERTMANAGER_VERSION} \
             --namespace cert-manager \
             --create-namespace  \
             --install \
@@ -71,8 +72,8 @@ jobs:
           write-mode: overwrite
           contents: |
             resources:
-              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ matrix.capi }}/cluster-api-components.yaml
-              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ matrix.capo }}/infrastructure-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ env.CAPI_VERSION }}/cluster-api-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ env.CAPO_VERSION }}/infrastructure-components.yaml
             patches:
               - patch: |-
                   - op: replace
@@ -130,7 +131,7 @@ jobs:
         run: |-
           helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
             --repo https://stackhpc.github.io/cluster-api-addon-provider \
-            --version ${{ matrix.addonprovider }} \
+            --version ${ADDON_PROVIDER_VERSION} \
             --namespace capi-addon-system \
             --create-namespace \
             --install \
@@ -138,150 +139,128 @@ jobs:
             --timeout 10m
       
       - name: Write cloud credential
-        run: 'echo "$CLOUD" > clouds.yml'
+        run: >
+          echo "$CLOUD" > clouds.yml
         shell: bash
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
+      - name: Write common Helm values
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: values-common.yaml
+          write-mode: overwrite
+          contents: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
+            controlPlane:
+              machineFlavor: vm.ska.cpu.general.small
+              machineCount: 1
+            nodeGroups:
+              - machineCount: 2
+                machineFlavor: vm.ska.cpu.general.small
+                name: test-group1
 
-      - name: Template cluster
-        run: |-
-          helm template ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
-            --values clouds.yml \
-            --dependency-update \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml \
-            --debug
+      #####
+      # For the smoke test, we do a clean deployment of the latest supported version
+      #####
 
-      - name: Create cluster 
-        run: |- 
-          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
-            --install \
-            --dependency-update \
-            --values clouds.yml \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values.yaml
+      - name: Test clean Kubernetes 1.27 deployment
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-latest
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          sonobuoy-upload: "yes"
+        if: ${{ !inputs.tests-full }}
 
-      - name: Wait for cluster READY
-        run: |- 
-          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
-            --for=condition=Ready \
-            --timeout 30m
+      - name: Delete Kubernetes 1.27 deployment
+        run: helm delete ci-${{ github.run_id }}-kube-latest --wait
+        if: ${{ !inputs.tests-full && always() }}
 
-      - name: Wait for addons to deploy
-        run: |-
-          kubectl wait manifests \
-            --all \
-            --for=jsonpath='{.status.phase}'=Deployed \
-            --timeout 20m \
-          && \
-          kubectl wait helmreleases \
-            --all \
-            --for=jsonpath='{.status.phase}'=Deployed \
-            --timeout 20m
+      #####
+      # On a full test, first test that we can upgrade from a cluster deployed using the latest tag
+      #####
 
-      - name: Write kubeconfig
-        run: |-
-          kubectl get secret ci-${GITHUB_SHA::7}-${{ matrix.version }}-kubeconfig \
-            -o go-template='{{ .data.value | base64decode }}' \
-            > kubeconfig
+      - name: Get latest tag
+        id: latest-tag
+        run: |
+          set -eo pipefail
+          TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
+          echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+        if: ${{ inputs.tests-full }}
 
-      - name: Wait for dns pods 
-        run: |-
-          kubectl wait po \
-            --namespace kube-system \
-            --selector k8s-app=kube-dns \
-            --for=condition=ready \
-            --timeout 20m
-        env:
-          KUBECONFIG: ./kubeconfig
+      - name: Deploy Kubernetes 1.27 with latest tag for chart upgrade test
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-chart-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          chart-version: ${{ steps.latest-tag.outputs.tag-name }}
+        if: ${{ inputs.tests-full }}
 
-      - name: Run sonobuoy [smoke]
-        timeout-minutes: 20
-        run: sonobuoy run --mode quick --wait
-        env:
-          KUBECONFIG: ./kubeconfig
-        if: github.event.pull_request.draft == false
+      - name: Upgrade to current chart
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-chart-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+        if: ${{ inputs.tests-full }}
 
-      - name: Clean sonobuoy 
-        run: sonobuoy delete --wait --all
-        env:
-          KUBECONFIG: ./kubeconfig
-        if: github.event.pull_request.draft == false
-      
-      - name: Upgrade cluster
-        run: |- 
-          helm upgrade ci-${GITHUB_SHA::7}-${{ matrix.version }} ./charts/openstack-cluster \
-            --install \
-            --dependency-update \
-            --values clouds.yml \
-            --values charts/openstack-cluster/ci/${{ matrix.version }}-ha-values-upgrade.yaml
-        if: github.event.pull_request.draft == false
-      
-      - name: Wait for cluster NOT READY
-        run: sleep 3m
-        if: github.event.pull_request.draft == false
-         
-      - name: Wait for cluster READY
-        run: |- 
-          kubectl wait clusters.cluster.x-k8s.io/ci-${GITHUB_SHA::7}-${{ matrix.version }} \
-            --for=condition=Ready \
-            --timeout 30m
-        if: github.event.pull_request.draft == false
+      - name: Delete chart upgrade deployment
+        run: helm delete ci-${{ github.run_id }}-chart-upgrade --wait
+        if: ${{ inputs.tests-full && always() }}
 
-      - name: Wait for addons to deploy
-        run: |-
-          kubectl wait manifests \
-            --all \
-            --for=jsonpath='{.status.phase}'=Deployed \
-            --timeout 20m \
-          && \
-          kubectl wait helmreleases \
-            --all \
-            --for=jsonpath='{.status.phase}'=Deployed \
-            --timeout 20m
-        if: github.event.pull_request.draft == false
+      #####
+      # On a full test, next run a full upgrade test
+      # This will run a sonobuoy smoke test after every step with a full test at the end
+      #####
 
-      - name: Run sonobuoy [smoke]
-        timeout-minutes: 20
-        run: sonobuoy run --mode quick --wait
-        env:
-          KUBECONFIG: ./kubeconfig
-        if: matrix.version != 'kube-1-26' || github.event.pull_request.draft == true
-      
-      - name: Run sonobuoy full
-        timeout-minutes: 120
-        run: sonobuoy run --wait
-        env:
-          KUBECONFIG: ./kubeconfig
-        if: matrix.version == 'kube-1-26' && github.event.pull_request.draft == false
+      - name: Deploy Kubernetes 1.25 for Kubernetes upgrade test
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
+        if: ${{ inputs.tests-full }}
 
-      - name: Retrieve sonobuoy results
-        continue-on-error: true
-        env:
-          KUBECONFIG: ./kubeconfig
-          STATUS_INTERVAL_SEC: 20
-        run: ./scripts/sonobuoy-artifacts.sh
-      
-      - name: Upload sonobuoy log artifacts
+      - name: Upgrade to Kubernetes 1.26
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
+        if: ${{ inputs.tests-full }}
+
+      - name: Upgrade to Kubernetes 1.27
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          sonobuoy-mode: full
+          sonobuoy-upload: "yes"
+        if: ${{ inputs.tests-full }}
+
+      - name: Delete Kubernetes upgrade deployment
+        run: helm delete ci-${{ github.run_id }}-kube-upgrade --wait
+        if: ${{ inputs.tests-full && always() }}
+
+      - name: Output controller logs
+        if: ${{ always() }}
+        run: |
+          kubectl -n capi-system logs deploy/capi-controller-manager > capi-logs.txt
+          kubectl -n capi-kubeadm-control-plane-system logs deploy/capi-kubeadm-control-plane-controller-manager > capi-kubeadm-control-plane-logs.txt
+          kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
+          kubectl -n capo-system logs deploy/capo-controller-manager > capo-logs.txt
+          kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
+
+      - name: Upload controller log artifacts
         uses: actions/upload-artifact@v3
         if: ${{ always() }} 
         with:
-          name: sonobuoy-logs
-          path: ./results.txt
-
-      - name: Delete release
-        if: ${{ always() }}
-        run: helm delete ci-${GITHUB_SHA::7}-${{ matrix.version }} --wait 
-      
-      - name: Output logs 
-        if: ${{ always() }}
-        run: |-
-          kubectl -n capo-system logs \
-          deploy/capo-controller-manager \
-          > logs.txt
-
-      - name: Upload log artifacts
-        uses: actions/upload-artifact@v3
-        if: ${{ always() }} 
-        with:
-          name: capo-controller-logs
-          path: logs.txt
+          name: cluster-api-controller-logs
+          path: ./*-logs.txt
