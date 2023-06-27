@@ -5,7 +5,7 @@ on:
       - main
 
 concurrency:
-  group: ${{ github.head_ref }}
+  group: main
   cancel-in-progress: true
 
 jobs:
