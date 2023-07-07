@@ -140,9 +140,9 @@ controlPlane:
     networks:
     ports:
   # The root volume spec for control plane machines
-  # If not given, the ephemeral root disk from the flavor is used
   machineRootVolume:
-    # The size of the disk to use
+    # The size of the disk to use
+    # If not given, the ephemeral root disk from the flavor is used
     diskSize:
     # The volume type to use
     # If not specified, the default volume type is used
@@ -229,9 +229,9 @@ nodeGroupDefaults:
     networks:
     ports:
   # The root volume spec for machines in the node group
-  # If not given, the ephemeral root disk from the flavor is used
   machineRootVolume:
-    # The size of the disk to use
+    # The size of the disk to use
+    # If not given, the ephemeral root disk from the flavor is used
     diskSize:
     # The volume type to use
     # If not specified, the default volume type is used
