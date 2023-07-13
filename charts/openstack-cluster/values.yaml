@@ -140,15 +140,15 @@ controlPlane:
     networks:
     ports:
   # The root volume spec for control plane machines
-  # If not given, the ephemeral root disk from the flavor is used
   machineRootVolume:
-    # # The size of the disk to use
-    # diskSize:
-    # # The volume type to use
-    # # If not specified, the default volume type is used
+    # The size of the disk to use
+    # If not given, the ephemeral root disk from the flavor is used
+    diskSize:
+    # The volume type to use
+    # If not specified, the default volume type is used
     # volumeType:
-    # # The volume availability zone to use
-    # # If not specified, the machine availability zone is used
+    # The volume availability zone to use
+    # If not specified, the machine availability zone is used
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
@@ -229,15 +229,15 @@ nodeGroupDefaults:
     networks:
     ports:
   # The root volume spec for machines in the node group
-  # If not given, the ephemeral root disk from the flavor is used
   machineRootVolume:
-    # # The size of the disk to use
-    # diskSize:
-    # # The volume type to use
-    # # If not specified, the default volume type is used
+    # The size of the disk to use
+    # If not given, the ephemeral root disk from the flavor is used
+    diskSize:
+    # The volume type to use
+    # If not specified, the default volume type is used
     # volumeType:
-    # # The volume availability zone to use
-    # # If not specified, the machine availability zone is used
+    # The volume availability zone to use
+    # If not specified, the machine availability zone is used
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s

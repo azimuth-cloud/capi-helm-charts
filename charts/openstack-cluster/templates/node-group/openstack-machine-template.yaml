@@ -15,8 +15,8 @@ template:
     {{- with $ctx.Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
-    {{- with $nodeGroup.machineRootVolume }}
-    rootVolume: {{ toYaml . | nindent 6 }}
+    {{- if $nodeGroup.machineRootVolume.diskSize }}
+    rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
     {{- end }}
     {{- if $ctx.Values.machineImageId }}
     imageUUID: {{ $ctx.Values.machineImageId }}

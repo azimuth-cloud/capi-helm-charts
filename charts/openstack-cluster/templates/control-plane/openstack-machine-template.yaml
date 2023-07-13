@@ -13,8 +13,8 @@ template:
     {{- with .Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
-    {{- with .Values.controlPlane.machineRootVolume }}
-    rootVolume: {{ toYaml . | nindent 6 }}
+    {{- if .Values.controlPlane.machineRootVolume.diskSize }}
+    rootVolume: {{ toYaml .Values.controlPlane.machineRootVolume | nindent 6 }}
     {{- end }}
     {{- if .Values.machineImageId }}
     imageUUID: {{ .Values.machineImageId }}
