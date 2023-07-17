@@ -26,7 +26,13 @@ jobs:
         id: deps
         run: ./scripts/read-dependencies.sh
 
-      - run: cat ${{ toJson(steps.deps.outputs) }}
+      - uses: DamianReeves/write-file-action@master
+        with:
+          path: deps.yaml
+          write-mode: overwrite
+          contents: cat ${{ toJson(steps.deps.outputs) }}
+
+      - run: cat deps.yaml
 
 
   # ensure-capi-images:
