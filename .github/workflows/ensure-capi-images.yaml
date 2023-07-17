@@ -92,12 +92,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ensure_image]
     outputs:
-      kube-1-25-image: ${{ steps.matrix-outputs.outputs.image-id.kube-1-25 }}
-      kube-1-25-version: ${{ steps.matrix-outputs.outputs.kube-version.kube-1-25 }}
-      kube-1-26-image: ${{ steps.matrix-outputs.outputs.image-id.kube-1-26 }}
-      kube-1-26-version: ${{ steps.matrix-outputs.outputs.kube-version.kube-1-26 }}
-      kube-1-27-image: ${{ steps.matrix-outputs.outputs.image-id.kube-1-27 }}
-      kube-1-27-version: ${{ steps.matrix-outputs.outputs.kube-version.kube-1-27 }}
+      kube-1-25-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-25 }}
+      kube-1-25-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-25 }}
+      kube-1-26-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-26 }}
+      kube-1-26-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-26 }}
+      kube-1-27-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-27 }}
+      kube-1-27-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-27 }}
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
@@ -109,7 +109,7 @@ jobs:
         with:
           path: outputs.json
           write-mode: overwrite
-          contents: ${{ toJSON(steps.matrix-outputs.outputs) }}
+          contents: ${{ steps.matrix-outputs.outputs.result }}
 
       - run: cat outputs.json
 
