@@ -109,7 +109,7 @@ jobs:
         with:
           path: outputs.json
           write-mode: overwrite
-          contents: ${{ steps.matrix-outputs.outputs }}
+          contents: ${{ toJSON(steps.matrix-outputs.outputs) }}
 
       - run: cat outputs.json
 
@@ -121,6 +121,6 @@ jobs:
         with:
           path: outputs.json
           write-mode: overwrite
-          contents: ${{ needs.produce_outputs.outputs }}
+          contents: ${{ toJSON(needs.produce_outputs.outputs) }}
 
       - run: cat outputs.json

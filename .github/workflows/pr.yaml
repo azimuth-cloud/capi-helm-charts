@@ -35,7 +35,7 @@ jobs:
         with:
           path: outputs.json
           write-mode: overwrite
-          contents: ${{ needs.ensure_capi_images.outputs }}
+          contents: ${{ toJSON(needs.ensure_capi_images.outputs) }}
 
       - run: cat outputs.json
 
