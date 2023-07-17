@@ -16,23 +16,22 @@ on:
         value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-version }}
 
 jobs:
-  get-images:
+  get_image_manifest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Read dependencies
-        id: deps
-        run: ./scripts/read-dependencies.sh
+      - name: Read azimuth-images version
+        id: azimuth-images
+        run: |
+          echo "version=$(jq -r '.["azimuth-images"]' ./dependencies.json)" >> "$GITHUB_OUTPUT"
 
-      - uses: DamianReeves/write-file-action@master
-        with:
-          path: deps.yaml
-          write-mode: overwrite
-          contents: cat ${{ toJson(steps.deps.outputs) }}
-
-      - run: cat deps.yaml
+      - name: Fetch azimuth-images manifest
+        run: |
+          curl -fsSL https://github.com/stackhpc/azimuth-images/releases/download/${VN}/manifest.json
+        env:
+          VN: ${{ steps.azimuth-images.outputs.version }}
 
 
   # ensure-capi-images:
