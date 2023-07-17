@@ -22,16 +22,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Read azimuth-images version
-        id: azimuth-images
+      - name: Fetch image details
+        id: images
         run: |
-          echo "version=$(jq -r '.["azimuth-images"]' ./dependencies.json)" >> "$GITHUB_OUTPUT"
+          VN="$(jq -r '.["azimuth-images"]' ./dependencies.json)"
+          MANIFEST="$(curl -fsSL "https://github.com/stackhpc/azimuth-images/releases/download/${VN}/manifest.json")"
+          echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
 
-      - name: Fetch azimuth-images manifest
-        run: |
-          curl -fsSL https://github.com/stackhpc/azimuth-images/releases/download/${VN}/manifest.json
-        env:
-          VN: ${{ steps.azimuth-images.outputs.version }}
+      - uses: DamianReeves/write-file-action@master
+        with:
+          path: outputs.json
+          write-mode: overwrite
+          contents: ${{ toJSON(steps.images.outputs.manifest) }}
+
+      - run: cat outputs.json
 
 
   # ensure-capi-images:
