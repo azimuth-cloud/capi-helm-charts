@@ -99,11 +99,28 @@ jobs:
       kube-1-27-image: ${{ steps.matrix-outputs.outputs.image-id.kube-1-27 }}
       kube-1-27-version: ${{ steps.matrix-outputs.outputs.kube-version.kube-1-27 }}
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v3
-
       - name: Read matrix outputs
         id: matrix-outputs
         uses: cloudposse/github-action-matrix-outputs-read@main
         with:
           matrix-step-name: ensure_image
+
+      - uses: DamianReeves/write-file-action@master
+        with:
+          path: outputs.json
+          write-mode: overwrite
+          contents: ${{ steps.matrix-outputs.outputs }}
+
+      - run: cat outputs.json
+
+  debug_outputs:
+    runs-on: ubuntu-latest
+    needs: [produce_outputs]
+    steps:
+      - uses: DamianReeves/write-file-action@master
+        with:
+          path: outputs.json
+          write-mode: overwrite
+          contents: ${{ needs.produce_outputs.outputs }}
+
+      - run: cat outputs.json
