@@ -1,7 +1,12 @@
 name: test pr
 on:
   pull_request:
-    types: [opened,synchronize,ready_for_review,edited,reopened]
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - edited
+      - reopened
     branches:
       - main
 
