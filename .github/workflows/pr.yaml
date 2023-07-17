@@ -28,25 +28,13 @@ jobs:
     if: github.repository == 'stackhpc/capi-helm-charts'
 
   test:
-    runs-on: ubuntu-latest
     needs: [sync_images, ensure_capi_images]
-    steps:
-      - uses: DamianReeves/write-file-action@master
-        with:
-          path: outputs.json
-          write-mode: overwrite
-          contents: ${{ toJSON(needs.ensure_capi_images.outputs) }}
-
-      - run: cat outputs.json
-
-  # test:
-  #   needs: [sync_images, ensure_capi_images]
-  #   uses: ./.github/workflows/test.yaml
-  #   secrets: inherit
-  #   with:
-  #     # Pass the images as JSON
-  #     images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
-  #     # If the PR is in draft, just run smoke tests
-  #     # If the PR is in review, run the full test suite
-  #     tests-full: ${{ !github.event.pull_request.draft }}
-  #   if: github.repository == 'stackhpc/capi-helm-charts'
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    with:
+      # Pass the images as JSON
+      images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+      # If the PR is in draft, just run smoke tests
+      # If the PR is in review, run the full test suite
+      tests-full: ${{ !github.event.pull_request.draft }}
+    if: github.repository == 'stackhpc/capi-helm-charts'
