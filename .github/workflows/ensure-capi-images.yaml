@@ -16,7 +16,7 @@ on:
         value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-version }}
 
 jobs:
-  get_image_manifest:
+  image_manifest:
     runs-on: ubuntu-latest
     outputs:
       manifest: ${{ steps.images.outputs.manifest }}
@@ -31,68 +31,102 @@ jobs:
           MANIFEST="$(curl -fsSL "https://github.com/stackhpc/azimuth-images/releases/download/${VN}/manifest.json")"
           echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
 
+  ensure_capi_images:
+    runs-on: ubuntu-latest
+    needs: [image_manifest]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: kubernetes-1-25
+            image-name: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy.name }}
+            image-url: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy.url }}
+            kubernetes-version: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy.kubernetes_version }}
+            required: ${{ !github.event.pull_request.draft }}
+          - name: kubernetes-1-26
+            image-name: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy.name }}
+            image-url: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy.url }}
+            kubernetes-version: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy.kubernetes_version }}
+            required: ${{ !github.event.pull_request.draft }}
+          - name: kubernetes-1-27
+            image-name: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy.name }}
+            image-url: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy.url }}
+            kubernetes-version: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy.kubernetes_version }}
+            required: true
+        exclude:
+          - required: false
+      
+
+    # steps:
+    #   - uses: DamianReeves/write-file-action@master
+    #     with:
+    #       path: manifest.json
+    #       write-mode: overwrite
+    #       contents: ${{ needs.get_image_manifest.outputs.manifest }}
+
+    #   - run: cat manifest.json
+
+
+    # outputs:
+    #   kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
+    #   kube-1-25-version: 1.25.10
+    #   kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
+    #   kube-1-26-version: 1.26.5
+    #   kube-1-27-image: ${{ steps.kube-1-27.outputs.image-id }}
+    #   kube-1-27-version: 1.27.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Write cloud credential
+        run: >
+          echo "$CLOUD" > clouds.yml
+        shell: bash
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
+
+      - name: Install OpenStack CLI
+        run: pip install python-openstackclient
+
+      - name: Ensure Kubernetes image
+        id: ensure-image
+        uses: ./.github/actions/ensure-image
+        with:
+          image-name: ${{ matrix.image-name }}
+          image-url: ${{ matrix.image-url }}
+
+      - name: Write matrix outputs
+        uses: cloudposse/github-action-matrix-outputs-write@main
+        with:
+          matrix-step-name: ${{ github.job }}
+          matrix-key: ${{ matrix.name }}
+          outputs: |-
+            image-id: ${{ steps.ensure-image.outputs.image-id }}
+            kubernetes-version: ${{ matrix.kubernetes-version }}
+
   debug_manifest:
     runs-on: ubuntu-latest
-    needs: [get_image_manifest]
+    needs: [ensure_capi_images]
     steps:
-      - uses: DamianReeves/write-file-action@master
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Read matrix outputs
+        id: matrix-outputs
+        uses: cloudposse/github-action-matrix-outputs-read@main
         with:
-          path: manifest.json
+          matrix-step-name: ensure_capi_images
+
+      - name: Write outputs
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: outputs.json
           write-mode: overwrite
-          contents: ${{ needs.get_image_manifest.outputs.manifest }}
+          contents: ${{ steps.matrix-outputs.outputs.result }}
 
-      - run: cat manifest.json
-
-
-  # ensure-capi-images:
-  #   runs-on: ubuntu-latest
-  #   # We output the image IDs for each image
-  #   outputs:
-  #     kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
-  #     kube-1-25-version: 1.25.10
-  #     kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
-  #     kube-1-26-version: 1.26.5
-  #     kube-1-27-image: ${{ steps.kube-1-27.outputs.image-id }}
-  #     kube-1-27-version: 1.27.2
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-
-  #     - name: Read dependencies
-  #       id: deps
-  #       run: ./scripts/read-dependencies.sh
-
-  #     - name: Write cloud credential
-  #       run: >
-  #         echo "$CLOUD" > clouds.yml
-  #       shell: bash
-  #       env:
-  #         CLOUD: ${{ secrets.CLOUD }}
-
-  #     - uses: actions/setup-python@v4
-  #       with:
-  #         python-version: '3.9'
-  #         check-latest: true
-
-  #     - name: Install OpenStack CLI
-  #       run: pip install python-openstackclient
-
-  #     - name: Ensure Kubernetes 1.25 image
-  #       id: kube-1-25
-  #       uses: ./.github/actions/ensure-image
-  #       with:
-  #         image-name: ubuntu-focal-kube-v1.25.10-230602-1732
-  #       if: ${{ !github.event.pull_request.draft }}
-
-  #     - name: Ensure Kubernetes 1.26 image
-  #       id: kube-1-26
-  #       uses: ./.github/actions/ensure-image
-  #       with:
-  #         image-name: ubuntu-focal-kube-v1.26.5-230602-1757
-  #       if: ${{ !github.event.pull_request.draft }}
-
-  #     - name: Ensure Kubernetes 1.27 image
-  #       id: kube-1-27
-  #       uses: ./.github/actions/ensure-image
-  #       with:
-  #         image-name: ubuntu-focal-kube-v1.27.2-230602-1824
+      - run: cat outputs.json

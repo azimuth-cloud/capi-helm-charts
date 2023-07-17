@@ -12,12 +12,11 @@ inputs:
     description: The name of the cloud within the OpenStack clouds file
     required: true
     default: openstack
-  images-base-url:
-    description: The base URL to use for downloading images
-    required: true
-    default: https://object.arcus.openstack.hpc.cam.ac.uk/swift/v1/AUTH_f0dc9cb312144d0aa44037c9149d2513/azimuth-images-prerelease/
   image-name:
     description: The name of the image to use
+    required: true
+  image-url:
+    description: The URL of the image
     required: true
 
 outputs:
@@ -34,5 +33,5 @@ runs:
       env:
         OS_CLIENT_CONFIG_FILE: ${{ inputs.os-client-config-file }}
         OS_CLOUD: ${{ inputs.os-cloud }}
-        IMAGES_BASE_URL: ${{ inputs.images-base-url }}
         IMAGE_NAME: ${{ inputs.image-name }}
+        IMAGE_URL: ${{ inputs.image-url }}
