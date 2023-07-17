@@ -42,20 +42,17 @@ jobs:
             image-name: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy.name }}
             image-url: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy.url }}
             kubernetes-version: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy.kubernetes_version }}
-            required: ${{ !github.event.pull_request.draft }}
+            skip: ${{ github.event.pull_request.draft }}
           - name: kubernetes-1-26
             image-name: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy.name }}
             image-url: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy.url }}
             kubernetes-version: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy.kubernetes_version }}
-            required: ${{ !github.event.pull_request.draft }}
+            skip: ${{ github.event.pull_request.draft }}
           - name: kubernetes-1-27
             image-name: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy.name }}
             image-url: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy.url }}
             kubernetes-version: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy.kubernetes_version }}
-            required: true
-        exclude:
-          - required: false
-      
+            skip: false
 
     # steps:
     #   - uses: DamianReeves/write-file-action@master
@@ -77,6 +74,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        if: ${{ !matrix.skip }}
 
       - name: Write cloud credential
         run: >
@@ -84,14 +82,17 @@ jobs:
         shell: bash
         env:
           CLOUD: ${{ secrets.CLOUD }}
+        if: ${{ !matrix.skip }}
 
       - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           check-latest: true
+        if: ${{ !matrix.skip }}
 
       - name: Install OpenStack CLI
         run: pip install python-openstackclient
+        if: ${{ !matrix.skip }}
 
       - name: Ensure Kubernetes image
         id: ensure-image
@@ -99,6 +100,7 @@ jobs:
         with:
           image-name: ${{ matrix.image-name }}
           image-url: ${{ matrix.image-url }}
+        if: ${{ !matrix.skip }}
 
       - name: Write matrix outputs
         uses: cloudposse/github-action-matrix-outputs-write@main
@@ -108,6 +110,7 @@ jobs:
           outputs: |-
             image-id: ${{ steps.ensure-image.outputs.image-id }}
             kubernetes-version: ${{ matrix.kubernetes-version }}
+        if: ${{ !matrix.skip }}
 
   debug_manifest:
     runs-on: ubuntu-latest
