@@ -104,23 +104,3 @@ jobs:
         uses: cloudposse/github-action-matrix-outputs-read@main
         with:
           matrix-step-name: ensure_image
-
-      - uses: DamianReeves/write-file-action@master
-        with:
-          path: outputs.json
-          write-mode: overwrite
-          contents: ${{ steps.matrix-outputs.outputs.result }}
-
-      - run: cat outputs.json
-
-  debug_outputs:
-    runs-on: ubuntu-latest
-    needs: [produce_outputs]
-    steps:
-      - uses: DamianReeves/write-file-action@master
-        with:
-          path: outputs.json
-          write-mode: overwrite
-          contents: ${{ toJSON(needs.produce_outputs.outputs) }}
-
-      - run: cat outputs.json
