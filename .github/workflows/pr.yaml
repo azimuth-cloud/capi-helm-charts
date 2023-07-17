@@ -15,11 +15,11 @@ jobs:
     uses: ./.github/workflows/lint.yaml
 
   # Only run image sync and test on the main repo
-  # sync_images:
-  #   needs: [lint]
-  #   uses: ./.github/workflows/sync-images.yaml
-  #   secrets: inherit
-  #   if: github.repository == 'stackhpc/capi-helm-charts'
+  sync_images:
+    needs: [lint]
+    uses: ./.github/workflows/sync-images.yaml
+    secrets: inherit
+    if: github.repository == 'stackhpc/capi-helm-charts'
 
   ensure_capi_images:
     needs: [lint]
@@ -27,14 +27,14 @@ jobs:
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
-  # test:
-  #   needs: [sync_images, ensure_capi_images]
-  #   uses: ./.github/workflows/test.yaml
-  #   secrets: inherit
-  #   with:
-  #     # Pass the images as JSON
-  #     images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
-  #     # If the PR is in draft, just run smoke tests
-  #     # If the PR is in review, run the full test suite
-  #     tests-full: ${{ !github.event.pull_request.draft }}
-  #   if: github.repository == 'stackhpc/capi-helm-charts'
+  test:
+    needs: [sync_images, ensure_capi_images]
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+    with:
+      # Pass the images as JSON
+      images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+      # If the PR is in draft, just run smoke tests
+      # If the PR is in review, run the full test suite
+      tests-full: ${{ !github.event.pull_request.draft }}
+    if: github.repository == 'stackhpc/capi-helm-charts'
