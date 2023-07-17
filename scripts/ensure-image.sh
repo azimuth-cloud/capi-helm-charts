@@ -2,6 +2,11 @@
 
 set -ex
 
+#####
+# This script uploads an image to OpenStack unless already present
+#####
+
+
 [ -z "$IMAGES_BASE_URL" ] && echo "IMAGES_BASE_URL is required" >&2 && exit 1
 [ -z "$IMAGE_NAME" ] && echo "IMAGE_NAME is required" >&2 && exit 1
 
