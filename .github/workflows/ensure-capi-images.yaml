@@ -18,7 +18,8 @@ on:
 jobs:
   get_image_manifest:
     runs-on: ubuntu-latest
-    outputs: ${{ fromJSON(steps.images.outputs.manifest) }}
+    outputs:
+      manifest: ${{ steps.images.outputs.manifest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,7 +39,9 @@ jobs:
         with:
           path: manifest.json
           write-mode: overwrite
-          contents: ${{ needs.get_image_manifest.outputs }}
+          contents: ${{ needs.get_image_manifest.outputs.manifest }}
+
+      - run: cat manifest.json
 
 
   # ensure-capi-images:
