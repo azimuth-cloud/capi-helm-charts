@@ -25,7 +25,7 @@ fi
 
 # If not, download the image and upload it to Glance
 IMAGE_FNAME="${IMAGE_NAME}.${IMAGE_DISK_FORMAT:-qcow2}"
-curl -LO --progress-bar "$IMAGE_URL"
+curl -Lo "$IMAGE_FNAME" --progress-bar "$IMAGE_URL"
 IMAGE_ID="$(
   openstack image create \
     --progress \
