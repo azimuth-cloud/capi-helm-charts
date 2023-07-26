@@ -2,8 +2,13 @@
 
 set -ex
 
-[ -z "$IMAGES_BASE_URL" ] && echo "IMAGES_BASE_URL is required" >&2 && exit 1
+#####
+# This script uploads an image to OpenStack unless already present
+#####
+
+
 [ -z "$IMAGE_NAME" ] && echo "IMAGE_NAME is required" >&2 && exit 1
+[ -z "$IMAGE_URL" ] && echo "IMAGE_URL is required" >&2 && exit 1
 
 # Default the GITHUB_OUTPUT to stdout
 GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
@@ -20,8 +25,7 @@ fi
 
 # If not, download the image and upload it to Glance
 IMAGE_FNAME="${IMAGE_NAME}.${IMAGE_DISK_FORMAT:-qcow2}"
-IMAGE_URL="${IMAGES_BASE_URL}${IMAGE_FNAME}"
-curl -LO --progress-bar "$IMAGE_URL"
+curl -Lo "$IMAGE_FNAME" --progress-bar "$IMAGE_URL"
 IMAGE_ID="$(
   openstack image create \
     --progress \

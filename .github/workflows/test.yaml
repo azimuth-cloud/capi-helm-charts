@@ -12,58 +12,62 @@ on:
         required: true
         default: false
 
-env:
-  HELM_VERSION: v3.11.3
-  CAPI_VERSION: v1.4.3
-  CAPO_VERSION: v0.7.3
-  ADDON_PROVIDER_VERSION: 0.1.0-dev.0.main.26
-  SONOBUOY_VERSION: 0.56.16
-  CERTMANAGER_VERSION: v1.12.1
-
 jobs:
   test-chart:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      
+
+      - name: Read dependencies
+        id: deps
+        run: |
+          echo "addon-provider=$(jq -r '.["addon-provider"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+          echo "cluster-api=$(jq -r '.["cluster-api"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+          echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+          echo "cert-manager=$(jq -r '.["cert-manager"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+          echo "helm=$(jq -r '.["helm"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+          echo "sonobuoy=$(jq -r '.["sonobuoy"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+
       - name: Install tools
         run: sudo apt install -y zip unzip
-      
+
       - name: Install sonobuoy
         run: >
           wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
           tar -xf sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
           sudo mv -n sonobuoy /usr/bin/
+        env:
+          SONOBUOY_VERSION: ${{ steps.deps.outputs.sonobuoy }}
 
       - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           check-latest: true
-      
+
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
-          version: ${{ env.HELM_VERSION }}
-      
+          version: ${{ steps.deps.outputs.helm }}
+
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.5.0
-      
+
       - name: Install cert-manager
         run: |-
           helm upgrade cert-manager cert-manager \
             --repo https://charts.jetstack.io \
-            --version ${CERTMANAGER_VERSION} \
+            --version ${{ steps.deps.outputs.cert-manager }} \
             --namespace cert-manager \
             --create-namespace  \
             --install \
             --set installCRDs=true \
             --wait \
             --timeout 10m
-      
+
       - name: Ensure Cluster API kustomization directory exists
         run: mkdir -p clusterapi
-      
+
       # From here: https://github.com/stackhpc/ansible-collection-azimuth-ops/blob/main/roles/clusterapi/defaults/main.yml
       - name: Write Cluster API kustomization file
         uses: DamianReeves/write-file-action@master
@@ -72,8 +76,8 @@ jobs:
           write-mode: overwrite
           contents: |
             resources:
-              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ env.CAPI_VERSION }}/cluster-api-components.yaml
-              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ env.CAPO_VERSION }}/infrastructure-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ steps.deps.outputs.cluster-api }}/cluster-api-components.yaml
+              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ steps.deps.outputs.cluster-api-provider-openstack }}/infrastructure-components.yaml
             patches:
               - patch: |-
                   - op: replace
@@ -105,7 +109,7 @@ jobs:
                   kind: Deployment
                   namespace: capi-kubeadm-control-plane-system
                   name: capi-kubeadm-control-plane-controller-manager
-      
+
       - name: Install Cluster API resources
         run: kubectl apply -k clusterapi/
 
@@ -131,13 +135,13 @@ jobs:
         run: |-
           helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
             --repo https://stackhpc.github.io/cluster-api-addon-provider \
-            --version ${ADDON_PROVIDER_VERSION} \
+            --version ${{ steps.deps.outputs.addon-provider }} \
             --namespace capi-addon-system \
             --create-namespace \
             --install \
             --wait \
             --timeout 10m
-      
+
       - name: Write cloud credential
         run: >
           echo "$CLOUD" > clouds.yml

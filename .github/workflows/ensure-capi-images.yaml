@@ -3,32 +3,54 @@ on:
   workflow_call:
     outputs:
       kube-1-25-image:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-25-image }}
+        value: ${{ jobs.produce_outputs.outputs.kube-1-25-image }}
       kube-1-25-version:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-25-version }}
+        value: ${{ jobs.produce_outputs.outputs.kube-1-25-version }}
       kube-1-26-image:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-26-image }}
+        value: ${{ jobs.produce_outputs.outputs.kube-1-26-image }}
       kube-1-26-version:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-26-version }}
+        value: ${{ jobs.produce_outputs.outputs.kube-1-26-version }}
       kube-1-27-image:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-image }}
+        value: ${{ jobs.produce_outputs.outputs.kube-1-27-image }}
       kube-1-27-version:
-        value: ${{ jobs.ensure-capi-images.outputs.kube-1-27-version }}
+        value: ${{ jobs.produce_outputs.outputs.kube-1-27-version }}
 
 jobs:
-  ensure-capi-images:
+  image_manifest:
     runs-on: ubuntu-latest
-    # We output the image IDs for each image
     outputs:
-      kube-1-25-image: ${{ steps.kube-1-25.outputs.image-id }}
-      kube-1-25-version: 1.25.10
-      kube-1-26-image: ${{ steps.kube-1-26.outputs.image-id }}
-      kube-1-26-version: 1.26.5
-      kube-1-27-image: ${{ steps.kube-1-27.outputs.image-id }}
-      kube-1-27-version: 1.27.2
+      manifest: ${{ steps.images.outputs.manifest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Fetch image details
+        id: images
+        run: |
+          VN="$(jq -r '.["azimuth-images"]' ./dependencies.json)"
+          MANIFEST="$(curl -fsSL "https://github.com/stackhpc/azimuth-images/releases/download/${VN}/manifest.json")"
+          echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
+
+  ensure_image:
+    runs-on: ubuntu-latest
+    needs: [image_manifest]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: kube-1-25
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy }}
+            skip: ${{ github.event.pull_request.draft }}
+          - name: kube-1-26
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy }}
+            skip: ${{ github.event.pull_request.draft }}
+          - name: kube-1-27
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy }}
+            skip: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        if: ${{ !matrix.skip }}
 
       - name: Write cloud credential
         run: >
@@ -36,31 +58,49 @@ jobs:
         shell: bash
         env:
           CLOUD: ${{ secrets.CLOUD }}
+        if: ${{ !matrix.skip }}
 
       - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           check-latest: true
+        if: ${{ !matrix.skip }}
 
       - name: Install OpenStack CLI
         run: pip install python-openstackclient
+        if: ${{ !matrix.skip }}
 
-      - name: Ensure Kubernetes 1.25 image
-        id: kube-1-25
+      - name: Ensure Kubernetes image
+        id: ensure-image
         uses: ./.github/actions/ensure-image
         with:
-          image-name: ubuntu-focal-kube-v1.25.10-230602-1732
-        if: ${{ !github.event.pull_request.draft }}
+          image-name: ${{ matrix.image.name }}
+          image-url: ${{ matrix.image.url }}
+        if: ${{ !matrix.skip }}
 
-      - name: Ensure Kubernetes 1.26 image
-        id: kube-1-26
-        uses: ./.github/actions/ensure-image
+      - name: Write matrix outputs
+        uses: cloudposse/github-action-matrix-outputs-write@main
         with:
-          image-name: ubuntu-focal-kube-v1.26.5-230602-1757
-        if: ${{ !github.event.pull_request.draft }}
+          matrix-step-name: ${{ github.job }}
+          matrix-key: ${{ matrix.name }}
+          outputs: |-
+            image-id: ${{ steps.ensure-image.outputs.image-id }}
+            kube-version: ${{ matrix.image.kubernetes_version }}
+        if: ${{ !matrix.skip }}
 
-      - name: Ensure Kubernetes 1.27 image
-        id: kube-1-27
-        uses: ./.github/actions/ensure-image
+  produce_outputs:
+    runs-on: ubuntu-latest
+    needs: [ensure_image]
+    outputs:
+      kube-1-25-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-25 }}
+      kube-1-25-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-25 }}
+      kube-1-26-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-26 }}
+      kube-1-26-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-26 }}
+      kube-1-27-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-27 }}
+      kube-1-27-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-27 }}
+    steps:
+      - name: Read matrix outputs
+        id: matrix-outputs
+        uses: cloudposse/github-action-matrix-outputs-read@main
         with:
-          image-name: ubuntu-focal-kube-v1.27.2-230602-1824
+          matrix-step-name: ensure_image
