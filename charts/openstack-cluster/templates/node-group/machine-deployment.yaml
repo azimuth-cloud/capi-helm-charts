@@ -61,4 +61,6 @@ spec:
         kind: OpenStackMachineTemplate
         name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
       nodeDrainTimeout: {{ $nodeGroup.nodeDrainTimeout }}
+      nodeVolumeDetachTimeout: {{ $nodeGroup.nodeVolumeDetachTimeout }}
+      nodeDeletionTimeout: {{ $nodeGroup.nodeDeletionTimeout }}
 {{- end }}
