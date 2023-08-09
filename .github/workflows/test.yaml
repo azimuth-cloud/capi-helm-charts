@@ -70,7 +70,7 @@ jobs:
 
       # From here: https://github.com/stackhpc/ansible-collection-azimuth-ops/blob/main/roles/clusterapi/defaults/main.yml
       - name: Write Cluster API kustomization file
-        uses: DamianReeves/write-file-action@master
+        uses: DamianReeves/write-file-action@0a7fcbe1960c53fc08fe789fa4850d24885f4d84
         with:
           path: clusterapi/kustomization.yaml
           write-mode: overwrite
@@ -150,7 +150,7 @@ jobs:
           CLOUD: ${{ secrets.CLOUD }}
 
       - name: Write common Helm values
-        uses: DamianReeves/write-file-action@master
+        uses: DamianReeves/write-file-action@0a7fcbe1960c53fc08fe789fa4850d24885f4d84
         with:
           path: values-common.yaml
           write-mode: overwrite
