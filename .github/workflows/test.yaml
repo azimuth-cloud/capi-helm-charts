@@ -34,8 +34,8 @@ jobs:
 
       - name: Install sonobuoy
         run: >
-          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
-          tar -xf sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
+          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION:1}_linux_amd64.tar.gz &&
+          tar -xf sonobuoy_${SONOBUOY_VERSION:1}_linux_amd64.tar.gz &&
           sudo mv -n sonobuoy /usr/bin/
         env:
           SONOBUOY_VERSION: ${{ steps.deps.outputs.sonobuoy }}
