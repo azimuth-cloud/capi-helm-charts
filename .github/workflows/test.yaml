@@ -32,6 +32,9 @@ jobs:
       - name: Install tools
         run: sudo apt install -y zip unzip
 
+      - name: Install OpenStack CLI
+        run: pip install python-openstackclient
+
       - name: Install sonobuoy
         run: >
           wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION}_linux_amd64.tar.gz &&
@@ -149,6 +152,13 @@ jobs:
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
+      - name: Wait for a floating IP to become available
+        id: wait-for-fip
+        run: ./scripts/wait-for-fip.sh
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+
       - name: Write common Helm values
         uses: DamianReeves/write-file-action@0a7fcbe1960c53fc08fe789fa4850d24885f4d84
         with:
@@ -160,6 +170,8 @@ jobs:
                 auth:
                   project_id: ${{ secrets.PROJECT_ID }}
                 verify: false
+            apiServer:
+              floatingIP: ${{ steps.wait-for-fip.outputs.floating-ip }}
             controlPlane:
               machineFlavor: vm.ska.cpu.general.small
               machineCount: 1
@@ -252,6 +264,13 @@ jobs:
       - name: Delete Kubernetes upgrade deployment
         run: helm delete ci-${{ github.run_id }}-kube-upgrade --wait
         if: ${{ inputs.tests-full && always() }}
+
+      - name: Release floating IP
+        run: ./scripts/release-fip.sh ${{ steps.wait-for-fip.outputs.floating-ip }}
+        env:
+          OS_CLOUD: openstack
+          OS_CLIENT_CONFIG_FILE: ./clouds.yml
+        if: ${{ always() }}
 
       - name: Output controller logs
         if: ${{ always() }}
