@@ -152,8 +152,12 @@ controlPlane:
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
+  # The time to wait for a node to detach all volumes before it can be removed
+  nodeVolumeDetachTimeout: 5m0s
+  # The time to wait for the node resource to be deleted in Kubernetes when a
+  # machine is marked for deletion
+  nodeDeletionTimeout: 5m0s
   # The rollout strategy to use for the control plane nodes
-
   # By default, the strategy allows the control plane to begin provisioning new nodes
   # without first tearing down old ones
   rolloutStrategy:
@@ -203,6 +207,8 @@ controlPlane:
     spec:
       # By default, unhealthy control plane nodes are always remediated
       maxUnhealthy: 100%
+      # If a node takes longer than 10 mins to startup, remediate it
+      nodeStartupTimeout: 10m0s
       # By default, consider a control plane node that has not been Ready
       # for more than 5 mins unhealthy
       unhealthyConditions:
@@ -241,6 +247,11 @@ nodeGroupDefaults:
     # availabilityZone:
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
+  # The time to wait for a node to detach all volumes before it can be removed
+  nodeVolumeDetachTimeout: 5m0s
+  # The time to wait for the node resource to be deleted in Kubernetes when a
+  # machine is marked for deletion
+  nodeDeletionTimeout: 5m0s
   # The rollout strategy to use for the node group
   # By default, this is set to do a rolling update within the existing resource envelope
   # of the node group, even if that means the node group temporarily has zero nodes
