@@ -1,0 +1,97 @@
+name: Update dependencies
+on:
+  # Allow manual executions
+  workflow_dispatch:
+  # Run nightly
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  propose_update_pr:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - key: addon-provider
+            type: helm
+            repo_url: https://stackhpc.github.io/cluster-api-addon-provider
+            chart_name: cluster-api-addon-provider
+
+          - key: azimuth-images
+            type: github
+            repo: stackhpc/azimuth-images
+
+          - key: cluster-api
+            type: github
+            repo: kubernetes-sigs/cluster-api
+          
+          - key: cluster-api-provider-openstack
+            type: github
+            repo: kubernetes-sigs/cluster-api-provider-openstack
+          
+          - key: cert-manager
+            type: helm
+            repo_url: https://charts.jetstack.io
+            chart_name: cert-manager
+          
+          - key: helm
+            type: github
+            repo: helm/helm
+          
+          - key: sonobuoy
+            type: github
+            repo: vmware-tanzu/sonobuoy
+
+    name: ${{ matrix.key }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install script dependencies
+        run: pip install -r .github/scripts/requirements.txt
+
+      - name: Check for updates (Helm)
+        id: helm-update-version
+        run: |
+          .github/scripts/helm-update-version \
+            ${{ matrix.repo_url }} \
+            ${{ matrix.chart_name }} \
+            ${{ matrix.key }} \
+            '${{ matrix.constraints || '>=0.0.0' }}'
+        if: ${{ matrix.type == 'helm' }}
+
+      - name: Check for updates (GitHub)
+        id: github-update-version
+        run: |
+          .github/scripts/github-update-version \
+            ${{ matrix.repo }} \
+            ${{ matrix.key }}
+        if: ${{ matrix.type == 'github' }}
+
+      - name: Get next version from relevant outputs
+        id: next
+        run: >-
+          echo "version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+        env:
+          NEXT_VERSION: >-
+            ${{
+              matrix.type == 'helm' &&
+              steps.helm-update-version.outputs.next-version ||
+              steps.github-update-version.outputs.next-version
+            }}
+
+      - name: Propose changes via PR if required
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: >-
+            Update ${{ matrix.key }} to ${{ steps.next.outputs.version }}
+          branch: update/${{ matrix.key }}
+          delete-branch: true
+          title: >-
+            Update ${{ matrix.key }} to ${{ steps.next.outputs.version }}
+          body: >
+            This PR was created automatically to update
+            ${{ matrix.key }} to ${{ steps.next.outputs.version }}.
+          labels: |
+            automation
+            dependency-update
