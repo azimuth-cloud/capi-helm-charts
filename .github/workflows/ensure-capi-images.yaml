@@ -101,6 +101,6 @@ jobs:
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
-        uses: cloudposse/github-action-matrix-outputs-read@0.4.2
+        uses: cloudposse/github-action-matrix-outputs-read@0.1.1
         with:
           matrix-step-name: ensure_image
