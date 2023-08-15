@@ -80,12 +80,22 @@ jobs:
               steps.github-update-version.outputs.next-version
             }}
 
+      - name: Generate app token for PR
+        id: generate-app-token
+        run: >
+          .github/scripts/generate-app-token "$REPO" "$APP_ID" "$APP_PRIVATE_KEY"
+        env:
+          REPO: ${{ github.repository }}
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Propose changes via PR if required
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ steps.generate-app-token.outputs.token }}
           commit-message: >-
             Update ${{ matrix.key }} to ${{ steps.next.outputs.version }}
-          branch: update/${{ matrix.key }}
+          branch: update-dependency/${{ matrix.key }}
           delete-branch: true
           title: >-
             Update ${{ matrix.key }} to ${{ steps.next.outputs.version }}
