@@ -25,7 +25,7 @@ jobs:
         uses: scrungus/chart-testing-action@v3.7.3
       
       - name: Dummy values
-        uses: DamianReeves/write-file-action@master
+        uses: DamianReeves/write-file-action@0a7fcbe1960c53fc08fe789fa4850d24885f4d84
         with:
           path: values.yml
           write-mode: overwrite

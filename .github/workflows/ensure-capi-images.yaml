@@ -79,7 +79,7 @@ jobs:
         if: ${{ !matrix.skip }}
 
       - name: Write matrix outputs
-        uses: cloudposse/github-action-matrix-outputs-write@main
+        uses: cloudposse/github-action-matrix-outputs-write@0.4.2
         with:
           matrix-step-name: ${{ github.job }}
           matrix-key: ${{ matrix.name }}
@@ -101,6 +101,6 @@ jobs:
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
-        uses: cloudposse/github-action-matrix-outputs-read@main
+        uses: cloudposse/github-action-matrix-outputs-read@0.1.1
         with:
           matrix-step-name: ensure_image
