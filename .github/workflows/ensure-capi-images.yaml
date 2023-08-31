@@ -39,13 +39,13 @@ jobs:
       matrix:
         include:
           - name: kube-1-25
-            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-jammy }}
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-25-focal }}
             skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-26
-            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy }}
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-focal }}
             skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-27
-            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy }}
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-focal }}
             skip: false
     steps:
       - name: Checkout
