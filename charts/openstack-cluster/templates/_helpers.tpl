@@ -104,9 +104,18 @@ files:
   - path: /etc/containerd/conf.d/{{ $registry }}/hosts.toml
     content: |
       {{- range $mirror := $mirrors }}
+      {{- if kindIs "string" $mirror }}
+      [host."{{ $mirror }}"]
+      capabilities = ["pull", "resolve"]
+      {{- else if kindIs "map" $mirror }}
       [host."{{ .url }}"]
-      capabilities = [{{ range $i, $capability := .capabilities }}{{- if gt $i 0 }}, {{ end }}"{{ . }}"{{- end }}]
-      {{ end }}
+      {{- if hasKey $mirror "capabilities" }}
+      capabilities =[{{ range $i, $capability := .capabilities }}{{- if gt $i 0 }}, {{ end }}"{{ . }}"{{- end }}]
+      {{- else }}
+      capabilities = ["pull", "resolve"]
+      {{- end }}
+      {{- end }}
+      {{- end }}
     owner: root:root
     permissions: "0644"
 {{- end }}
