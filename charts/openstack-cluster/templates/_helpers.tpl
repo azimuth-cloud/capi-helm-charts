@@ -100,16 +100,16 @@ files:
     owner: root:root
     permissions: "0644"
 {{- if $registryMirrors }}
-  - path: /etc/containerd/conf.d/mirrors.toml
+{{- range $registry, $mirrors := $registryMirrors }}
+  - path: /etc/containerd/conf.d/{{ $registry }}/hosts.toml
     content: |
-      version = 2
-      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
-        {{- range $registry, $mirrors := $registryMirrors }}
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."{{ $registry }}"]
-          endpoint = [{{ range $i, $mirror := $mirrors }}{{- if gt $i 0 }},{{ end }}"{{ . }}"{{- end }}]
-        {{- end }}
+      {{- range $mirror := $mirrors }}
+      [host."{{ .url }}"]
+      capabilities = [{{ range $i, $capability := .capabilities }}{{- if gt $i 0 }}, {{ end }}"{{ . }}"{{- end }}]
+      {{ end }}
     owner: root:root
     permissions: "0644"
+{{- end }}
 {{- end }}
 {{- if $ctx.Values.registryAuth }}
   - path: /etc/containerd/conf.d/auth.toml

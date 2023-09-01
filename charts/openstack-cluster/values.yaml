@@ -80,7 +80,9 @@ clusterNetworking:
 
 # Settings for registry mirrors
 registryMirrors: {}
-  # docker.io: ["https://registry.my.domain/v2/dockerhub-public"]
+  # docker.io:
+  #  - url: "https://registry.my.domain/v2/dockerhub-public"
+  #    capabilities: ["pull", "resolve"]
 
 # Settings for node-level registry auth
 registryAuth: {}
