@@ -172,16 +172,16 @@ jobs:
       # For the smoke test, we do a clean deployment of the latest supported version
       #####
 
-      - name: Test clean Kubernetes 1.27 deployment
+      - name: Test clean Kubernetes 1.28 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-kube-latest
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
           sonobuoy-upload: "yes"
         if: ${{ !inputs.tests-full }}
 
-      - name: Delete Kubernetes 1.27 deployment
+      - name: Delete Kubernetes 1.28 deployment
         run: helm delete ci-${{ github.run_id }}-kube-latest --wait
         if: ${{ !inputs.tests-full && always() }}
 
@@ -197,12 +197,12 @@ jobs:
           echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
         if: ${{ inputs.tests-full }}
 
-      - name: Deploy Kubernetes 1.27 with latest tag for chart upgrade test
+      - name: Deploy Kubernetes 1.28 with latest tag for chart upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-chart-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
           chart-version: ${{ steps.latest-tag.outputs.tag-name }}
         if: ${{ inputs.tests-full }}
 
@@ -210,8 +210,8 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-chart-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
         if: ${{ inputs.tests-full }}
 
       - name: Delete chart upgrade deployment
@@ -223,15 +223,7 @@ jobs:
       # This will run a sonobuoy smoke test after every step with a full test at the end
       #####
 
-      - name: Deploy Kubernetes 1.25 for Kubernetes upgrade test
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
-        if: ${{ inputs.tests-full }}
-
-      - name: Upgrade to Kubernetes 1.26
+      - name: Deploy Kubernetes 1.26 for Kubernetes upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-kube-upgrade
@@ -245,6 +237,14 @@ jobs:
           name: ci-${{ github.run_id }}-kube-upgrade
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+        if: ${{ inputs.tests-full }}
+
+      - name: Upgrade to Kubernetes 1.28
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-kube-upgrade
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
           sonobuoy-mode: full
           sonobuoy-upload: "yes"
         if: ${{ inputs.tests-full }}
