@@ -33,4 +33,5 @@ nvcr.io:
     nvidia/cloud-native/network-operator:
       - v1.4.0
     nvidia/mellanox/mofed:
+      - 5.7-1.0.2.0-ubuntu20.04-amd64
       - 5.8-1.0.1.1.2-ubuntu20.04-amd64
