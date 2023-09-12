@@ -175,6 +175,23 @@ controlPlane:
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
   nodeLabels:
     # my.company.org/label: value
+  # Additional data volumes for control plane machines
+  machineDataVolumes: {}
+    # The key is the name suffix for the volume (volumes will be named <machinename>-<suffix>)
+    # etcd:
+      # The size of the disk
+      # diskSize: 20
+      # The volume type to use
+      # If not specified, the default volume type is used
+      # volumeType:
+      # The volume availability zone to use
+      # If not specified, the machine availability zone is used
+      # availabilityZone:
+      # Tags for the volume mount
+      # These can be used to identify the device corresponding to the volume for cloud-init
+      # tags: [etcd]
+  # Indicates whether control plane machines should use config drive or not
+  machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
   # The time to wait for a node to detach all volumes before it can be removed
@@ -283,6 +300,23 @@ nodeGroupDefaults:
   # By default, nodes get the label "capi.stackhpc.com/node-group=<node group name>"
   nodeLabels:
     # my.company.org/label: value
+  # Additional data volumes for control plane machines
+  machineDataVolumes: {}
+    # The key is the name suffix for the volume (volumes will be named <machinename>-<suffix>)
+    # etcd:
+      # The size of the disk
+      # diskSize: 20
+      # The volume type to use
+      # If not specified, the default volume type is used
+      # volumeType:
+      # The volume availability zone to use
+      # If not specified, the machine availability zone is used
+      # availabilityZone:
+      # Tags for the volume mount
+      # These can be used to identify the device corresponding to the volume for cloud-init
+      # tags: [etcd]
+  # Indicates whether control plane machines should use config drive or not
+  machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
   # The time to wait for a node to detach all volumes before it can be removed

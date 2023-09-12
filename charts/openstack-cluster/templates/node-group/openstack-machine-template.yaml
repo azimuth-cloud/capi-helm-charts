@@ -15,6 +15,9 @@ template:
     {{- with $ctx.Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
+    {{- if $nodeGroup.machineConfigDrive }}
+    configDrive: true
+    {{- end }}
     {{- if $nodeGroup.machineRootVolume.diskSize }}
     rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
     {{- end }}
@@ -28,6 +31,13 @@ template:
     image: {{ tpl $ctx.Values.machineImage $ctx }}
     {{- else }}
     {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
+    {{- end }}
+    {{- with $nodeGroup.machineDataVolumes }}
+    dataVolumes:
+      {{- range $nameSuffix, $volumeSpec := . }}
+      - nameSuffix: {{ $nameSuffix }}
+        {{- toYaml $volumeSpec | nindent 8 }}
+      {{- end }}
     {{- end }}
     {{- with $nodeGroup.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
