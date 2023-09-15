@@ -13,7 +13,7 @@ template:
     {{- with .Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
-    {{- if .Values.controlPlane.machineConfigDrive }}
+    {{- if or .Values.controlPlane.machineConfigDrive .Values.controlPlane.machineDataVolumes }}
     configDrive: true
     {{- end }}
     {{- if .Values.controlPlane.machineRootVolume.diskSize }}
