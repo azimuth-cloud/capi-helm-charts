@@ -187,9 +187,9 @@ controlPlane:
       # The volume availability zone to use
       # If not specified, the machine availability zone is used
       # availabilityZone:
-      # Tags for the volume mount
-      # These can be used to identify the device corresponding to the volume for cloud-init
-      # tags: [etcd]
+      # Tag for the volume mount
+      # This can be used to identify the device corresponding to the volume for cloud-init
+      # tag: etcd
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
@@ -303,7 +303,7 @@ nodeGroupDefaults:
   # Additional data volumes for control plane machines
   machineDataVolumes: {}
     # The key is the name suffix for the volume (volumes will be named <machinename>-<suffix>)
-    # etcd:
+    # data:
       # The size of the disk
       # diskSize: 20
       # The volume type to use
@@ -312,9 +312,9 @@ nodeGroupDefaults:
       # The volume availability zone to use
       # If not specified, the machine availability zone is used
       # availabilityZone:
-      # Tags for the volume mount
-      # These can be used to identify the device corresponding to the volume for cloud-init
-      # tags: [etcd]
+      # Tag for the volume mount
+      # This can be used to identify the device corresponding to the volume for cloud-init
+      # tag: data
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
