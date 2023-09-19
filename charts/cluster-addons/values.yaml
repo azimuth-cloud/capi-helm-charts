@@ -99,7 +99,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
-      version: 2.3.0
+      version: 2.28.0
     values: {}
     # Variables affecting the definition of the storage class
     storageClass:
