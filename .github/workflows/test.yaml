@@ -160,13 +160,16 @@ jobs:
                 auth:
                   project_id: ${{ secrets.PROJECT_ID }}
                 verify: false
+            registryMirrors:
+              docker.io:
+                - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
             controlPlane:
-              machineFlavor: vm.ska.cpu.general.small
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
               machineCount: 1
             nodeGroups:
-              - machineCount: 2
-                machineFlavor: vm.ska.cpu.general.small
-                name: test-group1
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
 
       #####
       # For the smoke test, we do a clean deployment of the latest supported version

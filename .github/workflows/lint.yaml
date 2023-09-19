@@ -44,11 +44,11 @@ jobs:
             kubernetesVersion: 1.27.2
             machineImageId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
             controlPlane:
-              machineFlavor: vm.ska.cpu.general.small
+              machineFlavor: xxxx
               machineCount: 1
             nodeGroups:
               - machineCount: 2
-                machineFlavor: vm.ska.cpu.general.small
+                machineFlavor: xxxx
                 name: test-group1
 
       - name: Run chart-testing (lint)
