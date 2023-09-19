@@ -25,6 +25,7 @@ runs:
   steps:
     - name: Read dependencies
       id: deps
+      shell: bash
       run: |
         echo "addon-provider=$(jq -r '.["addon-provider"]' ./dependencies.json)" >> $GITHUB_OUTPUT
         echo "cluster-api=$(jq -r '.["cluster-api"]' ./dependencies.json)" >> $GITHUB_OUTPUT
@@ -61,6 +62,7 @@ runs:
       uses: helm/kind-action@v1.5.0
 
     - name: Install cert-manager
+      shell: bash
       run: |-
         helm upgrade cert-manager cert-manager \
           --repo https://charts.jetstack.io \
@@ -73,6 +75,7 @@ runs:
           --timeout 10m
 
     - name: Install clusterctl
+      shell: bash
       run: >
         curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/${CAPI_VERSION}/clusterctl-linux-amd64 -o clusterctl &&
         sudo install -o root -g root -m 0755 clusterctl /usr/local/bin/clusterctl &&
@@ -81,12 +84,14 @@ runs:
         CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
 
     - name: Install Cluster API controllers
+      shell: bash
       run: >
         clusterctl init --infrastructure openstack:${CAPO_VERSION} --wait-providers
       env:
         CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
 
     - name: Install Cluster API add-on provider
+      shell: bash
       run: |-
         helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
           --repo https://stackhpc.github.io/cluster-api-addon-provider \
@@ -98,13 +103,14 @@ runs:
           --timeout 10m
 
     - name: Write cloud credential
+      shell: bash
       run: >
         echo "$CLOUD" > clouds.yml
-      shell: bash
       env:
         CLOUD: ${{ inputs.clouds }}
 
     - name: Write common Helm values
+      shell: bash
       run: >
         echo "$VALUES" > values-common.yaml
       env:
