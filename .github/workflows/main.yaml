@@ -12,18 +12,13 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
 
-  sync_images:
-    needs: [lint]
-    uses: ./.github/workflows/sync-images.yaml
-    secrets: inherit
-
   ensure_capi_images:
     needs: [lint]
     uses: ./.github/workflows/ensure-capi-images.yaml
     secrets: inherit
 
   test:
-    needs: [sync_images, ensure_capi_images]
+    needs: [ensure_capi_images]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
