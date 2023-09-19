@@ -246,7 +246,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://nvidia.github.io/gpu-operator
     name: gpu-operator
-    version: v22.9.1
+    version: v23.6.1
   release:
     namespace: gpu-operator
     values:
