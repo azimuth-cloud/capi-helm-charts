@@ -5,9 +5,6 @@ on:
   # Run nightly
   schedule:
     - cron: '0 0 * * *'
-  push:
-    branches:
-      - feature/addon-autoupdate
 
 jobs:
   propose_update_pr:
