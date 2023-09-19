@@ -33,9 +33,11 @@ inputs:
     description: The ID of the image to use
     required: true
   sonobuoy-mode:
-    description: Specify "full" to do a full Sonobuoy run, anything else runs a smoke test only
+    description: |
+      The mode for the Sonobuoy run.
+      One of certified-conformance, conformance-lite, non-disruptive-conformance, quick.
     required: true
-    default: smoke
+    default: quick
   sonobuoy-upload:
     description: Specify "yes" to upload the Sonobuoy run as an artifact
     required: true
@@ -121,19 +123,11 @@ runs:
           -o go-template='{{ .data.value | base64decode }}' \
           > kubeconfig
 
-    - name: Run sonobuoy [smoke]
+    - name: Run sonobuoy
       shell: bash
-      run: sonobuoy run --mode quick --wait
+      run: sonobuoy run --mode ${{ inputs.sonobuoy-mode }} --wait
       env:
         KUBECONFIG: ./kubeconfig
-      if: "${{ inputs.sonobuoy-mode != 'full' }}"
-
-    - name: Run sonobuoy [full]
-      shell: bash
-      run: sonobuoy run --wait
-      env:
-        KUBECONFIG: ./kubeconfig
-      if: "${{ inputs.sonobuoy-mode == 'full' }}"
 
     - name: Retrieve sonobuoy results
       shell: bash

@@ -4,9 +4,13 @@ description: >-
   Sets up a Cluster API management cluster for a test.
 
 inputs:
-  clouds:
+  os-clouds:
     description: The clouds.yaml file to write into the environment.
     required: true
+  os-clouds-path:
+    description: The path to write the OpenStack clouds file.
+    required: true
+    default: ./clouds.yml
   project-id:
     description: The project ID for the target OpenStack project.
     required: true
@@ -19,6 +23,10 @@ inputs:
   node-group-flavor:
     description: The flavor to use for the node group.
     required: true
+  values-common-path:
+    description: The path to write the common values.
+    required: true
+    default: ./values-common.yaml
 
 runs:
   using: "composite"
@@ -105,14 +113,14 @@ runs:
     - name: Write cloud credential
       shell: bash
       run: >
-        echo "$CLOUD" > clouds.yml
+        echo "$CLOUD" > ${{ inputs.os-clouds-path }}
       env:
-        CLOUD: ${{ inputs.clouds }}
+        CLOUD: ${{ inputs.os-clouds }}
 
     - name: Write common Helm values
       shell: bash
       run: >
-        echo "$VALUES" > values-common.yaml
+        echo "$VALUES" > ${{ inputs.values-common-path }}
       env:
         VALUES: |
           clouds:

@@ -22,7 +22,7 @@ jobs:
       - name: Set up test environment
         uses: ./.github/actions/setup
         with:
-          clouds: ${{ secrets.CLOUD }}
+          os-clouds: ${{ secrets.CLOUD }}
           project-id: ${{ secrets.PROJECT_ID }}
           docker-hub-mirror-url: ${{ secrets.DOCKER_HUB_MIRROR_URL }}
           control-plane-flavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
@@ -105,7 +105,7 @@ jobs:
           name: ci-${{ github.run_id }}-kube-upgrade
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-          sonobuoy-mode: full
+          sonobuoy-mode: certified-conformance
           sonobuoy-upload: "yes"
         if: ${{ inputs.tests-full }}
 
