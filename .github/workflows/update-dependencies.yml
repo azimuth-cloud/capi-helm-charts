@@ -47,9 +47,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install script dependencies
-        run: pip install -r .github/scripts/requirements.txt
-
       - name: Check for updates (Helm)
         id: helm-version
         uses: stackhpc/github-actions/helm-latest-version@master
