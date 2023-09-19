@@ -1,0 +1,105 @@
+name: Update addons
+on:
+  # Allow manual executions
+  workflow_dispatch:
+  # Run nightly
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches:
+      - feature/addon-autoupdate
+
+jobs:
+  propose_update_pr:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - key: calico
+            path: cni.calico.chart
+
+          - key: cilium
+            path: cni.cilium.chart
+
+          - key: openstack-ccm
+            path: openstack.ccm.chart
+
+          - key: csi-cinder
+            path: openstack.csiCinder.chart
+
+          - key: metrics-server
+            path: metricsServer.chart
+
+          - key: kubernetes-dashboard
+            path: kubernetesDashboard.chart
+
+          - key: ingress-nginx
+            path: ingress.nginx.chart
+
+          - key: kube-prometheus-stack
+            path: monitoring.kubePrometheusStack.chart
+
+          - key: loki-stack
+            path: monitoring.lokiStack.chart
+
+          - key: node-feature-discovery
+            path: nodeFeatureDiscovery.chart
+
+          - key: nvidia-gpu-operator
+            path: nvidiaGPUOperator.chart
+
+          - key: mellanox-network-operator
+            path: mellanoxNetworkOperator.chart
+
+    name: ${{ matrix.key }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Extract repo and chart from values.yaml
+        id: chart-info
+        uses: stackhpc/github-actions/config-extract@master
+        with:
+          path: ./charts/cluster-addons/values.yaml
+          outputs:
+            repo=${{ matrix.path }}.repo
+            name=${{ matrix.path }}.name
+
+      - name: Check for updates
+        id: next
+        uses: stackhpc/github-actions/helm-latest-version@master
+        with:
+          repository: ${{ steps.chart-info.outputs.repo }}
+          chart: ${{ steps.chart-info.outputs.name }}
+
+      - name: Update chart version in values.yaml
+        uses: stackhpc/github-actions/config-update@master
+        with:
+          path: ./charts/cluster-addons/values.yaml
+          updates: |
+            ${{ matrix.path }}.version=${{ steps.next.outputs.version }}
+
+      - name: Generate app token for PR
+        uses: stackhpc/github-actions/generate-app-token@master
+        id: generate-app-token
+        with:
+          repository: ${{ github.repository }}
+          app-id: ${{ secrets.APP_ID }}
+          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Propose changes via PR if required
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ steps.generate-app-token.outputs.token }}
+          commit-message: >-
+            Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
+          branch: update-addon/${{ matrix.key }}
+          delete-branch: true
+          title: >-
+            Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
+          body: >
+            This PR was created automatically to update the
+            ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}.
+          labels: |
+            automation
+            addon-update
