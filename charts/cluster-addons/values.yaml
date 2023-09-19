@@ -264,7 +264,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://mellanox.github.io/network-operator
     name: network-operator
-    version: 1.4.0
+    version: 23.1.0
   release:
     namespace: network-operator
     values: {}
