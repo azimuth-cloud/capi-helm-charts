@@ -129,7 +129,7 @@ metricsServer:
   chart:
     repo: https://kubernetes-sigs.github.io/metrics-server
     name: metrics-server
-    version: 3.8.3
+    version: 3.11.0
   release:
     namespace: kube-system
     values: {}
