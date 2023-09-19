@@ -23,9 +23,6 @@ template:
     {{- else }}
     {{- fail "Either machineImage or machineImageId is required" }}
     {{- end }}
-    {{- with .Values.controlPlane.machineNetworking.networks }}
-    networks: {{ toYaml . | nindent 6 }}
-    {{- end }}
     {{- with .Values.controlPlane.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
@@ -40,7 +37,7 @@ template:
 {{- include "openstack-cluster.componentName" (list . "control-plane") }}-{{ trunc 8 $checksum }}
 {{- end }}
 
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha6
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
 kind: OpenStackMachineTemplate
 metadata:
   name: {{ include "openstack-cluster.controlplane.mt.name" . }}
