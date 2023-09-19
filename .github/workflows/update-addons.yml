@@ -61,7 +61,7 @@ jobs:
         uses: stackhpc/github-actions/config-extract@master
         with:
           path: ./charts/cluster-addons/values.yaml
-          outputs:
+          outputs: |
             repo=${{ matrix.path }}.repo
             name=${{ matrix.path }}.name
 
