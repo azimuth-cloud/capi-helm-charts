@@ -10,16 +10,16 @@ concurrency:
 
 jobs:
   lint:
-    uses: ./.github/workflows/lint.yaml
+    uses: ./.github/workflows/include/lint.yaml
 
   ensure_capi_images:
     needs: [lint]
-    uses: ./.github/workflows/ensure-capi-images.yaml
+    uses: ./.github/workflows/include/ensure-capi-images.yaml
     secrets: inherit
 
   test:
     needs: [ensure_capi_images]
-    uses: ./.github/workflows/test.yaml
+    uses: ./.github/workflows/include/test.yaml
     secrets: inherit
     with:
       # Pass the images as JSON
