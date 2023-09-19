@@ -76,7 +76,7 @@ jobs:
 
       - name: Install Cluster API controllers
         run: >
-          clusterctl init --infrastructure openstack:${CAPO_VERSION}
+          clusterctl init --infrastructure openstack:${CAPO_VERSION} --wait-providers
         env:
           CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
 
