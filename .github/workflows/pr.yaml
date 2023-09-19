@@ -16,18 +16,18 @@ concurrency:
 jobs:
   # Run the lint on every PR, even from external repos
   lint:
-    uses: ./.github/workflows/include/lint.yaml
+    uses: ./.github/workflows/lint.yaml
 
   # Only run tests on the main repo
   ensure_capi_images:
     needs: [lint]
-    uses: ./.github/workflows/include/ensure-capi-images.yaml
+    uses: ./.github/workflows/ensure-capi-images.yaml
     secrets: inherit
     if: github.repository == 'stackhpc/capi-helm-charts'
 
   test:
     needs: [ensure_capi_images]
-    uses: ./.github/workflows/include/test.yaml
+    uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
       # Pass the images as JSON
