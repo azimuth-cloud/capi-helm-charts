@@ -214,10 +214,20 @@ jobs:
 #              monitoring:
 #                enabled: true
 
+      # For the setup, we use a merged dependencies file in case new dependencies
+      # are added by the code under test, ensuring that the older dependencies are
+      # used where they are specified
+      - name: Create merged dependencies file
+        run: >
+          jq -s '.[0] * .[1]' \
+            current/dependencies.json \
+            latest-tag/dependencies.json \
+            > dependencies-merged.json
+
       - name: Set up test environment with dependencies from latest tag
         uses: ./current/.github/actions/setup
         with:
-          dependencies-path: latest-tag/dependencies.json
+          dependencies-path: dependencies-merged.json
 
       - name: Deploy Kubernetes 1.28 with latest tag
         uses: ./current/.github/actions/upgrade-and-test
