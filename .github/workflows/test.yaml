@@ -162,8 +162,17 @@ jobs:
     runs-on: ubuntu-latest
     # if: ${{ inputs.tests-full }}
     steps:
-      - name: Checkout
+      - name: Get latest tag
+        id: latest-tag
+        run: |
+          set -eo pipefail
+          TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
+          echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout latest tag
         uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.latest-tag.outputs.tag-name }}
 
       - name: Set up test environment
         uses: ./.github/actions/setup
@@ -196,18 +205,11 @@ jobs:
               - name: md-0
                 machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
                 machineCount: 2
-            addons:
-              kubernetesDashboard:
-                enabled: true
-              monitoring:
-                enabled: true
-
-      # - name: Get latest tag
-      #   id: latest-tag
-      #   run: |
-      #     set -eo pipefail
-      #     TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
-      #     echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+#            addons:
+#              kubernetesDashboard:
+#                enabled: true
+#              monitoring:
+#                enabled: true
 
       # - name: Deploy Kubernetes 1.28 with latest tag for chart upgrade test
       #   uses: ./.github/actions/upgrade-and-test
