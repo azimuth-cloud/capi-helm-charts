@@ -27,7 +27,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Write cloud credential
-        run: echo "$CLOUD" > ${{ inputs.os-clouds-path }}
+        run: echo "$CLOUD" > ./clouds.yaml
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
@@ -94,7 +94,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Write cloud credential
-        run: echo "$CLOUD" > ${{ inputs.os-clouds-path }}
+        run: echo "$CLOUD" > ./clouds.yaml
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
@@ -168,7 +168,7 @@ jobs:
   #       uses: ./.github/actions/setup
 
   #     - name: Write cloud credential
-  #       run: echo "$CLOUD" > ${{ inputs.os-clouds-path }}
+  #       run: echo "$CLOUD" > ./clouds.yaml
   #       env:
   #         CLOUD: ${{ secrets.CLOUD }}
 

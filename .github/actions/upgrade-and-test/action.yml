@@ -11,7 +11,7 @@ inputs:
   os-client-config-file:
     description: The path of the OpenStack clouds file
     required: true
-    default: ./clouds.yml
+    default: ./clouds.yaml
   os-cloud:
     description: The name of the cloud within the OpenStack clouds file
     required: true
