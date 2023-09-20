@@ -15,7 +15,6 @@ runs:
       id: deps
       shell: bash
       run: |
-        set -e
         echo "addon-provider=$(jq -r '.["addon-provider"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cluster-api=$(jq -r '.["cluster-api"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cluster-api-janitor-openstack=$(jq -r '.["cluster-api-janitor-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
@@ -72,12 +71,39 @@ runs:
       env:
         CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
 
-    - name: Install Cluster API controllers
+    - name: Install or upgrade Cluster API controllers
       shell: bash
-      run: >
-        clusterctl init --infrastructure openstack:${CAPO_VERSION} --wait-providers
+      run: |-
+        clusterctl generate provider \
+          --core cluster-api:${CAPI_VERSION} \
+          --control-plane kubeadm:${CAPI_VERSION} \
+          --bootstrap kubeadm:${CAPI_VERSION} \
+          --infrastructure openstack:${CAPO_VERSION} \
+          --write-to capi-components.yaml
+        &&
+        kubectl apply -f capi-components.yaml
       env:
+        CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
         CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
+
+    - name: Wait for Cluster API controllers to become ready
+      shell: bash
+      run: |-
+        kubectl rollout status deployment/capi-controller-manager \
+          --namespace capi-system \
+          --timeout 5m \
+        && \
+        kubectl rollout status deployment/capi-kubeadm-bootstrap-controller-manager \
+          --namespace capi-kubeadm-bootstrap-system \
+          --timeout 5m \
+        && \
+        kubectl rollout status deployment/capi-kubeadm-control-plane-controller-manager \
+          --namespace capi-kubeadm-control-plane-system \
+          --timeout 5m \
+        && \
+        kubectl rollout status deployment/capo-controller-manager \
+          --namespace capo-system \
+          --timeout 5m
 
     - name: Install Cluster API add-on provider
       shell: bash
