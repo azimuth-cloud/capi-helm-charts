@@ -12,6 +12,7 @@ runs:
       run: |
         echo "addon-provider=$(jq -r '.["addon-provider"]' ./dependencies.json)" >> $GITHUB_OUTPUT
         echo "cluster-api=$(jq -r '.["cluster-api"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+        echo "cluster-api-janitor-openstack=$(jq -r '.["cluster-api-janitor-openstack"]' ./dependencies.json)" >> $GITHUB_OUTPUT
         echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' ./dependencies.json)" >> $GITHUB_OUTPUT
         echo "cert-manager=$(jq -r '.["cert-manager"]' ./dependencies.json)" >> $GITHUB_OUTPUT
         echo "helm=$(jq -r '.["helm"]' ./dependencies.json)" >> $GITHUB_OUTPUT
@@ -80,6 +81,18 @@ runs:
           --repo https://stackhpc.github.io/cluster-api-addon-provider \
           --version ${{ steps.deps.outputs.addon-provider }} \
           --namespace capi-addon-system \
+          --create-namespace \
+          --install \
+          --wait \
+          --timeout 10m
+
+    - name: Install Cluster API janitor
+      shell: bash
+      run: |-
+        helm upgrade cluster-api-janitor-openstack cluster-api-janitor-openstack \
+          --repo https://stackhpc.github.io/cluster-api-janitor-openstack \
+          --version ${{ steps.deps.outputs.cluster-api-janitor-openstack }} \
+          --namespace capi-janitor-system \
           --create-namespace \
           --install \
           --wait \
