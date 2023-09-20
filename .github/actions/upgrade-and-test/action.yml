@@ -129,8 +129,9 @@ runs:
         set -e
         NAMESPACES=$(kubectl get ns --no-headers --output jsonpath='{.items[*].metadata.name}')
         for ns in $NAMESPACES; do
+          echo "namespace: $ns"
           kubectl rollout status \
-            --namespace "$ns"
+            --namespace "$ns" \
             --watch \
             --timeout 20m  \
             deployments,statefulsets,daemonsets
