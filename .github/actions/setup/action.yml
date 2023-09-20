@@ -50,9 +50,6 @@ runs:
       with:
         version: ${{ steps.deps.outputs.helm }}
 
-    - name: Create k8s Kind Cluster
-      uses: helm/kind-action@v1.8.0
-
     - name: Install cert-manager
       shell: bash
       run: |-

@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+
       - name: Set up test environment
         uses: ./.github/actions/setup
 
@@ -90,6 +93,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
 
       - name: Set up test environment
         uses: ./.github/actions/setup
@@ -213,6 +219,9 @@ jobs:
 #                enabled: true
 #              monitoring:
 #                enabled: true
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
 
       # For the setup, we use a merged dependencies file in case new dependencies
       # are added by the code under test, ensuring that the older dependencies are
