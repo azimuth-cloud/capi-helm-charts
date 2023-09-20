@@ -40,6 +40,10 @@ inputs:
     description: Specify "yes" to upload the Sonobuoy run as an artifact
     required: true
     default: "no"
+  skip-workload-status:
+    description: Specify "yes" to skip the workload status check
+    required: true
+    default: "no"
 
 runs:
   using: "composite"
@@ -124,6 +128,7 @@ runs:
         done
       env:
         KUBECONFIG: ./kubeconfig
+      if: "${{ inputs.skip-workload-status != 'yes' }}"
 
     - name: Run sonobuoy
       shell: bash
