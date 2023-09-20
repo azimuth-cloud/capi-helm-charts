@@ -117,6 +117,11 @@ jobs:
             controlPlane:
               machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
               machineCount: 1
+              nodeDrainTimeout: 30s
+              nodeVolumeDetachTimeout: 30s
+            nodeGroupDefaults:
+              nodeDrainTimeout: 30s
+              nodeVolumeDetachTimeout: 30s
             nodeGroups:
               - name: md-0
                 machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
