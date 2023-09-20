@@ -40,10 +40,12 @@ jobs:
         include:
           - name: kube-1-26
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-focal }}
-            skip: ${{ github.event.pull_request.draft }}
+            skip: false
+            # skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-27
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-focal }}
-            skip: ${{ github.event.pull_request.draft }}
+            skip: false
+            # skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-28
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-28-focal }}
             skip: false
