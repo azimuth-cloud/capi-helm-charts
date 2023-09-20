@@ -8,12 +8,16 @@ on:
         required: true
       tests-full:
         type: boolean
-        description: Indicates whether to run the full test suite or just a smoke test
+        description: Indicates whether to run the full test suite or just a sanity check
         required: true
         default: false
 
 jobs:
-  test-chart:
+  # This job tests a clean deployment against the latest version
+  # It is the only job that runs when tests-full=false
+  # For tests-full=true it creates an internal network + router and runs Sonobuoy in conformance mode
+  # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
+  latest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,110 +25,205 @@ jobs:
 
       - name: Set up test environment
         uses: ./.github/actions/setup
-        with:
-          os-clouds: ${{ secrets.CLOUD }}
-          project-id: ${{ secrets.PROJECT_ID }}
-          docker-hub-mirror-url: ${{ secrets.DOCKER_HUB_MIRROR_URL }}
-          control-plane-flavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
-          node-group-flavor: ${{ secrets.NODE_GROUP_FLAVOR }}
 
-      #####
-      # For the smoke test, we do a clean deployment of the latest supported version
-      #####
+      - name: Write cloud credential
+        run: echo "$CLOUD" > ${{ inputs.os-clouds-path }}
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - name: Write Helm values
+        run: echo "$VALUES" > ./values.yaml
+        env:
+          VALUES: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
+            registryMirrors:
+              docker.io:
+                - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
+            controlPlane:
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
+              machineCount: 1
+            nodeGroups:
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
+
+      - name: Apply network configuration
+        run: echo "$NETWORKING" >> ./values.yaml
+        env:
+          NETWORKING: |
+            clusterNetworking:
+              internalNetwork:
+                networkFilter:
+                  tags: capi-helm-chart-ci
+        if: ${{ !inputs.tests-full }}
 
       - name: Test clean Kubernetes 1.28 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-kube-latest
+          name: ci-${{ github.run_id }}-${{ github.job }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-          sonobuoy-upload: "yes"
-        if: ${{ !inputs.tests-full }}
+          sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
+          sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
       - name: Delete Kubernetes 1.28 deployment
-        run: helm delete ci-${{ github.run_id }}-kube-latest --wait
-        if: ${{ !inputs.tests-full && always() }}
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+        if: ${{ always() }}
 
-      #####
-      # On a full test, first test that we can upgrade from a cluster deployed using the latest tag
-      #####
-
-      - name: Get latest tag
-        id: latest-tag
-        run: |
-          set -eo pipefail
-          TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
-          echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
-        if: ${{ inputs.tests-full }}
-
-      - name: Deploy Kubernetes 1.28 with latest tag for chart upgrade test
-        uses: ./.github/actions/upgrade-and-test
+      - name: Upload logs
+        uses: ./.github/actions/upload-logs
         with:
-          name: ci-${{ github.run_id }}-chart-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-          chart-version: ${{ steps.latest-tag.outputs.tag-name }}
-        if: ${{ inputs.tests-full }}
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
 
-      - name: Upgrade to current chart
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-chart-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-        if: ${{ inputs.tests-full }}
+  # This job tests Kubernetes upgrade
+  # It only runs for non-draft PRs
+  # It uses a pre-existing internal network
+  kube-upgrade:
+    runs-on: ubuntu-latest
+    # if: ${{ inputs.tests-full }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Delete chart upgrade deployment
-        run: helm delete ci-${{ github.run_id }}-chart-upgrade --wait
-        if: ${{ inputs.tests-full && always() }}
+      - name: Set up test environment
+        uses: ./.github/actions/setup
 
-      #####
-      # On a full test, next run a full upgrade test
-      # This will run a sonobuoy smoke test after every step with a full test at the end
-      #####
+      - name: Write cloud credential
+        run: echo "$CLOUD" > ${{ inputs.os-clouds-path }}
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - name: Write Helm values
+        run: echo "$VALUES" > ./values.yaml
+        env:
+          VALUES: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
+            registryMirrors:
+              docker.io:
+                - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
+            clusterNetworking:
+              internalNetwork:
+                networkFilter:
+                  tags: capi-helm-chart-ci
+            controlPlane:
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
+              machineCount: 1
+            nodeGroups:
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
 
       - name: Deploy Kubernetes 1.26 for Kubernetes upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-kube-upgrade
+          name: ci-${{ github.run_id }}-${{ github.job }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
-        if: ${{ inputs.tests-full }}
 
       - name: Upgrade to Kubernetes 1.27
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-kube-upgrade
+          name: ci-${{ github.run_id }}-${{ github.job }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-        if: ${{ inputs.tests-full }}
 
       - name: Upgrade to Kubernetes 1.28
         uses: ./.github/actions/upgrade-and-test
         with:
-          name: ci-${{ github.run_id }}-kube-upgrade
+          name: ci-${{ github.run_id }}-${{ github.job }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-          sonobuoy-mode: certified-conformance
-          sonobuoy-upload: "yes"
-        if: ${{ inputs.tests-full }}
 
       - name: Delete Kubernetes upgrade deployment
-        run: helm delete ci-${{ github.run_id }}-kube-upgrade --wait
-        if: ${{ inputs.tests-full && always() }}
-
-      - name: Output controller logs
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
         if: ${{ always() }}
-        run: |
-          kubectl -n capi-system logs deploy/capi-controller-manager > capi-logs.txt
-          kubectl -n capi-kubeadm-control-plane-system logs deploy/capi-kubeadm-control-plane-controller-manager > capi-kubeadm-control-plane-logs.txt
-          kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
-          kubectl -n capo-system logs deploy/capo-controller-manager > capo-logs.txt
-          kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
 
-      - name: Upload controller log artifacts
-        uses: actions/upload-artifact@v3
-        if: ${{ always() }} 
+      - name: Upload logs
+        uses: ./.github/actions/upload-logs
         with:
-          name: cluster-api-controller-logs
-          path: ./*-logs.txt
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
+
+  # This jobs tests upgrading the chart + dependencies
+  # It only runs for non-draft PRs
+  # It uses a pre-existing internal network
+  # It installs ALL of the addons so that we test upgrading them
+  # chart-upgrade:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ inputs.tests-full }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up test environment
+  #       uses: ./.github/actions/setup
+
+  #     - name: Write cloud credential
+  #       run: echo "$CLOUD" > ${{ inputs.os-clouds-path }}
+  #       env:
+  #         CLOUD: ${{ secrets.CLOUD }}
+
+  #     - name: Write Helm values
+  #       run: echo "$VALUES" > ./values.yaml
+  #       env:
+  #         VALUES: |
+  #           clouds:
+  #             openstack:
+  #               auth:
+  #                 project_id: ${{ secrets.PROJECT_ID }}
+  #               verify: false
+  #           registryMirrors:
+  #             docker.io:
+  #               - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
+  #           clusterNetworking:
+  #             internalNetwork:
+  #               networkFilter:
+  #                 tags: capi-helm-chart-ci
+  #           controlPlane:
+  #             machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
+  #             machineCount: 1
+  #           nodeGroups:
+  #             - name: md-0
+  #               machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+  #               machineCount: 2
+
+  #     - name: Get latest tag
+  #       id: latest-tag
+  #       run: |
+  #         set -eo pipefail
+  #         TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
+  #         echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+
+  #     - name: Deploy Kubernetes 1.28 with latest tag for chart upgrade test
+  #       uses: ./.github/actions/upgrade-and-test
+  #       with:
+  #         name: ci-${{ github.run_id }}-${{ github.job }}
+  #         kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+  #         image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
+  #         chart-version: ${{ steps.latest-tag.outputs.tag-name }}
+
+  #     - name: Upgrade to current chart
+  #       uses: ./.github/actions/upgrade-and-test
+  #       with:
+  #         name: ci-${{ github.run_id }}-${{ github.job }}
+  #         kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+  #         image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
+
+  #     - name: Delete chart upgrade deployment
+  #       run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+  #       if: ${{ always() }}
+
+  #     - name: Upload logs
+  #       uses: ./.github/actions/upload-logs
+  #       with:
+  #         name-suffix: ${{ github.job }}
+  #       if: ${{ always() }}

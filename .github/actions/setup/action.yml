@@ -3,31 +3,6 @@ name: Set up test environment
 description: >-
   Sets up a Cluster API management cluster for a test.
 
-inputs:
-  os-clouds:
-    description: The clouds.yaml file to write into the environment.
-    required: true
-  os-clouds-path:
-    description: The path to write the OpenStack clouds file.
-    required: true
-    default: ./clouds.yml
-  project-id:
-    description: The project ID for the target OpenStack project.
-    required: true
-  docker-hub-mirror-url:
-    description: The URL of the Docker Hub mirror to use.
-    required: true
-  control-plane-flavor:
-    description: The flavor to use for control plane nodes.
-    required: true
-  node-group-flavor:
-    description: The flavor to use for the node group.
-    required: true
-  values-common-path:
-    description: The path to write the common values.
-    required: true
-    default: ./values-common.yaml
-
 runs:
   using: "composite"
   steps:
@@ -109,32 +84,3 @@ runs:
           --install \
           --wait \
           --timeout 10m
-
-    - name: Write cloud credential
-      shell: bash
-      run: >
-        echo "$CLOUD" > ${{ inputs.os-clouds-path }}
-      env:
-        CLOUD: ${{ inputs.os-clouds }}
-
-    - name: Write common Helm values
-      shell: bash
-      run: >
-        echo "$VALUES" > ${{ inputs.values-common-path }}
-      env:
-        VALUES: |
-          clouds:
-            openstack:
-              auth:
-                project_id: ${{ inputs.project-id }}
-              verify: false
-          registryMirrors:
-            docker.io:
-              - ${{ inputs.docker-hub-mirror-url }}
-          controlPlane:
-            machineFlavor: ${{ inputs.control-plane-flavor }}
-            machineCount: 1
-          nodeGroups:
-            - name: md-0
-              machineFlavor: ${{ inputs.node-group-flavor }}
-              machineCount: 2

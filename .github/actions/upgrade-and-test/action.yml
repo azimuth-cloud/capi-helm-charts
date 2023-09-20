@@ -22,10 +22,10 @@ inputs:
       use the chart from the directory in the current checkout.
     required: true
     default: ""
-  values-common-path:
-    description: The path to a file containing common values
+  values-path:
+    description: The path to a file containing Helm values
     required: true
-    default: ./values-common.yaml
+    default: ./values.yaml
   kubernetes-version:
     description: The Kubernetes version in the image
     required: true
@@ -53,7 +53,7 @@ runs:
           --install \
           --dependency-update \
           --values ${{ inputs.os-client-config-file }} \
-          --values ${{ inputs.values-common-path }} \
+          --values ${{ inputs.values-path }} \
           --set cloudName=${{ inputs.os-cloud }} \
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
@@ -67,7 +67,7 @@ runs:
           --version ${{ inputs.chart-version }} \
           --install \
           --values ${{ inputs.os-client-config-file }} \
-          --values ${{ inputs.values-common-path }} \
+          --values ${{ inputs.values-path }} \
           --set cloudName=${{ inputs.os-cloud }} \
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}

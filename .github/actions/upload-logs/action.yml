@@ -1,0 +1,27 @@
+name: Upload logs
+
+description: >-
+  Upload Cluster API controller logs as a workflow artifact.
+
+inputs:
+  name-suffix:
+    description: The suffix to add to the controller logs.
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Output controller logs
+      shell: bash
+      run: |
+        kubectl -n capi-system logs deploy/capi-controller-manager > capi-logs.txt
+        kubectl -n capi-kubeadm-control-plane-system logs deploy/capi-kubeadm-control-plane-controller-manager > capi-kubeadm-control-plane-logs.txt
+        kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
+        kubectl -n capo-system logs deploy/capo-controller-manager > capo-logs.txt
+        kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
+
+    - name: Upload controller log artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: cluster-api-controller-logs-${{ inputs.name-suffix }}
+        path: ./*-logs.txt
