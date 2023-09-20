@@ -162,6 +162,11 @@ jobs:
     runs-on: ubuntu-latest
     # if: ${{ inputs.tests-full }}
     steps:
+      - name: Checkout current
+        uses: actions/checkout@v3
+        with:
+          path: current
+
       - name: Get latest tag
         id: latest-tag
         run: |
@@ -173,9 +178,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ steps.latest-tag.outputs.tag-name }}
-
-      - name: Set up test environment
-        uses: ./.github/actions/setup
+          path: latest-tag
 
       - name: Write cloud credential
         run: echo "$CLOUD" > ./clouds.yaml
@@ -211,24 +214,15 @@ jobs:
 #              monitoring:
 #                enabled: true
 
-      # - name: Deploy Kubernetes 1.28 with latest tag for chart upgrade test
-      #   uses: ./.github/actions/upgrade-and-test
-      #   with:
-      #     name: ci-${{ github.run_id }}-${{ github.job }}
-      #     kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
-      #     image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-      #     chart-version: ${{ steps.latest-tag.outputs.tag-name }}
-
-      # - name: Upgrade to current chart
-      #   uses: ./.github/actions/upgrade-and-test
-      #   with:
-      #     name: ci-${{ github.run_id }}-${{ github.job }}
-      #     kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
-      #     image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-
-      - name: Test clean Kubernetes 1.28 deployment
-        uses: ./.github/actions/upgrade-and-test
+      - name: Set up test environment with dependencies from latest tag
+        uses: ./current/.github/actions/setup
         with:
+          dependencies-path: latest-tag/dependencies.json
+
+      - name: Deploy Kubernetes 1.28 with latest tag
+        uses: ./current/.github/actions/upgrade-and-test
+        with:
+          chart-directory: latest-tag/charts/openstack-cluster
           name: ci-${{ github.run_id }}-${{ github.job }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
@@ -238,7 +232,7 @@ jobs:
         if: ${{ always() }}
 
       - name: Upload logs
-        uses: ./.github/actions/upload-logs
+        uses: ./current/.github/actions/upload-logs
         with:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}

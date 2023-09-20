@@ -3,6 +3,11 @@ name: Set up test environment
 description: >-
   Sets up a Cluster API management cluster for a test.
 
+inputs:
+  dependencies-path:
+    description: Path to the dependencies file to use.
+    default: dependencies.json
+
 runs:
   using: "composite"
   steps:
@@ -10,13 +15,16 @@ runs:
       id: deps
       shell: bash
       run: |
-        echo "addon-provider=$(jq -r '.["addon-provider"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-        echo "cluster-api=$(jq -r '.["cluster-api"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-        echo "cluster-api-janitor-openstack=$(jq -r '.["cluster-api-janitor-openstack"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-        echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-        echo "cert-manager=$(jq -r '.["cert-manager"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-        echo "helm=$(jq -r '.["helm"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-        echo "sonobuoy=$(jq -r '.["sonobuoy"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+        set -e
+        echo "addon-provider=$(jq -r '.["addon-provider"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cluster-api=$(jq -r '.["cluster-api"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cluster-api-janitor-openstack=$(jq -r '.["cluster-api-janitor-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cert-manager=$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "helm=$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "sonobuoy=$(jq -r '.["sonobuoy"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+      env:
+        DEPENDENCIES_PATH: ${{ inputs.dependencies-path }}
 
     - name: Install tools
       shell: bash

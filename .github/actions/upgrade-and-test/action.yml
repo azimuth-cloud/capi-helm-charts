@@ -16,12 +16,10 @@ inputs:
     description: The name of the cloud within the OpenStack clouds file
     required: true
     default: openstack
-  chart-version:
-    description: >-
-      Use the specified chart version from the repo if given. If not,
-      use the chart from the directory in the current checkout.
+  chart-directory:
+    description: The directory containing the chart
     required: true
-    default: ""
+    default: charts/openstack-cluster
   values-path:
     description: The path to a file containing Helm values
     required: true
@@ -46,32 +44,20 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Update dependencies for chart
+      shell: bash
+      run: helm dependency update ${{ inputs.chart-directory }}
+
     - name: Install or upgrade cluster from directory
       shell: bash
       run: |-
-        helm upgrade ${{ inputs.name }} ./charts/openstack-cluster \
-          --install \
-          --dependency-update \
-          --values ${{ inputs.os-client-config-file }} \
-          --values ${{ inputs.values-path }} \
-          --set cloudName=${{ inputs.os-cloud }} \
-          --set kubernetesVersion=${{ inputs.kubernetes-version }} \
-          --set machineImageId=${{ inputs.image-id }}
-      if: "${{ inputs.chart-version == '' }}"
-
-    - name: Install or upgrade cluster from repository
-      shell: bash
-      run: |-
-        helm upgrade ${{ inputs.name }} openstack-cluster \
-          --repo https://stackhpc.github.io/capi-helm-charts \
-          --version ${{ inputs.chart-version }} \
+        helm upgrade ${{ inputs.name }} ${{ inputs.chart-directory }} \
           --install \
           --values ${{ inputs.os-client-config-file }} \
           --values ${{ inputs.values-path }} \
           --set cloudName=${{ inputs.os-cloud }} \
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
-      if: "${{ inputs.chart-version != '' }}"
 
     # Wait for any upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
