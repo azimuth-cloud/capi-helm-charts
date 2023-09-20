@@ -123,6 +123,21 @@ runs:
           -o go-template='{{ .data.value | base64decode }}' \
           > kubeconfig
 
+    - name: Wait for all workloads rollouts to complete
+      shell: bash
+      run: |-
+        set -e
+        NAMESPACES=$(kubectl get ns --no-headers --output jsonpath='{.items[*].metadata.name}')
+        for ns in $NAMESPACES; do
+          kubectl rollout status \
+            --namespace "$ns"
+            --watch \
+            --timeout 20m  \
+            deployments,statefulsets,daemonsets
+        done
+      env:
+        KUBECONFIG: ./kubeconfig
+
     - name: Run sonobuoy
       shell: bash
       run: sonobuoy run --mode ${{ inputs.sonobuoy-mode }} --wait
