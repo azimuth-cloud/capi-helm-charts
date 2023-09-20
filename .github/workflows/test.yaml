@@ -154,7 +154,7 @@ jobs:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}
 
-  # This jobs tests upgrading the chart + dependencies
+  # This jobs tests upgrading the chart + dependencies from the latest tag
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network
   # It installs ALL of the addons so that we test upgrading them
