@@ -19,7 +19,6 @@ jobs:
   # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
   latest:
     runs-on: ubuntu-latest
-    if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -166,7 +165,7 @@ jobs:
   # It installs ALL of the addons so that we test upgrading them
   chart-upgrade:
     runs-on: ubuntu-latest
-    # if: ${{ inputs.tests-full }}
+    if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout current
         uses: actions/checkout@v3
@@ -214,11 +213,11 @@ jobs:
               - name: md-0
                 machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
                 machineCount: 2
-#            addons:
-#              kubernetesDashboard:
-#                enabled: true
-#              monitoring:
-#                enabled: true
+            addons:
+              kubernetesDashboard:
+                enabled: true
+              monitoring:
+                enabled: true
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
