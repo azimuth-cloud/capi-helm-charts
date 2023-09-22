@@ -52,25 +52,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install script dependencies
-        run: pip install -r .github/scripts/requirements.txt
-
       - name: Check for updates (Helm)
-        id: helm-update-version
-        run: |
-          .github/scripts/helm-update-version \
-            ${{ matrix.repo_url }} \
-            ${{ matrix.chart_name }} \
-            ${{ matrix.key }} \
-            '${{ matrix.constraints || '>=0.0.0' }}'
+        id: helm-version
+        uses: stackhpc/github-actions/helm-latest-version@master
+        with:
+          repository: ${{ matrix.repo_url }}
+          chart: ${{ matrix.chart_name }}
         if: ${{ matrix.type == 'helm' }}
 
       - name: Check for updates (GitHub)
-        id: github-update-version
-        run: |
-          .github/scripts/github-update-version \
-            ${{ matrix.repo }} \
-            ${{ matrix.key }}
+        id: github-version
+        uses: stackhpc/github-actions/github-latest-release@master
+        with:
+          repository: ${{ matrix.repo }}
         if: ${{ matrix.type == 'github' }}
 
       - name: Get next version from relevant outputs
@@ -81,18 +75,24 @@ jobs:
           NEXT_VERSION: >-
             ${{
               matrix.type == 'helm' &&
-              steps.helm-update-version.outputs.next-version ||
-              steps.github-update-version.outputs.next-version
+                steps.helm-version.outputs.version ||
+                steps.github-version.outputs.version
             }}
 
+      - name: Update dependency key
+        uses: stackhpc/github-actions/config-update@master
+        with:
+          path: ./dependencies.json
+          updates: |
+            ${{ matrix.key }}=${{ steps.next.outputs.version }}
+
       - name: Generate app token for PR
+        uses: stackhpc/github-actions/generate-app-token@master
         id: generate-app-token
-        run: >
-          .github/scripts/generate-app-token "$REPO" "$APP_ID" "$APP_PRIVATE_KEY"
-        env:
-          REPO: ${{ github.repository }}
-          APP_ID: ${{ secrets.APP_ID }}
-          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+        with:
+          repository: ${{ github.repository }}
+          app-id: ${{ secrets.APP_ID }}
+          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Propose changes via PR if required
         uses: peter-evans/create-pull-request@v5
