@@ -32,7 +32,7 @@ jobs:
     with:
       # Pass the images as JSON
       images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
-      # If the PR is in draft, just run smoke tests
+      # If the PR is in draft, just run a sanity check
       # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
     if: github.repository == 'stackhpc/capi-helm-charts'

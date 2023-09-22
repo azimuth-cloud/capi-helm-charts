@@ -24,6 +24,11 @@ jobs:
           - key: cluster-api
             type: github
             repo: kubernetes-sigs/cluster-api
+
+          - key: cluster-api-janitor-openstack
+            type: helm
+            repo_url: https://stackhpc.github.io/cluster-api-janitor-openstack
+            chart_name: cluster-api-janitor-openstack
           
           - key: cluster-api-provider-openstack
             type: github

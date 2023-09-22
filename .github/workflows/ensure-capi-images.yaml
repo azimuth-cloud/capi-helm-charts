@@ -40,10 +40,12 @@ jobs:
         include:
           - name: kube-1-26
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-focal }}
-            skip: ${{ github.event.pull_request.draft }}
+            skip: false
+            # skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-27
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-focal }}
-            skip: ${{ github.event.pull_request.draft }}
+            skip: false
+            # skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-28
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-28-focal }}
             skip: false
@@ -79,7 +81,7 @@ jobs:
         if: ${{ !matrix.skip }}
 
       - name: Write matrix outputs
-        uses: cloudposse/github-action-matrix-outputs-write@main
+        uses: cloudposse/github-action-matrix-outputs-write@0.4.2
         with:
           matrix-step-name: ${{ github.job }}
           matrix-key: ${{ matrix.name }}
@@ -101,6 +103,6 @@ jobs:
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
-        uses: cloudposse/github-action-matrix-outputs-read@main
+        uses: cloudposse/github-action-matrix-outputs-read@0.1.1
         with:
           matrix-step-name: ensure_image

@@ -1,0 +1,115 @@
+name: Set up test environment
+
+description: >-
+  Sets up a Cluster API management cluster for a test.
+
+inputs:
+  dependencies-path:
+    description: Path to the dependencies file to use.
+    default: dependencies.json
+
+runs:
+  using: "composite"
+  steps:
+    - name: Read dependencies
+      id: deps
+      shell: bash
+      run: |
+        echo "addon-provider=$(jq -r '.["addon-provider"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cluster-api=$(jq -r '.["cluster-api"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cluster-api-janitor-openstack=$(jq -r '.["cluster-api-janitor-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "cert-manager=$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "helm=$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "sonobuoy=$(jq -r '.["sonobuoy"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+      env:
+        DEPENDENCIES_PATH: ${{ inputs.dependencies-path }}
+
+    - name: Install tools
+      shell: bash
+      run: sudo apt install -y zip unzip
+
+    - name: Install sonobuoy
+      shell: bash
+      run: >
+        wget https://github.com/vmware-tanzu/sonobuoy/releases/download/${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION:1}_linux_amd64.tar.gz &&
+        tar -xf sonobuoy_${SONOBUOY_VERSION:1}_linux_amd64.tar.gz &&
+        sudo install -o root -g root -m 0755 sonobuoy /usr/local/bin/sonobuoy &&
+        sonobuoy version
+      env:
+        SONOBUOY_VERSION: ${{ steps.deps.outputs.sonobuoy }}
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        check-latest: true
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: ${{ steps.deps.outputs.helm }}
+
+    - name: Install cert-manager
+      shell: bash
+      run: |-
+        helm upgrade cert-manager cert-manager \
+          --repo https://charts.jetstack.io \
+          --version ${{ steps.deps.outputs.cert-manager }} \
+          --namespace cert-manager \
+          --create-namespace  \
+          --install \
+          --set installCRDs=true \
+          --wait \
+          --timeout 10m
+
+    - name: Install clusterctl
+      shell: bash
+      run: >
+        curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/${CAPI_VERSION}/clusterctl-linux-amd64 -o clusterctl &&
+        sudo install -o root -g root -m 0755 clusterctl /usr/local/bin/clusterctl &&
+        clusterctl version
+      env:
+        CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
+
+    - name: Check if Cluster API is already installed
+      id: capi-check
+      shell: bash
+      run: kubectl get provider -n capi-system cluster-api
+      continue-on-error: true
+
+    - name: Install or upgrade Cluster API controllers
+      shell: bash
+      run: >
+        clusterctl ${{ steps.capi-check.outcome == 'success' && 'upgrade apply' || 'init' }} \
+          --core cluster-api:${CAPI_VERSION} \
+          --control-plane kubeadm:${CAPI_VERSION} \
+          --bootstrap kubeadm:${CAPI_VERSION} \
+          --infrastructure openstack:${CAPO_VERSION} \
+          --wait-providers
+      env:
+        CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
+        CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
+
+    - name: Install Cluster API add-on provider
+      shell: bash
+      run: |-
+        helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
+          --repo https://stackhpc.github.io/cluster-api-addon-provider \
+          --version ${{ steps.deps.outputs.addon-provider }} \
+          --namespace capi-addon-system \
+          --create-namespace \
+          --install \
+          --wait \
+          --timeout 10m
+
+    - name: Install Cluster API janitor
+      shell: bash
+      run: |-
+        helm upgrade cluster-api-janitor-openstack cluster-api-janitor-openstack \
+          --repo https://stackhpc.github.io/cluster-api-janitor-openstack \
+          --version ${{ steps.deps.outputs.cluster-api-janitor-openstack }} \
+          --namespace capi-janitor-system \
+          --create-namespace \
+          --install \
+          --wait \
+          --timeout 10m

@@ -11,21 +11,19 @@ inputs:
   os-client-config-file:
     description: The path of the OpenStack clouds file
     required: true
-    default: ./clouds.yml
+    default: ./clouds.yaml
   os-cloud:
     description: The name of the cloud within the OpenStack clouds file
     required: true
     default: openstack
-  chart-version:
-    description: >-
-      Use the specified chart version from the repo if given. If not,
-      use the chart from the directory in the current checkout.
+  chart-directory:
+    description: The directory containing the chart
     required: true
-    default: ""
-  values-common-path:
-    description: The path to a file containing common values
+    default: charts/openstack-cluster
+  values-path:
+    description: The path to a file containing Helm values
     required: true
-    default: ./values-common.yaml
+    default: ./values.yaml
   kubernetes-version:
     description: The Kubernetes version in the image
     required: true
@@ -33,43 +31,37 @@ inputs:
     description: The ID of the image to use
     required: true
   sonobuoy-mode:
-    description: Specify "full" to do a full Sonobuoy run, anything else runs a smoke test only
+    description: |
+      The mode for the Sonobuoy run.
+      One of certified-conformance, conformance-lite, non-disruptive-conformance, quick.
     required: true
-    default: smoke
+    default: quick
   sonobuoy-upload:
     description: Specify "yes" to upload the Sonobuoy run as an artifact
+    required: true
+    default: "no"
+  skip-workload-status:
+    description: Specify "yes" to skip the workload status check
     required: true
     default: "no"
 
 runs:
   using: "composite"
   steps:
+    - name: Update dependencies for chart
+      shell: bash
+      run: helm dependency update ${{ inputs.chart-directory }}
+
     - name: Install or upgrade cluster from directory
       shell: bash
       run: |-
-        helm upgrade ${{ inputs.name }} ./charts/openstack-cluster \
+        helm upgrade ${{ inputs.name }} ${{ inputs.chart-directory }} \
           --install \
-          --dependency-update \
           --values ${{ inputs.os-client-config-file }} \
-          --values ${{ inputs.values-common-path }} \
+          --values ${{ inputs.values-path }} \
           --set cloudName=${{ inputs.os-cloud }} \
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
-      if: "${{ inputs.chart-version == '' }}"
-
-    - name: Install or upgrade cluster from repository
-      shell: bash
-      run: |-
-        helm upgrade ${{ inputs.name }} openstack-cluster \
-          --repo https://stackhpc.github.io/capi-helm-charts \
-          --version ${{ inputs.chart-version }} \
-          --install \
-          --values ${{ inputs.os-client-config-file }} \
-          --values ${{ inputs.values-common-path }} \
-          --set cloudName=${{ inputs.os-cloud }} \
-          --set kubernetesVersion=${{ inputs.kubernetes-version }} \
-          --set machineImageId=${{ inputs.image-id }}
-      if: "${{ inputs.chart-version != '' }}"
 
     # Wait for any upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
@@ -121,19 +113,28 @@ runs:
           -o go-template='{{ .data.value | base64decode }}' \
           > kubeconfig
 
-    - name: Run sonobuoy [smoke]
+    - name: Wait for all workloads rollouts to complete
       shell: bash
-      run: sonobuoy run --mode quick --wait
+      run: |-
+        set -e
+        NAMESPACES=$(kubectl get ns --no-headers --output jsonpath='{.items[*].metadata.name}')
+        for ns in $NAMESPACES; do
+          echo "namespace: $ns"
+          kubectl rollout status \
+            --namespace "$ns" \
+            --watch \
+            --timeout 20m  \
+            deployments,statefulsets,daemonsets
+        done
       env:
         KUBECONFIG: ./kubeconfig
-      if: "${{ inputs.sonobuoy-mode != 'full' }}"
+      if: "${{ inputs.skip-workload-status != 'yes' }}"
 
-    - name: Run sonobuoy [full]
+    - name: Run sonobuoy
       shell: bash
-      run: sonobuoy run --wait
+      run: sonobuoy run --mode ${{ inputs.sonobuoy-mode }} --wait
       env:
         KUBECONFIG: ./kubeconfig
-      if: "${{ inputs.sonobuoy-mode == 'full' }}"
 
     - name: Retrieve sonobuoy results
       shell: bash
