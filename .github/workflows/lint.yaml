@@ -23,13 +23,12 @@ jobs:
 
       - name: Set up chart-testing
         uses: scrungus/chart-testing-action@v3.7.3
-      
-      - name: Dummy values
-        uses: DamianReeves/write-file-action@master
-        with:
-          path: values.yml
-          write-mode: overwrite
-          contents: |
+
+      - name: Create dummy values
+        run: >
+          echo "$VALUES" > values.yaml
+        env:
+          VALUES: |
             clouds:
               openstack:
                 auth:
@@ -44,11 +43,11 @@ jobs:
             kubernetesVersion: 1.27.2
             machineImageId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
             controlPlane:
-              machineFlavor: vm.ska.cpu.general.small
+              machineFlavor: xxxx
               machineCount: 1
             nodeGroups:
               - machineCount: 2
-                machineFlavor: vm.ska.cpu.general.small
+                machineFlavor: xxxx
                 name: test-group1
 
       - name: Run chart-testing (lint)
@@ -57,4 +56,4 @@ jobs:
             --target-branch ${{ github.event.repository.default_branch }} \
             --all \
             --validate-maintainers=false \
-            --extra-values values.yml
+            --extra-values values.yaml

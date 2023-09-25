@@ -2,11 +2,8 @@
 
 global:
   # The prefix to use for images
-  # Assumes the images have been synced using Skopeo using the configuration file
-  # in this repository with the "--scoped" flag
   # This setting is shared with the addons
-  # By default, use the mirrors on GitHub packages
-  imagePrefix: ghcr.io/stackhpc/capi/
+  imagePrefix:
 
 # The name of an existing secret containing a clouds.yaml and optional cacert
 cloudCredentialsSecretName:
@@ -135,11 +132,10 @@ controlPlane:
   machineCount: 3
   # The flavor to use for control plane machines
   machineFlavor:
-  # The networks and ports for control plane nodes
-  # If neither networks or ports are given, the cluster internal network is used
+  # The ports for control plane nodes
+  # If no ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
   machineNetworking:
-    networks:
     ports:
   # The root volume spec for control plane machines
   machineRootVolume:
@@ -230,11 +226,10 @@ nodeGroupDefaults:
   failureDomain:
   # The flavor to use for machines in the node group
   machineFlavor:
-  # The default networks and ports for worker nodes
-  # If neither networks or ports are given, the cluster internal network is used
+  # The default ports for worker nodes
+  # If no ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
   machineNetworking:
-    networks:
     ports:
   # The root volume spec for machines in the node group
   machineRootVolume:

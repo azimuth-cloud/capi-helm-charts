@@ -2,11 +2,8 @@
 
 global:
   # The prefix to use for images
-  # Assumes the images have been synced using Skopeo using the configuration file
-  # in this repository with the "--scoped" flag
   # This setting is shared with the parent cluster
-  # By default, use the mirrors on GitHub packages
-  imagePrefix: ghcr.io/stackhpc/capi/
+  imagePrefix:
 
 # The name of the Cluster API cluster
 # if not given, the release name is used
@@ -50,7 +47,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.24.5
+      version: v3.24.6
     release:
       namespace: tigera-operator
       values: {}

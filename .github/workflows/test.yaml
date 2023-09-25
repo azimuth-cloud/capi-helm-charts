@@ -8,186 +8,169 @@ on:
         required: true
       tests-full:
         type: boolean
-        description: Indicates whether to run the full test suite or just a smoke test
+        description: Indicates whether to run the full test suite or just a sanity check
         required: true
         default: false
 
 jobs:
-  test-chart:
+  # This job tests a clean deployment against the latest version
+  # It is the only job that runs when tests-full=false
+  # For tests-full=true it creates an internal network + router and runs Sonobuoy in conformance mode
+  # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
+  latest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Read dependencies
-        id: deps
-        run: |
-          echo "addon-provider=$(jq -r '.["addon-provider"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-          echo "cluster-api=$(jq -r '.["cluster-api"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-          echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-          echo "cert-manager=$(jq -r '.["cert-manager"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-          echo "helm=$(jq -r '.["helm"]' ./dependencies.json)" >> $GITHUB_OUTPUT
-          echo "sonobuoy=$(jq -r '.["sonobuoy"]' ./dependencies.json)" >> $GITHUB_OUTPUT
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
 
-      - name: Install tools
-        run: sudo apt install -y zip unzip
-
-      - name: Install sonobuoy
-        run: >
-          wget https://github.com/vmware-tanzu/sonobuoy/releases/download/${SONOBUOY_VERSION}/sonobuoy_${SONOBUOY_VERSION:1}_linux_amd64.tar.gz &&
-          tar -xf sonobuoy_${SONOBUOY_VERSION:1}_linux_amd64.tar.gz &&
-          sudo mv -n sonobuoy /usr/bin/
-        env:
-          SONOBUOY_VERSION: ${{ steps.deps.outputs.sonobuoy }}
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          check-latest: true
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: ${{ steps.deps.outputs.helm }}
-
-      - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.5.0
-
-      - name: Install cert-manager
-        run: |-
-          helm upgrade cert-manager cert-manager \
-            --repo https://charts.jetstack.io \
-            --version ${{ steps.deps.outputs.cert-manager }} \
-            --namespace cert-manager \
-            --create-namespace  \
-            --install \
-            --set installCRDs=true \
-            --wait \
-            --timeout 10m
-
-      - name: Ensure Cluster API kustomization directory exists
-        run: mkdir -p clusterapi
-
-      # From here: https://github.com/stackhpc/ansible-collection-azimuth-ops/blob/main/roles/clusterapi/defaults/main.yml
-      - name: Write Cluster API kustomization file
-        uses: DamianReeves/write-file-action@master
-        with:
-          path: clusterapi/kustomization.yaml
-          write-mode: overwrite
-          contents: |
-            resources:
-              - https://github.com/kubernetes-sigs/cluster-api/releases/download/${{ steps.deps.outputs.cluster-api }}/cluster-api-components.yaml
-              - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/${{ steps.deps.outputs.cluster-api-provider-openstack }}/infrastructure-components.yaml
-            patches:
-              - patch: |-
-                  - op: replace
-                    path: /spec/template/spec/containers/0/args
-                    value:
-                      - --leader-elect
-                      - --metrics-bind-addr=localhost:8080
-                target:
-                  kind: Deployment
-                  namespace: capi-system
-                  name: capi-controller-manager
-              - patch: |-
-                  - op: replace
-                    path: /spec/template/spec/containers/0/args
-                    value:
-                      - --leader-elect
-                      - --metrics-bind-addr=localhost:8080
-                target:
-                  kind: Deployment
-                  namespace: capi-kubeadm-bootstrap-system
-                  name: capi-kubeadm-bootstrap-controller-manager
-              - patch: |-
-                  - op: replace
-                    path: /spec/template/spec/containers/0/args
-                    value:
-                      - --leader-elect
-                      - --metrics-bind-addr=localhost:8080
-                target:
-                  kind: Deployment
-                  namespace: capi-kubeadm-control-plane-system
-                  name: capi-kubeadm-control-plane-controller-manager
-
-      - name: Install Cluster API resources
-        run: kubectl apply -k clusterapi/
-
-      - name: Wait for Cluster API controllers to become ready
-        run: |-
-          kubectl rollout status deployment/capi-controller-manager \
-            --namespace capi-system \
-            --timeout 5m \
-          && \
-          kubectl rollout status deployment/capi-kubeadm-bootstrap-controller-manager \
-            --namespace capi-kubeadm-bootstrap-system \
-            --timeout 5m \
-          && \
-          kubectl rollout status deployment/capi-kubeadm-control-plane-controller-manager \
-            --namespace capi-kubeadm-control-plane-system \
-            --timeout 5m \
-          && \
-          kubectl rollout status deployment/capo-controller-manager \
-            --namespace capo-system \
-            --timeout 10m
-
-      - name: Install Cluster API add-on provider
-        run: |-
-          helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
-            --repo https://stackhpc.github.io/cluster-api-addon-provider \
-            --version ${{ steps.deps.outputs.addon-provider }} \
-            --namespace capi-addon-system \
-            --create-namespace \
-            --install \
-            --wait \
-            --timeout 10m
+      - name: Set up test environment
+        uses: ./.github/actions/setup
 
       - name: Write cloud credential
-        run: >
-          echo "$CLOUD" > clouds.yml
-        shell: bash
+        run: echo "$CLOUD" > ./clouds.yaml
         env:
           CLOUD: ${{ secrets.CLOUD }}
 
-      - name: Write common Helm values
-        uses: DamianReeves/write-file-action@master
-        with:
-          path: values-common.yaml
-          write-mode: overwrite
-          contents: |
+      - name: Write Helm values
+        run: echo "$VALUES" > ./values.yaml
+        env:
+          VALUES: |
             clouds:
               openstack:
                 auth:
                   project_id: ${{ secrets.PROJECT_ID }}
                 verify: false
+            registryMirrors:
+              docker.io:
+                - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
             controlPlane:
-              machineFlavor: vm.ska.cpu.general.small
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
               machineCount: 1
             nodeGroups:
-              - machineCount: 2
-                machineFlavor: vm.ska.cpu.general.small
-                name: test-group1
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
 
-      #####
-      # For the smoke test, we do a clean deployment of the latest supported version
-      #####
-
-      - name: Test clean Kubernetes 1.27 deployment
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-latest
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-          sonobuoy-upload: "yes"
+      - name: Apply network configuration
+        run: echo "$NETWORKING" >> ./values.yaml
+        env:
+          NETWORKING: |
+            clusterNetworking:
+              internalNetwork:
+                networkFilter:
+                  tags: capi-helm-chart-ci
         if: ${{ !inputs.tests-full }}
 
-      - name: Delete Kubernetes 1.27 deployment
-        run: helm delete ci-${{ github.run_id }}-kube-latest --wait
-        if: ${{ !inputs.tests-full && always() }}
+      - name: Test clean Kubernetes 1.28 deployment
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
+          sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
+          sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
-      #####
-      # On a full test, first test that we can upgrade from a cluster deployed using the latest tag
-      #####
+      - name: Delete Kubernetes 1.28 deployment
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+        if: ${{ always() }}
+
+      - name: Upload logs
+        uses: ./.github/actions/upload-logs
+        with:
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
+
+  # This job tests Kubernetes upgrade
+  # It only runs for non-draft PRs
+  # It uses a pre-existing internal network
+  kube-upgrade:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.tests-full }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup
+
+      - name: Write cloud credential
+        run: echo "$CLOUD" > ./clouds.yaml
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - name: Write Helm values
+        run: echo "$VALUES" > ./values.yaml
+        env:
+          VALUES: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
+            registryMirrors:
+              docker.io:
+                - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
+            clusterNetworking:
+              internalNetwork:
+                networkFilter:
+                  tags: capi-helm-chart-ci
+            controlPlane:
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
+              machineCount: 1
+            nodeGroups:
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
+
+      - name: Deploy Kubernetes 1.26 for Kubernetes upgrade test
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
+
+      - name: Upgrade to Kubernetes 1.27
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
+
+      - name: Upgrade to Kubernetes 1.28
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
+
+      - name: Delete Kubernetes upgrade deployment
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+        if: ${{ always() }}
+
+      - name: Upload logs
+        uses: ./.github/actions/upload-logs
+        with:
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
+
+  # This jobs tests upgrading the chart + dependencies from the latest tag
+  # It only runs for non-draft PRs
+  # It uses a pre-existing internal network
+  # It installs ALL of the addons so that we test upgrading them
+  chart-upgrade:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.tests-full }}
+    steps:
+      - name: Checkout current
+        uses: actions/checkout@v3
+        with:
+          path: current
 
       - name: Get latest tag
         id: latest-tag
@@ -195,76 +178,94 @@ jobs:
           set -eo pipefail
           TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
           echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
-        if: ${{ inputs.tests-full }}
 
-      - name: Deploy Kubernetes 1.27 with latest tag for chart upgrade test
-        uses: ./.github/actions/upgrade-and-test
+      - name: Checkout latest tag
+        uses: actions/checkout@v3
         with:
-          name: ci-${{ github.run_id }}-chart-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-          chart-version: ${{ steps.latest-tag.outputs.tag-name }}
-        if: ${{ inputs.tests-full }}
+          ref: ${{ steps.latest-tag.outputs.tag-name }}
+          path: latest-tag
 
-      - name: Upgrade to current chart
-        uses: ./.github/actions/upgrade-and-test
+      - name: Write cloud credential
+        run: echo "$CLOUD" > ./clouds.yaml
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - name: Write Helm values
+        run: echo "$VALUES" > ./values.yaml
+        env:
+          VALUES: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
+            registryMirrors:
+              docker.io:
+                - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
+            clusterNetworking:
+              internalNetwork:
+                networkFilter:
+                  tags: capi-helm-chart-ci
+            controlPlane:
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
+              machineCount: 1
+            nodeGroups:
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
+            addons:
+              kubernetesDashboard:
+                enabled: true
+              monitoring:
+                enabled: true
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+
+      # For the setup, we use a merged dependencies file in case new dependencies
+      # are added by the code under test, ensuring that the older dependencies are
+      # used where they are specified
+      - name: Create merged dependencies file
+        run: >
+          jq -s '.[0] * .[1]' \
+            current/dependencies.json \
+            latest-tag/dependencies.json \
+            > dependencies-merged.json
+
+      - name: Set up test environment with dependencies from latest tag
+        uses: ./current/.github/actions/setup
         with:
-          name: ci-${{ github.run_id }}-chart-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-        if: ${{ inputs.tests-full }}
+          dependencies-path: dependencies-merged.json
+
+      - name: Deploy cluster with chart from latest tag
+        uses: ./current/.github/actions/upgrade-and-test
+        with:
+          chart-directory: latest-tag/charts/openstack-cluster
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
+          # TODO(mkjpryor) remove this once calico csi-node-driver is fixed in a tagged version
+          skip-workload-status: "yes"
+
+      - name: Update test environment with current dependencies
+        uses: ./current/.github/actions/setup
+        with:
+          dependencies-path: current/dependencies.json
+
+      - name: Upgrade cluster to current chart
+        uses: ./current/.github/actions/upgrade-and-test
+        with:
+          chart-directory: current/charts/openstack-cluster
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
 
       - name: Delete chart upgrade deployment
-        run: helm delete ci-${{ github.run_id }}-chart-upgrade --wait
-        if: ${{ inputs.tests-full && always() }}
-
-      #####
-      # On a full test, next run a full upgrade test
-      # This will run a sonobuoy smoke test after every step with a full test at the end
-      #####
-
-      - name: Deploy Kubernetes 1.25 for Kubernetes upgrade test
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-25-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-25-image }}
-        if: ${{ inputs.tests-full }}
-
-      - name: Upgrade to Kubernetes 1.26
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
-        if: ${{ inputs.tests-full }}
-
-      - name: Upgrade to Kubernetes 1.27
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-kube-upgrade
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-          sonobuoy-mode: full
-          sonobuoy-upload: "yes"
-        if: ${{ inputs.tests-full }}
-
-      - name: Delete Kubernetes upgrade deployment
-        run: helm delete ci-${{ github.run_id }}-kube-upgrade --wait
-        if: ${{ inputs.tests-full && always() }}
-
-      - name: Output controller logs
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
         if: ${{ always() }}
-        run: |
-          kubectl -n capi-system logs deploy/capi-controller-manager > capi-logs.txt
-          kubectl -n capi-kubeadm-control-plane-system logs deploy/capi-kubeadm-control-plane-controller-manager > capi-kubeadm-control-plane-logs.txt
-          kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
-          kubectl -n capo-system logs deploy/capo-controller-manager > capo-logs.txt
-          kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
 
-      - name: Upload controller log artifacts
-        uses: actions/upload-artifact@v3
-        if: ${{ always() }} 
+      - name: Upload logs
+        uses: ./current/.github/actions/upload-logs
         with:
-          name: cluster-api-controller-logs
-          path: ./*-logs.txt
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
