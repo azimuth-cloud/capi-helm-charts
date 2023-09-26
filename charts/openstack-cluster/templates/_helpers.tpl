@@ -75,6 +75,67 @@ Name of the secret containing the cloud credentials.
 {{- end -}}
 
 {{/*
+Outputs the content for a containerd registry file containing mirror configuration.
+*/}}
+{{- define "openstack-cluster.registryFile" -}}
+{{- $registry := index . 0 -}}
+{{- $registrySpec := index . 1 -}}
+{{-
+  $defaultUpstream :=
+    eq $registry "docker.io" |
+    ternary "registry-1.docker.io" $registry |
+    printf "https://%s"
+-}}
+{{-
+  $upstream :=
+    kindIs "map" $registrySpec |
+    ternary $registrySpec dict |
+    dig "upstream" $defaultUpstream
+-}}
+{{-
+  $mirrors :=
+    kindIs "map" $registrySpec |
+    ternary $registrySpec (dict "mirrors" $registrySpec) |
+    dig "mirrors" list
+-}}
+{{- with $upstream }}
+server = "{{ . }}"
+{{- end }}
+{{- range $mirror := $mirrors }}
+{{-
+  $url :=
+    kindIs "map" $mirror |
+    ternary $mirror (dict "url" $mirror) |
+    dig "url" "" |
+    required "unable to determine mirror url"
+}}
+{{-
+  $capabilities :=
+    kindIs "map" $mirror |
+    ternary $mirror (dict "capabilities" list) |
+    dig "capabilities" list |
+    default (list "pull" "resolve")
+}}
+{{-
+  $skipVerify :=
+    kindIs "map" $mirror |
+    ternary $mirror (dict "skipVerify" false) |
+    dig "skipVerify" false
+}}
+{{-
+  $overridePath :=
+    kindIs "map" $mirror |
+    ternary $mirror (dict "overridePath" true) |
+    dig "overridePath" true
+}}
+[host."{{ $url }}"]
+capabilities = [{{ range $i, $cap := $capabilities }}{{ if gt $i 0 }}, {{ end }}"{{ . }}"{{ end }}]
+skip_verify = {{ ternary "true" "false" $skipVerify }}
+override_path = {{ ternary "true" "false" $overridePath }}
+{{- end }}
+{{- end }}
+
+{{/*
 Produces the spec for a KubeadmConfig object, with support for configuring registry
 mirrors and additional packages.
 */}}
@@ -91,31 +152,22 @@ mirrors and additional packages.
 {{- toYaml . }}
 {{- end }}
 files:
-  - path: /etc/containerd/conf.d/.keepdir
+  - path: /etc/containerd/conf.d/cri-registry-config-path.toml
     content: |
-      # This file is created by the capi-helm-chart to
-      # ensure that its parent directory exists. *.toml
-      # files in this directory are included in containerd
-      # config when /etc/containerd/config.toml is parsed.
+      [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/containerd/certs.d"
     owner: root:root
     permissions: "0644"
-{{- if $registryMirrors }}
-{{- range $registry, $mirrors := $registryMirrors }}
-  - path: /etc/containerd/conf.d/{{ $registry }}/hosts.toml
+  - path: /etc/containerd/certs.d/.keepdir
     content: |
-      {{- range $mirror := $mirrors }}
-      {{- if kindIs "string" $mirror }}
-      [host."{{ $mirror }}"]
-      capabilities = ["pull", "resolve"]
-      {{- else if kindIs "map" $mirror }}
-      [host."{{ .url }}"]
-      {{- if hasKey $mirror "capabilities" }}
-      capabilities =[{{ range $i, $capability := .capabilities }}{{- if gt $i 0 }}, {{ end }}"{{ . }}"{{- end }}]
-      {{- else }}
-      capabilities = ["pull", "resolve"]
-      {{- end }}
-      {{- end }}
-      {{- end }}
+      # This file is created by the capi-helm-chart to ensure that its parent directory exists
+    owner: root:root
+    permissions: "0644"
+{{- with $registryMirrors }}
+{{- range $registry, $registrySpec := . }}
+  - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
+    content: |
+      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | nindent 6 }}
     owner: root:root
     permissions: "0644"
 {{- end }}
