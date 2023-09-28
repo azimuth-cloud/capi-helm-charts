@@ -68,8 +68,13 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
+<<<<<<< Updated upstream
   name: {{ include "cluster-addons.componentName" (list . "csi-manila-secret") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila-secret") | nindent 4 }}
+=======
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-secret
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+>>>>>>> Stashed changes
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
@@ -95,7 +100,11 @@ apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-manila-cephfsStorageclass") }}
+<<<<<<< Updated upstream
   labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila-cephfsStorageclass") | nindent 4 }}
+=======
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+>>>>>>> Stashed changes
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
@@ -144,7 +153,11 @@ apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-manila-storageclass") }}
+<<<<<<< Updated upstream
   labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila-storageclass") | nindent 4 }}
+=======
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+>>>>>>> Stashed changes
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
