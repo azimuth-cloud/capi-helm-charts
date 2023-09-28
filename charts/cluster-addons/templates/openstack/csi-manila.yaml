@@ -1,0 +1,189 @@
+{{- if and .Values.openstack.enabled .Values.openstack.csiManila.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    shareProtocols:
+      {{- if .Values.openstack.csiManila.nfs.enabled }}
+      - protocolSelector: NFS
+        fsGroupPolicy: None
+        fwdNodePluginEndpoint:
+          dir: /var/lib/kubelet/plugins/csi-nfsplugin
+          sockFile: csi.sock
+      {{- end }}
+      {{- if .Values.openstack.csiManila.cephfs.enabled }}
+      - protocolSelector: CEPHFS
+        fwdNodePluginEndpoint:
+          dir: /var/lib/kubelet/plugins/cephfs.csi.ceph.com
+          sockFile: csi.sock
+      {{- end }}
+    csimanila:
+      image:
+        repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/provider-os/manila-csi-plugin
+    nodeplugin:
+      registrar:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/sig-storage/csi-node-driver-registrar
+    controllerplugin:
+      provisioner:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/sig-storage/csi-provisioner
+      snapshotter:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/sig-storage/csi-snapshotter
+      resizer:
+        image:
+          repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/sig-storage/csi-resizer
+  overrides: |
+    {{- toYaml .Values.openstack.csiManila.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.openstack.csiManila.chart | nindent 4 }}
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: csi-manila
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
+        key: overrides
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila-secret") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila-secret") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: csi-manila-secret
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: csi-manila
+        stringData:
+          os-authURL: {{ "{{" }} cloud_identity.data.auth.auth_url {{ "}}" }}
+          os-region: {{ "{{" }} cloud_identity.data.region | default {{ .Values.openstack.region }} {{ "}}" }}
+          os-applicationCredentialID: {{ "{{" }} cloud_identity.data.auth.application_credential_id {{ "}}" }}
+          os-applicationCredentialSecret: {{ "{{" }} cloud_identity.data.auth.application_credential_secret {{ "}}" }}
+{{- if .Values.openstack.csiManila.cephfsStorageClass.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila-cephfsStorageclass") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila-cephfsStorageclass") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: csi-manila-cephfsStorageclass
+  manifestSources:
+    - template: |
+        {{- with .Values.openstack.csiManila.storageClass }}
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: {{ .name }}
+          {{- if .isDefault }}
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "true"
+          {{- end }}
+        provisioner: cephfs.manila.csi.openstack.org
+        parameters:
+          cephfs-mounter: {{ .cephfsMounter }}
+          csi.storage.k8s.io/provisioner-secret-name: csi-manila
+          csi.storage.k8s.io/provisioner-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          csi.storage.k8s.io/controller-expand-secret-name: csi-manila
+          csi.storage.k8s.io/controller-expand-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          csi.storage.k8s.io/node-stage-secret-name: csi-manila
+          csi.storage.k8s.io/node-stage-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          csi.storage.k8s.io/node-publish-secret-name: csi-manila
+          csi.storage.k8s.io/node-publish-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          {{- with .manilaAvailabilityZone }}
+          availability: {{ . }}
+          {{- end }}
+          type: {{ .type }}
+        reclaimPolicy: {{ .reclaimPolicy }}
+        allowVolumeExpansion: {{ .allowVolumeExpansion }}
+        volumeBindingMode: WaitForFirstConsumer
+        {{- with .allowedTopologies }}
+        allowedTopologies: {{ toYaml . | nindent 6 }}
+        {{- end }}
+        {{- end }}
+{{- end }}
+{{- if .Values.openstack.csiManila.nfsStorageClass.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila-storageclass") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila-storageclass") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: csi-manila-nfsStorageclass
+  manifestSources:
+    - template: |
+        {{- with .Values.openstack.csiManila.storageClass }}
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: {{ .name }}
+          {{- if .isDefault }}
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "true"
+          {{- end }}
+        provisioner: nfs.manila.csi.openstack.org
+        parameters:
+          csi.storage.k8s.io/provisioner-secret-name: csi-manila
+          csi.storage.k8s.io/provisioner-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          csi.storage.k8s.io/controller-expand-secret-name: csi-manila
+          csi.storage.k8s.io/controller-expand-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          csi.storage.k8s.io/node-stage-secret-name: csi-manila
+          csi.storage.k8s.io/node-stage-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          csi.storage.k8s.io/node-publish-secret-name: csi-manila
+          csi.storage.k8s.io/node-publish-secret-namespace: {{ .Values.openstack.targetNamespace }}
+          {{- with .manilaAvailabilityZone }}
+          availability: {{ . }}
+          {{- end }}
+          type: {{ .type }}
+        reclaimPolicy: {{ .reclaimPolicy }}
+        allowVolumeExpansion: {{ .allowVolumeExpansion }}
+        volumeBindingMode: WaitForFirstConsumer
+        {{- with .allowedTopologies }}
+        allowedTopologies: {{ toYaml . | nindent 6 }}
+        {{- end }}
+        {{- end }}
+{{- end }}
+{{- end }}
