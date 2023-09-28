@@ -1,0 +1,36 @@
+{{- if or .Values.csiNfs.enabled .Values.openstack.csiManila.nfs.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "csi-nfs") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults:    
+  overrides: |
+    {{- toYaml .Values.csiNfs.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-nfs") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.csiNfs.chart | nindent 4 }}
+  targetNamespace: {{ .Values.csiNfs.release.namespace }}
+  releaseName: csi-manila
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}-config
+        key: overrides
+{{- end }}
