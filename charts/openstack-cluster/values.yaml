@@ -313,7 +313,7 @@ autoscaler:
   image:
     # Defaults to the global image prefix if not given
     prefix:
-    repository: k8s.gcr.io/autoscaling/cluster-autoscaler
+    repository: registry.k8s.io/autoscaling/cluster-autoscaler
     pullPolicy: IfNotPresent
     # The cluster-autoscaler docs recommend using a version that matches the
     # Kubernetes version, but versions should be (mostly) backwards-compatible
