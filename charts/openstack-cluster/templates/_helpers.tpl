@@ -75,6 +75,50 @@ Name of the secret containing the cloud credentials.
 {{- end -}}
 
 {{/*
+Template that merges two variables with the latter taking precedence and outputs the result as YAML.
+Lists are merged by concatenating them rather than overwriting.
+*/}}
+{{- define "openstack-cluster.mergeConcat" -}}
+{{- $left := index . 0 }}
+{{- $right := index . 1 }}
+{{- if kindIs (kindOf list) $left }}
+{{- if kindIs (kindOf list) $right }}
+{{ concat $left $right | toYaml }}
+{{- else }}
+{{ default $left $right | toYaml }}
+{{- end }}
+{{- else if kindIs (kindOf dict) $left }}
+{{- if kindIs (kindOf dict) $right }}
+{{- range $key := concat (keys $left) (keys $right) | uniq }}
+{{- if and (hasKey $left $key) (hasKey $right $key) }}
+{{- $merged := include "openstack-cluster.mergeConcat" (list (index $left $key) (index $right $key)) }}
+{{ $key }}: {{ $merged | nindent 2 }}
+{{- else if hasKey $left $key }}
+{{ index $left $key | dict $key | toYaml }}
+{{- else }}
+{{ index $right $key | dict $key | toYaml }}
+{{- end }}
+{{- end }}
+{{- else }}
+{{ default $left $right | toYaml }}
+{{- end }}
+{{- else }}
+{{ default $left $right | toYaml }}
+{{- end }}
+{{- end }}
+
+{{/*
+Applies a list of templates to an input object sequentially.
+*/}}
+{{- define "openstack-cluster.mergeConcatMany" -}}
+{{- $obj := first . }}
+{{- range $overrides := rest . }}
+{{- $obj = include "openstack-cluster.mergeConcat" (list $obj $overrides) | fromYaml }}
+{{- end }}
+{{- toYaml $obj }}
+{{- end }}
+
+{{/*
 Outputs the content for a containerd registry file containing mirror configuration.
 */}}
 {{- define "openstack-cluster.registryFile" -}}
@@ -136,21 +180,9 @@ override_path = {{ ternary "true" "false" $overridePath }}
 {{- end }}
 
 {{/*
-Produces the spec for a KubeadmConfig object, with support for configuring registry
-mirrors and additional packages.
+Produces the kubeadmConfigSpec required to configure containerd.
 */}}
-{{- define "openstack-cluster.kubeadmConfigSpec" -}}
-{{- $ctx := index . 0 }}
-{{- $registryMirrors := $ctx.Values.registryMirrors }}
-{{- $additionalPackages := $ctx.Values.additionalPackages }}
-{{- $trustedCAs := $ctx.Values.trustedCAs }}
-{{- $kubeadmConfigSpec := omit (index . 1) "files" "preKubeadmCommands" }}
-{{- $files := index . 1 | dig "files" list }}
-{{- $preKubeadmCommands := index . 1 | dig "preKubeadmCommands" list }}
-
-{{- with $kubeadmConfigSpec }}
-{{- toYaml . }}
-{{- end }}
+{{- define "openstack-cluster.kubeadmConfigSpec.containerd" -}}
 files:
   - path: /etc/containerd/conf.d/.keepdir
     content: |
@@ -169,7 +201,7 @@ files:
     owner: root:root
     permissions: "0644"
     append: true
-{{- with $registryMirrors }}
+{{- with .Values.registryMirrors }}
 {{- range $registry, $registrySpec := . }}
   - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
     content: |
@@ -178,40 +210,59 @@ files:
     permissions: "0644"
 {{- end }}
 {{- end }}
-{{- if $ctx.Values.registryAuth }}
+{{- if .Values.registryAuth }}
   - path: /etc/containerd/conf.d/auth.toml
     contentFrom:
       secret:
-        name: {{ include "openstack-cluster.componentName" (list $ctx "containerd-auth") }}
+        name: {{ include "openstack-cluster.componentName" (list . "containerd-auth") }}
         key: "auth.toml"
     owner: root:root
     permissions: "0644"
 {{- end }}
-{{- if $trustedCAs }}
-  {{- range $name, $certificate := $trustedCAs }}
+{{- end }}
+
+{{/*
+Produces the kubeadmConfigSpec required to configure additional trusted CAs for cluster nodes,
+e.g. for private registries.
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec.trustedCAs" -}}
+{{- with .Values.trustedCAs }}
+files:
+  {{- range $name, $certificate := . }}
   - path: /usr/local/share/ca-certificates/{{ $name }}.crt
     content: |
       {{- nindent 6 $certificate }}
     owner: root:root
     permissions: "0644"
   {{- end }}
-{{- end }}
-{{- if $files }}
-  {{- range $files }}
-  - {{ toYaml . | nindent 4 }}
-  {{- end }}
-{{- end }}
-{{- if or $trustedCAs $additionalPackages $preKubeadmCommands }}
 preKubeadmCommands:
-  {{- if $trustedCAs }}
   - update-ca-certificates
-  {{- end }}
-  {{- if $additionalPackages }}
-  - apt update -y
-  - apt install -y {{ join " " $additionalPackages }}
-  {{- end }}
-  {{- range $preKubeadmCommands }}
-  - {{ . }}
-  {{- end }}
 {{- end }}
+{{- end }}
+
+{{/*
+Produces the kubeadmConfigSpec required to install additional packages.
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec.additionalPackages" -}}
+{{- with .Values.additionalPackages }}
+preKubeadmCommands:
+  - apt update -y
+  - apt install -y {{ join " " . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Produces the spec for a KubeadmConfig object.
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec" -}}
+{{- $ctx := index . 0 }}
+{{- $kubeadmConfigSpec := index . 1 }}
+{{-
+  list
+    (include "openstack-cluster.kubeadmConfigSpec.trustedCAs" $ctx | fromYaml)
+    (include "openstack-cluster.kubeadmConfigSpec.containerd" $ctx | fromYaml)
+    (include "openstack-cluster.kubeadmConfigSpec.additionalPackages" $ctx | fromYaml)
+    $kubeadmConfigSpec |
+  include "openstack-cluster.mergeConcatMany"
+}}
 {{- end }}
