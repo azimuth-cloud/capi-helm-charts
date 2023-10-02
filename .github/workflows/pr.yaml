@@ -30,6 +30,16 @@ jobs:
     needs: [wait_for_approval]
     uses: ./.github/workflows/lint.yaml
 
+  test:
+    needs: [lint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - run: cat ./.github/workflows/pr.yaml
+
   # test:
   #   needs: [lint]
   #   # Using an environment means that workflow runs need to be approved
