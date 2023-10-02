@@ -1,6 +1,6 @@
 name: test pr
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - synchronize
@@ -14,16 +14,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Run the lint on every PR, even from external repos
-  lint:
-    uses: ./.github/workflows/lint.yaml
+  # Reusable workflows cannot be used with environments
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#supported-keywords-for-jobs-that-call-a-reusable-workflow
+  # So we must use a different mechanism for approvals
+  wait_for_approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for approval
+        uses: stackhpc/github-actions/workflow-approve@master
+        with:
+          approvers: mkjpryor
+          # Explicit approval is only required for PRs from external forks
+          approval-required: ${{ github.event.pull_request.head.repo.full_name != 'stackhpc/capi-helm-charts' && 'yes' || 'no' }}
 
-  # Only run tests on the main repo
+  lint:
+    needs: [wait_for_approval]
+    uses: ./.github/workflows/lint.yaml
+    with:
+      ref-under-test: ${{ github.event.pull_request.head.sha }}
+
   ensure_capi_images:
     needs: [lint]
     uses: ./.github/workflows/ensure-capi-images.yaml
     secrets: inherit
-    if: github.repository == 'stackhpc/capi-helm-charts'
+    with:
+      ref-under-test: ${{ github.event.pull_request.head.sha }}
 
   test:
     needs: [ensure_capi_images]
@@ -32,7 +47,8 @@ jobs:
     with:
       # Pass the images as JSON
       images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+      # We want to test the code in the PR
+      ref-under-test: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
       # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
-    if: github.repository == 'stackhpc/capi-helm-charts'

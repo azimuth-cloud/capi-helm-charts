@@ -5,6 +5,9 @@ on:
       images:
         type: string
         description: JSON-encoded dictionary of images and versions
+      ref-under-test:
+        type: string
+        description: The Git ref under test.
         required: true
       tests-full:
         type: boolean
@@ -22,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref-under-test }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
@@ -92,6 +97,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref-under-test }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
@@ -170,6 +177,7 @@ jobs:
       - name: Checkout current
         uses: actions/checkout@v3
         with:
+          ref: ${{ inputs.ref-under-test }}
           path: current
 
       - name: Get latest tag

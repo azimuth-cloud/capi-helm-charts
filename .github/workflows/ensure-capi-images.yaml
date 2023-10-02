@@ -1,6 +1,11 @@
 name: Ensure CAPI images
 on:
   workflow_call:
+    inputs:
+      ref-under-test:
+        type: string
+        description: The Git ref under test.
+        required: true
     outputs:
       kube-1-26-image:
         value: ${{ jobs.produce_outputs.outputs.kube-1-26-image }}
@@ -23,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref-under-test }}
 
       - name: Fetch image details
         id: images
@@ -50,6 +57,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref-under-test }}
         if: ${{ !matrix.skip }}
 
       - name: Write cloud credential

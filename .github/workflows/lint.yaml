@@ -1,6 +1,11 @@
 name: Helm Lint
 on:
   workflow_call:
+    inputs:
+      ref-under-test:
+        type: string
+        description: The Git ref under test.
+        required: true
 
 jobs:
   lint:
@@ -9,6 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ inputs.ref-under-test }}
           fetch-depth: 0
 
       - name: Set up Helm
