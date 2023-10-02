@@ -1,3 +1,10 @@
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" -}}
+{{- with .Values.controlPlane.nodeLabels }}
+initConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . | nindent 2 }}
+joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . | nindent 2 }}
+{{- end }}
+{{- end }}
+
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" -}}
 {{- with .kubeProxyConfiguration }}
 files:
@@ -12,31 +19,6 @@ files:
 preKubeadmCommands:
   - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
 {{- end }}
-{{- end }}
-
-{{- define "openstack-cluster.controlplane.kubeadmConfigSpec" -}}
-{{-
-  $baseKubeadmConfigSpec :=
-    include
-      "openstack-cluster.kubeadmConfigSpec"
-      (list . .Values.controlPlane.kubeadmConfigSpec) |
-    fromYaml
-}}
-{{-
-  $kubeProxyConfigOverrides :=
-    include
-      "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration"
-      .Values.controlPlane.kubeadmConfigSpec |
-    fromYaml
-}}
-{{-
-  $mergedKubeadmConfigSpec :=
-    include
-      "openstack-cluster.mergeConcat"
-      (list $baseKubeadmConfigSpec $kubeProxyConfigOverrides) |
-    fromYaml
-}}
-{{- omit $mergedKubeadmConfigSpec "kubeProxyConfiguration" | toYaml }}
 {{- end }}
 
 ---
@@ -65,4 +47,17 @@ spec:
     nodeDrainTimeout: {{ .Values.controlPlane.nodeDrainTimeout }}
     nodeVolumeDetachTimeout: {{ .Values.controlPlane.nodeVolumeDetachTimeout }}
     nodeDeletionTimeout: {{ .Values.controlPlane.nodeDeletionTimeout }}
-  kubeadmConfigSpec: {{ include "openstack-cluster.controlplane.kubeadmConfigSpec" . | nindent 4 }}
+  kubeadmConfigSpec: {{
+    omit
+      (
+        list
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
+          (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" .Values.controlPlane.kubeadmConfigSpec | fromYaml) |
+        include "openstack-cluster.mergeConcatMany" |
+        fromYaml
+      )
+      "kubeProxyConfiguration" |
+    toYaml |
+    nindent 4
+  }}
