@@ -14,8 +14,6 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    image:
-      repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/nfd/node-feature-discovery
     master:
       extraLabelNs:
         - nvidia.com

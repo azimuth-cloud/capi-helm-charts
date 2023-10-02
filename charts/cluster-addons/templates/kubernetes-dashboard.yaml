@@ -10,12 +10,8 @@ metadata:
 stringData:
   # Enable the metrics scraper by default
   defaults: |
-    image:
-      repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/kubernetesui/dashboard
     metricsScraper:
       enabled: true
-      image:
-        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/kubernetesui/metrics-scraper
   overrides: |
     {{- toYaml .Values.kubernetesDashboard.release.values | nindent 4 }}
 ---

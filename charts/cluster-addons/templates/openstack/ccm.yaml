@@ -9,8 +9,6 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    image:
-      repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/provider-os/openstack-cloud-controller-manager
     secret:
       create: false
     cluster:

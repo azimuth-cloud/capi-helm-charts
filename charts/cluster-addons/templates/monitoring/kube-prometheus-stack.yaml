@@ -43,8 +43,6 @@ stringData:
         route:
           group_by: ['...']
       alertmanagerSpec:
-        image:
-          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
         # Make sure that alertmanager finds configurations with the alertmanager name as a label
         alertmanagerConfigSelector:
           matchLabels:
@@ -52,22 +50,8 @@ stringData:
         # Do NOT add the namespace matcher to routes from AlertmanagerConfig resources
         alertmanagerConfigMatcherStrategy:
           type: None
-    prometheusOperator:
-      admissionWebhooks:
-        patch:
-          image:
-            registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
-      image:
-        registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
-      prometheusConfigReloader:
-        image:
-          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
-      thanosImage:
-        registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
     prometheus:
       prometheusSpec:
-        image:
-          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
         # Tell Prometheus to pick up all monitors and alerting rules, regardless of labels
         podMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
@@ -78,33 +62,11 @@ stringData:
         {{- $storageUnits := mustRegexFind "(K|M|G|T|E|P)i?$" $prometheusVolumeSize }}
         retentionSize: {{ mulf 0.95 $storageAmount }}{{ $storageUnits }}B
         {{- end }}
-    thanosRuler:
-      thanosRulerSpec:
-        image:
-          registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
-    kube-state-metrics:
-      image:
-        repository: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io/kube-state-metrics/kube-state-metrics
-    prometheus-node-exporter:
-      image:
-        registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
     grafana:
-      image:
-        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana
       sidecar:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}quay.io/kiwigrid/k8s-sidecar
         # Tell Grafana to include dashboards from all namespaces
         dashboards:
           searchNamespace: ALL
-      downloadDashboardsImage:
-        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/curlimages/curl
-      initChownData:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/busybox
-      imageRenderer:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/grafana-image-renderer
   overrides: |
     {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
 ---

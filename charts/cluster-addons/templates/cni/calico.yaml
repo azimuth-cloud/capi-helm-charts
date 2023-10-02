@@ -9,10 +9,7 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    tigeraOperator:
-      registry: {{ include "cluster-addons.imagePrefix" . }}quay.io
     installation:
-      registry: {{ include "cluster-addons.imagePrefix" . }}docker.io/
       nodeMetricsPort: 9091
       typhaMetricsPort: 9093
       calicoNetwork:
