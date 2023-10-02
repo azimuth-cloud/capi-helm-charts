@@ -23,7 +23,6 @@ jobs:
     # Using an environment means that workflow runs need to be approved
     environment: ci
     uses: ./.github/workflows/test.yaml
-    secrets: inherit
     with:
       ref-under-test: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
