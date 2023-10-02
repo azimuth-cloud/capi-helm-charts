@@ -10,7 +10,7 @@ metadata:
 stringData:
   defaults:    
   overrides: |
-    {{- toYaml .Values.csiNfs.values | nindent 4 }}
+    {{- toYaml .Values.csiNfs.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
