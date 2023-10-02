@@ -26,7 +26,7 @@ jobs:
         with:
           approvers: mkjpryor
           # Explicit approval is only required for PRs from external forks
-          approval-required: ${{ github.event.pull_request.head.repo.full_name != 'stackhpc/capi-helm-charts' }}
+          approval-required: ${{ github.event.pull_request.head.repo.full_name != 'stackhpc/capi-helm-charts' && 'yes' || 'no' }}
 
   lint:
     needs: [wait_for_approval]
