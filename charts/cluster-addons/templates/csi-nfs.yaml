@@ -26,7 +26,7 @@ spec:
   bootstrap: true
   chart: {{ toYaml .Values.csiNfs.chart | nindent 4 }}
   targetNamespace: {{ .Values.csiNfs.release.namespace }}
-  releaseName: csi-manila
+  releaseName: csi-nfs
   valuesSources:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}-config
