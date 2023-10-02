@@ -32,6 +32,7 @@ jobs:
 
   test:
     needs: [lint]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
