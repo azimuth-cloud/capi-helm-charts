@@ -17,6 +17,7 @@ concurrency:
 jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
+    environment: ci
 
   # test:
   #   needs: [lint]
