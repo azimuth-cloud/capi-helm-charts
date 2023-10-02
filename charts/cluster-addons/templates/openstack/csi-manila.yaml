@@ -86,10 +86,10 @@ spec:
         metadata:
           name: csi-manila
         stringData:
-          os-authURL: {{ "{{" }} cloud_identity.data.auth.auth_url {{ "}}" }}
-          os-region: {{ "{{" }} cloud_identity.data.region | default {{ .Values.openstack.region }} {{ "}}" }}
-          os-applicationCredentialID: {{ "{{" }} cloud_identity.data.auth.application_credential_id {{ "}}" }}
-          os-applicationCredentialSecret: {{ "{{" }} cloud_identity.data.auth.application_credential_secret {{ "}}" }}
+          os-authURL: {{ "{{" }} cloud_identity.data.clouds.openstack.auth.auth_url {{ "}}" }}
+          os-region: {{ "{{" }} cloud_identity.data.clouds.openstack.region_name | default {{ .Values.openstack.region }} {{ "}}" }}
+          os-applicationCredentialID: {{ "{{" }} cloud_identity.data.clouds.openstack.auth.application_credential_id {{ "}}" }}
+          os-applicationCredentialSecret: {{ "{{" }} cloud_identity.data.clouds.openstack.auth.application_credential_secret {{ "}}" }}
 {{- if .Values.openstack.csiManila.cephfsStorageClass.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
