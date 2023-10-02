@@ -8,7 +8,8 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "csi-nfs") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  defaults:    
+  defaults: |
+    {}
   overrides: |
     {{- toYaml .Values.csiNfs.release.values | nindent 4 }}
 ---

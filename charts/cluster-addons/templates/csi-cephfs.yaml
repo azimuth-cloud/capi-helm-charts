@@ -9,8 +9,7 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    tolerations:
-      - effect: NoSchedule
+    {}
     
   overrides: |
     {{- toYaml .Values.csiCephfs.release.values | nindent 4 }}

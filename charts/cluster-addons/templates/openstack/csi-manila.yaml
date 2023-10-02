@@ -106,7 +106,7 @@ spec:
   releaseName: csi-manila-cephfsStorageclass
   manifestSources:
     - template: |
-        {{- with .Values.openstack.csiManila.storageClass }}
+        {{- with .Values.openstack.csiManila.cephfsStorageClass }}
         apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
@@ -118,6 +118,7 @@ spec:
         provisioner: cephfs.manila.csi.openstack.org
         parameters:
           cephfs-mounter: {{ .cephfsMounter }}
+        {{- end }}
           csi.storage.k8s.io/provisioner-secret-name: csi-manila
           csi.storage.k8s.io/provisioner-secret-namespace: {{ .Values.openstack.targetNamespace }}
           csi.storage.k8s.io/controller-expand-secret-name: csi-manila
@@ -126,6 +127,7 @@ spec:
           csi.storage.k8s.io/node-stage-secret-namespace: {{ .Values.openstack.targetNamespace }}
           csi.storage.k8s.io/node-publish-secret-name: csi-manila
           csi.storage.k8s.io/node-publish-secret-namespace: {{ .Values.openstack.targetNamespace }}
+        {{- with .Values.openstack.csiManila.cephfsStorageClass }}
           {{- with .manilaAvailabilityZone }}
           availability: {{ . }}
           {{- end }}
@@ -166,6 +168,7 @@ spec:
           {{- end }}
         provisioner: nfs.manila.csi.openstack.org
         parameters:
+        {{- end }}
           csi.storage.k8s.io/provisioner-secret-name: csi-manila
           csi.storage.k8s.io/provisioner-secret-namespace: {{ .Values.openstack.targetNamespace }}
           csi.storage.k8s.io/controller-expand-secret-name: csi-manila
@@ -174,6 +177,7 @@ spec:
           csi.storage.k8s.io/node-stage-secret-namespace: {{ .Values.openstack.targetNamespace }}
           csi.storage.k8s.io/node-publish-secret-name: csi-manila
           csi.storage.k8s.io/node-publish-secret-namespace: {{ .Values.openstack.targetNamespace }}
+        {{- with .Values.openstack.csiManila.storageClass }}
           {{- with .manilaAvailabilityZone }}
           availability: {{ . }}
           {{- end }}
