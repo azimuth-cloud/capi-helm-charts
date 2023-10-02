@@ -94,7 +94,7 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-manila-cephfsStorageclass") }}
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila-cephfs-storageclass") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
@@ -145,7 +145,7 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-manila-storageclass") }}
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila-nfs-storageclass") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
