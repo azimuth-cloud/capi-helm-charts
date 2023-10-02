@@ -19,6 +19,7 @@ stringData:
       {{- end }}
       {{- if .Values.openstack.csiManila.cephfs.enabled }}
       - protocolSelector: CEPHFS
+        fsGroupPolicy: None
         fwdNodePluginEndpoint:
           dir: /var/lib/kubelet/plugins/cephfs.csi.ceph.com
           sockFile: csi.sock

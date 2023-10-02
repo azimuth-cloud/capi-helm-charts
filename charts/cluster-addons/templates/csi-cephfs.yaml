@@ -27,7 +27,7 @@ spec:
   bootstrap: true
   chart: {{ toYaml .Values.csiCephfs.chart | nindent 4 }}
   targetNamespace: {{ .Values.csiCephfs.release.namespace }}
-  releaseName: csi-manila
+  releaseName: csi-cephfs
   valuesSources:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
