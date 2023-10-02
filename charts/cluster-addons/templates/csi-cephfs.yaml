@@ -13,7 +13,7 @@ stringData:
       - effect: NoSchedule
     
   overrides: |
-    {{- toYaml .Values.csiCephfs.values | nindent 4 }}
+    {{- toYaml .Values.csiCephfs.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
