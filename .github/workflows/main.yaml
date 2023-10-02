@@ -12,17 +12,12 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
 
-  ensure_capi_images:
-    needs: [lint]
-    uses: ./.github/workflows/ensure-capi-images.yaml
-    secrets: inherit
-
   test:
-    needs: [ensure_capi_images]
+    needs: [lint]
+    environment: ci
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
-      # Pass the images as JSON
-      images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+      ref-under-test: ${{ github.sha }}
       # Only run the sanity check on main
       tests-full: false

@@ -1,6 +1,6 @@
 name: test pr
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - synchronize
@@ -8,31 +8,24 @@ on:
       - reopened
     branches:
       - main
+      - feature/ci-external-repos
 
 concurrency: 
   group: ${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
-  # Run the lint on every PR, even from external repos
   lint:
     uses: ./.github/workflows/lint.yaml
 
-  # Only run tests on the main repo
-  ensure_capi_images:
-    needs: [lint]
-    uses: ./.github/workflows/ensure-capi-images.yaml
-    secrets: inherit
-    if: github.repository == 'stackhpc/capi-helm-charts'
-
   test:
-    needs: [ensure_capi_images]
+    needs: [lint]
+    # Using an environment means that workflow runs need to be approved
+    environment: ci
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
-      # Pass the images as JSON
-      images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+      ref: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
       # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
-    if: github.repository == 'stackhpc/capi-helm-charts'

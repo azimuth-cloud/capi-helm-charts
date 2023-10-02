@@ -1,6 +1,12 @@
 name: Ensure CAPI images
 on:
   workflow_call:
+    inputs:
+      all:
+        type: boolean
+        description: Indicates whether to upload all images, or just the latest.
+        required: true
+        default: false
     outputs:
       kube-1-26-image:
         value: ${{ jobs.produce_outputs.outputs.kube-1-26-image }}
@@ -40,10 +46,10 @@ jobs:
         include:
           - name: kube-1-26
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy }}
-            skip: ${{ github.event.pull_request.draft }}
+            skip: ${{ inputs.all }}
           - name: kube-1-27
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy }}
-            skip: ${{ github.event.pull_request.draft }}
+            skip: ${{ inputs.all }}
           - name: kube-1-28
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-28-jammy }}
             skip: false
