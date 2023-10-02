@@ -16,15 +16,6 @@ stringData:
         serviceMonitor:
           enabled: true
       {{- end }}
-      image:
-        registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
-    admissionWebhooks:
-      patch:
-        image:
-          registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
-    defaultBackend:
-      image:
-        registry: {{ include "cluster-addons.imagePrefix" . }}registry.k8s.io
   overrides: |
     {{- toYaml .Values.ingress.nginx.release.values | nindent 4 }}
 ---

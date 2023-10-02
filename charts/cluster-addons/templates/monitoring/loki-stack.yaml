@@ -10,13 +10,9 @@ metadata:
 stringData:
   defaults: |
     loki:
-      image:
-        repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/grafana/loki
       serviceMonitor:
         enabled: true
     promtail:
-      image:
-        registry: {{ include "cluster-addons.imagePrefix" . }}docker.io
       serviceMonitor:
         enabled: true
       # Get promtail to scrape systemd services

@@ -23,7 +23,7 @@ spec:
       containers:
         - name: autoscaler
           securityContext: {{ toYaml .Values.autoscaler.securityContext | nindent 12 }}
-          image: {{ include "openstack-cluster.autoscaler.image" . }}
+          image: {{ printf "%s:%s" .Values.autoscaler.image.repository .Values.autoscaler.image.tag }}
           imagePullPolicy: {{ .Values.autoscaler.image.pullPolicy }}
           command:
             - /cluster-autoscaler

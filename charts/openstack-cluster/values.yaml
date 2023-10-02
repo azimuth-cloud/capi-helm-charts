@@ -1,10 +1,5 @@
 ---
 
-global:
-  # The prefix to use for images
-  # This setting is shared with the addons
-  imagePrefix:
-
 # The name of an existing secret containing a clouds.yaml and optional cacert
 cloudCredentialsSecretName:
 # OR

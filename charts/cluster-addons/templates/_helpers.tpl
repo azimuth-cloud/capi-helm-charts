@@ -37,10 +37,3 @@ helm.sh/chart: {{ index . 0 | include "cluster-addons.chart" }}
 capi.stackhpc.com/managed-by: {{ (index . 0).Release.Service }}
 {{ include "cluster-addons.componentSelectorLabels" . }}
 {{- end -}}
-
-{{/*
-Prefix to use for images
-*/}}
-{{- define "cluster-addons.imagePrefix" -}}
-{{- .Values.imagePrefix | default .Values.global.imagePrefix | default "" -}}
-{{- end -}}

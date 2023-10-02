@@ -9,8 +9,6 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    operator:
-      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
     # Use the shared NFD
     nfd:
       enabled: false
@@ -19,7 +17,6 @@ stringData:
     # Deploy the OFED driver onto nodes with a suitable NIC
     ofedDriver:
       deploy: true
-      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/mellanox
       # OFED takes ages to deploy on low-resource nodes
       # The startup probe has a fixed failure threshold of 60
       # So in order to give the drivers up to one hour to install, we use a period
@@ -30,29 +27,17 @@ stringData:
     # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
     rdmaSharedDevicePlugin:
       deploy: true
-      repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
     # Disable all other features for now
     ibKubernetes:
       deploy: false
-      repository: {{ include "cluster-addons.imagePrefix" . }}ghcr.io/mellanox
     nvPeerDriver:
       deploy: false
-      repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/mellanox
     sriovNetworkOperator:
       enabled: false
     sriovDevicePlugin:
       deploy: false
-      repository: {{ include "cluster-addons.imagePrefix" . }}ghcr.io/k8snetworkplumbingwg
     secondaryNetwork:
       deploy: false
-      cniPlugins:
-        repository: {{ include "cluster-addons.imagePrefix" . }}ghcr.io/k8snetworkplumbingwg
-      multus:
-        repository: {{ include "cluster-addons.imagePrefix" . }}ghcr.io/k8snetworkplumbingwg
-      ipoib:
-        repository: {{ include "cluster-addons.imagePrefix" . }}nvcr.io/nvidia/cloud-native
-      ipamPlugin:
-        repository: {{ include "cluster-addons.imagePrefix" . }}ghcr.io/k8snetworkplumbingwg
   overrides: |
     {{- toYaml .Values.mellanoxNetworkOperator.release.values | nindent 4 }}
 ---

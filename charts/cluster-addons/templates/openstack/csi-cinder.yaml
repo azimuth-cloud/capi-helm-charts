@@ -12,27 +12,7 @@ stringData:
   # We deploy our own instead as it gives us more control over the parameters
   defaults: |
     csi:
-      attacher:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/csi-attacher
-      provisioner:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/csi-provisioner
-      snapshotter:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/csi-snapshotter
-      resizer:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/csi-resizer
-      livenessprobe:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/livenessprobe
-      nodeDriverRegistrar:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/csi-node-driver-registrar
       plugin:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}docker.io/k8scloudprovider/cinder-csi-plugin
         # This has to be non-empty or the chart fails to render
         volumes:
           - name: cacert
@@ -44,9 +24,6 @@ stringData:
           - name: cloud-config
             mountPath: /etc/kubernetes
             readOnly: true
-      snapshotController:
-        image:
-          repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/sig-storage/snapshot-controller
     secret:
       enabled: true
       create: false

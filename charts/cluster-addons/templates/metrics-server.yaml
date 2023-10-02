@@ -9,8 +9,6 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    image:
-      repository: {{ include "cluster-addons.imagePrefix" . }}k8s.gcr.io/metrics-server/metrics-server
     args:
       - --kubelet-insecure-tls
   overrides: |

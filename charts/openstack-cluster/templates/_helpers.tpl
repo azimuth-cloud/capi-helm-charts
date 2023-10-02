@@ -215,11 +215,3 @@ preKubeadmCommands:
   {{- end }}
 {{- end }}
 {{- end }}
-
-{{/*
-Produces the image for the cluster autoscaler.
-*/}}
-{{- define "openstack-cluster.autoscaler.image" -}}
-{{- $prefix := .Values.autoscaler.image.prefix | default .Values.global.imagePrefix | default "" }}
-{{- printf "%s%s:%s" $prefix .Values.autoscaler.image.repository .Values.autoscaler.image.tag -}}
-{{- end }}
