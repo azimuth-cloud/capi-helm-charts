@@ -103,7 +103,7 @@ spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
   targetNamespace: {{ .Values.openstack.targetNamespace }}
-  releaseName: csi-manila-cephfsStorageclass
+  releaseName: csi-manila-cephfs-storageclass
   manifestSources:
     - template: |
         {{- with .Values.openstack.csiManila.cephfsStorageClass }}
@@ -154,7 +154,7 @@ spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
   targetNamespace: {{ .Values.openstack.targetNamespace }}
-  releaseName: csi-manila-nfsStorageclass
+  releaseName: csi-manila-nfs-storageclass
   manifestSources:
     - template: |
         {{- with .Values.openstack.csiManila.storageClass }}
