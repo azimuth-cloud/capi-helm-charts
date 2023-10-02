@@ -11,13 +11,24 @@ concurrency:
 jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
+    with:
+      ref-under-test: ${{ github.sha }}
+
+  ensure_capi_images:
+    needs: [lint]
+    uses: ./.github/workflows/ensure-capi-images.yaml
+    secrets: inherit
+    with:
+      ref-under-test: ${{ github.sha }}
 
   test:
-    needs: [lint]
-    environment: ci
+    needs: [ensure_capi_images]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
+      # Pass the images as JSON
+      images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
+      # We want to test the current sha
       ref-under-test: ${{ github.sha }}
       # Only run the sanity check on main
       tests-full: false

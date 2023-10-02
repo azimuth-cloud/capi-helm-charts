@@ -2,6 +2,9 @@ name: Test OpenStack cluster chart
 on:
   workflow_call:
     inputs:
+      images:
+        type: string
+        description: JSON-encoded dictionary of images and versions.
       ref-under-test:
         type: string
         description: The Git ref under test.
@@ -13,18 +16,11 @@ on:
         default: false
 
 jobs:
-  ensure_capi_images:
-    uses: ./.github/workflows/ensure-capi-images.yaml
-    secrets: inherit
-    with:
-      all: ${{ inputs.tests-full }}
-
   # This job tests a clean deployment against the latest version
   # It is the only job that runs when tests-full=false
   # For tests-full=true it creates an internal network + router and runs Sonobuoy in conformance mode
   # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
   latest:
-    needs: [ensure_capi_images]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -77,8 +73,8 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
-          kubernetes-version: ${{ needs.ensure_capi_images.outputs.kube-1-28-version }}
-          image-id: ${{ needs.ensure_capi_images.outputs.kube-1-28-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
@@ -96,7 +92,6 @@ jobs:
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network
   kube-upgrade:
-    needs: [ensure_capi_images]
     runs-on: ubuntu-latest
     if: ${{ inputs.tests-full }}
     steps:
@@ -144,22 +139,22 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
-          kubernetes-version: ${{ needs.ensure_capi_images.outputs.kube-1-26-version }}
-          image-id: ${{ needs.ensure_capi_images.outputs.kube-1-26-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-26-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-26-image }}
 
       - name: Upgrade to Kubernetes 1.27
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
-          kubernetes-version: ${{ needs.ensure_capi_images.outputs.kube-1-27-version }}
-          image-id: ${{ needs.ensure_capi_images.outputs.kube-1-27-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
 
       - name: Upgrade to Kubernetes 1.28
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
-          kubernetes-version: ${{ needs.ensure_capi_images.outputs.kube-1-28-version }}
-          image-id: ${{ needs.ensure_capi_images.outputs.kube-1-28-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
 
       - name: Delete Kubernetes upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -176,7 +171,6 @@ jobs:
   # It uses a pre-existing internal network
   # It installs ALL of the addons so that we test upgrading them
   chart-upgrade:
-    needs: [ensure_capi_images]
     runs-on: ubuntu-latest
     if: ${{ inputs.tests-full }}
     steps:
@@ -256,8 +250,8 @@ jobs:
         with:
           chart-directory: latest-tag/charts/openstack-cluster
           name: ci-${{ github.run_id }}-${{ github.job }}
-          kubernetes-version: ${{ needs.ensure_capi_images.outputs.kube-1-28-version }}
-          image-id: ${{ needs.ensure_capi_images.outputs.kube-1-28-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
           # TODO(mkjpryor) remove this once calico csi-node-driver is fixed in a tagged version
           skip-workload-status: "yes"
 
@@ -271,8 +265,8 @@ jobs:
         with:
           chart-directory: current/charts/openstack-cluster
           name: ci-${{ github.run_id }}-${{ github.job }}
-          kubernetes-version: ${{ needs.ensure_capi_images.outputs.kube-1-28-version }}
-          image-id: ${{ needs.ensure_capi_images.outputs.kube-1-28-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
 
       - name: Delete chart upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
