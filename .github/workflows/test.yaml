@@ -4,7 +4,7 @@ on:
     inputs:
       images:
         type: string
-        description: JSON-encoded dictionary of images and versions.
+        description: JSON-encoded dictionary of images and versions
       ref-under-test:
         type: string
         description: The Git ref under test.
