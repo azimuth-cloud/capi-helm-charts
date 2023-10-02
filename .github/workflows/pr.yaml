@@ -32,22 +32,9 @@ jobs:
 
   test:
     needs: [lint]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - run: cat ./.github/workflows/pr.yaml
-
-  # test:
-  #   needs: [lint]
-  #   # Using an environment means that workflow runs need to be approved
-  #   environment: ci
-  #   uses: ./.github/workflows/test.yaml
-  #   with:
-  #     ref-under-test: ${{ github.event.pull_request.head.sha }}
-  #     # If the PR is in draft, just run a sanity check
-  #     # If the PR is in review, run the full test suite
-  #     tests-full: ${{ !github.event.pull_request.draft }}
+    uses: ./.github/workflows/test.yaml
+    with:
+      ref-under-test: ${{ github.event.pull_request.head.sha }}
+      # If the PR is in draft, just run a sanity check
+      # If the PR is in review, run the full test suite
+      tests-full: ${{ !github.event.pull_request.draft }}
