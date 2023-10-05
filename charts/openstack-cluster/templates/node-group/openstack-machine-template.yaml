@@ -32,6 +32,9 @@ template:
     {{- with $nodeGroup.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
+    {{- with $nodeGroup.serverGroupId }}
+    serverGroupID: {{ . }}
+    {{- end }}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.mt.checksum" -}}
