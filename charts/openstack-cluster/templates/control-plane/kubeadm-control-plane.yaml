@@ -76,7 +76,7 @@ metadata:
     helm.sh/resource-policy: keep
     # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
-  version: v{{ .Values.kubernetesVersion | required ".Values.kubernetesVersion is required" | trimPrefix "v" }}
+  version: v{{ .Values.controlPlane.kubernetesVersion | default .Values.kubernetesVersion | required "One of .Values.controlPlane.kubernetesVersion or .Values.kubernetesVersion is required" | trimPrefix "v" }}
   replicas: {{ .Values.controlPlane.machineCount }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
   machineTemplate:

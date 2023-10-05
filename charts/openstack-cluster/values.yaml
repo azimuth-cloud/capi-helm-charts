@@ -127,6 +127,12 @@ controlPlane:
   # For high-availability, this should be greater than 1
   # For etcd quorum, it should be odd - usually 3, or 5 for very large clusters
   machineCount: 3
+  # The kubernetes version for the control plane
+  kubernetesVersion:
+  # The image to use for control plane
+  machineImage:
+  # The ID of the image to use for the control plane
+  machineImageId:
   # The flavor to use for control plane machines
   machineFlavor:
   # The ports for control plane nodes
@@ -223,6 +229,14 @@ nodeGroupDefaults:
   failureDomain:
   # The flavor to use for machines in the node group
   machineFlavor:
+  # Default image id for nodeGroup hosts
+  machineImage:
+  # The ID of the image to use for nodeGroup machines
+  machineImageId:
+  # Kubernetes version for nodeGroup machines
+  kubernetesVersion:
+  # The default networks and ports for worker nodes
+  # If neither networks or ports are given, the cluster internal network is used
   # The default ports for worker nodes
   # If no ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
