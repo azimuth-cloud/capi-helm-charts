@@ -11,10 +11,25 @@
   To do this, we create a new template whenever the checksum of the spec changes.
 */}}
 
+{{- define "openstack-cluster.nodegroup.kct.spec.nodeLabels" -}}
+{{- $ctx := index . 0 }}
+{{- $nodeGroup := index . 1 }}
+{{- $defaultLabels := dict (printf "%s/node-group" $ctx.Values.projectPrefix) $nodeGroup.name }}
+{{- $nodeLabels := dig "nodeLabels" dict $nodeGroup | mergeOverwrite $defaultLabels }}
+joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $nodeLabels | nindent 2 }}
+{{- end }}
+
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
 {{- $ctx := index . 0 }}
 {{- $nodeGroup := index . 1 }}
-{{- include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) }}
+{{-
+  list
+    (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)
+    (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml) |
+  include "openstack-cluster.mergeConcat" |
+  fromYaml |
+  toYaml
+}}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.kct.checksum" -}}

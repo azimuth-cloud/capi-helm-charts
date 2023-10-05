@@ -1,45 +1,13 @@
-{{/*
-Produces the kubeadm config spec for a controlplane object, with support for the skipPhases
-option of InitConfiguration and specifying a KubeProxyConfiguration.
-*/}}
-{{- define "openstack-cluster.controlplane.kubeadmConfigSpec" -}}
-{{- $ctx := index . 0 }}
-{{- $kubeadmConfigSpec := omit
-  (index . 1)
-  "initConfiguration"
-  "kubeProxyConfiguration"
-  "files"
-  "preKubeadmCommands"
-}}
-{{- $initConfiguration := omit (index . 1 | dig "initConfiguration" dict) "skipPhases" }}
-{{- $skipPhases := index . 1 | dig "initConfiguration" "skipPhases" list }}
-{{- $kubeProxyConfiguration := index . 1 | dig "kubeProxyConfiguration" dict }}
-{{- $files := index . 1 | dig "files" list }}
-{{- $preKubeadmCommands := index . 1 | dig "preKubeadmCommands" list }}
-
-{{- if and $skipPhases (semverCompare "<1.22.0" $ctx.Values.kubernetesVersion) }}
-{{- fail "skipPhases is only supported for Kubernetes 1.22 and higher" }}
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" -}}
+{{- with .Values.controlPlane.nodeLabels }}
+initConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . | nindent 2 }}
+joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . | nindent 2 }}
+{{- end }}
 {{- end }}
 
-{{- with $kubeadmConfigSpec }}
-{{- toYaml . }}
-{{- end }}
-{{- with $initConfiguration }}
-initConfiguration: {{ toYaml $initConfiguration | nindent 2 }}
-{{- end }}
-{{- if or $files $skipPhases $kubeProxyConfiguration }}
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" -}}
+{{- with .kubeProxyConfiguration }}
 files:
-  {{- range $files }}
-  - {{ toYaml . | nindent 4 }}
-  {{- end }}
-  {{- if $skipPhases }}
-  - path: /run/kubeadm/skip-phases.yaml
-    content: |
-      skipPhases: {{ toYaml $skipPhases | nindent 8 }}
-    owner: root:root
-    permissions: "0644"
-  {{- end }}
-  {{- with $kubeProxyConfiguration }}
   - path: /run/kubeadm/kube-proxy-configuration.yaml
     content: |
       ---
@@ -48,19 +16,8 @@ files:
       {{- toYaml . | nindent 6 }}
     owner: root:root
     permissions: "0644"
-  {{- end }}
-{{- end }}
-{{- if or $preKubeadmCommands $skipPhases $kubeProxyConfiguration }}
 preKubeadmCommands:
-  {{- range $preKubeadmCommands }}
-  - {{ . }}
-  {{- end }}
-  {{- if $skipPhases }}
-  - cat /run/kubeadm/skip-phases.yaml >> /run/kubeadm/kubeadm.yaml
-  {{- end }}
-  {{- if $kubeProxyConfiguration }}
   - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
-  {{- end }}
 {{- end }}
 {{- end }}
 
@@ -91,11 +48,16 @@ spec:
     nodeVolumeDetachTimeout: {{ .Values.controlPlane.nodeVolumeDetachTimeout }}
     nodeDeletionTimeout: {{ .Values.controlPlane.nodeDeletionTimeout }}
   kubeadmConfigSpec: {{
-    include
-      "openstack-cluster.controlplane.kubeadmConfigSpec"
-      (list . .Values.controlPlane.kubeadmConfigSpec) |
-    fromYaml |
-    list . |
-    include "openstack-cluster.kubeadmConfigSpec" |
+    omit
+      (
+        list
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
+          (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" .Values.controlPlane.kubeadmConfigSpec | fromYaml) |
+        include "openstack-cluster.mergeConcatMany" |
+        fromYaml
+      )
+      "kubeProxyConfiguration" |
+    toYaml |
     nindent 4
   }}

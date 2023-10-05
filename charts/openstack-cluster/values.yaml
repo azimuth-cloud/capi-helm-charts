@@ -151,6 +151,9 @@ controlPlane:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+  # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
+  nodeLabels:
+    # my.company.org/label: value
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
   # The time to wait for a node to detach all volumes before it can be removed
@@ -253,6 +256,10 @@ nodeGroupDefaults:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+  # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
+  # By default, nodes that are part of a node group get the label "capi.stackhpc.com/node-group=<node group name>"
+  nodeLabels:
+    # my.company.org/label: value
   # The time to wait for a node to finish draining before it can be removed
   nodeDrainTimeout: 5m0s
   # The time to wait for a node to detach all volumes before it can be removed
