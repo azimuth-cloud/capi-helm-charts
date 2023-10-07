@@ -25,8 +25,9 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $n
 {{-
   list
     (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)
-    (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml) |
-  include "openstack-cluster.mergeConcat" |
+    (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml)
+    (omit (include "openstack-cluster.osDistroKubeadmConfigSpec" (list $ctx) | fromYaml) "initConfiguration") |
+  include "openstack-cluster.mergeConcatMany" |
   fromYaml |
   toYaml
 }}

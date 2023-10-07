@@ -203,6 +203,7 @@ files:
       # This file is created by the capi-helm-chart to ensure that its parent directory exists
     owner: root:root
     permissions: "0644"
+{{- if ne .Values.osDistro "flatcar" }}
   - path: /etc/containerd/config.toml
     content: |
       [plugins."io.containerd.grpc.v1.cri".registry]
@@ -210,6 +211,7 @@ files:
     owner: root:root
     permissions: "0644"
     append: true
+{{- end }}
 {{- with .Values.registryMirrors }}
 {{- range $registry, $registrySpec := . }}
   - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
@@ -274,4 +276,46 @@ Produces the spec for a KubeadmConfig object.
     $kubeadmConfigSpec |
   include "openstack-cluster.mergeConcatMany"
 }}
+{{- end }}
+
+{{/*
+Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
+*/}}
+{{- define "openstack-cluster.flatcarKubeadmConfigSpec" -}}
+initConfiguration:
+  nodeRegistration:
+    name: ${COREOS_OPENSTACK_HOSTNAME}
+joinConfiguration:
+  nodeRegistration:
+    name: ${COREOS_OPENSTACK_HOSTNAME}
+preKubeadmCommands:
+  - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+  - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
+  - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
+format: ignition
+ignition:
+  containerLinuxConfig:
+    additionalConfig: |
+      systemd:
+        units:
+        - name: coreos-metadata-sshkeys@.service
+          enabled: true
+        - name: kubeadm.service
+          enabled: true
+          dropins:
+          - name: 10-flatcar.conf
+            contents: |
+              [Unit]
+              Requires=containerd.service coreos-metadata.service
+              After=containerd.service coreos-metadata.service
+              [Service]
+              EnvironmentFile=/run/metadata/flatcar
+{{- end }}
+
+{{- define "openstack-cluster.osDistroKubeadmConfigSpec" }}
+{{- $ctx := index . 0 }}
+{{- $osDistro := $ctx.Values.osDistro }}
+{{- if eq $osDistro "flatcar" }}
+{{- include "openstack-cluster.flatcarKubeadmConfigSpec" $ctx }}
+{{- end }}
 {{- end }}

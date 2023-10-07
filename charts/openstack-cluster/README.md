@@ -222,3 +222,11 @@ clusterctl get kubeconfig my-cluster > kubeconfig.my-cluster
 # Use that kubeconfig to list pods on the workload cluster
 kubectl --kubeconfig=./kubeconfig.my-cluster get po -A
 ```
+
+## Flatcar
+
+To deploy clusters which use Ignition such as Flatcar, you will need to override the following setting in your local `values.yaml`:
+
+```yaml
+osDistro: flatcar 
+```
