@@ -219,7 +219,7 @@ nodeFeatureDiscovery:
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.12.0
+    version: 0.14.1
   release:
     namespace: node-feature-discovery
     values: {}
@@ -232,9 +232,9 @@ nvidiaGPUOperator:
   # that do not need it now but may need it in the future is low
   enabled: true
   chart:
-    repo: https://nvidia.github.io/gpu-operator
+    repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v22.9.1
+    version: v23.6.1
   release:
     namespace: gpu-operator
     values:
@@ -250,9 +250,9 @@ mellanoxNetworkOperator:
   # that do not need it now but may need it in the future is low
   enabled: true
   chart:
-    repo: https://mellanox.github.io/network-operator
+    repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 1.4.0
+    version: 23.7.0
   release:
     namespace: network-operator
     values: {}
