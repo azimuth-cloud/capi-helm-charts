@@ -30,6 +30,9 @@ template:
     {{- with .Values.controlPlane.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
+    {{- with .Values.controlPlane.serverGroupId }}
+    serverGroupID: {{ . }}
+    {{- end }}
 {{- end }}
 
 {{- define "openstack-cluster.controlplane.mt.checksum" -}}
