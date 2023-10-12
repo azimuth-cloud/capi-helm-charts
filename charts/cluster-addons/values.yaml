@@ -109,6 +109,14 @@ openstack:
       # The allowed topologies for the storage class
       allowedTopologies:
 
+  k8sKeystoneAuth:
+    enabled: false
+    targetNamespace: kube-system
+    chart:
+      repo: https://heytrav.github.io/helm-charts
+      name: k8s-keystone-auth
+      version: 0.0.8
+
 # Settings for the metrics server
 # https://github.com/kubernetes-sigs/metrics-server#helm-chart
 metricsServer:

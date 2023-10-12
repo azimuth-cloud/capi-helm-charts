@@ -122,6 +122,11 @@ apiServer:
 
 # Set osDistro used. ubuntu, flatcar, etc.
 osDistro: ubuntu
+#
+# API server authentication/authorization webhook. Set this to
+# integrate into KubeadmControlPlane and KubeadmConfigTemplate
+# possible values: k8s-keystone-auth
+# authWebhook: k8s-keystone-auth
 
 # Settings for the control plane
 controlPlane:

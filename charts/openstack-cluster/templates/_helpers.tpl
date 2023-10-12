@@ -319,3 +319,93 @@ ignition:
 {{- include "openstack-cluster.flatcarKubeadmConfigSpec" $ctx }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create folders necessary for webhook integration.
+*/}}
+{{- define "openstack-cluster.webhookPatches" }}
+  preKubeadmCommands:
+    - mkdir -p /etc/kubernetes/webhooks
+    - mkdir -p /etc/kubernetes/patches
+{{- end }}
+
+{{/*
+Supplement kubeadmConfig with apiServer config and webhook patches as needed. Authentication
+webhooks and policies for audit logging can be added here.
+*/}}
+{{- define "openstack-cluster.patchConfigSpec" -}}
+{{- $ctx := index . 0 }}
+{{- $authWebhook := $ctx.Values.authWebhook }}
+  clusterConfiguration:
+    apiServer:
+      extraArgs:
+        cloud-provider: external
+{{- if $authWebhook }}
+        authorization-mode: Node,Webhook,RBAC
+{{- if eq $authWebhook "k8s-keystone-auth" }}
+        authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
+        authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
+{{/*
+Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
+in future
+*/}}
+{{- end }}
+  initConfiguration:
+    patches:
+      directory: /etc/kubernetes/patches
+  joinConfiguration:
+    patches:
+      directory: /etc/kubernetes/patches
+{{- include "openstack-cluster.webhookPatches" $ctx }}
+{{- if eq $authWebhook "k8s-keystone-auth" }}
+{{- include "openstack-cluster.k8sKeystoneAuthWebhook" $ctx }}
+{{/*
+Add else if blocks with other webhooks or policy files in future.
+*/}}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Produces integration for k8s-keystone-auth webhook on apiserver
+*/}}
+{{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
+  files:
+    - path: /etc/kubernetes/patches/kube-apiserver0+strategic.yaml
+      permissions: "0644"
+      owner: root:root
+      content: |
+        spec:
+          containers:
+          -  name: kube-apiserver
+             volumeMounts:
+             - mountPath: /etc/kubernetes/webhooks
+               name: kube-webhooks
+               readOnly: true
+          volumes:
+          - hostPath:
+              path: /etc/kubernetes/webhooks
+              type: DirectoryOrCreate
+            name: kube-webhooks
+    - path: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
+      content: |
+        ---
+        apiVersion: v1
+        kind: Config
+        preferences: {}
+        clusters:
+          - cluster:
+              insecure-skip-tls-verify: true
+              server: https://127.0.0.1:8443/webhook
+            name: webhook
+        users:
+          - name: webhook
+        contexts:
+          - context:
+              cluster: webhook
+              user: webhook
+            name: webhook
+        current-context: webhook
+      owner: root:root
+      permissions: "0644"
+{{- end }}
