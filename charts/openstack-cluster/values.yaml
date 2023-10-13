@@ -101,7 +101,11 @@ apiServer:
   enableLoadBalancer: true
   # Indicates what loadbalancer provider to use. Default is amphora
   loadBalancerProvider:
-
+  # Restrict loadbalancer access to select IPs
+  # allowedCidrs
+  #  - 192.168.0.0/16  # needed for cluster to init
+  #  - 10.10.0.0/16  # IPv4 Internal Network
+  #  - 123.123.123.123 # some other IPs
   # Indicates whether to associate a floating IP with the API server
   associateFloatingIP: true
   # The specific floating IP to associate with the API server
