@@ -119,6 +119,10 @@ apiServer:
   # The port to use for the API server
   port: 6443
 
+
+# Set osDistro used. ubuntu, flatcar, etc.
+osDistro: ubuntu
+
 # Settings for the control plane
 controlPlane:
   # The failure domains to use for control plane nodes
