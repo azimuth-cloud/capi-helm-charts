@@ -14,18 +14,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Reusable workflows cannot be used with environments
-  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#supported-keywords-for-jobs-that-call-a-reusable-workflow
-  # So we must use a different mechanism for approvals
+  # Use a job that does nothing but has an environment as a guard to control
+  # access to the rest of workflow
+  # This allows us to control access to test infra for concurrenct and approval reasons
   wait_for_approval:
     runs-on: ubuntu-latest
+    environment: ci-approval
     steps:
-      - name: Wait for approval
-        uses: stackhpc/github-actions/workflow-approve@master
-        with:
-          approvers: mkjpryor
-          # Explicit approval is only required for PRs from external forks
-          approval-required: ${{ github.event.pull_request.head.repo.full_name != 'stackhpc/capi-helm-charts' && 'yes' || 'no' }}
+      - name: Workflow approved
+        run: exit 0
 
   lint:
     needs: [wait_for_approval]
