@@ -1,0 +1,17 @@
+name: Publish dependencies on release
+on:
+  push:
+    tags:
+      - "**"
+
+jobs:
+  publish_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Publish manifest to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dependencies.json
