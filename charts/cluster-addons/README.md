@@ -163,3 +163,18 @@ By default, Grafana is only available from within the cluster and must be access
 ```sh
 kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000:80
 ```
+
+## Keystone Authentication Webhook
+
+The  [k8s-keystone-auth](https://github.com/heytrav/helm-charts/tree/main/charts/k8s-keystone-auth) 
+webhook can be installed by enabling the `k8sKeystoneAuth` subchart. Note that you will need to provide 
+the **auth url** and **project id** for the Openstack tenant where you are deploying your cluster.
+
+```yaml
+  k8sKeystoneAuth:
+    enabled: true
+    values:
+      openstackAuthUrl: $OS_AUTH_URL
+      projectId: $OS_PROJECT_ID
+
+```

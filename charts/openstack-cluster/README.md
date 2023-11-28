@@ -230,3 +230,14 @@ To deploy clusters which use Ignition such as Flatcar, you will need to override
 ```yaml
 osDistro: flatcar 
 ```
+
+## Keystone Authentication Webhook
+
+To deploy with the k8s-keystone-auth webhook enabled, set `authWebhook`
+to "k8s-keystone-auth".
+
+```
+authWebhook: k8s-keystone-auth 
+```
+
+See cluster-addons README for instructions on installing the `k8s-keystone-auth` subchart.
