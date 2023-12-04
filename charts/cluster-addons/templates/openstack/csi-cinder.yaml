@@ -85,29 +85,17 @@ spec:
           {{- with .volumeType }}
           type: {{ . }}
           {{- end }}
+          {{- with .fstype }}
+          fstype: {{ . }}
+          {{- end }}
         reclaimPolicy: {{ .reclaimPolicy }}
         allowVolumeExpansion: {{ .allowVolumeExpansion }}
-        volumeBindingMode: WaitForFirstConsumer
+        volumeBindingMode: {{ .volumeBindingMode }}
         {{- with .allowedTopologies }}
         allowedTopologies: {{ toYaml . | nindent 6 }}
         {{- end }}
         {{- end }}
-{{- end }}
-{{- range .Values.openstack.csiCinder.additionalStorageClasses }}
-{{- $rangeItem := . -}}
-{{- with $ }}
----
-apiVersion: addons.stackhpc.com/v1alpha1
-kind: Manifests
-metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-cinder-storageclass") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder-storageclass") | nindent 4 }}
-spec:
-  clusterName: {{ include "cluster-addons.clusterName" . }}
-  bootstrap: true
-  targetNamespace: {{ .Values.openstack.targetNamespace }}
-  releaseName: {{ $rangeItem.name }}-storageclass
-  manifestSources:
+{{- range $rangeItem := .Values.openstack.csiCinder.additionalStorageClasses }}
     - template: |
         apiVersion: storage.k8s.io/v1
         kind: StorageClass
@@ -119,9 +107,12 @@ spec:
           {{- with $rangeItem.volumeType }}
           type: {{ . }}
           {{- end }}
+          {{- with $rangeItem.fstype }}
+          fstype: {{ . }}
+          {{- end }}
         reclaimPolicy: {{ $rangeItem.reclaimPolicy }}
         allowVolumeExpansion: {{ $rangeItem.allowVolumeExpansion }}
-        volumeBindingMode: WaitForFirstConsumer
+        volumeBindingMode: {{ $rangeItem.volumeBindingMode }}
         {{- with $rangeItem.allowedTopologies }}
         allowedTopologies: {{ toYaml . | nindent 6 }}
         {{- end }}

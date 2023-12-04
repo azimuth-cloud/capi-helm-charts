@@ -67,7 +67,7 @@ openstack:
       name: openstack-cinder-csi
       version: 2.28.1
     values: {}
-    # Variables affecting the definition of the default storage class
+    # Variables affecting the definition of the storage class
     defaultStorageClass:
       # Indicates if the storage class should be enabled
       enabled: true
@@ -82,23 +82,30 @@ openstack:
       # The Cinder volume type to use for volumes provisioned by the storage class
       # If not given, the default volume type will be used
       volumeType:
+      # The volumeBindingMode field controls when volume binding and dynamic provisioning should occur.
+      volumeBindingMode: WaitForFirstConsumer
       # The allowed topologies for the storage class
       allowedTopologies:
-    # Variables affecting the definition of additional (non-default) storage classes
+      # Filesystem type supported by Kubernetes. Defaults to "ext4"
+      # fstype:
     additionalStorageClasses: []
-      # - name: csi-cinder-fast
-      #   # The reclaim policy for the storage class
-      #   reclaimPolicy: Delete
-      #   # Indicates if volume expansion is allowed
-      #   allowVolumeExpansion: true
-      #   # The Cinder availability zone to use for volumes provisioned by the storage class
-      #   availabilityZone: nova
-      #   # The Cinder volume type to use for volumes provisioned by the storage class
-      #   # If not given, the default volume type will be used
-      #   volumeType: fast
-      #   # The allowed topologies for the storage class
-      #   allowedTopologies:
-
+    # - name: additional-storage-classname
+    # The reclaim policy for the storage class
+    #   reclaimPolicy: Delete
+    # The reclaim policy for the storage class
+    #   allowVolumeExpansion: true
+    # The Cinder availability zone to use for volumes provisioned by the storage class
+    #   availabilityZone: nova
+    # The Cinder volume type to use for volumes provisioned by the storage class
+    # If not given, the default volume type will be used
+    #   volumeType:
+    # The volumeBindingMode field controls when volume binding and dynamic provisioning should occur.
+    # Required for additionalStorageClasses.
+    #   volumeBindingMode: WaitForFirstConsumer
+    # The allowed topologies for the storage class
+    #   allowedTopologies:
+    # Filesystem type supported by Kubernetes. Defaults to "ext4"
+    #   fstype:
   k8sKeystoneAuth:
     enabled: false
     targetNamespace: kube-system
