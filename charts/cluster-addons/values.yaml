@@ -242,7 +242,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v23.9.0
+    version: v23.9.1
   release:
     namespace: gpu-operator
     values:
