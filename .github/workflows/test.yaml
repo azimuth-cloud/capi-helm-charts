@@ -133,6 +133,7 @@ jobs:
               docker.io:
                 - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
             clusterNetworking:
+              externalNetworkId: ${{ secrets.EXTERNAL_NETWORK_ID }}
               internalNetwork:
                 networkFilter:
                   tags: capi-helm-chart-ci
@@ -220,6 +221,7 @@ jobs:
               docker.io:
                 - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
             clusterNetworking:
+              externalNetworkId: ${{ secrets.EXTERNAL_NETWORK_ID }}
               internalNetwork:
                 networkFilter:
                   tags: capi-helm-chart-ci
