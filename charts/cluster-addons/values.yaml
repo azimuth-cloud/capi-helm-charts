@@ -4,28 +4,6 @@
 # if not given, the release name is used
 clusterName:
 
-# Settings for hook jobs
-hooks:
-  image:
-    repository: ghcr.io/stackhpc/capi-helm-utils
-    tag:  # Defaults to chart appVersion if not given
-    pullPolicy: IfNotPresent
-  imagePullSecrets: []
-  backoffLimit: 1000
-  activeDeadlineSeconds: 3600
-  podSecurityContext:
-    runAsNonRoot: true
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop: [ALL]
-    readOnlyRootFilesystem: true
-  resources: {}
-  hostNetwork: false
-  tolerations: []
-  nodeSelector: {}
-  affinity: {}
-
 # Settings for the CNI addon
 cni:
   # Indicates if a CNI should be deployed

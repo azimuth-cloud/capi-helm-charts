@@ -51,6 +51,8 @@ jobs:
             registryMirrors:
               docker.io:
                 - ${{ secrets.DOCKER_HUB_MIRROR_URL }}
+            clusterNetworking:
+              externalNetworkId: ${{ secrets.EXTERNAL_NETWORK_ID }}
             controlPlane:
               machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
               machineCount: 1
