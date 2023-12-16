@@ -55,7 +55,7 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
         key: overrides
-{{- if .Values.openstack.csiCinder.storageClass.enabled }}
+{{- if .Values.openstack.csiCinder.defaultStorageClass.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
@@ -72,27 +72,50 @@ spec:
   releaseName: csi-cinder-storageclass
   manifestSources:
     - template: |
-        {{- with .Values.openstack.csiCinder.storageClass }}
+        {{- with .Values.openstack.csiCinder.defaultStorageClass }}
         apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
           name: {{ .name }}
-          {{- if .isDefault }}
           annotations:
             storageclass.kubernetes.io/is-default-class: "true"
-          {{- end }}
         provisioner: cinder.csi.openstack.org
         parameters:
           availability: {{ .availabilityZone }}
           {{- with .volumeType }}
           type: {{ . }}
           {{- end }}
+          {{- with .fstype }}
+          fstype: {{ . }}
+          {{- end }}
         reclaimPolicy: {{ .reclaimPolicy }}
         allowVolumeExpansion: {{ .allowVolumeExpansion }}
-        volumeBindingMode: WaitForFirstConsumer
+        volumeBindingMode: {{ .volumeBindingMode }}
         {{- with .allowedTopologies }}
         allowedTopologies: {{ toYaml . | nindent 6 }}
         {{- end }}
         {{- end }}
+{{- range $rangeItem := .Values.openstack.csiCinder.additionalStorageClasses }}
+    - template: |
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: {{ $rangeItem.name }}
+        provisioner: cinder.csi.openstack.org
+        parameters:
+          availability: {{ $rangeItem.availabilityZone }}
+          {{- with $rangeItem.volumeType }}
+          type: {{ . }}
+          {{- end }}
+          {{- with $rangeItem.fstype }}
+          fstype: {{ . }}
+          {{- end }}
+        reclaimPolicy: {{ $rangeItem.reclaimPolicy }}
+        allowVolumeExpansion: {{ $rangeItem.allowVolumeExpansion }}
+        volumeBindingMode: {{ $rangeItem.volumeBindingMode }}
+        {{- with $rangeItem.allowedTopologies }}
+        allowedTopologies: {{ toYaml . | nindent 6 }}
+        {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

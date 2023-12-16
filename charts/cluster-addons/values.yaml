@@ -68,13 +68,11 @@ openstack:
       version: 2.28.1
     values: {}
     # Variables affecting the definition of the storage class
-    storageClass:
+    defaultStorageClass:
       # Indicates if the storage class should be enabled
       enabled: true
       # The name of the storage class
       name: csi-cinder
-      # Indicates if the storage class should be annotated as the default storage class
-      isDefault: true
       # The reclaim policy for the storage class
       reclaimPolicy: Delete
       # Indicates if volume expansion is allowed
@@ -84,9 +82,30 @@ openstack:
       # The Cinder volume type to use for volumes provisioned by the storage class
       # If not given, the default volume type will be used
       volumeType:
+      # The volumeBindingMode field controls when volume binding and dynamic provisioning should occur.
+      volumeBindingMode: WaitForFirstConsumer
       # The allowed topologies for the storage class
       allowedTopologies:
-
+      # Filesystem type supported by Kubernetes. Defaults to "ext4"
+      # fstype:
+    additionalStorageClasses: []
+    # - name: additional-storage-classname
+    # The reclaim policy for the storage class
+    #   reclaimPolicy: Delete
+    # The reclaim policy for the storage class
+    #   allowVolumeExpansion: true
+    # The Cinder availability zone to use for volumes provisioned by the storage class
+    #   availabilityZone: nova
+    # The Cinder volume type to use for volumes provisioned by the storage class
+    # If not given, the default volume type will be used
+    #   volumeType:
+    # The volumeBindingMode field controls when volume binding and dynamic provisioning should occur.
+    # Required for additionalStorageClasses.
+    #   volumeBindingMode: WaitForFirstConsumer
+    # The allowed topologies for the storage class
+    #   allowedTopologies:
+    # Filesystem type supported by Kubernetes. Defaults to "ext4"
+    #   fstype:
   k8sKeystoneAuth:
     enabled: false
     targetNamespace: kube-system
