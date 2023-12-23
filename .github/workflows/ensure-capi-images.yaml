@@ -7,10 +7,6 @@ on:
         description: The Git ref under test.
         required: true
     outputs:
-      kube-1-26-image:
-        value: ${{ jobs.produce_outputs.outputs.kube-1-26-image }}
-      kube-1-26-version:
-        value: ${{ jobs.produce_outputs.outputs.kube-1-26-version }}
       kube-1-27-image:
         value: ${{ jobs.produce_outputs.outputs.kube-1-27-image }}
       kube-1-27-version:
@@ -19,6 +15,10 @@ on:
         value: ${{ jobs.produce_outputs.outputs.kube-1-28-image }}
       kube-1-28-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-28-version }}
+      kube-1-29-image:
+        value: ${{ jobs.produce_outputs.outputs.kube-1-29-image }}
+      kube-1-29-version:
+        value: ${{ jobs.produce_outputs.outputs.kube-1-29-version }}
 
 jobs:
   image_manifest:
@@ -45,14 +45,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: kube-1-26
-            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-26-jammy }}
-            skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-27
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-27-jammy }}
             skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-28
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-28-jammy }}
+            skip: ${{ github.event.pull_request.draft }}
+          - name: kube-1-29
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-29-jammy }}
             skip: false
     steps:
       - name: Checkout
@@ -101,12 +101,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ensure_image]
     outputs:
-      kube-1-26-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-26 }}
-      kube-1-26-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-26 }}
       kube-1-27-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-27 }}
       kube-1-27-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-27 }}
       kube-1-28-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-28 }}
       kube-1-28-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-28 }}
+      kube-1-29-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-29 }}
+      kube-1-29-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-29 }}
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
