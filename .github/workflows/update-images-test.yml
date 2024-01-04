@@ -41,6 +41,8 @@ jobs:
                         requests:
                           storage: 10Gi
 
-      - run: echo -e "$MANIFESTS"
-        env:
-          MANIFESTS: ${{ steps.helm-template.outputs.manifests }}
+      - run: |
+          MANIFESTS=<<'EOF'
+          ${{ steps.helm-template.outputs.manifests }}
+          EOF
+          echo -e "$MANIFESTS"
