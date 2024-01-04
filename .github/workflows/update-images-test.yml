@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: helm-template
-        uses: stackhpc/github-actions/helm-template@master
+        uses: stackhpc/github-actions/helm-template@feature/helm-template
         with:
           repository: https://prometheus-community.github.io/helm-charts
           chart: kube-prometheus-stack
