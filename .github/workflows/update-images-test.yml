@@ -1,0 +1,46 @@
+name: Update addons
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - reopened
+    branches:
+      - main
+
+jobs:
+  test_actions:
+    runs-on: ubuntu-latest
+    steps:
+      - id: helm-template
+        uses: stackhpc/github-actions/helm-template@master
+        with:
+          repository: https://prometheus-community.github.io/helm-charts
+          chart: kube-prometheus-stack
+          version: 55.5.1
+          values: |
+            alertmanager:
+              alertmanagerSpec:
+                retention: 168h
+                storage:
+                  volumeClaimTemplate:
+                    spec:
+                      accessModes: ["ReadWriteOnce"]
+                      resources:
+                        requests:
+                          storage: 10Gi
+            prometheus:
+              prometheusSpec:
+                retention: 90d
+                storageSpec:
+                  volumeClaimTemplate:
+                    spec:
+                      accessModes: ["ReadWriteOnce"]
+                      resources:
+                        requests:
+                          storage: 10Gi
+
+      - run: echo -e "$MANIFESTS"
+        env:
+          MANIFESTS: ${{ steps.helm-template.outputs.manifests }}
