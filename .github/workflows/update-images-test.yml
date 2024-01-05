@@ -47,7 +47,7 @@ jobs:
       - uses: stackhpc/github-actions/k8s-extract-images@feature/k8s-extract-images
         id: extract-images
         with:
-          manifests: ${{ steps.helm-template.outputs.manifests }}
+          manifests-file: ${{ steps.helm-template.outputs.manifests-file }}
 
       - run: 'echo "$IMAGES"'
         env:
