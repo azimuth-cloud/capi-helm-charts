@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: helm-template
-        uses: stackhpc/github-actions/helm-template@feature/helm-template
+        uses: stackhpc/github-actions/helm-template@master
         with:
           repository: https://prometheus-community.github.io/helm-charts
           chart: kube-prometheus-stack
@@ -41,8 +41,11 @@ jobs:
                         requests:
                           storage: 10Gi
 
-      - run: |
-          MANIFESTS=<<'EOF'
-          ${{ steps.helm-template.outputs.manifests }}
-          EOF
-          echo -e "$MANIFESTS"
+      - uses: stackhpc/github-actions/k8s-extract-images@feature/k8s-extract-images
+        id: extract-images
+        with:
+          manifests: ${{ steps.helm-template.outputs.manifests }}
+
+      - run: 'echo "$IMAGES"'
+        env:
+          IMAGES: ${{ steps.extract-images.outputs.images }}
