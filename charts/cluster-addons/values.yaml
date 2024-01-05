@@ -200,7 +200,7 @@ monitoring:
     chart:
       repo: https://grafana.github.io/helm-charts
       name: loki-stack
-      version: 2.9.11
+      version: 2.9.12
     release:
       namespace: monitoring-system
       values:
