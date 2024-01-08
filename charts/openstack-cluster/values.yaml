@@ -71,18 +71,25 @@ clusterNetworking:
     nodeCidr: 192.168.3.0/24
 
 # Settings for registry mirrors
-registryMirrors: {}
+# When a mirror is set, it will be tried for images but will fall back to the
+# upstream registry if the image pull fails
+# By default, use images mirrored to the StackHPC GitHub packages when possible
+registryMirrors:
   # docker.io:
   #   upstream: https://registry-1.docker.io
   #   mirrors:
   #     - url: https://registry.my.domain/v2/dockerhub-public
   #       capabilities: ["pull", "resolve"]
-
-# Settings for node-level registry auth
-registryAuth: {}
-  # registry-1.docker.io:
-  #   username: "<username>"
-  #   password: "<password>"
+  docker.io:
+    - https://ghcr.io/v2/stackhpc/docker.io
+  ghcr.io:
+    - https://ghcr.io/v2/stackhpc/ghcr.io
+  nvcr.io:
+    - https://ghcr.io/v2/stackhpc/nvcr.io
+  quay.io:
+    - https://ghcr.io/v2/stackhpc/quay.io
+  registry.k8s.io:
+    - https://ghcr.io/v2/stackhpc/registry.k8s.io
 
 # A map of trusted CAs to add to the system trust on cluster nodes
 trustedCAs: {}
@@ -118,7 +125,6 @@ apiServer:
   fixedIP:
   # The port to use for the API server
   port: 6443
-
 
 # Set osDistro used. ubuntu, flatcar, etc.
 osDistro: ubuntu
