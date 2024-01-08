@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - id: helm-template
-        uses: stackhpc/github-actions/helm-template@feature/k8s-extract-images
+        uses: stackhpc/github-actions/helm-template@master
         with:
           repository: https://prometheus-community.github.io/helm-charts
           chart: kube-prometheus-stack
@@ -44,11 +44,18 @@ jobs:
                         requests:
                           storage: 10Gi
 
-      - uses: stackhpc/github-actions/k8s-extract-images@feature/k8s-extract-images
+      - uses: stackhpc/github-actions/k8s-extract-images@master
         id: extract-images
         with:
           manifests-file: ${{ steps.helm-template.outputs.manifests-file }}
 
-      - run: 'echo "$IMAGES"'
+      - name: Write Skopeo manifest
+        id: skopeo-manifest
+        uses: stackhpc/github-actions/skopeo-manifest@feature/skopeo-manifest
+        with:
+          manifest-file: ./skopeo-manifest.yaml
+          images: ${{ steps.extract-images.outputs.images }}
+
+      - run: cat $MANIFEST_FILE
         env:
-          IMAGES: ${{ steps.extract-images.outputs.images }}
+          MANIFEST_FILE: ${{ steps.skopeo-manifest.outputs.manifest-file }}
