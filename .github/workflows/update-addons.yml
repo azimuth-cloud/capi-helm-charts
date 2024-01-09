@@ -14,6 +14,19 @@ jobs:
         include:
           - key: calico
             path: cni.calico.chart
+            # Because of the way the Calico chart and CRDs are written, it is very
+            # difficult to infer the images (other than the operator image)
+            # Instead, we must list them here
+            # This string is formatted with the chart version
+            additional-images: |-
+              docker.io/calico/apiserver:{0}
+              docker.io/calico/cni:{0}
+              docker.io/calico/csi:{0}
+              docker.io/calico/kube-controllers:{0}
+              docker.io/calico/node-driver-registrar:{0}
+              docker.io/calico/node:{0}
+              docker.io/calico/pod2daemon-flexvol:{0}
+              docker.io/calico/typha:{0}
 
           - key: cilium
             path: cni.cilium.chart
@@ -24,11 +37,20 @@ jobs:
           - key: csi-cinder
             path: openstack.csiCinder.chart
 
+          - key: k8s-keystone-auth
+            path: openstack.k8sKeystoneAuth.chart
+            values: |
+              openstackAuthUrl: https://keystone.my.openstack
+              projectId: notarealprojectid
+
           - key: metrics-server
             path: metricsServer.chart
 
           - key: kubernetes-dashboard
             path: kubernetesDashboard.chart
+            values: |
+              metricsScraper:
+                enabled: true
 
           - key: ingress-nginx
             path: ingress.nginx.chart
@@ -44,9 +66,30 @@ jobs:
 
           - key: nvidia-gpu-operator
             path: nvidiaGPUOperator.chart
+            values: |
+              nfd:
+                enabled: false
 
           - key: mellanox-network-operator
             path: mellanoxNetworkOperator.chart
+            values: |
+              nfd:
+                enabled: false
+              deployCR: true
+              ofedDriver:
+                deploy: true
+              rdmaSharedDevicePlugin:
+                deploy: true
+              ibKubernetes:
+                deploy: false
+              nvPeerDriver:
+                deploy: false
+              sriovNetworkOperator:
+                enabled: false
+              sriovDevicePlugin:
+                deploy: false
+              secondaryNetwork:
+                deploy: false
 
     name: ${{ matrix.key }}
     steps:
@@ -75,6 +118,38 @@ jobs:
           path: ./charts/cluster-addons/values.yaml
           updates: |
             ${{ matrix.path }}.version=${{ steps.next.outputs.version }}
+
+      - name: Template updated chart
+        id: helm-template
+        uses: stackhpc/github-actions/helm-template@master
+        with:
+          repository: ${{ steps.chart-info.outputs.repo }}
+          chart: ${{ steps.chart-info.outputs.name }}
+          version: ${{ steps.next.outputs.version }}
+          values: ${{ matrix.values || '{}' }}
+
+      - name: Extract images from templated manifests
+        id: extract-images
+        uses: stackhpc/github-actions/k8s-extract-images@master
+        with:
+          manifests-file: ${{ steps.helm-template.outputs.manifests-file }}
+
+      - name: Ensure manifests directory exists
+        run: mkdir -p ./skopeo-manifests
+
+      - name: Write Skopeo manifest
+        uses: stackhpc/github-actions/skopeo-manifest@master
+        with:
+          manifest-file: ./skopeo-manifests/${{ matrix.key }}.yaml
+          images: |
+            ${{ steps.extract-images.outputs.images }}
+            ${{
+              format(
+                matrix.additional-images || '',
+                steps.next.outputs.version,
+                steps.next.outputs.app-version
+              )
+            }}
 
       - name: Generate app token for PR
         uses: stackhpc/github-actions/generate-app-token@master
