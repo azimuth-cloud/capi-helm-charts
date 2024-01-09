@@ -112,7 +112,7 @@ openstack:
     chart:
       repo: https://heytrav.github.io/helm-charts
       name: k8s-keystone-auth
-      version: 0.0.8
+      version: 0.0.9
 
 # Settings for the metrics server
 # https://github.com/kubernetes-sigs/metrics-server#helm-chart
