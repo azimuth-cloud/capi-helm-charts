@@ -1,0 +1,4 @@
+registry.k8s.io:
+  images:
+    metrics-server/metrics-server:
+    - v0.6.4
