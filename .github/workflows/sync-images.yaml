@@ -1,0 +1,34 @@
+name: sync images
+on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        description: The Git ref to use in the checkout.
+
+jobs:
+  sync_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Install skopeo
+        run: sudo apt-get -y update && sudo apt-get install -y skopeo
+
+      # Just sync all the images in all the manifests to GitHub packages
+      - name: Sync component images
+        run: |-
+          set -ex
+          for manifest in $(ls ./skopeo-manifests/*.yaml); do
+            skopeo sync \
+              --src yaml \
+              --dest docker \
+              --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+              --scoped \
+              --all \
+              "$manifest" \
+              ghcr.io/stackhpc
+          done

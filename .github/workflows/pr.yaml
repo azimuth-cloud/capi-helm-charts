@@ -28,24 +28,31 @@ jobs:
     needs: [wait_for_approval]
     uses: ./.github/workflows/lint.yaml
     with:
-      ref-under-test: ${{ github.event.pull_request.head.sha }}
+      ref: ${{ github.event.pull_request.head.sha }}
+
+  mirror_container_images:
+    needs: [lint]
+    uses: ./.github/workflows/sync-images.yaml
+    secrets: inherit
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
 
   ensure_capi_images:
     needs: [lint]
     uses: ./.github/workflows/ensure-capi-images.yaml
     secrets: inherit
     with:
-      ref-under-test: ${{ github.event.pull_request.head.sha }}
+      ref: ${{ github.event.pull_request.head.sha }}
 
   test:
-    needs: [ensure_capi_images]
+    needs: [mirror_container_images, ensure_capi_images]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
       # Pass the images as JSON
       images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
       # We want to test the code in the PR
-      ref-under-test: ${{ github.event.pull_request.head.sha }}
+      ref: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
       # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
