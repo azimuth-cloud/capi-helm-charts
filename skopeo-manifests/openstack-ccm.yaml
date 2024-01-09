@@ -1,0 +1,4 @@
+registry.k8s.io:
+  images:
+    provider-os/openstack-cloud-controller-manager:
+    - v1.28.1
