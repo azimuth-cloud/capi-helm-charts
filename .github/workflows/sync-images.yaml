@@ -39,6 +39,8 @@ jobs:
       - name: Install skopeo
         run: sudo apt-get -y update && sudo apt-get install -y skopeo
 
+      - run: skopeo --version
+
       # Just sync all the images in all the manifests to GitHub packages
       - name: Sync component images
         run: |-
