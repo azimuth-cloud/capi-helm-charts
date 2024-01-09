@@ -36,8 +36,6 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - run: podman run quay.io/skopeo/stable:latest --version
-
       # Just sync all the images in all the manifests to GitHub packages
       - name: Sync component images
         run: |-
