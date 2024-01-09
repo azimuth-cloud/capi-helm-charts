@@ -5,6 +5,7 @@ on:
   # Run nightly
   schedule:
     - cron: '0 0 * * *'
+  pull_request:
 
 jobs:
   propose_update_pr:
@@ -14,39 +15,52 @@ jobs:
         include:
           - key: calico
             path: cni.calico.chart
+            # Because of the way the Calico chart and CRDs are written, it is very
+            # difficult to infer the images (other than the operator image)
+            # Instead, we must list them here
+            # This string is formatted with the chart version and appVersion
+            additional-images: |
+              docker.io/calico/apiserver:{0}
+              docker.io/calico/cni:{0}
+              docker.io/calico/csi:{0}
+              docker.io/calico/kube-controllers:{0}
+              docker.io/calico/node-driver-registrar:{0}
+              docker.io/calico/node:{0}
+              docker.io/calico/pod2daemon-flexvol:{0}
+              docker.io/calico/typha:{0}
 
-          - key: cilium
-            path: cni.cilium.chart
+          # - key: cilium
+          #   path: cni.cilium.chart
 
-          - key: openstack-ccm
-            path: openstack.ccm.chart
+          # - key: openstack-ccm
+          #   path: openstack.ccm.chart
 
-          - key: csi-cinder
-            path: openstack.csiCinder.chart
+          # - key: csi-cinder
+          #   path: openstack.csiCinder.chart
 
-          - key: metrics-server
-            path: metricsServer.chart
+          # - key: metrics-server
+          #   path: metricsServer.chart
 
-          - key: kubernetes-dashboard
-            path: kubernetesDashboard.chart
+          # - key: kubernetes-dashboard
+          #   path: kubernetesDashboard.chart
 
-          - key: ingress-nginx
-            path: ingress.nginx.chart
+          # - key: ingress-nginx
+          #   path: ingress.nginx.chart
 
-          - key: kube-prometheus-stack
-            path: monitoring.kubePrometheusStack.chart
+          # - key: kube-prometheus-stack
+          #   path: monitoring.kubePrometheusStack.chart
 
-          - key: loki-stack
-            path: monitoring.lokiStack.chart
+          # - key: loki-stack
+          #   path: monitoring.lokiStack.chart
 
-          - key: node-feature-discovery
-            path: nodeFeatureDiscovery.chart
+          # - key: node-feature-discovery
+          #   path: nodeFeatureDiscovery.chart
 
-          - key: nvidia-gpu-operator
-            path: nvidiaGPUOperator.chart
+          # - key: nvidia-gpu-operator
+          #   path: nvidiaGPUOperator.chart
 
-          - key: mellanox-network-operator
-            path: mellanoxNetworkOperator.chart
+          # - key: mellanox-network-operator
+          #   path: mellanoxNetworkOperator.chart
 
     name: ${{ matrix.key }}
     steps:
@@ -76,27 +90,61 @@ jobs:
           updates: |
             ${{ matrix.path }}.version=${{ steps.next.outputs.version }}
 
-      - name: Generate app token for PR
-        uses: stackhpc/github-actions/generate-app-token@master
-        id: generate-app-token
+      - name: Template updated chart
+        id: helm-template
+        uses: stackhpc/github-actions/helm-template@master
         with:
-          repository: ${{ github.repository }}
-          app-id: ${{ secrets.APP_ID }}
-          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          repository: ${{ steps.chart-info.outputs.repo }}
+          chart: ${{ steps.chart-info.outputs.name }}
+          version: ${{ steps.next.outputs.version }}
+          values: ${{ matrix.values || '{}' }}
 
-      - name: Propose changes via PR if required
-        uses: peter-evans/create-pull-request@v5
+      - name: Extract images from templated manifests
+        id: extract-images
+        uses: stackhpc/github-actions/k8s-extract-images@master
         with:
-          token: ${{ steps.generate-app-token.outputs.token }}
-          commit-message: >-
-            Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
-          branch: update-addon/${{ matrix.key }}
-          delete-branch: true
-          title: >-
-            Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
-          body: >
-            This PR was created automatically to update the
-            ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}.
-          labels: |
-            automation
-            addon-update
+          manifests-file: ${{ steps.helm-template.outputs.manifests-file }}
+
+      - name: Ensure manifests directory exists
+        run: mkdir -p ./skopeo-manifests
+
+      - name: Write Skopeo manifest
+        uses: stackhpc/github-actions/skopeo-manifest@master
+        with:
+          manifest-file: ./skopeo-manifests/${{ matrix.key }}.yaml
+          images: |
+            ${{ steps.extract-images.outputs.images }}
+            ${{
+              format(
+                matrix.additional-images || '',
+                steps.next.outputs.version,
+                steps.next.outputs.app-version
+              )
+            }}
+
+      - run: cat ./skopeo-manifests/${{ matrix.key }}.yaml
+
+      # - name: Generate app token for PR
+      #   uses: stackhpc/github-actions/generate-app-token@master
+      #   id: generate-app-token
+      #   with:
+      #     repository: ${{ github.repository }}
+      #     app-id: ${{ secrets.APP_ID }}
+      #     app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      # - name: Propose changes via PR if required
+      #   uses: peter-evans/create-pull-request@v5
+      #   with:
+      #     token: ${{ steps.generate-app-token.outputs.token }}
+      #     commit-message: >-
+      #       Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
+      #     branch: update-addon/${{ matrix.key }}
+      #     delete-branch: true
+      #     title: >-
+      #       Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
+      #     body: >
+      #       This PR was created automatically to update the
+      #       ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}.
+      #     labels: |
+      #       automation
+      #       addon-update
