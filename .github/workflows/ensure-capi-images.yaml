@@ -2,7 +2,7 @@ name: Ensure CAPI images
 on:
   workflow_call:
     inputs:
-      ref-under-test:
+      ref:
         type: string
         description: The Git ref under test.
         required: true
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.ref-under-test }}
+          ref: ${{ inputs.ref }}
 
       - name: Fetch image details
         id: images
@@ -58,7 +58,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.ref-under-test }}
+          ref: ${{ inputs.ref }}
         if: ${{ !matrix.skip }}
 
       - name: Write cloud credential
