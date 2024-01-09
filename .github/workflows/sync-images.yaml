@@ -36,19 +36,20 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Install skopeo
-        run: sudo apt-get -y update && sudo apt-get install -y skopeo
-
-      - run: skopeo --version
+      - run: podman run quay.io/skopeo/stable:latest --version
 
       # Just sync all the images in all the manifests to GitHub packages
       - name: Sync component images
         run: |-
-          skopeo sync \
-            --src yaml \
-            --dest docker \
-            --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
-            --scoped \
-            --all \
-            ${{ matrix.manifest-file }} \
-            ghcr.io/stackhpc
+          podman run \
+            -v ./skopeo-manifests:/opt/skopeo-manifests \
+            -w /opt \
+            quay.io/skopeo/stable:latest \
+            sync \
+              --src yaml \
+              --dest docker \
+              --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+              --scoped \
+              --all \
+              ${{ matrix.manifest-file }} \
+              ghcr.io/stackhpc
