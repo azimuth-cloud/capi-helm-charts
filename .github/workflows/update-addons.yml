@@ -5,7 +5,6 @@ on:
   # Run nightly
   schedule:
     - cron: '0 0 * * *'
-  pull_request:
 
 jobs:
   propose_update_pr:
@@ -152,29 +151,27 @@ jobs:
               )
             }}
 
-      - run: cat ./skopeo-manifests/${{ matrix.key }}.yaml
+      - name: Generate app token for PR
+        uses: stackhpc/github-actions/generate-app-token@master
+        id: generate-app-token
+        with:
+          repository: ${{ github.repository }}
+          app-id: ${{ secrets.APP_ID }}
+          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      # - name: Generate app token for PR
-      #   uses: stackhpc/github-actions/generate-app-token@master
-      #   id: generate-app-token
-      #   with:
-      #     repository: ${{ github.repository }}
-      #     app-id: ${{ secrets.APP_ID }}
-      #     app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      # - name: Propose changes via PR if required
-      #   uses: peter-evans/create-pull-request@v5
-      #   with:
-      #     token: ${{ steps.generate-app-token.outputs.token }}
-      #     commit-message: >-
-      #       Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
-      #     branch: update-addon/${{ matrix.key }}
-      #     delete-branch: true
-      #     title: >-
-      #       Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
-      #     body: >
-      #       This PR was created automatically to update the
-      #       ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}.
-      #     labels: |
-      #       automation
-      #       addon-update
+      - name: Propose changes via PR if required
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ steps.generate-app-token.outputs.token }}
+          commit-message: >-
+            Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
+          branch: update-addon/${{ matrix.key }}
+          delete-branch: true
+          title: >-
+            Update ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}
+          body: >
+            This PR was created automatically to update the
+            ${{ matrix.key }} addon to ${{ steps.next.outputs.version }}.
+          labels: |
+            automation
+            addon-update
