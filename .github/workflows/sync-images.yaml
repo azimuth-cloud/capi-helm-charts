@@ -7,8 +7,29 @@ on:
         description: The Git ref to use in the checkout.
 
 jobs:
+  build_manifest_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      manifest-files: ${{ steps.list-manifests.outputs.manifest-files }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: List manifests
+        id: list-manifests
+        # Use jq to format the manifest list as a JSON array
+        run: |
+          MANIFEST_FILES="$(ls ./skopeo-manifests/*.yaml | jq -c -s -R 'split("\n") | map(select(length > 0))')"
+          echo "manifest-files=$MANIFEST_FILES" >> $GITHUB_OUTPUT
+
   sync_images:
     runs-on: ubuntu-latest
+    needs: [build_manifest_matrix]
+    strategy:
+      matrix:
+        manifest-file: ${{ fromJSON(needs.build_manifest_matrix.outputs.manifest-files) }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -21,14 +42,11 @@ jobs:
       # Just sync all the images in all the manifests to GitHub packages
       - name: Sync component images
         run: |-
-          set -ex
-          for manifest in $(ls ./skopeo-manifests/*.yaml); do
-            skopeo sync \
-              --src yaml \
-              --dest docker \
-              --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
-              --scoped \
-              --all \
-              "$manifest" \
-              ghcr.io/stackhpc
-          done
+          skopeo sync \
+            --src yaml \
+            --dest docker \
+            --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+            --scoped \
+            --all \
+            ${{ matrix.manifest-file }} \
+            ghcr.io/stackhpc
