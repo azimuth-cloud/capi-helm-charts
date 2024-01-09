@@ -18,8 +18,8 @@ jobs:
             # Because of the way the Calico chart and CRDs are written, it is very
             # difficult to infer the images (other than the operator image)
             # Instead, we must list them here
-            # This string is formatted with the chart version and appVersion
-            additional-images: |
+            # This string is formatted with the chart version
+            additional-images: |-
               docker.io/calico/apiserver:{0}
               docker.io/calico/cni:{0}
               docker.io/calico/csi:{0}
@@ -29,38 +29,68 @@ jobs:
               docker.io/calico/pod2daemon-flexvol:{0}
               docker.io/calico/typha:{0}
 
-          # - key: cilium
-          #   path: cni.cilium.chart
+          - key: cilium
+            path: cni.cilium.chart
 
-          # - key: openstack-ccm
-          #   path: openstack.ccm.chart
+          - key: openstack-ccm
+            path: openstack.ccm.chart
 
-          # - key: csi-cinder
-          #   path: openstack.csiCinder.chart
+          - key: csi-cinder
+            path: openstack.csiCinder.chart
 
-          # - key: metrics-server
-          #   path: metricsServer.chart
+          - key: k8s-keystone-auth
+            path: openstack.k8sKeystoneAuth.chart
+            values: |
+              openstackAuthUrl: https://keystone.my.openstack
+              projectId: notarealprojectid
 
-          # - key: kubernetes-dashboard
-          #   path: kubernetesDashboard.chart
+          - key: metrics-server
+            path: metricsServer.chart
 
-          # - key: ingress-nginx
-          #   path: ingress.nginx.chart
+          - key: kubernetes-dashboard
+            path: kubernetesDashboard.chart
+            values: |
+              metricsScraper:
+                enabled: true
 
-          # - key: kube-prometheus-stack
-          #   path: monitoring.kubePrometheusStack.chart
+          - key: ingress-nginx
+            path: ingress.nginx.chart
 
-          # - key: loki-stack
-          #   path: monitoring.lokiStack.chart
+          - key: kube-prometheus-stack
+            path: monitoring.kubePrometheusStack.chart
 
-          # - key: node-feature-discovery
-          #   path: nodeFeatureDiscovery.chart
+          - key: loki-stack
+            path: monitoring.lokiStack.chart
 
-          # - key: nvidia-gpu-operator
-          #   path: nvidiaGPUOperator.chart
+          - key: node-feature-discovery
+            path: nodeFeatureDiscovery.chart
 
-          # - key: mellanox-network-operator
-          #   path: mellanoxNetworkOperator.chart
+          - key: nvidia-gpu-operator
+            path: nvidiaGPUOperator.chart
+            values: |
+              nfd:
+                enabled: false
+
+          - key: mellanox-network-operator
+            path: mellanoxNetworkOperator.chart
+            values: |
+              nfd:
+                enabled: false
+              deployCR: true
+              ofedDriver:
+                deploy: true
+              rdmaSharedDevicePlugin:
+                deploy: true
+              ibKubernetes:
+                deploy: false
+              nvPeerDriver:
+                deploy: false
+              sriovNetworkOperator:
+                enabled: false
+              sriovDevicePlugin:
+                deploy: false
+              secondaryNetwork:
+                deploy: false
 
     name: ${{ matrix.key }}
     steps:
