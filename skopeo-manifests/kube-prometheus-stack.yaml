@@ -1,7 +1,7 @@
 docker.io:
   images:
     grafana/grafana:
-    - 10.2.2
+    - 10.2.3
 quay.io:
   images:
     kiwigrid/k8s-sidecar:
