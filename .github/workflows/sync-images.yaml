@@ -31,6 +31,8 @@ jobs:
       # Restrict the maximum number of parallel syncs to avoid quay.io push limits
       # Anonymous pulls are not rate-limited
       max-parallel: 4
+      # If one sync fails, continue with the others
+      fail-fast: false
       matrix:
         manifest-file: ${{ fromJSON(needs.build_manifest_matrix.outputs.manifest-files) }}
     steps:
