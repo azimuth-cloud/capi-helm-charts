@@ -15,7 +15,7 @@ template:
     {{- with $ctx.Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
-    {{- if or $nodeGroup.machineConfigDrive $nodeGroup.machineDataVolumes }}
+    {{- if or $nodeGroup.machineConfigDrive $nodeGroup.additionalBlockDevices }}
     configDrive: true
     {{- end }}
     {{- if $nodeGroup.machineRootVolume.diskSize }}
