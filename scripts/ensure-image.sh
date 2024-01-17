@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -exo pipefail
 
 #####
 # This script uploads an image to OpenStack unless already present
@@ -14,8 +14,7 @@ set -ex
 GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
 
 # Try to find the ID of an existing image with the required name
-#   NOTE: This command is allowed/expected to fail sometimes
-IMAGE_ID="$(openstack image show -f value -c id "$IMAGE_NAME" || true)"
+IMAGE_ID="$(openstack image list -f json --name "$IMAGE_NAME" | jq -r '.[0].ID // empty')"
 
 # If there is an existing image, we are done
 if [ -n "$IMAGE_ID" ]; then
