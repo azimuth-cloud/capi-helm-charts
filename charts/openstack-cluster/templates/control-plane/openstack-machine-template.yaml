@@ -30,11 +30,22 @@ template:
     {{- else }}
     {{- fail "Either controlPlane.machineImageId, controlPlane.machineImage, machineImage or machineImageId is required" }}
     {{- end }}
-    {{- with .Values.controlPlane.machineDataVolumes }}
-    dataVolumes:
-      {{- range $nameSuffix, $volumeSpec := . }}
-      - nameSuffix: {{ $nameSuffix }}
-        {{- toYaml $volumeSpec | nindent 8 }}
+    {{- with .Values.controlPlane.additionalBlockDevices }}
+    additionalBlockDevices:
+      {{- range $name, $blockDevice := . }}
+      - name: {{ $name }}
+        sizeGiB: {{ required "size is required for a block device" $blockDevice.size }}
+        storage:
+          type: {{ default "Volume" $blockDevice.type }}
+          {{- if or $blockDevice.volumeType $blockDevice.availabilityZone }}
+          volume:
+            {{- with $blockDevice.volumeType }}
+            type: {{ . }}
+            {{- end }}
+            {{- with $blockDevice.availabilityZone }}
+            availabilityZone: {{ . }}
+            {{- end }}
+          {{- end }}
       {{- end }}
     {{- end }}
     {{- with .Values.controlPlane.machineNetworking.ports }}

@@ -175,21 +175,24 @@ controlPlane:
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
   nodeLabels:
     # my.company.org/label: value
-  # Additional data volumes for control plane machines
-  machineDataVolumes: {}
-    # The key is the name suffix for the volume (volumes will be named <machinename>-<suffix>)
+  # Additional block devices for control plane machines
+  additionalBlockDevices: {}
+    # # The key is the name for the block device in the context of the machine
+    # # It is also used to tag the block device, so that the volume can be identified in instance metadata
     # etcd:
-      # The size of the disk
-      # diskSize: 20
-      # The volume type to use
-      # If not specified, the default volume type is used
-      # volumeType:
-      # The volume availability zone to use
-      # If not specified, the machine availability zone is used
-      # availabilityZone:
-      # Tag for the volume mount
-      # This can be used to identify the device corresponding to the volume for cloud-init
-      # tag: etcd
+    #   # The size of the block device
+    #   size: 20
+    #   # The type of the block device
+    #   # If set to "Volume", which is the default, then a Cinder volume is used to back the block device
+    #   # If set to "Local", local ephemeral storage is used to back the block device
+    #   # In both cases, the lifecycle of the device is the same as the machine
+    #   type: Volume
+    #   # The volume type to use
+    #   # If not specified, the default volume type is used
+    #   volumeType:
+    #   # The volume availability zone to use
+    #   # If not specified, the machine availability zone is used
+    #   availabilityZone:
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
@@ -300,21 +303,9 @@ nodeGroupDefaults:
   # By default, nodes get the label "capi.stackhpc.com/node-group=<node group name>"
   nodeLabels:
     # my.company.org/label: value
-  # Additional data volumes for control plane machines
-  machineDataVolumes: {}
-    # The key is the name suffix for the volume (volumes will be named <machinename>-<suffix>)
-    # data:
-      # The size of the disk
-      # diskSize: 20
-      # The volume type to use
-      # If not specified, the default volume type is used
-      # volumeType:
-      # The volume availability zone to use
-      # If not specified, the machine availability zone is used
-      # availabilityZone:
-      # Tag for the volume mount
-      # This can be used to identify the device corresponding to the volume for cloud-init
-      # tag: data
+  # Additional block devices for node groups machines
+  # Options are the same as for controlPlane.additionalBlockDevices above
+  additionalBlockDevices: {}
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed

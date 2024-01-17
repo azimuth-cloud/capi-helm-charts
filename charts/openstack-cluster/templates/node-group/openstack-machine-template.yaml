@@ -32,11 +32,22 @@ template:
     {{- else }}
     {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
     {{- end }}
-    {{- with $nodeGroup.machineDataVolumes }}
-    dataVolumes:
-      {{- range $nameSuffix, $volumeSpec := . }}
-      - nameSuffix: {{ $nameSuffix }}
-        {{- toYaml $volumeSpec | nindent 8 }}
+    {{- with $nodeGroup.additionalBlockDevices }}
+    additionalBlockDevices:
+      {{- range $name, $blockDevice := . }}
+      - name: {{ $name }}
+        sizeGiB: {{ required "size is required for a block device" $blockDevice.size }}
+        storage:
+          type: {{ default "Volume" $blockDevice.type }}
+          {{- if or $blockDevice.volumeType $blockDevice.availabilityZone }}
+          volume:
+            {{- with $blockDevice.volumeType }}
+            type: {{ . }}
+            {{- end }}
+            {{- with $blockDevice.availabilityZone }}
+            availabilityZone: {{ . }}
+            {{- end }}
+          {{- end }}
       {{- end }}
     {{- end }}
     {{- with $nodeGroup.machineNetworking.ports }}
