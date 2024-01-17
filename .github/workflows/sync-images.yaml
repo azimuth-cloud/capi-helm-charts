@@ -46,8 +46,8 @@ jobs:
             sync \
               --src yaml \
               --dest docker \
-              --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+              --dest-creds "${{ secrets.QUAY_IO_USER }}:${{ secrets.QUAY_IO_TOKEN }}" \
               --scoped \
               --all \
               ${{ matrix.manifest-file }} \
-              ghcr.io/stackhpc
+              quay.io/azimuth
