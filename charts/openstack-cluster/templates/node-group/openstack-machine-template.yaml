@@ -15,6 +15,9 @@ template:
     {{- with $ctx.Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
+    {{- if or $nodeGroup.machineConfigDrive $nodeGroup.additionalBlockDevices }}
+    configDrive: true
+    {{- end }}
     {{- if $nodeGroup.machineRootVolume.diskSize }}
     rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
     {{- end }}
@@ -28,6 +31,24 @@ template:
     image: {{ tpl $ctx.Values.machineImage $ctx }}
     {{- else }}
     {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
+    {{- end }}
+    {{- with $nodeGroup.additionalBlockDevices }}
+    additionalBlockDevices:
+      {{- range $name, $blockDevice := . }}
+      - name: {{ $name }}
+        sizeGiB: {{ required "size is required for a block device" $blockDevice.size }}
+        storage:
+          type: {{ default "Volume" $blockDevice.type }}
+          {{- if or $blockDevice.volumeType $blockDevice.availabilityZone }}
+          volume:
+            {{- with $blockDevice.volumeType }}
+            type: {{ . }}
+            {{- end }}
+            {{- with $blockDevice.availabilityZone }}
+            availabilityZone: {{ . }}
+            {{- end }}
+          {{- end }}
+      {{- end }}
     {{- end }}
     {{- with $nodeGroup.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
