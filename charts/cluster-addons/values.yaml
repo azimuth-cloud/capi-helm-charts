@@ -54,7 +54,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
-      version: 2.28.3
+      version: 2.29.0
     values: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
