@@ -118,7 +118,7 @@ etcd:
     # # The size of the block device
     # size: 20
     # # The type of the block device
-    # # If set to "Volume" then a Cinder volume is used to back the block device
+    # # If set to "Volume", which is the default, then a Cinder volume is used to back the block device
     # # If set to "Local", local ephemeral storage is used to back the block device
     # type: Volume
     # # The volume type to use

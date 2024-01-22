@@ -94,11 +94,78 @@ jobs:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}
 
+  # This job tests the etcd volume support
+  # It only runs for non-draft PRs
+  # It uses a pre-existing internal network and the default volume type
+  etcd-volume:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.tests-full }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup
+
+      - name: Write cloud credential
+        run: echo "$CLOUD" > ./clouds.yaml
+        env:
+          CLOUD: ${{ secrets.CLOUD }}
+
+      - name: Write Helm values
+        run: echo "$VALUES" > ./values.yaml
+        env:
+          VALUES: |
+            clouds:
+              openstack:
+                auth:
+                  project_id: ${{ secrets.PROJECT_ID }}
+                verify: false
+            clusterNetworking:
+              externalNetworkId: ${{ secrets.EXTERNAL_NETWORK_ID }}
+              internalNetwork:
+                networkFilter:
+                  tags: capi-helm-chart-ci
+            etcd:
+              blockDevice:
+                size: 10
+            controlPlane:
+              machineFlavor: ${{ secrets.CONTROL_PLANE_FLAVOR }}
+              machineCount: 1
+            nodeGroups:
+              - name: md-0
+                machineFlavor: ${{ secrets.NODE_GROUP_FLAVOR }}
+                machineCount: 2
+
+      - name: Deploy Kubernetes 1.29 for etcd volume test
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+
+      - name: Delete etcd volume test deployment
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+        if: ${{ always() }}
+
+      - name: Upload logs
+        uses: ./.github/actions/upload-logs
+        with:
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
+
   # This job tests Kubernetes upgrade
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network
   kube-upgrade:
     runs-on: ubuntu-latest
+    # Run after the etcd volume tests
+    needs: [etcd-volume]
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
@@ -176,6 +243,8 @@ jobs:
   # It installs ALL of the addons so that we test upgrading them
   chart-upgrade:
     runs-on: ubuntu-latest
+    # Run after the kube-upgrade
+    needs: [kube-upgrade]
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout current
