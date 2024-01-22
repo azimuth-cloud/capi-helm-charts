@@ -3,6 +3,12 @@
   To do this, we create a new template whenever the checksum of the spec changes.
 */}}
 {{- define "openstack-cluster.controlplane.mt.spec" -}}
+{{-
+  $blockDevices :=
+    not (not .Values.etcd.blockDevice) |
+    ternary (dict "etcd" .Values.etcd.blockDevice) dict |
+    mergeOverwrite .Values.controlPlane.additionalBlockDevices
+}}
 template:
   spec:
     identityRef:
@@ -13,7 +19,7 @@ template:
     {{- with .Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
     {{- end }}
-    {{- if or .Values.controlPlane.machineConfigDrive .Values.controlPlane.additionalBlockDevices }}
+    {{- if or .Values.controlPlane.machineConfigDrive $blockDevices }}
     configDrive: true
     {{- end }}
     {{- if .Values.controlPlane.machineRootVolume.diskSize }}
@@ -30,7 +36,7 @@ template:
     {{- else }}
     {{- fail "Either controlPlane.machineImageId, controlPlane.machineImage, machineImage or machineImageId is required" }}
     {{- end }}
-    {{- with .Values.controlPlane.additionalBlockDevices }}
+    {{- with $blockDevices }}
     additionalBlockDevices:
       {{- range $name, $blockDevice := . }}
       - name: {{ $name }}

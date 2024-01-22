@@ -25,6 +25,33 @@ preKubeadmCommands:
 {{- end }}
 {{- end }}
 
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" -}}
+clusterConfiguration:
+  etcd:
+    local:
+      dataDir: {{ .Values.etcd.dataDir }}
+      extraArgs: {{ toYaml .Values.etcd.extraArgs | nindent 8 }}
+{{- if .Values.etcd.blockDevice }}
+# Tell kubeadm to ignore the fact that the etcd datadir contains lost+found
+initConfiguration:
+  nodeRegistration:
+    ignorePreflightErrors:
+      - diravailable-{{ replace "/" "-" .Values.etcd.dataDir }}
+joinConfiguration:
+  nodeRegistration:
+    ignorePreflightErrors:
+      - diravailable-{{ replace "/" "-" .Values.etcd.dataDir }}
+diskSetup:
+  filesystems:
+    - device: /dev/disk/openstack/by-tag/etcd
+      filesystem: ext4
+      label: etcd_disk
+mounts:
+  - - LABEL=etcd_disk
+    - {{ .Values.etcd.dataDir }}
+{{- end }}
+{{- end }}
+
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
@@ -56,6 +83,7 @@ spec:
       (
         list
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" . | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
           (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
           (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)

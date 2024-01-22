@@ -102,6 +102,32 @@ trustedCAs: {}
 additionalPackages: []
   # - nfs-common
 
+# Settings for etcd
+etcd:
+  # The data directory to use for etcd
+  # When a block device is specified, it is mounted at the parent directory, e.g. /var/lib/etcd
+  # This is to avoid etcd complaining about the lost+found directory
+  dataDir: /var/lib/etcd
+  # Any extra command line arguments to pass to etcd
+  extraArgs:
+    # Tell etcd to listen for metrics on 0.0.0.0 so Prometheus can collect them
+    listen-metrics-urls: http://0.0.0.0:2381
+  # The block device configuration for etcd
+  # If not specified, the root device is used
+  blockDevice:
+    # # The size of the block device
+    # size: 20
+    # # The type of the block device
+    # # If set to "Volume", which is the default, then a Cinder volume is used to back the block device
+    # # If set to "Local", local ephemeral storage is used to back the block device
+    # type: Volume
+    # # The volume type to use
+    # # If not specified, the default volume type is used
+    # volumeType:
+    # # The volume availability zone to use
+    # # If not specified, the machine availability zone is used
+    # availabilityZone:
+
 # Settings for the Kubernetes API server
 apiServer:
   # Indicates whether to deploy a load balancer for the API server
@@ -179,7 +205,7 @@ controlPlane:
   additionalBlockDevices: {}
     # # The key is the name for the block device in the context of the machine
     # # It is also used to tag the block device, so that the volume can be identified in instance metadata
-    # etcd:
+    # scratch:
     #   # The size of the block device
     #   size: 20
     #   # The type of the block device
@@ -219,13 +245,9 @@ controlPlane:
         kubeletExtraArgs:
           cloud-provider: external
     # As well as enabling an external cloud provider, we set the bind addresses for the
-    # etcd metrics, controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus
-    # can reach them to collect metrics
+    # controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus can reach
+    # them to collect metrics
     clusterConfiguration:
-      etcd:
-        local:
-          extraArgs:
-            listen-metrics-urls: http://0.0.0.0:2381
       apiServer:
         extraArgs:
           cloud-provider: external
