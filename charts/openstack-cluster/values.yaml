@@ -110,7 +110,14 @@ etcd:
   dataDir: /var/lib/etcd
   # Any extra command line arguments to pass to etcd
   extraArgs:
-    # Tell etcd to listen for metrics on 0.0.0.0 so Prometheus can collect them
+    # Set timeouts so that etcd tolerates 'slowness' (network + disks) better
+    # This is at the expense of taking longer to detect a leader failure
+    # https://etcd.io/docs/v3.5/tuning/#time-parameters
+    heartbeat-interval: "500"  # defaults to 100ms in etcd 3.5
+    election-timeout: "5000"   # defaults to 1000ms in etcd 3.5
+    # Set a slightly larger space quota than the default (default is 2GB)
+    quota-backend-bytes: "4294967296"
+    # Listen for metrics on 0.0.0.0 so Prometheus can collect them
     listen-metrics-urls: http://0.0.0.0:2381
   # The block device configuration for etcd
   # If not specified, the root device is used
