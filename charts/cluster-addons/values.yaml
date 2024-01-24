@@ -114,6 +114,19 @@ openstack:
       name: k8s-keystone-auth
       version: 0.0.9
 
+# Settings for etcd defragmentation jobs
+etcdDefrag:
+  # Indicates if the etcd defragmentation job should be enabled
+  enabled: true
+  chart:
+    repo: https://stackhpc.github.io/capi-helm-charts
+    name: etcd-defrag
+    version:  # Defaults to the same version as is being deployed
+  release:
+    # This should be namespace in which the etcd pods are deployed
+    namespace: kube-system
+    values: {}
+
 # Settings for the metrics server
 # https://github.com/kubernetes-sigs/metrics-server#helm-chart
 metricsServer:
