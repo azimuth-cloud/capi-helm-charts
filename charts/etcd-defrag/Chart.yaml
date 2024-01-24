@@ -1,0 +1,7 @@
+apiVersion: v2
+name: etcd-defrag
+description: >-
+  Helm chart for deploying a cronjob to do etcd defragmentation on a kubeadm cluster.
+type: application
+version: 0.1.0
+appVersion: main

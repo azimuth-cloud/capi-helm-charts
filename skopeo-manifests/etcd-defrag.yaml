@@ -1,0 +1,7 @@
+docker.io:
+  images:
+    bitnami/kubectl:
+    - "1.26"
+    - "1.27"
+    - "1.28"
+    - "1.29"
