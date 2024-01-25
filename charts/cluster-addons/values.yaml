@@ -121,7 +121,7 @@ etcdDefrag:
   chart:
     repo: https://stackhpc.github.io/capi-helm-charts
     name: etcd-defrag
-    version:  # Defaults to the same version as is being deployed
+    version:  # Defaults to the same version as this chart
   release:
     # This should be namespace in which the etcd pods are deployed
     namespace: kube-system
