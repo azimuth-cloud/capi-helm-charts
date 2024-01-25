@@ -66,6 +66,7 @@ metadata:
 spec:
   version: v{{ .Values.controlPlane.kubernetesVersion | default .Values.kubernetesVersion | required "One of .Values.controlPlane.kubernetesVersion or .Values.kubernetesVersion is required" | trimPrefix "v" }}
   replicas: {{ .Values.controlPlane.machineCount }}
+  remediationStrategy: {{ toYaml .Values.controlPlane.remediationStrategy | nindent 4 }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
   machineTemplate:
     metadata:

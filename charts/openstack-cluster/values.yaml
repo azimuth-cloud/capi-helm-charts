@@ -235,6 +235,17 @@ controlPlane:
   # The time to wait for the node resource to be deleted in Kubernetes when a
   # machine is marked for deletion
   nodeDeletionTimeout: 5m0s
+  # The remediation strategy for the control plane nodes
+  # We set these so that we don't keep remediating an unhealthy control plane forever
+  remediationStrategy:
+    # The maximum number of times that a remediation will be retried
+    maxRetry: 3
+    # The amount of time that a node created as a remediation has to become healthy
+    # before the remediation is retried
+    retryPeriod: 10m
+    # The length of time that a node must be healthy before any future problems are
+    # considered unrelated to the previous ones (i.e. the retry count is reset)
+    minHealthyPeriod: 1h
   # The rollout strategy to use for the control plane nodes
   # By default, the strategy allows the control plane to begin provisioning new nodes
   # without first tearing down old ones
