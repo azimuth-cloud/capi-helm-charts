@@ -5,6 +5,9 @@ on:
       images:
         type: string
         description: JSON-encoded dictionary of images and versions
+      chart-version:
+        type: string
+        description: The version of the charts to test
       ref:
         type: string
         description: The Git ref under test.
@@ -79,6 +82,7 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
@@ -146,6 +150,7 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
 
@@ -210,6 +215,7 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
 
@@ -217,6 +223,7 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
 
@@ -224,6 +231,7 @@ jobs:
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
 
@@ -319,8 +327,9 @@ jobs:
       - name: Deploy cluster with chart from latest tag
         uses: ./current/.github/actions/upgrade-and-test
         with:
-          chart-directory: latest-tag/charts/openstack-cluster
           name: ci-${{ github.run_id }}-${{ github.job }}
+          # Deploy using the tagged version here
+          chart-version: ${{ steps.latest-tag.outputs.tag-name }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
 
@@ -332,8 +341,9 @@ jobs:
       - name: Upgrade cluster to current chart
         uses: ./current/.github/actions/upgrade-and-test
         with:
-          chart-directory: current/charts/openstack-cluster
           name: ci-${{ github.run_id }}-${{ github.job }}
+          # And upgrade to the version under test
+          chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
 

@@ -1,15 +1,26 @@
 name: publish artifacts
 on:
-  push:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        description: The Git ref under test.
+        required: true
+    outputs:
+      chart-version:
+        value: ${{ jobs.build_push_charts.outputs.chart-version }}
 
 jobs:
-  build_push_chart:
+  build_push_charts:
     name: Build and push Helm charts
     runs-on: ubuntu-latest
+    outputs:
+      chart-version: ${{ steps.semver.outputs.version }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
         with:
+          ref: ${{ inputs.ref }}
           # This is important for the semver action to work correctly
           # when determining the number of commits since the last tag
           fetch-depth: 0

@@ -1,8 +1,8 @@
 name: Upgrade and test cluster
 
 description: >-
-  Run a Helm upgrade using the specified values, wait for the cluster to
-  become ready and run Sonobuoy against it
+  Run a Helm upgrade using the specified chart version and values, wait for
+  the cluster to become ready and run Sonobuoy against it
 
 inputs:
   name:
@@ -16,10 +16,17 @@ inputs:
     description: The name of the cloud within the OpenStack clouds file
     required: true
     default: openstack
-  chart-directory:
-    description: The directory containing the chart
+  chart-repo:
+    description: The repository to fetch the charts from
     required: true
-    default: charts/openstack-cluster
+    default: https://stackhpc.github.io/capi-helm-charts
+  chart-name:
+    description: The name of the chart to use
+    required: true
+    default: openstack-cluster
+  chart-version:
+    description: The version of the charts to use
+    required: true
   values-path:
     description: The path to a file containing Helm values
     required: true
@@ -48,14 +55,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Update dependencies for chart
-      shell: bash
-      run: helm dependency update ${{ inputs.chart-directory }}
-
     - name: Install or upgrade cluster from directory
       shell: bash
       run: |-
-        helm upgrade ${{ inputs.name }} ${{ inputs.chart-directory }} \
+        helm upgrade ${{ inputs.name }} ${{ inputs.chart-name }} \
+          --repo ${{ inputs.chart-repo }} \
+          --version ${{ inputs.chart-version }} \
           --install \
           --values ${{ inputs.os-client-config-file }} \
           --values ${{ inputs.values-path }} \

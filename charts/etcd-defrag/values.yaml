@@ -1,0 +1,41 @@
+# The schedule for the cronjob (defaults to nightly)
+schedule: "0 0 * * *"
+# Allow the jobs to start up to 12 hours after the configured time
+# If it does not start within this time, just wait for the next one
+startingDeadlineSeconds: 43200
+
+# Abandon the defrag after three retries or one hour, whichever is sooner
+backoffLimit: 3
+activeDeadlineSeconds: 3600
+
+# The kubectl image to use
+image:
+  repository: bitnami/kubectl
+  pullPolicy: IfNotPresent
+  tag: ""  # Defaults to the Kubernetes minor version, e.g. 1.28
+
+imagePullSecrets: []
+
+# Pod-level security context
+podSecurityContext:
+  runAsNonRoot: true
+
+# Container-level security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
+  readOnlyRootFilesystem: true
+
+# Resources for the kubectl container
+resources: {}
+
+# Scheduling parameters for the kubectl pod
+nodeSelector: {}
+# Allow the pods to run on control plane nodes if they need to
+tolerations:
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule
+affinity: {}

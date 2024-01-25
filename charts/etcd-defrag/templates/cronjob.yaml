@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "etcd-defrag.fullname" . }}
+  labels: {{ include "etcd-defrag.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  startingDeadlineSeconds: {{ .Values.startingDeadlineSeconds }}
+  # Prevent the next job from stomping on one that hasn't finished yet
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.backoffLimit }}
+      activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "etcd-defrag.fullname" . }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{ toYaml .Values.podSecurityContext | nindent 12 }}
+          containers:
+            - name: {{ .Chart.Name }}
+              image: {{
+                .Values.image.tag |
+                  default (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor) |
+                  printf "%s:%s" .Values.image.repository
+              }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              # We run the defrag by execing into one of the etcd pods
+              command:
+                - bash
+                - -c
+                - |
+                    set -e
+                    POD_NAME="$(
+                      kubectl get pod \
+                        --namespace {{ .Release.Namespace }} \
+                        --selector component=etcd \
+                        --output go-template='{{ "{{" }}(index .items 0).metadata.name{{ "}}" }}'
+                    )"
+                    kubectl exec --namespace {{ .Release.Namespace }} "$POD_NAME" -- \
+                      etcdctl defrag \
+                        --cluster \
+                        --cacert /etc/kubernetes/pki/etcd/ca.crt \
+                        --cert /etc/kubernetes/pki/etcd/server.crt \
+                        --key /etc/kubernetes/pki/etcd/server.key
+              securityContext: {{ toYaml .Values.securityContext | nindent 16 }}
+              resources: {{ toYaml .Values.resources | nindent 16 }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations: {{ toYaml . | nindent 12 }}
+          {{- end }}
