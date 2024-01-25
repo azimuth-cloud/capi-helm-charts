@@ -242,7 +242,7 @@ controlPlane:
     maxRetry: 3
     # The amount of time that a node created as a remediation has to become healthy
     # before the remediation is retried
-    retryPeriod: 10m
+    retryPeriod: 20m
     # The length of time that a node must be healthy before any future problems are
     # considered unrelated to the previous ones (i.e. the retry count is reset)
     minHealthyPeriod: 1h
