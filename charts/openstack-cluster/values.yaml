@@ -292,8 +292,8 @@ controlPlane:
     spec:
       # By default, unhealthy control plane nodes are always remediated
       maxUnhealthy: 100%
-      # If a node takes longer than 10 mins to startup, remediate it
-      nodeStartupTimeout: 10m0s
+      # If a node takes longer than 30 mins to startup, remediate it
+      nodeStartupTimeout: 30m0s
       # By default, consider a control plane node that has not been Ready
       # for more than 5 mins unhealthy
       unhealthyConditions:
@@ -389,8 +389,8 @@ nodeGroupDefaults:
     spec:
       # By default, unhealthy worker nodes are always remediated
       maxUnhealthy: 100%
-      # If a node takes longer than 10 mins to startup, remediate it
-      nodeStartupTimeout: 10m0s
+      # If a node takes longer than 30 mins to startup, remediate it
+      nodeStartupTimeout: 30m0s
       # By default, consider a worker node that has not been Ready for
       # more than 5 mins unhealthy
       unhealthyConditions:
