@@ -106,7 +106,7 @@ spec:
                   0 <= (last_over_time(nginx_ingress_controller_ssl_expire_time_seconds[10m]) - time()) < (7 * 24 * 3600)
                 for: 0m
                 annotations:
-                  message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value - time() | humanizeDuration {{ "}}" }} from expiry."
+                  message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
                 labels:
                   severity: critical
               - alert: NginxIngressCertificateExpired
