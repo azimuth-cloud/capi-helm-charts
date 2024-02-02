@@ -18,7 +18,14 @@ Create a name for a cluster component.
 Create chart name and version as used by the chart label.
 */}}
 {{- define "openstack-cluster.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{-
+  printf "%s-%s" .Chart.Name .Chart.Version |
+    replace "+" "_" |
+    trunc 63 |
+    trimSuffix "-" |
+    trimSuffix "." |
+    trimSuffix "_"
+}}
 {{- end }}
 
 {{/*
