@@ -153,6 +153,8 @@ spec:
             grafana_dashboard: "1"
         data:
           cni-calico-dashboard.json: |
+            {% raw %}
             {{- .Files.Get "grafana-dashboards/cni-calico-dashboard.json" | nindent 12 }}
+            {% endraw %}
 {{- end }}
 {{- end }}

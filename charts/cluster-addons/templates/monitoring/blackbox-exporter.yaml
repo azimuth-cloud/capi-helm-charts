@@ -1,0 +1,147 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.blackboxExporter.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    serviceMonitor:
+      enabled: true
+      {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
+      {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
+      targets:
+        {% for name, config in clouds_data.clouds.items() %}
+        - name: {{ "{{" }} name {{ "}}" }}-auth-url
+          url: {{ "{{" }} config.auth.auth_url {{ "}}" }}
+        {% endfor %}
+      {% endif %}
+  overrides: |
+    {{- toYaml .Values.monitoring.blackboxExporter.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.monitoring.blackboxExporter.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.blackboxExporter.release.namespace }}
+  releaseName: prometheus-blackbox-exporter
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
+        key: overrides
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "blackbox-exporter-dashboards") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.monitoring.blackboxExporter.release.namespace }}
+  releaseName: blackbox-exporter-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: blackbox-exporter-dashboards
+          labels:
+            grafana_dashboard: "1"
+        data:
+          blackbox-exporter-dashboard.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/blackbox-exporter-dashboard.json" | nindent 12 }}
+            {% endraw %}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter-alerts") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "blackbox-exporter-alerts") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.monitoring.blackboxExporter.release.namespace }}
+  releaseName: blackbox-exporter-alerts
+  manifestSources:
+    - template: |
+        {% raw %}
+        apiVersion: monitoring.coreos.com/v1
+        kind: PrometheusRule
+        metadata:
+          name: blackbox-exporter-alerts
+        spec:
+          groups:
+            - name: blackbox_exporter.rules
+              rules:
+                - alert: BlackboxProbeFailed
+                  expr: probe_success == 0
+                  for: 0m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: Blackbox probe failed (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "Blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' failed"
+                - alert: BlackboxSlowProbe
+                  expr: avg_over_time(probe_duration_seconds[1m]) > 1
+                  for: 1m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: Blackbox slow probe (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "Blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' took more than 1s to complete - {{ "{{" }} $value {{ "}}" }}"
+                - alert: BlackboxProbeHttpFailure
+                  expr: probe_http_status_code <= 199 OR probe_http_status_code >= 400
+                  for: 0m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: Blackbox probe HTTP failure (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "Blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' returned an HTTP error status - {{ "{{" }} $value {{ "}}" }}"
+                - alert: BlackboxSslCertificateWillExpireSoon
+                  expr: (7 * 24 * 3600) <= (last_over_time(probe_ssl_earliest_cert_expiry[10m]) - time()) < (30 * 24 * 3600)
+                  for: 0m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: Blackbox SSL certificate will expire soon (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "SSL certificate for blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' expires in {{ "{{" }} $value | humanizeDuration {{ "}}" }}"
+                - alert: BlackboxSslCertificateWillExpireVerySoon
+                  expr: 0 <= (last_over_time(probe_ssl_earliest_cert_expiry[10m]) - time()) < (7 * 24 * 3600)
+                  for: 0m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: Blackbox SSL certificate will expire very soon (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "SSL certificate for blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' expires in {{ "{{" }} $value | humanizeDuration {{ "}}" }}"
+                - alert: BlackboxSslCertificateExpired
+                  expr: (last_over_time(probe_ssl_earliest_cert_expiry[10m]) - time()) < 0
+                  for: 0m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: Blackbox SSL certificate expired (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "SSL certificate for blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' has expired"
+        {% endraw %}
+{{- end }}

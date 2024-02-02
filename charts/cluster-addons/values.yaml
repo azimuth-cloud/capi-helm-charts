@@ -228,6 +228,21 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
+  # Configuration for the blackbox exporter
+  blackboxExporter:
+    enabled: true
+    chart:
+      repo: https://prometheus-community.github.io/helm-charts
+      name: prometheus-blackbox-exporter
+      version: 8.10.1
+    release:
+      namespace: monitoring-system
+      values: {}
+        # Example of adding additional scrape targets
+        # serviceMonitor:
+        #   targets:
+        #     - name: example
+        #       url: http://example.com/healthz
 
 # Settings for node feature discovery
 # https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
