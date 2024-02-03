@@ -154,9 +154,15 @@ spec:
             grafana_dashboard: "1"
         data:
           loki-pod-logs-dashboard.json: |
+            {% raw %}
             {{- .Files.Get "grafana-dashboards/loki-pod-logs-dashboard.json" | nindent 12 }}
+            {% endraw %}
           loki-systemd-logs-dashboard.json: |
+            {% raw %}
             {{- .Files.Get "grafana-dashboards/loki-systemd-logs-dashboard.json" | nindent 12 }}
+            {% endraw %}
           loki-metrics-dashboard.json: |
+            {% raw %}
             {{- .Files.Get "grafana-dashboards/loki-metrics-dashboard.json" | nindent 12 }}
+            {% endraw %}
 {{- end }}

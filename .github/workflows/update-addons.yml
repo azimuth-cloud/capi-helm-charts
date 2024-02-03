@@ -61,6 +61,9 @@ jobs:
           - key: loki-stack
             path: monitoring.lokiStack.chart
 
+          - key: prometheus-blackbox-exporter
+            path: monitoring.blackboxExporter.chart
+
           - key: node-feature-discovery
             path: nodeFeatureDiscovery.chart
 

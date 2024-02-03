@@ -65,13 +65,15 @@ spec:
             grafana_dashboard: "1"
         data:
           nginx-ingress-dashboard.json: |
+            {% raw %}
             {{- .Files.Get "grafana-dashboards/ingress-nginx-dashboard.json" | nindent 12 }}
+            {% endraw %}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-alerting-rules
-  labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx-alerts") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx-alerts") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
@@ -79,32 +81,40 @@ spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
   targetNamespace: {{ .Values.ingress.nginx.release.namespace }}
-  releaseName: ingress-nginx-alerting-rules
+  releaseName: ingress-nginx-alerts
   manifestSources:
     - template: |
         {% raw %}
         apiVersion: monitoring.coreos.com/v1
         kind: PrometheusRule
         metadata:
-          name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-alerting-rules
+          name: ingress-nginx-alerts
         spec:
           groups:
           - name: ingress_nginx.rules
             rules:
               - alert: NginxIngressCertificateExpiresSoon
                 expr: |
-                  nginx_ingress_controller_ssl_expire_time_seconds < (time() + (30 * 24 * 3600))
-                for: 1h
+                  (7 * 24 * 3600) <= (last_over_time(nginx_ingress_controller_ssl_expire_time_seconds[10m]) - time()) < (30 * 24 * 3600)
+                for: 0m
                 annotations:
                   message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
                 labels:
                   severity: warning
               - alert: NginxIngressCertificateExpiresVerySoon
                 expr: |
-                  nginx_ingress_controller_ssl_expire_time_seconds < (time() + (7 * 24 * 3600))
-                for: 1m
+                  0 <= (last_over_time(nginx_ingress_controller_ssl_expire_time_seconds[10m]) - time()) < (7 * 24 * 3600)
+                for: 0m
                 annotations:
                   message: "The cert {{ "{{" }} $labels.name {{ "}}" }} is {{ "{{" }} $value | humanizeDuration {{ "}}" }} from expiry."
+                labels:
+                  severity: critical
+              - alert: NginxIngressCertificateExpired
+                expr: |
+                  (last_over_time(nginx_ingress_controller_ssl_expire_time_seconds[10m]) - time()) < 0
+                for: 0m
+                annotations:
+                  message: "The cert {{ "{{" }} $labels.name {{ "}}" }} has expired."
                 labels:
                   severity: critical
         {% endraw %}

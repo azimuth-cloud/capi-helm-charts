@@ -176,5 +176,7 @@ spec:
             grafana_dashboard: "1"
         data:
           nvidia-dcgm-exporter-dashboard.json: |
+            {% raw %}
             {{- .Files.Get "grafana-dashboards/nvidia-dcgm-exporter-dashboard_rev3.json" | nindent 12 }}
+            {% endraw %}
 {{- end }}
