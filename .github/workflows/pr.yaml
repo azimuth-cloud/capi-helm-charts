@@ -49,7 +49,7 @@ jobs:
     uses: ./.github/workflows/publish-charts.yaml
     secrets: inherit
     with:
-      ref: ${{ github.sha }}
+      ref: ${{ github.event.pull_request.head.sha }}
 
   test:
     needs: [mirror_container_images, ensure_capi_images, publish_charts]
