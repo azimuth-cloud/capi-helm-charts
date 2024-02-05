@@ -180,7 +180,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 56.6.1
+      version: 56.6.2
     release:
       namespace: monitoring-system
       values:
