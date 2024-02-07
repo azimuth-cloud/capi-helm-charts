@@ -16,7 +16,7 @@ stringData:
       targets:
         {% for name, config in clouds_data.clouds.items() %}
         - name: {{ "{{" }} name {{ "}}" }}-auth-url
-          url: {{ "{{" }} config.auth.auth_url {{ "}}" }}
+          url: {{ "{{" }} config.auth.auth_url.strip("/").removesuffix("/v3") {{ "}}" }}/v3
         {% endfor %}
       {% endif %}
   overrides: |
