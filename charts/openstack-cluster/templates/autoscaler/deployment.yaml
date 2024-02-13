@@ -32,6 +32,9 @@ spec:
             - --kubeconfig=/mnt/kubeconfig/value
             - --clusterapi-cloud-config-authoritative
             - --node-group-auto-discovery=clusterapi:namespace={{ .Release.Namespace }},clusterName={{ include "openstack-cluster.clusterName" . }}
+            {{- range $key, $value := .Values.autoscaler.extraArgs }}
+            - --{{ $key }}={{ $value }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health-check
