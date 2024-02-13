@@ -57,10 +57,10 @@ stringData:
         serviceMonitorSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
         {{- if $prometheusVolumeSize }}
-        # Set the retention size to 95% of the given volume size
+        # Set the retention size to 85% of the given volume size
         {{- $storageAmount := mustRegexFind "^([0-9]*[.])?[0-9]+" $prometheusVolumeSize | float64 }}
         {{- $storageUnits := mustRegexFind "(K|M|G|T|E|P)i?$" $prometheusVolumeSize }}
-        retentionSize: {{ mulf 0.95 $storageAmount }}{{ $storageUnits }}B
+        retentionSize: {{ mulf 0.85 $storageAmount }}{{ $storageUnits }}B
         {{- end }}
     grafana:
       sidecar:
