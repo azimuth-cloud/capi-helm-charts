@@ -223,7 +223,7 @@ monitoring:
             compactor:
               retention_enabled: true
             limits_config:
-              retention_period: 744h
+              retention_period: 72h
           # Enable persistence by default
           persistence:
             enabled: true
