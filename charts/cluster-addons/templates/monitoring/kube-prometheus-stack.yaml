@@ -57,7 +57,7 @@ stringData:
         serviceMonitorSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
         {{- if $prometheusVolumeSize }}
-        # Set the retention size to max 85% of the given volume size
+        # Set the retention size to max 85% of the given volume size, to leave space for the WAL
         # To get a valid storage request, we round down to the nearest whole number
         {{- $storageAmount := mustRegexFind "^([0-9]*[.])?[0-9]+" $prometheusVolumeSize | float64 }}
         {{- $storageUnits := mustRegexFind "(K|M|G|T|E|P)i?$" $prometheusVolumeSize }}
