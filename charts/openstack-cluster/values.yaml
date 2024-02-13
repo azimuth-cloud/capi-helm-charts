@@ -416,14 +416,28 @@ nodeGroups:
 autoscaler:
   # The image to use for the autoscaler component
   image:
-    # Defaults to the global image prefix if not given
-    prefix:
     repository: registry.k8s.io/autoscaling/cluster-autoscaler
     pullPolicy: IfNotPresent
-    # The cluster-autoscaler docs recommend using a version that matches the
-    # Kubernetes version, but versions should be (mostly) backwards-compatible
-    tag: v1.26.1
+    tag: v1.29.0
   imagePullSecrets: []
+  # Any extra args for the autoscaler
+  extraArgs:
+    # Make sure logs go to stderr
+    logtostderr: true
+    stderrthreshold: info
+    # Output at a decent log level
+    v: 4
+    # Cordon nodes before terminating them so new pods are not scheduled there
+    cordon-node-before-terminating: "true"
+    # When scaling up, choose the node group that will result in the least idle CPU after
+    expander: least-waste,random
+    # Allow pods in kube-system to prevent a node from being deleted
+    skip-nodes-with-system-pods: "true"
+    # Allow pods with emptyDirs to be evicted
+    skip-nodes-with-local-storage: "false"
+    # Allow pods with custom controllers to be evicted
+    skip-nodes-with-custom-controller-pods: "false"
+
   # Pod-level security context
   podSecurityContext:
     runAsNonRoot: true
