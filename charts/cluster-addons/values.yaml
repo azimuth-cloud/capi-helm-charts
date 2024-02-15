@@ -169,6 +169,7 @@ ingress:
       version: 4.9.1
     release:
       namespace: ingress-nginx
+      values: {}
 
 # Settings for cluster monitoring
 monitoring:
