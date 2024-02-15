@@ -15,6 +15,8 @@ stringData:
         enabled: true
         serviceMonitor:
           enabled: true
+    {{- else }}
+    {}
     {{- end }}
   overrides: |
     {{- toYaml .Values.ingress.nginx.release.values | nindent 4 }}
