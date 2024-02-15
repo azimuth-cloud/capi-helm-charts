@@ -9,13 +9,13 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    {{- if .Values.monitoring.enabled }}
     controller:
-      {{- if .Values.monitoring.enabled }}
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
-      {{- end }}
+    {{- end }}
   overrides: |
     {{- toYaml .Values.ingress.nginx.release.values | nindent 4 }}
 ---
