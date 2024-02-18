@@ -45,12 +45,12 @@ spec:
     enabled: true
   {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
-    {{- if .allowedCidrs }}
+  {{- end }}
+  {{- if .allowedCidrs }}
     allowedCidrs:
       {{- range .allowedCidrs }}
       - {{ . }}
       {{- end}}
-    {{- end }}
   {{- end }}
   {{- end }}
 
