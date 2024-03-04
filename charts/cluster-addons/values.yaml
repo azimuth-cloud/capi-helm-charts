@@ -20,6 +20,20 @@ cni:
     release:
       namespace: tigera-operator
       values: {}
+    # Nova metadata service
+    # See https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service
+    globalNetworkPolicy:
+      denyNamespaceSelector: kubernetes.io/metadata.name != 'openstack-system'
+      allowPriority: 20
+      denyPriority: 10
+      allowEgressCidrs:
+        - "0.0.0.0/0"
+      denyEgressCidrs:
+        - "169.254.169.254/32"
+      allowv6EgressCidrs:
+        - "::/0"
+      denyv6EgressCidrs:
+        - "fe80::a9fe:a9fe/128"
   # Settings for the Cilium CNI
   # See https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details
   cilium:

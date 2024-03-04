@@ -49,6 +49,73 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
         key: overrides
+{{- if .Values.cni.calico.globalNetworkPolicy }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico-globalnetpolicy") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico-globalnetpolicy") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.cni.calico.release.namespace }}
+  releaseName: cni-calico-metadata-global-netpolicy
+  manifestSources:
+    - template: |
+        ---
+        apiVersion: projectcalico.org/v3
+        kind: GlobalNetworkPolicy
+        metadata:
+          name: {{ include "cluster-addons.componentName" (list . "deny-egress") }}
+        spec:
+          order: {{ .Values.cni.calico.globalNetworkPolicy.denyPriority }}
+          namespaceSelector: {{ .Values.cni.calico.globalNetworkPolicy.denyNamespaceSelector }}
+          types:
+            - Egress
+          egress:
+            - action: Deny
+              ipVersion: 4
+              destination:
+                nets:
+                {{- range .Values.cni.calico.globalNetworkPolicy.denyEgressCidrs }}
+                  - {{ . }}
+                {{ end }}
+            - action: Deny
+              ipVersion: 6
+              destination:
+                nets:
+                {{- range .Values.cni.calico.globalNetworkPolicy.denyv6EgressCidrs }}
+                  - {{ . }}
+                {{ end }}
+        ---
+        apiVersion: projectcalico.org/v3
+        kind: GlobalNetworkPolicy
+        metadata:
+          name: {{ include "cluster-addons.componentName" (list . "allow-global-egress") }}
+        spec:
+          order: {{ .Values.cni.calico.globalNetworkPolicy.allowPriority }}
+          types:
+            - Egress
+          egress:
+            - action: Allow
+              ipVersion: 4
+              destination:
+                nets: 
+                {{- range .Values.cni.calico.globalNetworkPolicy.allowEgressCidrs }}
+                  - {{ . }}
+                {{ end }}
+            - action: Allow
+              ipVersion: 6
+              destination:
+                nets: 
+                {{- range .Values.cni.calico.globalNetworkPolicy.allowv6EgressCidrs }}
+                  - {{ . }}
+                {{ end }}
+{{- end }}
 {{- if .Values.monitoring.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
