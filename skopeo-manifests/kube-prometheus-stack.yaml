@@ -11,13 +11,13 @@ quay.io:
     prometheus-operator/prometheus-operator:
     - v0.71.2
     prometheus/alertmanager:
-    - v0.26.0
+    - v0.27.0
     prometheus/node-exporter:
     - v1.7.0
     prometheus/prometheus:
-    - v2.49.1
+    - v2.50.1
     thanos/thanos:
-    - v0.34.0
+    - v0.34.1
 registry.k8s.io:
   images:
     ingress-nginx/kube-webhook-certgen:
