@@ -10,6 +10,7 @@ metadata:
 stringData:
   # By default, we disable the storage class deployed by the cinder-csi chart
   # We deploy our own instead as it gives us more control over the parameters
+  # We also disable the topology-aware scheduling by default
   defaults: |
     csi:
       plugin:
@@ -24,6 +25,8 @@ stringData:
           - name: cloud-config
             mountPath: /etc/kubernetes
             readOnly: true
+      provisioner:
+        topology: "false"
     secret:
       enabled: true
       create: false
