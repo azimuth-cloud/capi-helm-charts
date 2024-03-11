@@ -10,6 +10,7 @@ rules:
       - machinedeployments
       - machines
       - machinesets
+      - machinepools
     verbs:
       - get
       - list
