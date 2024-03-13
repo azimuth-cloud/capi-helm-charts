@@ -19,27 +19,12 @@ on:
         default: false
 
 jobs:
-  # We use the same resource as the Azimuth CI, so acquire the same CI lock
-  acquire-lock:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Acquire S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
-        with:
-          host: ${{ vars.CI_S3_LOCK_HOST }}
-          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
-          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
-          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
-          action: acquire
-        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
-
   # This job tests a clean deployment against the latest version
   # It is the only job that runs when tests-full=false
   # For tests-full=true it creates an internal network + router and runs Sonobuoy in conformance mode
   # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
   latest:
     runs-on: ubuntu-latest
-    needs: [acquire-lock]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -93,6 +78,20 @@ jobs:
                   tags: capi-helm-chart-ci
         if: ${{ !inputs.tests-full }}
 
+      # This is the point at which we start to consume OpenStack resources
+      # We use the same resource as the Azimuth CI, so acquire the same CI lock
+      - name: Acquire S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: acquire
+          # Include the job ID in the process ID
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+
       - name: Test clean Kubernetes 1.29 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
@@ -113,12 +112,23 @@ jobs:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}
 
+      # Release the CI lock when we are done
+      - name: Release S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: release
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+
   # This job tests the etcd volume support
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network and the default volume type
   etcd-volume:
     runs-on: ubuntu-latest
-    needs: [acquire-lock]
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
@@ -162,6 +172,20 @@ jobs:
                 machineFlavor: ${{ vars.NODE_GROUP_FLAVOR }}
                 machineCount: 2
 
+      # This is the point at which we start to consume OpenStack resources
+      # We use the same resource as the Azimuth CI, so acquire the same CI lock
+      - name: Acquire S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: acquire
+          # Include the job ID in the process ID
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+
       - name: Deploy Kubernetes 1.29 for etcd volume test
         uses: ./.github/actions/upgrade-and-test
         with:
@@ -180,13 +204,23 @@ jobs:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}
 
+      # Release the CI lock when we are done
+      - name: Release S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: release
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+
   # This job tests Kubernetes upgrade
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network
   kube-upgrade:
     runs-on: ubuntu-latest
-    # Run after the etcd volume tests
-    needs: [etcd-volume]
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
@@ -227,6 +261,20 @@ jobs:
                 machineFlavor: ${{ vars.NODE_GROUP_FLAVOR }}
                 machineCount: 2
 
+      # This is the point at which we start to consume OpenStack resources
+      # We use the same resource as the Azimuth CI, so acquire the same CI lock
+      - name: Acquire S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: acquire
+          # Include the job ID in the process ID
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+
       - name: Deploy Kubernetes 1.27 for Kubernetes upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
@@ -261,14 +309,24 @@ jobs:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}
 
+      # Release the CI lock when we are done
+      - name: Release S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: release
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+
   # This jobs tests upgrading the chart + dependencies from the latest tag
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network
   # It installs ALL of the addons so that we test upgrading them
   chart-upgrade:
     runs-on: ubuntu-latest
-    # Run after the kube-upgrade
-    needs: [kube-upgrade]
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout current
@@ -340,6 +398,20 @@ jobs:
         with:
           dependencies-path: dependencies-merged.json
 
+      # This is the point at which we start to consume OpenStack resources
+      # We use the same resource as the Azimuth CI, so acquire the same CI lock
+      - name: Acquire S3 lock
+        uses: stackhpc/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: acquire
+          # Include the job ID in the process ID
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+
       - name: Deploy cluster with chart from latest tag
         uses: ./current/.github/actions/upgrade-and-test
         with:
@@ -373,14 +445,7 @@ jobs:
           name-suffix: ${{ github.job }}
         if: ${{ always() }}
 
-  # Release the same CI lock as is used by the Azimuth CI
-  # If the Azimuth tests run the lock will already have been released, in which case
-  # this is a no-op, but we need to make sure it is released if the builds fail
-  release-lock:
-    runs-on: ubuntu-latest
-    needs: [latest, chart-upgrade]
-    if: ${{ always() }}
-    steps:
+      # Release the CI lock when we are done
       - name: Release S3 lock
         uses: stackhpc/github-actions/s3-lock@master
         with:
@@ -389,4 +454,5 @@ jobs:
           secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
           bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
           action: release
-        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
