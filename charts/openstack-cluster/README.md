@@ -27,16 +27,6 @@ First, you must set up a
 with the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
 installed.
 
-> **WARNING**
->
-> This chart depends on features in
-> [cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
-> that are not yet in a release.
->
-> StackHPC maintain custom builds of `cluster-api-provider-openstack` for use with this chart.
-> You can find these in [the StackHPC fork](https://github.com/stackhpc/cluster-api-provider-openstack/releases)
-> of `cluster-api-provider-openstack`.
-
 Addons are managed by the
 [Cluster API Addon Provider](https://github.com/stackhpc/cluster-api-addon-provider),
 which must also be installed if you wish to use the addons functionality.
@@ -125,10 +115,10 @@ working cluster:
 
 ```yaml
 # The target Kubernetes version
-kubernetesVersion: 1.22.1
+kubernetesVersion: 1.29.2
 
 # An image with the required software installed at the target version
-machineImage: ubuntu-2004-kube-v{{ .Values.kubernetesVersion }}
+machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
 
 # The name of the SSH keypair to inject into cluster machines
 machineSSHKeyName: jbloggs-keypair
