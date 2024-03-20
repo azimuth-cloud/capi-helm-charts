@@ -162,7 +162,7 @@ kubernetesDashboard:
   chart:
     repo: https://kubernetes.github.io/dashboard
     name: kubernetes-dashboard
-    version: 6.0.8
+    version: 7.1.2
   release:
     namespace: kubernetes-dashboard
     values: {}
