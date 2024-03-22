@@ -90,6 +90,10 @@ jobs:
           action: acquire
           # Include the job ID in the process ID
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        # GitHub terminates jobs after 6 hours
+        # We don't want jobs to acquire the lock then get timed out before they can finish
+        # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
+        timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
       - name: Test clean Kubernetes 1.29 deployment
@@ -184,6 +188,10 @@ jobs:
           action: acquire
           # Include the job ID in the process ID
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        # GitHub terminates jobs after 6 hours
+        # We don't want jobs to acquire the lock then get timed out before they can finish
+        # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
+        timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
       - name: Deploy Kubernetes 1.29 for etcd volume test
@@ -273,6 +281,10 @@ jobs:
           action: acquire
           # Include the job ID in the process ID
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        # GitHub terminates jobs after 6 hours
+        # We don't want jobs to acquire the lock then get timed out before they can finish
+        # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
+        timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
       - name: Deploy Kubernetes 1.27 for Kubernetes upgrade test
@@ -410,6 +422,10 @@ jobs:
           action: acquire
           # Include the job ID in the process ID
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        # GitHub terminates jobs after 6 hours
+        # We don't want jobs to acquire the lock then get timed out before they can finish
+        # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
+        timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
       - name: Deploy cluster with chart from latest tag
