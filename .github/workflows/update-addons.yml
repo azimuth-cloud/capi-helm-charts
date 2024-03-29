@@ -48,6 +48,8 @@ jobs:
 
           - key: kubernetes-dashboard
             path: kubernetesDashboard.chart
+            # v7 introduces substantial changes that break Azimuth integration
+            constraints: '<7.0.0'
             values: |
               metricsScraper:
                 enabled: true
@@ -114,6 +116,7 @@ jobs:
         with:
           repository: ${{ steps.chart-info.outputs.repo }}
           chart: ${{ steps.chart-info.outputs.name }}
+          constraints: ${{ matrix.constraints || '>=0.0.0' }}
 
       - name: Update chart version in values.yaml
         uses: stackhpc/github-actions/config-update@master
