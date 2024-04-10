@@ -124,9 +124,9 @@ openstack:
     enabled: false
     targetNamespace: kube-system
     chart:
-      repo: https://heytrav.github.io/helm-charts
+      repo: https://catalyst-cloud.github.io/capi-plugin-helm-charts
       name: k8s-keystone-auth
-      version: 0.0.9
+      version: 1.1.0
 
 # Settings for etcd defragmentation jobs
 etcdDefrag:
