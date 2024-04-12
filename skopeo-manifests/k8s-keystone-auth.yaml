@@ -1,1 +1,4 @@
-{}
+registry.k8s.io:
+  images:
+    provider-os/k8s-keystone-auth:
+    - v1.29.0
