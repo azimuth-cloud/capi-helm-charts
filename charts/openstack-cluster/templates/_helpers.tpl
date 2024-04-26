@@ -131,7 +131,7 @@ Outputs the node registration object for setting node labels.
 {{- define "openstack-cluster.nodeRegistration.nodeLabels" -}}
 nodeRegistration:
   kubeletExtraArgs:
-    node-labels: "{{ range $i, $k := keys . }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
+    node-labels: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
 {{- end }}
 
 {{/*
