@@ -7,15 +7,15 @@ quay.io:
     kiwigrid/k8s-sidecar:
     - 1.26.1
     prometheus-operator/prometheus-config-reloader:
-    - v0.73.1
+    - v0.73.2
     prometheus-operator/prometheus-operator:
-    - v0.73.1
+    - v0.73.2
     prometheus/alertmanager:
     - v0.27.0
     prometheus/node-exporter:
     - v1.7.0
     prometheus/prometheus:
-    - v2.51.1
+    - v2.51.2
     thanos/thanos:
     - v0.34.1
 registry.k8s.io:
