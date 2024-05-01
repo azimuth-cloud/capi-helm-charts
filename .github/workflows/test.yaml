@@ -96,17 +96,17 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
-      - name: Test clean Kubernetes 1.29 deployment
+      - name: Test clean Kubernetes 1.30 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
           chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
-      - name: Delete Kubernetes 1.29 deployment
+      - name: Delete Kubernetes 1.30 deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
         if: ${{ always() }}
 
@@ -194,13 +194,13 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
-      - name: Deploy Kubernetes 1.29 for etcd volume test
+      - name: Deploy Kubernetes 1.30 for etcd volume test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
           chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
 
       - name: Delete etcd volume test deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -287,15 +287,7 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.CI_S3_LOCK_HOST != '' }}
 
-      - name: Deploy Kubernetes 1.27 for Kubernetes upgrade test
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-${{ github.job }}
-          chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-27-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-27-image }}
-
-      - name: Upgrade to Kubernetes 1.28
+      - name: Deploy Kubernetes 1.28 for Kubernetes upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
@@ -310,6 +302,14 @@ jobs:
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+
+      - name: Upgrade to Kubernetes 1.30
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          chart-version: ${{ inputs.chart-version }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
 
       - name: Delete Kubernetes upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
