@@ -13,7 +13,7 @@ quay.io:
     prometheus/alertmanager:
     - v0.27.0
     prometheus/node-exporter:
-    - v1.7.0
+    - v1.8.0
     prometheus/prometheus:
     - v2.51.2
     thanos/thanos:
