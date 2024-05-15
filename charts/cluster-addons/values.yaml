@@ -183,7 +183,21 @@ ingress:
       version: 4.10.1
     release:
       namespace: ingress-nginx
-      values: {}
+      values:
+        controller:
+          # Try to mitigate unresolved issue with pod instability
+          # on nodes running the Nvidia container runtime
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 1
+                preference:
+                  matchExpressions:
+                  - key: nvidia.com/gpu.present
+                    operator: NotIn
+                    values:
+                    - "true"
+
 
 # Settings for cluster monitoring
 monitoring:
@@ -211,6 +225,18 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+            # Try to mitigate unresolved issue with pod instability
+            # on nodes running the Nvidia container runtime
+            affinity:
+              nodeAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 1
+                  preference:
+                    matchExpressions:
+                    - key: nvidia.com/gpu.present
+                      operator: NotIn
+                      values:
+                      - "true"
         prometheus:
           prometheusSpec:
             # The amount of data that is retained will be 90 days or 95% of the size of the
