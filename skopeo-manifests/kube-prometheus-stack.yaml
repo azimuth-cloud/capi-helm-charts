@@ -15,9 +15,9 @@ quay.io:
     prometheus/node-exporter:
     - v1.8.0
     prometheus/prometheus:
-    - v2.51.2
+    - v2.52.0
     thanos/thanos:
-    - v0.34.1
+    - v0.35.0
 registry.k8s.io:
   images:
     ingress-nginx/kube-webhook-certgen:
