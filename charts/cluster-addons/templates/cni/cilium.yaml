@@ -1,4 +1,14 @@
 {{- if and .Values.cni.enabled (eq .Values.cni.type "cilium") }}
+{{/*
+  Use the kube-proxy replacement by default
+
+  NOTE(mkjpryor)
+  When using the kube-proxy replacement Cilium must be told the host and port for the
+  Kubernetes API as it is responsible for handling service traffic
+  We can use the templating support in the addon provider to extract this dynamically
+  from the CAPI cluster resource spec
+*/}}
+{{- $kubeProxyReplacement := dig "kubeProxyReplacement" true .Values.cni.cilium.release.values }}
 ---
 apiVersion: v1
 kind: Secret
@@ -9,8 +19,15 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    # Use IPs allocated to each node by Kubernetes
+    # This respects the pod CIDR specified in the CAPI cluster resource
     ipam:
       mode: kubernetes
+    {{- if $kubeProxyReplacement }}
+    kubeProxyReplacement: true
+    k8sServiceHost: {{ "{{" }} cluster.spec.controlPlaneEndpoint.host {{ "}}" }}
+    k8sServicePort: {{ "{{" }} cluster.spec.controlPlaneEndpoint.port {{ "}}" }}
+    {{- end }}
   overrides: |
     {{- toYaml .Values.cni.cilium.release.values | nindent 4 }}
 ---
