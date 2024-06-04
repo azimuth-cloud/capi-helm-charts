@@ -8,8 +8,8 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . 
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" -}}
 {{- $ctx := index . 0 }}
 {{- $osDistro := index . 1 }}
-{{- $kubeProxyConfigurationPath := ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" (eq $osDistro "flatcar") }}
-{{- $kubeadmPath := ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" (eq $osDistro "flatcar") }}
+{{- $kubeProxyConfigurationPath := eq $osDistro "flatcar" | ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" }}
+{{- $kubeadmPath := eq $osDistro "flatcar" | ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" }}
 {{- with $ctx.kubeProxyConfiguration }}
 files:
   - path: {{ $kubeProxyConfigurationPath }}
@@ -52,6 +52,24 @@ mounts:
 {{- end }}
 {{- end }}
 
+{{/*
+  NOTE(mkjpryor)
+  When Cilium is enabled with the kube-proxy replacement, we need to skip kube-proxy
+*/}}
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" -}}
+{{-
+  if and
+    .Values.addons.enabled
+    (dig "cni" "enabled" true .Values.addons)
+    (dig "cni" "type" "calico" .Values.addons | eq "cilium")
+    (dig "cni" "cilium" "release" "values" "kubeProxyReplacement" true .Values.addons)
+}}
+initConfiguration:
+  skipPhases:
+    - addon/kube-proxy
+{{- end }}
+{{- end }}
+
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
@@ -85,6 +103,7 @@ spec:
         list
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
           (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
           (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)

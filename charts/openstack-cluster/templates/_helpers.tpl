@@ -346,7 +346,6 @@ webhooks and policies for audit logging can be added here.
   clusterConfiguration:
     apiServer:
       extraArgs:
-        cloud-provider: external
 {{- if $authWebhook }}
         authorization-mode: Node,Webhook,RBAC
 {{- if eq $authWebhook "k8s-keystone-auth" }}
