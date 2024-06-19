@@ -14,6 +14,9 @@ see how addons are defined.
 
 - [Container Network Interface (CNI) plugins](#container-network-interface-cni-plugins)
 - [OpenStack integrations](#openstack-integrations)
+  - [Cinder CSI and storage class](#cinder-csi-and-storage-class)
+  - [Manila CSI and storage class](#manila-csi-and-storage-class)
+  - [Keystone authenticating webhook](#keystone-authenticating-webhook)
 - [Ingress controllers](#ingress-controllers)
 - [Metrics server](#metrics-server)
 - [Monitoring and logging](#monitoring-and-logging)
@@ -33,7 +36,13 @@ cni:
   type: cilium
 ```
 
-And to disable the installation of a CNI completely:
+> **NOTE**
+> 
+> When Cilium is used, the
+> [Cilium kube-proxy replacement](https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/)
+> is configured by default with no further action required.
+
+To disable the installation of a CNI completely, use:
 
 ```yaml
 cni:
@@ -50,12 +59,13 @@ underlying infrastructure, for example
 [Container Storage Interface (CSI) implementations](https://kubernetes-csi.github.io/docs/)
 and [authenticating webhooks](https://kubernetes.io/docs/reference/access-authn-authz/webhook/).    
 
-This chart is able to deploy the CCM and the Cinder CSI plugin from the
+This chart is able to deploy the CCM, the Cinder and Manila CSI plugins and the Keystone
+authenticating webbook from the
 [Kubernetes OpenStack cloud provider](https://github.com/kubernetes/cloud-provider-openstack),
 which allows your Kubernetes cluster to integrate with the OpenStack cloud on which it is deployed.
 This enables features like automatic labelling of nodes with OpenStack information (e.g. server ID
 and flavor), automatic configuration of hostnames and IP addresses, managed load balancers for
-services and dynamic provisioning of RWO volumes.
+services and dynamic provisioning of RWO and RWX volumes.
 
 By default, the OpenStack integrations are not enabled. To enable OpenStack integrations on the
 target cluster, use the following in your Helm values:
@@ -64,6 +74,11 @@ target cluster, use the following in your Helm values:
 openstack:
   enabled: true
 ```
+
+> **TIP**
+>
+> When using the [openstack-cluster chart](../openstack-cluster/), the OpenStack integrations
+> are enabled by default in the values for the chart.
 
 To configure options for the `[Networking]`, `[LoadBalancer]`, `[BlockStorage]` and `[Metadata]`
 sections of the cloud-config file, you can use Helm values, e.g.:
@@ -92,6 +107,95 @@ and the
 
 Additional configuration options are available for the OpenStack integrations - see
 [values.yaml](./values.yaml) for more details.
+
+### Cinder CSI and storage class
+
+The [Cinder service](https://docs.openstack.org/cinder/latest/) in an OpenStack cloud provides
+[block volumes](https://en.wikipedia.org/wiki/Block-level_storage) for workloads. These volumes
+can only be attached to a single pod at once, referred to as read-write-one (RWO).
+
+Cinder is available on the vast majority of OpenStack clouds, and so the Cinder CSI is installed
+by default whenever the OpenStack integrations are enabled. As part of this, a default
+[storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/) is installed that
+allows Cinder volumes to be requested and attached to pods using
+[persistent volume claims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims).
+This storage class uses the default Cinder volume type and the `nova` availability zone, and
+is configured as the default storage class for the cluster.
+
+To change the Cinder availability zone or volume type for the default storage class, use the
+following values:
+
+```yaml
+openstack:
+  csiCinder:
+    defaultStorageClass:
+      availabilityZone: az1
+      volumeType: fast-ssd
+```
+
+### Manila CSI and storage class
+
+In contrast to Cinder, the [Manila service](https://docs.openstack.org/manila/latest/) provides
+shared filesystems for cloud workloads. These volumes can be attached to multiple pods
+simultaneously, referred to as read-write-many (RWX).
+
+Because Manila is often not deployed on OpenStack clouds, it is not enabled by default even when
+the OpenStack integrations are enabled. To enable the Manila CSI, set the following variable:
+
+```yaml
+openstack:
+  csiManila:
+    enabled: true
+```
+
+Manila supports multiple backends, but currently only the [CephFS](https://docs.ceph.com/en/latest/cephfs/)
+backend is supported in the CAPI Helm charts. To utilise the CephFS support in the Manila CSI,
+the CephFS CSI plugin must also be enabled:
+
+```yaml
+csi:
+  cephfs:
+    enabled: true
+```
+
+By default, this will result in the Manila CSI creating volumes using the `cephfs` share type. If
+you need to use a different share type, use the following:
+
+```yaml
+openstack:
+  csiManila:
+    defaultStorageClass:
+      parameters:
+        type: cephfs_type
+```
+
+Any of the storage class parameters
+[specified in the Manila CSI docs](https://docs.ceph.com/en/latest/cephfs/) can be given under
+`openstack.csiManila.defaultStorageClass.parameters`. For example, to use the `kernel` mounter
+rather than the default `fuse` mounter, which can help performance, use the following:
+
+```yaml
+openstack:
+  csiManila:
+    defaultStorageClass:
+      parameters:
+        cephfs-mounter: kernel
+```
+
+### Keystone authenticating webhook
+
+The  [k8s-keystone-auth](https://github.com/heytrav/helm-charts/tree/main/charts/k8s-keystone-auth) 
+webhook can be installed by enabling the `k8sKeystoneAuth` subchart. Note that you will need to provide
+the **auth url** and **project id** for the Openstack tenant where you are deploying your cluster.
+
+```yaml
+openstack:
+  k8sKeystoneAuth:
+    enabled: true
+    values:
+      openstackAuthUrl: $OS_AUTH_URL
+      projectId: $OS_PROJECT_ID
+```
 
 ## Ingress controllers
 
@@ -162,19 +266,4 @@ By default, Grafana is only available from within the cluster and must be access
 
 ```sh
 kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000:80
-```
-
-## Keystone Authentication Webhook
-
-The  [k8s-keystone-auth](https://github.com/heytrav/helm-charts/tree/main/charts/k8s-keystone-auth) 
-webhook can be installed by enabling the `k8sKeystoneAuth` subchart. Note that you will need to provide 
-the **auth url** and **project id** for the Openstack tenant where you are deploying your cluster.
-
-```yaml
-  k8sKeystoneAuth:
-    enabled: true
-    values:
-      openstackAuthUrl: $OS_AUTH_URL
-      projectId: $OS_PROJECT_ID
-
 ```
