@@ -45,6 +45,19 @@ cni:
       namespace: kube-system
       values: {}
 
+# Settings for CSI addons
+csi:
+  # Settings for the CephFS CSI
+  cephfs:
+    enabled: false
+    chart:
+      repo: https://ceph.github.io/csi-charts
+      name: ceph-csi-cephfs
+      version: 3.11.0
+    release:
+      namespace: csi-ceph-system
+      values: {}
+
 # Settings for the OpenStack integrations
 openstack:
   # Indicates if the OpenStack integrations should be enabled
@@ -81,52 +94,79 @@ openstack:
       name: openstack-cinder-csi
       version: 2.30.0
     values: {}
-    # Variables affecting the definition of the storage class
+    # Definition of the default storage class for Cinder CSI
     defaultStorageClass:
       # Indicates if the storage class should be enabled
       enabled: true
       # The name of the storage class
       name: csi-cinder
+      # Indicates if the Cinder default storage class is the cluster default storage class
+      isClusterDefault: true
       # The reclaim policy for the storage class
       reclaimPolicy: Delete
       # Indicates if volume expansion is allowed
       allowVolumeExpansion: true
+      # Controls when volume binding and dynamic provisioning should occur
+      volumeBindingMode: WaitForFirstConsumer
+      # The allowed topologies for the storage class
+      allowedTopologies:
+      # Filesystem type to use for volumes provisioned with the storage class
+      # If not given, the default filesystem type will be used
+      fstype:
       # The Cinder availability zone to use for volumes provisioned by the storage class
       availabilityZone: nova
       # The Cinder volume type to use for volumes provisioned by the storage class
       # If not given, the default volume type will be used
       volumeType:
-      # The volumeBindingMode field controls when volume binding and dynamic provisioning should occur.
+    # Additional storage classes to create for the Cinder CSI
+    # For each item, the properties from the default storage class are supported (except enabled and isClusterDefault)
+    additionalStorageClasses: []
+  # Settings for the Manila CSI plugin
+  csiManila:
+    # Indicates if the Manila CSI should be enabled
+    # By default, it is disabled as Manila is not commonly available
+    # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/manila-csi-plugin/values.yaml
+    enabled: false
+    chart:
+      repo: https://kubernetes.github.io/cloud-provider-openstack
+      name: openstack-manila-csi
+      version: 2.30.0
+    values: {}
+    # Definition of the default storage class for the Manila CSI
+    defaultStorageClass:
+      # Indicates if the storage class should be enabled
+      enabled: true
+      # The name of the storage class
+      name: csi-manila
+      # Indicates if the Manila default storage class is the cluster default storage class
+      isClusterDefault: false
+      # The provisioner for the storage class
+      # If not given and the Ceph CSI plugin is installed, cephfs.manila.csi.openstack.org is used
+      provisioner:
+      # The reclaim policy for the storage class
+      reclaimPolicy: Delete
+      # Indicates if volume expansion is allowed
+      allowVolumeExpansion: true
+      # Controls when volume binding and dynamic provisioning should occur
       volumeBindingMode: WaitForFirstConsumer
       # The allowed topologies for the storage class
       allowedTopologies:
-      # Filesystem type supported by Kubernetes. Defaults to "ext4"
-      # fstype:
+      # The parameters for the storage class
+      # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters
+      parameters:
+        # The Manila share type to use
+        # If not given and the Ceph CSI plugin is installed, cephfs is used
+        type:
+    # Additional storage classes to create for the Manila CSI
+    # For each item, the properties from the default storage class are supported (except for "enabled")
     additionalStorageClasses: []
-    # - name: additional-storage-classname
-    # The reclaim policy for the storage class
-    #   reclaimPolicy: Delete
-    # The reclaim policy for the storage class
-    #   allowVolumeExpansion: true
-    # The Cinder availability zone to use for volumes provisioned by the storage class
-    #   availabilityZone: nova
-    # The Cinder volume type to use for volumes provisioned by the storage class
-    # If not given, the default volume type will be used
-    #   volumeType:
-    # The volumeBindingMode field controls when volume binding and dynamic provisioning should occur.
-    # Required for additionalStorageClasses.
-    #   volumeBindingMode: WaitForFirstConsumer
-    # The allowed topologies for the storage class
-    #   allowedTopologies:
-    # Filesystem type supported by Kubernetes. Defaults to "ext4"
-    #   fstype:
   k8sKeystoneAuth:
     enabled: false
     targetNamespace: kube-system
     chart:
       repo: https://catalyst-cloud.github.io/capi-plugin-helm-charts
       name: k8s-keystone-auth
-      version: 1.3.0
+      version: 1.1.0
 
 # Settings for etcd defragmentation jobs
 etcdDefrag:

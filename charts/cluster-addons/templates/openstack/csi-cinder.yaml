@@ -58,13 +58,17 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
         key: overrides
-{{- if .Values.openstack.csiCinder.defaultStorageClass.enabled }}
+{{-
+  if or
+    .Values.openstack.csiCinder.defaultStorageClass.enabled
+    .Values.openstack.csiCinder.additionalStorageClasses
+}}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-cinder-storageclass") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder-storageclass") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-storageclass
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
@@ -74,14 +78,17 @@ spec:
   targetNamespace: {{ .Values.openstack.targetNamespace }}
   releaseName: csi-cinder-storageclass
   manifestSources:
+{{- if .Values.openstack.csiCinder.defaultStorageClass.enabled }}
     - template: |
         {{- with .Values.openstack.csiCinder.defaultStorageClass }}
         apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
           name: {{ .name }}
+          {{- if .isClusterDefault }}
           annotations:
             storageclass.kubernetes.io/is-default-class: "true"
+          {{- end }}
         provisioner: cinder.csi.openstack.org
         parameters:
           availability: {{ .availabilityZone }}
@@ -98,25 +105,26 @@ spec:
         allowedTopologies: {{ toYaml . | nindent 6 }}
         {{- end }}
         {{- end }}
-{{- range $rangeItem := .Values.openstack.csiCinder.additionalStorageClasses }}
+{{- end }}
+{{- range .Values.openstack.csiCinder.additionalStorageClasses }}
     - template: |
         apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
-          name: {{ $rangeItem.name }}
+          name: {{ required "name is required for storage classes" .name }}
         provisioner: cinder.csi.openstack.org
         parameters:
-          availability: {{ $rangeItem.availabilityZone }}
-          {{- with $rangeItem.volumeType }}
+          availability: {{ default "nova" .availabilityZone }}
+          {{- with .volumeType }}
           type: {{ . }}
           {{- end }}
-          {{- with $rangeItem.fstype }}
+          {{- with .fstype }}
           fstype: {{ . }}
           {{- end }}
-        reclaimPolicy: {{ $rangeItem.reclaimPolicy }}
-        allowVolumeExpansion: {{ $rangeItem.allowVolumeExpansion }}
-        volumeBindingMode: {{ $rangeItem.volumeBindingMode }}
-        {{- with $rangeItem.allowedTopologies }}
+        reclaimPolicy: {{ default "Delete" .reclaimPolicy }}
+        allowVolumeExpansion: {{ dig "allowVolumeExpansion" true . | ternary "true" "false" }}
+        volumeBindingMode: {{ default "WaitForFirstConsumer" .volumeBindingMode }}
+        {{- with .allowedTopologies }}
         allowedTopologies: {{ toYaml . | nindent 6 }}
         {{- end }}
 {{- end }}

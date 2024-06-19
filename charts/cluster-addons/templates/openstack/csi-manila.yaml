@@ -1,0 +1,188 @@
+{{- define "cluster-addons.openstack.csiManila.storageClass" -}}
+{{- $ctx := index . 0 -}}
+{{- $sc := index . 1 -}}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ required "name is required for storage classes" $sc.name }}
+  {{- if $sc.isClusterDefault }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  {{- end }}
+{{- if $sc.provisioner }}
+provisioner: {{ $sc.provisioner }}
+{{- else if $ctx.Values.csi.cephfs.enabled }}
+provisioner: cephfs.manila.csi.openstack.org
+{{- else }}
+{{- printf "Unable to determine provisioner for storage class - %s" $sc.name | fail }}
+{{- end }}
+parameters:
+  csi.storage.k8s.io/provisioner-secret-name: csi-manila-credentials
+  csi.storage.k8s.io/provisioner-secret-namespace: {{ $ctx.Values.openstack.targetNamespace }}
+  csi.storage.k8s.io/controller-expand-secret-name: csi-manila-credentials
+  csi.storage.k8s.io/controller-expand-secret-namespace: {{ $ctx.Values.openstack.targetNamespace }}
+  csi.storage.k8s.io/node-stage-secret-name: csi-manila-credentials
+  csi.storage.k8s.io/node-stage-secret-namespace: {{ $ctx.Values.openstack.targetNamespace }}
+  csi.storage.k8s.io/node-publish-secret-name: csi-manila-credentials
+  csi.storage.k8s.io/node-publish-secret-namespace: {{ $ctx.Values.openstack.targetNamespace }}
+  {{- $parameters := default dict $sc.parameters }}
+  {{- if $parameters.type }}
+  type: {{ $parameters.type }}
+  {{- else if $ctx.Values.csi.cephfs.enabled }}
+  type: cephfs
+  {{- else }}
+  {{- printf "Unable to determine share type for storage class - %s" $sc.name | fail }}
+  {{- end }}
+  {{- with (omit $parameters "type") }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+reclaimPolicy: {{ default "Delete" $sc.reclaimPolicy }}
+allowVolumeExpansion: {{ dig "allowVolumeExpansion" true $sc | ternary "true" "false" }}
+volumeBindingMode: {{ default "WaitForFirstConsumer" $sc.volumeBindingMode }}
+{{- with $sc.allowedTopologies }}
+allowedTopologies: {{ toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- if and .Values.openstack.enabled .Values.openstack.csiManila.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    csimanila:
+      clusterID: {{ include "cluster-addons.clusterName" . }}
+    {{- if .Values.csi.cephfs.enabled }}
+    shareProtocols:
+      - protocolSelector: CEPHFS
+        fsGroupPolicy: None
+        fwdNodePluginEndpoint:
+          dir: /var/lib/kubelet/plugins/cephfs.csi.ceph.com
+          sockFile: csi.sock
+    {{- end }}
+    # Allow the node plugin to run on the control plane nodes
+    nodeplugin:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
+  overrides: |
+    {{- toYaml .Values.openstack.csiManila.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.openstack.csiManila.chart | nindent 4 }}
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: csi-manila
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
+        key: overrides
+{{-
+  if or
+    .Values.openstack.csiManila.defaultStorageClass.enabled
+    .Values.openstack.csiManila.additionalStorageClasses
+}}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-storageclass
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.openstack.targetNamespace }}
+  releaseName: csi-manila-storageclass
+  manifestSources:
+    - template: |
+        {%- set identity_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml -%}
+        {%- set cloud_data = identity_data.clouds.openstack -%}
+        {%- set tls_verify = cloud_data.verify | default(True) %}
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: csi-manila-credentials
+        stringData:
+          os-authURL: >-
+            {{ "{{" }} cloud_data.auth.auth_url {{ "}}" }}
+          os-region: >-
+            {{ "{{" }} cloud_data.region_name {{ "}}" }}
+          {%- if cloud_data.auth_type == "v3applicationcredential" %}
+          os-applicationCredentialID: >-
+            {{ "{{" }} cloud_data.auth.application_credential_id {{ "}}" }}
+          os-applicationCredentialSecret: >-
+            {{ "{{" }} cloud_data.auth.application_credential_secret {{ "}}" }}
+          {%- elif cloud_data.auth_type == "v3password" %}
+          os-password: >-
+            {{ "{{" }} cloud_data.auth.password {{ "}}" }}
+          {%- if "user_id" in cloud_data.auth %}
+          os-userID: >-
+            {{ "{{" }} cloud_data.auth.user_id {{ "}}" }}
+          {%- else %}
+          os-userName: >-
+            {{ "{{" }} cloud_data.auth.username {{ "}}" }}
+          {%- endif %}
+          {%- if "domain_id" in cloud_data.auth %}
+          os-domainID: >-
+            {{ "{{" }} cloud_data.auth.domain_id {{ "}}" }}
+          {%- else %}
+          os-domainName: >-
+            {{ "{{" }} cloud_data.auth.domain_name {{ "}}" }}
+          {%- endif %}
+          {%- if "project_id" in cloud_data.auth %}
+          os-projectID: >-
+            {{ "{{" }} cloud_data.auth.project_id {{ "}}" }}
+          {%- else %}
+          os-projectName: >-
+            {{ "{{" }} cloud_data.auth.project_name {{ "}}" }}
+          {%- endif %}
+          {%- if "project_domain_id" in cloud_data.auth %}
+          os-projectDomainID: >-
+            {{ "{{" }} cloud_data.auth.project_domain_id {{ "}}" }}
+          {%- elif "project_domain_name" in cloud_data.auth %}
+          os-projectDomainName: >-
+            {{ "{{" }} cloud_data.auth.project_domain_name {{ "}}" }}
+          {%- endif %}
+          {%- if "user_domain_id" in cloud_data.auth %}
+          os-userDomainID: >-
+            {{ "{{" }} cloud_data.auth.user_domain_id {{ "}}" }}
+          {%- elif "user_domain_name" in cloud_data.auth %}
+          os-userDomainName: >-
+            {{ "{{" }} cloud_data.auth.user_domain_name {{ "}}" }}
+          {%- endif %}
+          {%- endif %}
+          os-TLSInsecure: "{{ "{{" }} "false" if tls_verify else "true" {{ "}}" }}"
+  {{- if .Values.openstack.csiManila.defaultStorageClass.enabled }}
+  {{- with .Values.openstack.csiManila.defaultStorageClass }}
+    - template: |
+        {{- include "cluster-addons.openstack.csiManila.storageClass" (list $ .) | nindent 8 }}
+  {{- end }}
+  {{- end }}
+  {{- range .Values.openstack.csiManila.additionalStorageClasses }}
+    - template: |
+        {{- include "cluster-addons.openstack.csiManila.storageClass" (list $ .) | nindent 8 }}
+  {{- end }}
+{{- end }}
+{{- end }}

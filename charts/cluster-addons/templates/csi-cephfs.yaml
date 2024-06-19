@@ -1,0 +1,46 @@
+{{- if .Values.csi.cephfs.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "csi-cephfs") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    # Adjust the provisioner settings to allow it to deploy on a single node
+    provisioner:
+      replicaCount: 1
+    # Allow the node plugin to run on the control plane nodes
+    nodeplugin:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
+  overrides: |
+    {{- toYaml .Values.csi.cephfs.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-cephfs") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.csi.cephfs.chart | nindent 4 }}
+  targetNamespace: {{ .Values.csi.cephfs.release.namespace }}
+  releaseName: csi-cephfs
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
+        key: overrides
+{{- end }}
