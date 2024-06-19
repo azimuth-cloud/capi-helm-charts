@@ -253,8 +253,8 @@ etcd:
     availabilityZone: nova
 ```
 
-This can be used in combination with volume-backed instances using a volume type backed
-by spinning disk, e.g.:
+This can be used in combination with volume-backed instances to get nodes that have a root
+volume backed by spinning disk but with etcd on a volume backed by SSDs:
 
 ```yaml
 etcd:
