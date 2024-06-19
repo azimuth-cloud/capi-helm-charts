@@ -1,4 +1,4 @@
-{{- if or .Values.csiCephfs.enabled .Values.openstack.csiManila.cephfs.enabled }}
+{{- if .Values.csi.cephfs.enabled }}
 ---
 apiVersion: v1
 kind: Secret
@@ -9,10 +9,18 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    {}
-    
+    # Adjust the provisioner settings to allow it to deploy on a single node
+    provisioner:
+      replicaCount: 1
+    # Allow the node plugin to run on the control plane nodes
+    nodeplugin:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
   overrides: |
-    {{- toYaml .Values.csiCephfs.release.values | nindent 4 }}
+    {{- toYaml .Values.csi.cephfs.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
@@ -25,8 +33,8 @@ metadata:
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.csiCephfs.chart | nindent 4 }}
-  targetNamespace: {{ .Values.csiCephfs.release.namespace }}
+  chart: {{ toYaml .Values.csi.cephfs.chart | nindent 4 }}
+  targetNamespace: {{ .Values.csi.cephfs.release.namespace }}
   releaseName: csi-cephfs
   valuesSources:
     - secret:
