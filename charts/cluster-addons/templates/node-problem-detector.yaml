@@ -9,6 +9,7 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    {{- if .Values.monitoring.enabled }}
     metrics:
       enabled: true
       prometheusRule:
@@ -17,6 +18,10 @@ stringData:
           create: true
       serviceMonitor:
         enabled: true
+    {{- else }}
+    metrics:
+      enabled: false
+    {{- end }}
   overrides: |
     {{- toYaml .Values.nodeProblemDetector.release.values | nindent 4 }}
 ---
