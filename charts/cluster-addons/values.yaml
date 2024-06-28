@@ -345,6 +345,18 @@ mellanoxNetworkOperator:
     namespace: network-operator
     values: {}
 
+# Settings for the node problem detector
+nodeProblemDetector:
+  # Indicates if the node problem detector should be enabled
+  enabled: true
+  chart:
+    repo: https://charts.deliveryhero.io
+    name: node-problem-detector
+    version: 2.3.13
+  release:
+    namespace: node-problem-detector
+    values: {}
+
 # Settings for any custom addons
 custom: {}
   #  #Indexed by the name of the release on the target cluster

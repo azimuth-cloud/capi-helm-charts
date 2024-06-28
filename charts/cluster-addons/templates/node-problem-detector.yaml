@@ -1,0 +1,49 @@
+{{- if .Values.nodeProblemDetector.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "node-problem-detector") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    {{- if .Values.monitoring.enabled }}
+    metrics:
+      enabled: true
+      prometheusRule:
+        enabled: true
+        defaultRules:
+          create: true
+      serviceMonitor:
+        enabled: true
+    {{- else }}
+    metrics:
+      enabled: false
+    {{- end }}
+  overrides: |
+    {{- toYaml .Values.nodeProblemDetector.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "node-problem-detector") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.nodeProblemDetector.chart | nindent 4 }}
+  targetNamespace: {{ .Values.nodeProblemDetector.release.namespace }}
+  releaseName: node-problem-detector
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-config
+        key: overrides
+{{- end }}

@@ -1,0 +1,4 @@
+registry.k8s.io:
+  images:
+    node-problem-detector/node-problem-detector:
+    - v0.8.18
