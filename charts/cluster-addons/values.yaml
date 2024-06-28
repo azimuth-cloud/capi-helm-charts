@@ -343,8 +343,7 @@ mellanoxNetworkOperator:
     version: 23.7.0
   release:
     namespace: network-operator
-    values:
-      secondaryNetwork: {}
+    values: {}
 
 # Settings for any custom addons
 custom: {}
