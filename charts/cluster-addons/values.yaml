@@ -343,7 +343,15 @@ mellanoxNetworkOperator:
     version: 23.7.0
   release:
     namespace: network-operator
-    values: {}
+    values:
+      secondaryNetwork:
+        deploy: true
+        multus:
+          deploy: true
+        cniPlugins:
+          deploy: true
+        ipamPlugin:
+          deploy: true
 
 # Settings for any custom addons
 custom: {}
