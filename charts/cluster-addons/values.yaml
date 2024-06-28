@@ -344,14 +344,7 @@ mellanoxNetworkOperator:
   release:
     namespace: network-operator
     values:
-      secondaryNetwork:
-        deploy: true
-        multus:
-          deploy: true
-        cniPlugins:
-          deploy: true
-        ipamPlugin:
-          deploy: true
+      secondaryNetwork: {}
 
 # Settings for any custom addons
 custom: {}

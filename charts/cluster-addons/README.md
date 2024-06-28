@@ -23,6 +23,7 @@ see how addons are defined.
 
 ## Container Network Interface (CNI) plugins
 
+### Networking Control Planes
 This chart can install either [Calico](https://docs.projectcalico.org/about/about-calico) or
 [Cilium](https://cilium.io/) as a
 [CNI plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
@@ -50,6 +51,53 @@ cni:
 ```
 
 Additional configuration options are available for each - see [values.yaml](./values.yaml).
+
+### Multi-Homed Pods
+
+The [NVIDIA (ex Mellanox) Network Operator](https://github.com/Mellanox/network-operator) is provided
+by default to deploy the OFED driver where relevant hardware is detected, enabling RDMA workloads.
+
+The plumbing for multi-homed pods is also provided via this operator and available by default.
+The relevant provided components are:
+
+* [Multus](https://github.com/k8snetworkplumbingwg/multus-cni)
+* [Container Networking Plugins](https://github.com/containernetworking/plugins)
+* [Whereabouts IPAM](https://github.com/k8snetworkplumbingwg/whereabouts)
+
+The usage of these CNIs requires manual configuration to match the specific cluster deployment.
+Particularly around secondary interface naming and subnetting.
+An example can be found below.
+
+There are constraints to be considered before attempting to make use of this advanced
+functionality. Most notably that a typical network within OpenStack enforces port security,
+permitting only known MAC/IP Pairs.
+
+```yaml
+cat <<'EOF' | kubectl apply -f -
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: whereabouts-conf
+spec:
+  config: '{
+      "cniVersion": "0.3.0",
+      "name": "secondaryClusterNet",
+      "type": "macvlan",
+      "master": "enp5s0",
+      "mode": "bridge",
+      "ipam": {
+        "type": "whereabouts",
+        "range": "10.250.10.0/24",
+        "exclude": [
+           "10.250.10.1/32",
+           "10.250.10.240/28"
+        ]
+      }
+    }'
+EOF
+```
+Additional configuration options for the operator are available - See [values.yaml](./values.yaml) and
+[NVIDIA Helm chart customisations](https://docs.nvidia.com/networking/display/kubernetes2440/customizations/helm.html)
 
 ## OpenStack integrations
 

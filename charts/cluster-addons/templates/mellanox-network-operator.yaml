@@ -27,7 +27,16 @@ stringData:
     # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
     rdmaSharedDevicePlugin:
       deploy: true
-    # Disable all other features for now
+    # Deploy all tooling for multi-homed pods, multus, wherabouts, and plugins
+    secondaryNetwork:
+      deploy: true
+        multus:
+          deploy: true
+        cniPlugins:
+          deploy: true
+        ipamPlugin:
+          deploy: true
+   # Disable all other features for now
     ibKubernetes:
       deploy: false
     nvPeerDriver:
@@ -36,8 +45,7 @@ stringData:
       enabled: false
     sriovDevicePlugin:
       deploy: false
-    secondaryNetwork:
-      deploy: false
+
   overrides: |
     {{- toYaml .Values.mellanoxNetworkOperator.release.values | nindent 4 }}
 ---
