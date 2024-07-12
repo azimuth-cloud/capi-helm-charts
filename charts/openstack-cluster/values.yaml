@@ -389,7 +389,7 @@ nodeGroupDefaults:
     spec:
       # By default, remediate unhealthy workers as long as they are less than 40% of
       # the total number of workers in the node group
-      maxUnhealthy: 40%
+      maxUnhealthy: 100%
       # If a node takes longer than 30 mins to startup, remediate it
       nodeStartupTimeout: 30m0s
       # By default, consider a worker node that has not been Ready for
