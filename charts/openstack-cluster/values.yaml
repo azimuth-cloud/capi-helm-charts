@@ -387,8 +387,9 @@ nodeGroupDefaults:
     enabled: true
     # The spec for the health check
     spec:
-      # By default, remediate unhealthy workers as long as they are less than 40% of
-      # the total number of workers in the node group
+      # We have a control place feature gate enabled which blocks all worker node remediation if
+      # control plane is unhealthy, so should be safe to reset worker remediation threshold to
+      # 100% without the risk of runaway remediations.
       maxUnhealthy: 100%
       # If a node takes longer than 30 mins to startup, remediate it
       nodeStartupTimeout: 30m0s
