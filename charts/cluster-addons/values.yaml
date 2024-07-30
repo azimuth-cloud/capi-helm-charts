@@ -85,7 +85,7 @@ openstack:
     values:
       image:
         repository: docker.io/scrunguss/openstack-cloud-controller-manager
-        tag: v1.30.2
+        tag: v1.30.3
   # Settings for the Cinder CSI plugin
   csiCinder:
     # Indicates if the Cinder CSI should be enabled
