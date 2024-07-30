@@ -19,7 +19,7 @@ inputs:
   chart-repo:
     description: The repository to fetch the charts from
     required: true
-    default: https://stackhpc.github.io/capi-helm-charts
+    default: https://azimuth-cloud.github.io/capi-helm-charts
   chart-name:
     description: The name of the chart to use
     required: true
