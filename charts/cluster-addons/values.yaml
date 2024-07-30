@@ -81,7 +81,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
-      version: 2.29.2
+      version: v1.30.2
     values:
       image:
         repository: docker.io/scrunguss/openstack-cloud-controller-manager
