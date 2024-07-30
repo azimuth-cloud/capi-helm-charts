@@ -81,11 +81,11 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
-      version: v1.30.2
+      version: 2.29.2
     values:
       image:
         repository: docker.io/scrunguss/openstack-cloud-controller-manager
-        tag: latest
+        tag: v1.30.2
   # Settings for the Cinder CSI plugin
   csiCinder:
     # Indicates if the Cinder CSI should be enabled
