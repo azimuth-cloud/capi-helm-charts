@@ -176,7 +176,7 @@ etcdDefrag:
   # Indicates if the etcd defragmentation job should be enabled
   enabled: true
   chart:
-    repo: https://stackhpc.github.io/capi-helm-charts
+    repo: https://azimuth-cloud.github.io/capi-helm-charts
     name: etcd-defrag
     version:  # Defaults to the same version as this chart
   release:
