@@ -79,7 +79,7 @@ openstack:
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/openstack-cloud-controller-manager/values.yaml
     enabled: true
     chart:
-      repository: https://kubernetes.github.io/cloud-provider-openstack
+      repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
       version: 2.29.2
     values:
