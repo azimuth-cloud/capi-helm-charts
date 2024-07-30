@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "metrics-server") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "metrics-server") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     args:
@@ -18,7 +18,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.metricsServer.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "metrics-server") }}

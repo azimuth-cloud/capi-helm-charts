@@ -26,7 +26,7 @@ machineImageId:
 machineSSHKeyName:
 
 # The prefix used for project labels and annotations
-projectPrefix: capi.stackhpc.com
+projectPrefix: capi.azimuth-cloud.com
 
 # Any extra annotations to add to the cluster
 clusterAnnotations: {}
@@ -73,7 +73,7 @@ clusterNetworking:
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
 # upstream registry if the image pull fails
-# By default, use images mirrored to the StackHPC GitHub packages when possible
+# By default, use images mirrored to the azimuth-cloud GitHub packages when possible
 registryMirrors:
   # docker.io:
   #   upstream: https://registry-1.docker.io
@@ -340,7 +340,7 @@ nodeGroupDefaults:
   # The ID of the server group to use for machines in the node group
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
-  # By default, nodes get the label "capi.stackhpc.com/node-group=<node group name>"
+  # By default, nodes get the label "capi.azimuth-cloud.com/node-group=<node group name>"
   nodeLabels:
     # my.company.org/label: value
   # Additional block devices for node groups machines

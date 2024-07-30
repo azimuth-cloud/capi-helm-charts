@@ -6,7 +6,7 @@ This [Helm chart](https://helm.sh/) manages the deployment of addons for a
 charts from this repository, e.g. [openstack-cluster](../openstack-cluster).
 
 Addons are managed using custom resources provided by the
-[Cluster API Addon Provider](https://github.com/stackhpc/cluster-api-addon-provider),
+[Cluster API Addon Provider](https://github.com/azimuth-cloud/cluster-api-addon-provider),
 which must be installed. Please also read the documentation for the addon provider to
 see how addons are defined.
 

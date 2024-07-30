@@ -11,7 +11,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "node-feature-discovery") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     master:
@@ -41,7 +41,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.nodeFeatureDiscovery.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}

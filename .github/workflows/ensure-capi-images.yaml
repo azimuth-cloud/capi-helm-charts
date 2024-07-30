@@ -35,7 +35,7 @@ jobs:
         id: images
         run: |
           VN="$(jq -r '.["azimuth-images"]' ./dependencies.json)"
-          MANIFEST="$(curl -fsSL "https://github.com/stackhpc/azimuth-images/releases/download/${VN}/manifest.json")"
+          MANIFEST="$(curl -fsSL "https://github.com/azimuth-cloud/azimuth-images/releases/download/${VN}/manifest.json")"
           echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
 
   ensure_image:

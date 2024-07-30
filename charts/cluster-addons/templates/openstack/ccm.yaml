@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "ccm-openstack") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     secret:
@@ -28,7 +28,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.openstack.ccm.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}

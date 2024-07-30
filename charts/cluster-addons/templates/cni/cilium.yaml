@@ -16,7 +16,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "cni-cilium") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     # Use IPs allocated to each node by Kubernetes
@@ -31,7 +31,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.cni.cilium.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}

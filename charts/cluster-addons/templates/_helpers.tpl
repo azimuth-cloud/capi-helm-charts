@@ -32,8 +32,8 @@ Create chart name and version as used by the chart label.
 Selector labels for component-level resources
 */}}
 {{- define "cluster-addons.componentSelectorLabels" -}}
-capi.stackhpc.com/cluster: {{ index . 0 | include "cluster-addons.clusterName" }}
-capi.stackhpc.com/component: {{ index . 1 }}
+capi.azimuth-cloud.com/cluster: {{ index . 0 | include "cluster-addons.clusterName" }}
+capi.azimuth-cloud.com/component: {{ index . 1 }}
 {{- end -}}
 
 {{/*
@@ -41,6 +41,6 @@ Labels for component-level resources
 */}}
 {{- define "cluster-addons.componentLabels" -}}
 helm.sh/chart: {{ index . 0 | include "cluster-addons.chart" }}
-capi.stackhpc.com/managed-by: {{ (index . 0).Release.Service }}
+capi.azimuth-cloud.com/managed-by: {{ (index . 0).Release.Service }}
 {{ include "cluster-addons.componentSelectorLabels" . }}
 {{- end -}}

@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     serviceMonitor:
@@ -22,7 +22,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.monitoring.blackboxExporter.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}
@@ -44,7 +44,7 @@ spec:
         name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
         key: overrides
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter-dashboards") }}
@@ -71,7 +71,7 @@ spec:
             {{- .Files.Get "grafana-dashboards/blackbox-exporter-dashboard.json" | nindent 12 }}
             {% endraw %}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter-alerts") }}

@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     loki:
@@ -54,7 +54,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.monitoring.lokiStack.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}
@@ -114,7 +114,7 @@ spec:
           release: loki-stack
         action: delete
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "loki-stack-dashboards") }}

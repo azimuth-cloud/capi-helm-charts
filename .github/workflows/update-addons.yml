@@ -106,7 +106,7 @@ jobs:
 
       - name: Extract repo and chart from values.yaml
         id: chart-info
-        uses: stackhpc/github-actions/config-extract@master
+        uses: azimuth-cloud/github-actions/config-extract@master
         with:
           path: ./charts/cluster-addons/values.yaml
           outputs: |
@@ -115,14 +115,14 @@ jobs:
 
       - name: Check for updates
         id: next
-        uses: stackhpc/github-actions/helm-latest-version@master
+        uses: azimuth-cloud/github-actions/helm-latest-version@master
         with:
           repository: ${{ steps.chart-info.outputs.repo }}
           chart: ${{ steps.chart-info.outputs.name }}
           constraints: ${{ matrix.constraints || '>=0.0.0' }}
 
       - name: Update chart version in values.yaml
-        uses: stackhpc/github-actions/config-update@master
+        uses: azimuth-cloud/github-actions/config-update@master
         with:
           path: ./charts/cluster-addons/values.yaml
           updates: |
@@ -130,7 +130,7 @@ jobs:
 
       - name: Template updated chart
         id: helm-template
-        uses: stackhpc/github-actions/helm-template@master
+        uses: azimuth-cloud/github-actions/helm-template@master
         with:
           repository: ${{ steps.chart-info.outputs.repo }}
           chart: ${{ steps.chart-info.outputs.name }}
@@ -139,7 +139,7 @@ jobs:
 
       - name: Extract images from templated manifests
         id: extract-images
-        uses: stackhpc/github-actions/k8s-extract-images@master
+        uses: azimuth-cloud/github-actions/k8s-extract-images@master
         with:
           manifests-file: ${{ steps.helm-template.outputs.manifests-file }}
 
@@ -147,7 +147,7 @@ jobs:
         run: mkdir -p ./skopeo-manifests
 
       - name: Write Skopeo manifest
-        uses: stackhpc/github-actions/skopeo-manifest@master
+        uses: azimuth-cloud/github-actions/skopeo-manifest@master
         with:
           manifest-file: ./skopeo-manifests/${{ matrix.key }}.yaml
           images: |
@@ -161,7 +161,7 @@ jobs:
             }}
 
       - name: Generate app token for PR
-        uses: stackhpc/github-actions/generate-app-token@master
+        uses: azimuth-cloud/github-actions/generate-app-token@master
         id: generate-app-token
         with:
           repository: ${{ github.repository }}

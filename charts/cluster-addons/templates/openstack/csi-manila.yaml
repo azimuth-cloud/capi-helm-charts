@@ -52,7 +52,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "csi-manila") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     csimanila:
@@ -75,7 +75,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.openstack.csiManila.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}
@@ -102,7 +102,7 @@ spec:
     .Values.openstack.csiManila.additionalStorageClasses
 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-manila") }}-storageclass

@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     {{- if .Values.monitoring.enabled }}
@@ -21,7 +21,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.ingress.nginx.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}
@@ -44,7 +44,7 @@ spec:
         key: overrides
 {{- if .Values.monitoring.enabled }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "ingress-nginx-dashboards") }}
@@ -71,7 +71,7 @@ spec:
             {{- .Files.Get "grafana-dashboards/ingress-nginx-dashboard.json" | nindent 12 }}
             {% endraw %}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "ingress-nginx-alerts") }}

@@ -1,6 +1,6 @@
 {{- if .Values.openstack.enabled }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cloud-config") }}

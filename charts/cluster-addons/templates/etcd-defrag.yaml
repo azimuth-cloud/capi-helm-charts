@@ -6,12 +6,12 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "etcd-defrag") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "etcd-defrag") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   overrides: |
     {{- toYaml .Values.etcdDefrag.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "etcd-defrag") }}

@@ -34,7 +34,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     alertmanager:
@@ -71,7 +71,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.monitoring.kubePrometheusStack.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}
@@ -154,7 +154,7 @@ spec:
           operator.prometheus.io/name: kube-prometheus-stack-prometheus
         action: delete
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack-dashboards") }}

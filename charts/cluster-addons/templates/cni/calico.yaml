@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     installation:
@@ -28,7 +28,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.cni.calico.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}
@@ -51,7 +51,7 @@ spec:
         key: overrides
 {{- if .Values.cni.calico.globalNetworkPolicy }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico-globalnetpolicy") }}
@@ -118,7 +118,7 @@ spec:
 {{- end }}
 {{- if .Values.monitoring.enabled }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico-monitoring") }}

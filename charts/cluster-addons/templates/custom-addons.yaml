@@ -7,7 +7,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list $ $name) }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   # Ensure that any template syntax in the values is ignored
   values: |
@@ -15,7 +15,7 @@ stringData:
     {{- toYaml $addon.spec.values | nindent 4 }}
     {%- endraw %}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list $ $name) }}
@@ -41,7 +41,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list $ $name) }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   # Ensure that any template syntax in the manifests is ignored
   {{- range $key, $manifest := $addon.spec.manifests }}
@@ -51,7 +51,7 @@ stringData:
     {%- endraw %}
   {{- end }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list $ $name) }}

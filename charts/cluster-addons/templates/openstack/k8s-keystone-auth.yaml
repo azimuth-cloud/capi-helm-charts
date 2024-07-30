@@ -6,13 +6,13 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "k8s-keystone-auth") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "k8s-keystone-auth") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   overrides: |
     {{- toYaml .Values.openstack.k8sKeystoneAuth.values | nindent 4 }}
 
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "k8s-keystone-auth") }}

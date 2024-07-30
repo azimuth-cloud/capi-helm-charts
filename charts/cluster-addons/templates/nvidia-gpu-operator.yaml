@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   defaults: |
     # Use the shared NFD
@@ -30,7 +30,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}
@@ -44,7 +44,7 @@ metadata:
     #
     # We use the annotation rather than the spec so that the resource is compatible with
     # both the legacy and Argo addon providers
-    addons.stackhpc.com/sync-options: |
+    addons.azimuth-cloud.com/sync-options: |
       { "serverSideApply": false }
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}

@@ -6,7 +6,7 @@ metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
   labels:
     {{- include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
-    addons.stackhpc.com/watch: ""
+    addons.azimuth-cloud.com/watch: ""
 stringData:
   # By default, we disable the storage class deployed by the cinder-csi chart
   # We deploy our own instead as it gives us more control over the parameters
@@ -37,7 +37,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.openstack.csiCinder.values | nindent 4 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}
@@ -64,7 +64,7 @@ spec:
     .Values.openstack.csiCinder.additionalStorageClasses
 }}
 ---
-apiVersion: addons.stackhpc.com/v1alpha1
+apiVersion: addons.azimuth-cloud.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-storageclass
