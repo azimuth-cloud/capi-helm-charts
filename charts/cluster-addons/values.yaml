@@ -79,12 +79,12 @@ openstack:
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/openstack-cloud-controller-manager/values.yaml
     enabled: true
     chart:
-      repo: https://kubernetes.github.io/cloud-provider-openstack
+      repository: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
       version: 2.29.2
     values:
       image:
-        repo: docker.io/scrunguss/openstack-cloud-controller-manager
+        repository: docker.io/scrunguss/openstack-cloud-controller-manager
         tag: 1.30.2
   # Settings for the Cinder CSI plugin
   csiCinder:
