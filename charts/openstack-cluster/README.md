@@ -51,7 +51,7 @@ In addition, Helm must be installed and configured to access your management clu
 and the chart repository containing this chart must be configured:
 
 ```sh
-helm repo add capi https://stackhpc.github.io/capi-helm-charts
+helm repo add capi https://azimuth-cloud.github.io/capi-helm-charts
 ```
 
 ## OpenStack images
