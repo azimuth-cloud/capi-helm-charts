@@ -1,0 +1,10 @@
+ghcr.io:
+  images:
+    mellanox/k8s-rdma-shared-dev-plugin:
+    - 1.4.0
+    mellanox/network-operator-init-container:
+    - v0.0.2
+nvcr.io:
+  images:
+    nvidia/cloud-native/network-operator:
+    - v24.4.1
