@@ -12,54 +12,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
 
       - name: Set up Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
         with:
-          version: v3.10.0
+          version: v3.15.3
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.10'
           check-latest: true
 
       - name: Set up chart-testing
-        uses: scrungus/chart-testing-action@v3.7.3
-
-      - name: Create dummy values
-        run: >
-          echo "$VALUES" > values.yaml
-        env:
-          VALUES: |
-            clouds:
-              openstack:
-                auth:
-                  auth_url: https://my.cloud:5000
-                  application_credential_id: "xxxx"
-                  application_credential_secret: "xxxx"
-                region_name: "RegionOne"
-                verify: false
-                interface: "public"
-                identity_api_version: 3
-                auth_type: "v3applicationcredential"
-            kubernetesVersion: 1.27.2
-            machineImageId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-            controlPlane:
-              machineFlavor: xxxx
-              machineCount: 1
-            nodeGroups:
-              - machineCount: 2
-                machineFlavor: xxxx
-                name: test-group1
+        uses: helm/chart-testing-action@v2
 
       - name: Run chart-testing (lint)
         run: |-
           ct lint \
             --target-branch ${{ github.event.repository.default_branch }} \
             --all \
-            --validate-maintainers=false \
-            --extra-values values.yaml
+            --validate-maintainers=false
