@@ -91,8 +91,8 @@ jobs:
         id: generate-app-token
         with:
           repository: ${{ github.repository }}
-          app-id: ${{ secrets.APP_ID }}
-          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          app-private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
 
       - name: Propose changes via PR if required
         uses: peter-evans/create-pull-request@v6
