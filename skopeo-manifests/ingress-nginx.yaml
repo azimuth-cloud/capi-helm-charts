@@ -1,6 +1,6 @@
 registry.k8s.io:
   images:
     ingress-nginx/controller:
-    - v1.10.1
+    - v1.11.1
     ingress-nginx/kube-webhook-certgen:
     - v1.4.1
