@@ -47,7 +47,12 @@ spec:
         {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
     spec:
       clusterName: {{ include "openstack-cluster.clusterName" $ }}
-      version: v{{ $nodeGroup.kubernetesVersion | default $.Values.kubernetesVersion | trimPrefix "v" }}
+      version: v{{
+        $nodeGroup.kubernetesVersion |
+          default $.Values.kubernetesVersion |
+          required (printf "unable to determine Kubernetes version for node group '%s'" $nodeGroup.name) |
+          trimPrefix "v"
+      }}
       {{- with $nodeGroup.failureDomain }}
       failureDomain: {{ . }}
       {{- end }}
