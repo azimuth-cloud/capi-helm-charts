@@ -94,7 +94,7 @@ runs:
       shell: bash
       run: |-
         helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
-          --repo https://stackhpc.github.io/cluster-api-addon-provider \
+          --repo https://azimuth-cloud.github.io/cluster-api-addon-provider \
           --version ${{ steps.deps.outputs.addon-provider }} \
           --namespace capi-addon-system \
           --create-namespace \
@@ -106,7 +106,7 @@ runs:
       shell: bash
       run: |-
         helm upgrade cluster-api-janitor-openstack cluster-api-janitor-openstack \
-          --repo https://stackhpc.github.io/cluster-api-janitor-openstack \
+          --repo https://azimuth-cloud.github.io/cluster-api-janitor-openstack \
           --version ${{ steps.deps.outputs.cluster-api-janitor-openstack }} \
           --namespace capi-janitor-system \
           --create-namespace \

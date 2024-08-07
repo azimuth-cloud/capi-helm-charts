@@ -6,7 +6,7 @@ cluster on an [OpenStack](https://www.openstack.org/) cloud using
 
 As well as managing the Cluster API resources for the cluster, this chart optionally
 manages addons for the cluster using addon resources from the
-[Cluster API Addon Provider](https://github.com/stackhpc/cluster-api-addon-provider).
+[Cluster API Addon Provider](https://github.com/azimuth-cloud/cluster-api-addon-provider).
 Some of these are required for a functional cluster, e.g. a
 [Container Network Interface (CNI) plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
 and the
@@ -44,7 +44,7 @@ with the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/
 installed.
 
 Addons are managed by the
-[Cluster API Addon Provider](https://github.com/stackhpc/cluster-api-addon-provider),
+[Cluster API Addon Provider](https://github.com/azimuth-cloud/cluster-api-addon-provider),
 which must also be installed if you wish to use the addons functionality.
 
 In addition, Helm must be installed and configured to access your management cluster,

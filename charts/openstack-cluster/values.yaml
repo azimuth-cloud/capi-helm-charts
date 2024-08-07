@@ -73,7 +73,7 @@ clusterNetworking:
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
 # upstream registry if the image pull fails
-# By default, use images mirrored to the StackHPC GitHub packages when possible
+# By default, use images mirrored to quay.io when possible
 registryMirrors:
   # docker.io:
   #   upstream: https://registry-1.docker.io
