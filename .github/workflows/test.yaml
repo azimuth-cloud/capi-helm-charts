@@ -81,7 +81,7 @@ jobs:
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
       - name: Acquire S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -118,7 +118,7 @@ jobs:
 
       # Release the CI lock when we are done
       - name: Release S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -179,7 +179,7 @@ jobs:
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
       - name: Acquire S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -214,7 +214,7 @@ jobs:
 
       # Release the CI lock when we are done
       - name: Release S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -272,7 +272,7 @@ jobs:
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
       - name: Acquire S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -323,7 +323,7 @@ jobs:
 
       # Release the CI lock when we are done
       - name: Release S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -413,7 +413,7 @@ jobs:
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
       - name: Acquire S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
@@ -463,7 +463,7 @@ jobs:
 
       # Release the CI lock when we are done
       - name: Release S3 lock
-        uses: stackhpc/github-actions/s3-lock@master
+        uses: azimuth-cloud/github-actions/s3-lock@master
         with:
           host: ${{ vars.CI_S3_LOCK_HOST }}
           access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}

@@ -14,12 +14,12 @@ jobs:
         include:
           - key: addon-provider
             type: helm
-            repo_url: https://stackhpc.github.io/cluster-api-addon-provider
+            repo_url: https://azimuth-cloud.github.io/cluster-api-addon-provider
             chart_name: cluster-api-addon-provider
 
           - key: azimuth-images
             type: github
-            repo: stackhpc/azimuth-images
+            repo: azimuth-cloud/azimuth-images
 
           - key: cluster-api
             type: github
@@ -27,7 +27,7 @@ jobs:
 
           - key: cluster-api-janitor-openstack
             type: helm
-            repo_url: https://stackhpc.github.io/cluster-api-janitor-openstack
+            repo_url: https://azimuth-cloud.github.io/cluster-api-janitor-openstack
             chart_name: cluster-api-janitor-openstack
           
           - key: cluster-api-provider-openstack
@@ -54,7 +54,7 @@ jobs:
 
       - name: Check for updates (Helm)
         id: helm-version
-        uses: stackhpc/github-actions/helm-latest-version@master
+        uses: azimuth-cloud/github-actions/helm-latest-version@master
         with:
           repository: ${{ matrix.repo_url }}
           chart: ${{ matrix.chart_name }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Check for updates (GitHub)
         id: github-version
-        uses: stackhpc/github-actions/github-latest-release@master
+        uses: azimuth-cloud/github-actions/github-latest-release@master
         with:
           repository: ${{ matrix.repo }}
         if: ${{ matrix.type == 'github' }}
@@ -80,14 +80,14 @@ jobs:
             }}
 
       - name: Update dependency key
-        uses: stackhpc/github-actions/config-update@master
+        uses: azimuth-cloud/github-actions/config-update@master
         with:
           path: ./dependencies.json
           updates: |
             ${{ matrix.key }}=${{ steps.next.outputs.version }}
 
       - name: Generate app token for PR
-        uses: stackhpc/github-actions/generate-app-token@master
+        uses: azimuth-cloud/github-actions/generate-app-token@master
         id: generate-app-token
         with:
           repository: ${{ github.repository }}
