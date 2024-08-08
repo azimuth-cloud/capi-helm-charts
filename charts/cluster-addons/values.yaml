@@ -40,7 +40,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.15.7
+      version: 1.16.0
     release:
       namespace: kube-system
       values: {}
