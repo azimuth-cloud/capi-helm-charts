@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "ccm-os") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "ccm-openstack") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -44,9 +44,9 @@ spec:
   releaseName: ccm-openstack
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "ccm-os") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "ccm-openstack") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "ccm-os") }}-cfg
         key: overrides
 {{- end }}

@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "csi-cinder") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -53,10 +53,10 @@ spec:
   releaseName: csi-cinder
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "csi-cinder") }}-cfg
         key: overrides
 {{-
   if or

@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -70,10 +70,10 @@ spec:
   releaseName: loki-stack
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-cfg
         key: overrides
   # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks
   # to ensure that it happens correctly

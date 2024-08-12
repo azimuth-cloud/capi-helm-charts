@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "ingress-nginx") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -37,10 +37,10 @@ spec:
   releaseName: ingress-nginx
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "ingress-nginx") }}-cfg
         key: overrides
 {{- if .Values.monitoring.enabled }}
 ---

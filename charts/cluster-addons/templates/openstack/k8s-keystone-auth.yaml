@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "k8s-keystone-auth") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "k8s-ksauth") }}-cfg
   labels:
-    {{- include "cluster-addons.componentLabels" (list . "k8s-keystone-auth") | nindent 4 }}
+    {{- include "cluster-addons.componentLabels" (list . "k8s-ksauth") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
   overrides: |
@@ -15,8 +15,8 @@ stringData:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "k8s-keystone-auth") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "k8s-keystone-auth") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "k8s-ksauth") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "k8s-ksauth") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
@@ -25,9 +25,9 @@ spec:
   bootstrap: true
   chart: {{ toYaml .Values.openstack.k8sKeystoneAuth.chart | nindent 4 }}
   targetNamespace: {{ .Values.openstack.k8sKeystoneAuth.targetNamespace }}
-  releaseName: k8s-keystone-auth
+  releaseName: k8s-ksauth
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "k8s-keystone-auth") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "k8s-ksauth") }}-cfg
         key: overrides
 {{- end }}

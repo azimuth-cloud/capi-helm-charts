@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -38,10 +38,10 @@ spec:
   releaseName: prometheus-blackbox-exporter
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "blackbox-exporter") }}-cfg
         key: overrides
 ---
 apiVersion: addons.stackhpc.com/v1alpha1

@@ -31,7 +31,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "kube-prom-stack") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -87,10 +87,10 @@ spec:
   releaseName: kube-prometheus-stack
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "kube-prom-stack") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "kube-prom-stack") }}-cfg
         key: overrides
   # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks to
   # ensure that it happens correctly

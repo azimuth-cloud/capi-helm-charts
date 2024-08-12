@@ -7,11 +7,12 @@ The name of the target cluster.
 
 {{/*
 Create a name for a cluster component.
+Truncate to 59 to allow "-cfg" to be appended as needed.
 */}}
 {{- define "cluster-addons.componentName" -}}
 {{- $ctx := index . 0 -}}
 {{- $componentName := index . 1 -}}
-{{- printf "%s-%s" $ctx.Release.Name $componentName | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" $ctx.Release.Name $componentName | trunc 59 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*

@@ -13,7 +13,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "cni-cilium") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -47,9 +47,9 @@ spec:
   releaseName: cni-cilium
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "cni-cilium") }}-cfg
         key: overrides
 {{- end }}

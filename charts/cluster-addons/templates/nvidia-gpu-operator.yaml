@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -54,9 +54,9 @@ spec:
   releaseName: nvidia-gpu-operator
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}-cfg
         key: overrides
 {{- end }}

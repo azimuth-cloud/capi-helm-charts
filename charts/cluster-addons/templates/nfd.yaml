@@ -8,7 +8,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "node-feature-discovery") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -57,9 +57,9 @@ spec:
   releaseName: node-feature-discovery
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "node-feature-discovery") }}-cfg
         key: overrides
 {{- end }}

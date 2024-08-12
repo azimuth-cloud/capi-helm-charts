@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "etcd-defrag") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "etcd-defrag") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "etcd-defrag") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -30,6 +30,6 @@ spec:
   releaseName: etcd-defrag
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "etcd-defrag") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "etcd-defrag") }}-cfg
         key: overrides
 {{- end }}

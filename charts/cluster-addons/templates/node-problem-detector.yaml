@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "node-problem-detector") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -41,9 +41,9 @@ spec:
   releaseName: node-problem-detector
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "node-problem-detector") }}-cfg
         key: overrides
 {{- end }}

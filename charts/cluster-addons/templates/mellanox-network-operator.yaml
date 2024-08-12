@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -65,9 +65,9 @@ spec:
   releaseName: mellanox-network-operator
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}-cfg
         key: overrides
 {{- end }}

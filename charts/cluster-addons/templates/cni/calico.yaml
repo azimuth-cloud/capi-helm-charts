@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -44,10 +44,10 @@ spec:
   releaseName: cni-calico
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-cfg
         key: overrides
 {{- if .Values.cni.calico.globalNetworkPolicy }}
 ---

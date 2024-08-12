@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-cfg
   labels:
     {{- include "cluster-addons.componentLabels" (list . "csi-cephfs") | nindent 4 }}
     addons.stackhpc.com/watch: ""
@@ -38,9 +38,9 @@ spec:
   releaseName: csi-cephfs
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-cfg
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "csi-cephfs") }}-cfg
         key: overrides
 {{- end }}
