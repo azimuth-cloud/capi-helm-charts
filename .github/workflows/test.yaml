@@ -342,8 +342,8 @@ jobs:
           chart-version: ${{ steps.latest-tag.outputs.tag-name }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
+          defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
 
       - name: Update test environment with current dependencies
         uses: ./current/.github/actions/setup
@@ -359,8 +359,8 @@ jobs:
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
+          defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
 
       - name: Delete chart upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
