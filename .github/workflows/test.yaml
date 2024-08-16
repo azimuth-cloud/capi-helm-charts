@@ -38,45 +38,9 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Write cloud credential
-        run: echo "$CLOUD" > ./clouds.yaml
+        run: echo "$OS_CLOUDS" > ./clouds.yaml
         env:
-          CLOUD: ${{ secrets.CLOUD }}
-
-      - name: Write Helm values
-        run: echo "$VALUES" > ./values.yaml
-        env:
-          VALUES: |
-            clouds:
-              openstack:
-                auth:
-                  project_id: ${{ secrets.PROJECT_ID }}
-                verify: false
-            controlPlane:
-              machineFlavor: ${{ vars.CONTROL_PLANE_FLAVOR }}
-              machineCount: 1
-            nodeGroups:
-              - name: md-0
-                machineFlavor: ${{ vars.NODE_GROUP_FLAVOR }}
-                machineCount: 2
-
-      - name: Apply network configuration
-        run: echo "$NETWORKING" >> ./values.yaml
-        env:
-          NETWORKING: |
-            clusterNetworking:
-              externalNetworkId: ${{ vars.EXTERNAL_NETWORK_ID }}
-        if: ${{ inputs.tests-full }}
-
-      - name: Apply network configuration
-        run: echo "$NETWORKING" >> ./values.yaml
-        env:
-          NETWORKING: |
-            clusterNetworking:
-              externalNetworkId: ${{ vars.EXTERNAL_NETWORK_ID }}
-              internalNetwork:
-                networkFilter:
-                  tags: capi-helm-chart-ci
-        if: ${{ !inputs.tests-full }}
+          OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
@@ -94,15 +58,18 @@ jobs:
         # We don't want jobs to acquire the lock then get timed out before they can finish
         # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
         timeout-minutes: 180
-        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
       - name: Test clean Kubernetes 1.30 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest${{ inputs.tests-full && '-full' || '' }}.yaml
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
@@ -126,7 +93,7 @@ jobs:
           bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
           action: release
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
-        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}
 
   # This job tests the etcd volume support
   # It only runs for non-draft PRs
@@ -147,34 +114,9 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Write cloud credential
-        run: echo "$CLOUD" > ./clouds.yaml
+        run: echo "$OS_CLOUDS" > ./clouds.yaml
         env:
-          CLOUD: ${{ secrets.CLOUD }}
-
-      - name: Write Helm values
-        run: echo "$VALUES" > ./values.yaml
-        env:
-          VALUES: |
-            clouds:
-              openstack:
-                auth:
-                  project_id: ${{ secrets.PROJECT_ID }}
-                verify: false
-            clusterNetworking:
-              externalNetworkId: ${{ vars.EXTERNAL_NETWORK_ID }}
-              internalNetwork:
-                networkFilter:
-                  tags: capi-helm-chart-ci
-            etcd:
-              blockDevice:
-                size: 10
-            controlPlane:
-              machineFlavor: ${{ vars.CONTROL_PLANE_FLAVOR }}
-              machineCount: 1
-            nodeGroups:
-              - name: md-0
-                machineFlavor: ${{ vars.NODE_GROUP_FLAVOR }}
-                machineCount: 2
+          OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
@@ -192,15 +134,18 @@ jobs:
         # We don't want jobs to acquire the lock then get timed out before they can finish
         # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
         timeout-minutes: 180
-        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
       - name: Deploy Kubernetes 1.30 for etcd volume test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/etcd-volume.yaml
 
       - name: Delete etcd volume test deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -222,7 +167,7 @@ jobs:
           bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
           action: release
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
-        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}
 
   # This job tests Kubernetes upgrade
   # It only runs for non-draft PRs
@@ -243,31 +188,9 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Write cloud credential
-        run: echo "$CLOUD" > ./clouds.yaml
+        run: echo "$OS_CLOUDS" > ./clouds.yaml
         env:
-          CLOUD: ${{ secrets.CLOUD }}
-
-      - name: Write Helm values
-        run: echo "$VALUES" > ./values.yaml
-        env:
-          VALUES: |
-            clouds:
-              openstack:
-                auth:
-                  project_id: ${{ secrets.PROJECT_ID }}
-                verify: false
-            clusterNetworking:
-              externalNetworkId: ${{ vars.EXTERNAL_NETWORK_ID }}
-              internalNetwork:
-                networkFilter:
-                  tags: capi-helm-chart-ci
-            controlPlane:
-              machineFlavor: ${{ vars.CONTROL_PLANE_FLAVOR }}
-              machineCount: 1
-            nodeGroups:
-              - name: md-0
-                machineFlavor: ${{ vars.NODE_GROUP_FLAVOR }}
-                machineCount: 2
+          OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
       # This is the point at which we start to consume OpenStack resources
       # We use the same resource as the Azimuth CI, so acquire the same CI lock
@@ -285,31 +208,40 @@ jobs:
         # We don't want jobs to acquire the lock then get timed out before they can finish
         # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
         timeout-minutes: 180
-        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
       - name: Deploy Kubernetes 1.28 for Kubernetes upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
 
       - name: Upgrade to Kubernetes 1.29
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
 
       - name: Upgrade to Kubernetes 1.30
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
 
       - name: Delete Kubernetes upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -331,7 +263,7 @@ jobs:
           bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
           action: release
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
-        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}
 
   # This jobs tests upgrading the chart + dependencies from the latest tag
   # It only runs for non-draft PRs
@@ -361,36 +293,9 @@ jobs:
           path: latest-tag
 
       - name: Write cloud credential
-        run: echo "$CLOUD" > ./clouds.yaml
+        run: echo "$OS_CLOUDS" > ./clouds.yaml
         env:
-          CLOUD: ${{ secrets.CLOUD }}
-
-      - name: Write Helm values
-        run: echo "$VALUES" > ./values.yaml
-        env:
-          VALUES: |
-            clouds:
-              openstack:
-                auth:
-                  project_id: ${{ secrets.PROJECT_ID }}
-                verify: false
-            clusterNetworking:
-              externalNetworkId: ${{ vars.EXTERNAL_NETWORK_ID }}
-              internalNetwork:
-                networkFilter:
-                  tags: capi-helm-chart-ci
-            controlPlane:
-              machineFlavor: ${{ vars.CONTROL_PLANE_FLAVOR }}
-              machineCount: 1
-            nodeGroups:
-              - name: md-0
-                machineFlavor: ${{ vars.NODE_GROUP_FLAVOR }}
-                machineCount: 2
-            addons:
-              kubernetesDashboard:
-                enabled: true
-              monitoring:
-                enabled: true
+          OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
@@ -426,16 +331,19 @@ jobs:
         # We don't want jobs to acquire the lock then get timed out before they can finish
         # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
         timeout-minutes: 180
-        if: ${{ vars.CI_S3_LOCK_HOST != '' }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
       - name: Deploy cluster with chart from latest tag
         uses: ./current/.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           # Deploy using the tagged version here
           chart-version: ${{ steps.latest-tag.outputs.tag-name }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
 
       - name: Update test environment with current dependencies
         uses: ./current/.github/actions/setup
@@ -446,10 +354,13 @@ jobs:
         uses: ./current/.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           # And upgrade to the version under test
           chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
 
       - name: Delete chart upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -471,4 +382,4 @@ jobs:
           bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
           action: release
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
-        if: ${{ vars.CI_S3_LOCK_HOST != '' && always() }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}

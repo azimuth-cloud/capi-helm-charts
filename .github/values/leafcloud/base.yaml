@@ -1,0 +1,27 @@
+clouds:
+  arcus:
+    auth:
+      project_id: f39848421b2747148400ad8eeae8d536
+    verify: false
+
+clusterNetworking:
+  externalNetworkId: ee54f79e-d33a-4866-8df0-4a4576d70243
+  internalNetwork:
+    networkFilter:
+      id: 92a7ff81-bfe6-4bd7-9eec-d7a6aa290a45
+
+controlPlane:
+  machineFlavor: ec1.medium
+  machineCount: 1
+
+nodeGroups:
+  - name: md-0
+    machineFlavor: ec1.medium
+    machineCount: 2
+
+addons:
+  openstack:
+    csiCinder:
+      defaultStorageClass:
+        availabilityZone: europe-nl-ams1
+        volumeType: unencrypted
