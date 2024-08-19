@@ -19,6 +19,7 @@ runs:
         kubectl -n capi-kubeadm-bootstrap-system logs deploy/capi-kubeadm-bootstrap-controller-manager > capi-kubeadm-bootstrap-logs.txt
         kubectl -n capo-system logs deploy/capo-controller-manager > capo-logs.txt
         kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
+        kubectl -n capi-janitor-system logs deploy/cluster-api-janitor-openstack > capi-janitor-openstack-logs.txt
 
     - name: Upload controller log artifacts
       uses: actions/upload-artifact@v3

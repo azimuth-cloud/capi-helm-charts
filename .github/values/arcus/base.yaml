@@ -1,0 +1,20 @@
+clouds:
+  arcus:
+    auth:
+      project_id: f0dc9cb312144d0aa44037c9149d2513
+    verify: false
+
+clusterNetworking:
+  externalNetworkId: 57add367-d205-4030-a929-d75617a7c63e
+  internalNetwork:
+    networkFilter:
+      id: dcaae42c-237b-45e5-8909-3c1d27e90701
+
+controlPlane:
+  machineFlavor: vm.azimuth.ci.ec1.medium
+  machineCount: 1
+
+nodeGroups:
+  - name: md-0
+    machineFlavor: vm.azimuth.ci.ec1.medium
+    machineCount: 2

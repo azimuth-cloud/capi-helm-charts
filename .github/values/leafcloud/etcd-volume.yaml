@@ -1,0 +1,5 @@
+etcd:
+  blockDevice:
+    size: 10
+    volumeType: unencrypted
+    availabilityZone: europe-nl-ams1

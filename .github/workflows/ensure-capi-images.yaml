@@ -62,16 +62,15 @@ jobs:
         if: ${{ !matrix.skip }}
 
       - name: Write cloud credential
-        run: >
-          echo "$CLOUD" > clouds.yml
+        run: echo "$OS_CLOUDS" > clouds.yml
         shell: bash
         env:
-          CLOUD: ${{ secrets.CLOUD }}
+          OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
         if: ${{ !matrix.skip }}
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
           check-latest: true
         if: ${{ !matrix.skip }}
 
@@ -83,6 +82,7 @@ jobs:
         id: ensure-image
         uses: ./.github/actions/ensure-image
         with:
+          os-cloud: ${{ vars.TARGET_CLOUD }}
           image-name: ${{ matrix.image.name }}
           image-url: ${{ matrix.image.url }}
         if: ${{ !matrix.skip }}

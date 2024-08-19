@@ -27,10 +27,12 @@ inputs:
   chart-version:
     description: The version of the charts to use
     required: true
-  values-path:
-    description: The path to a file containing Helm values
+  defaults-path:
+    description: The path to a file containing Helm value defaults
     required: true
-    default: ./values.yaml
+  overrides-path:
+    description: The path to a file containing Helm value overrides
+    required: true
   kubernetes-version:
     description: The Kubernetes version in the image
     required: true
@@ -63,7 +65,8 @@ runs:
           --version ${{ inputs.chart-version }} \
           --install \
           --values ${{ inputs.os-client-config-file }} \
-          --values ${{ inputs.values-path }} \
+          --values ${{ inputs.defaults-path }} \
+          --values ${{ inputs.overrides-path }} \
           --set cloudName=${{ inputs.os-cloud }} \
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}

@@ -1,0 +1,5 @@
+addons:
+  kubernetesDashboard:
+    enabled: true
+  monitoring:
+    enabled: true
