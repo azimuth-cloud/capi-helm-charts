@@ -66,6 +66,8 @@ clusterNetworking:
     # Filter to find an existing subnet for the cluster internal network
     # See Cluster API documentation for details
     subnetFilter:
+      # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
+      # name: tenant-internal-subnet
     # The CIDR to use if creating a cluster network
     # This is only used if neither of networkFilter and subnetFilter are given
     nodeCidr: 192.168.3.0/24
