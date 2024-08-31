@@ -60,20 +60,20 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Test clean Kubernetes 1.30 deployment
+      - name: Test clean Kubernetes 1.31 deployment
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
           os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest${{ inputs.tests-full && '-full' || '' }}.yaml
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
-      - name: Delete Kubernetes 1.30 deployment
+      - name: Delete Kubernetes 1.31 deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
         if: ${{ always() }}
 
@@ -136,14 +136,14 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Deploy Kubernetes 1.30 for etcd volume test
+      - name: Deploy Kubernetes 1.31 for etcd volume test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
           os-cloud: ${{ vars.TARGET_CLOUD }}
           chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/etcd-volume.yaml
 
@@ -210,18 +210,7 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Deploy Kubernetes 1.28 for Kubernetes upgrade test
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-${{ github.job }}
-          os-cloud: ${{ vars.TARGET_CLOUD }}
-          chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-28-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-28-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-
-      - name: Upgrade to Kubernetes 1.29
+      - name: Deploy Kubernetes 1.29 for Kubernetes upgrade test
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
@@ -240,6 +229,17 @@ jobs:
           chart-version: ${{ inputs.chart-version }}
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
+
+      - name: Upgrade to Kubernetes 1.31
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
+          chart-version: ${{ inputs.chart-version }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
 
@@ -340,8 +340,8 @@ jobs:
           os-cloud: ${{ vars.TARGET_CLOUD }}
           # Deploy using the tagged version here
           chart-version: ${{ steps.latest-tag.outputs.tag-name }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
 
@@ -357,8 +357,8 @@ jobs:
           os-cloud: ${{ vars.TARGET_CLOUD }}
           # And upgrade to the version under test
           chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
 
