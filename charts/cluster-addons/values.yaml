@@ -19,7 +19,9 @@ cni:
       version: v3.28.1
     release:
       namespace: tigera-operator
-      values: {}
+      values:
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: ""
     # Nova metadata service
     # See https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service
     globalNetworkPolicy:
@@ -93,7 +95,15 @@ openstack:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
       version: 2.30.0
-    values: {}
+    values:
+      csi:
+        plugin:
+          controllerPlugin:
+            nodeSelector:
+              node-role.kubernetes.io/control-plane: ""
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                effect: NoSchedule
     # Definition of the default storage class for Cinder CSI
     defaultStorageClass:
       # Indicates if the storage class should be enabled
