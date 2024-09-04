@@ -1,0 +1,7 @@
+addons:
+  kubernetesDashboard:
+    enabled: true
+  ingress:
+    enabled: true
+  monitoring:
+    enabled: true
