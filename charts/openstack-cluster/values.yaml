@@ -63,8 +63,8 @@ clusterNetworking:
     networkFilter:
       # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
       # name: tenant-internal-net
-    # Filter to find an existing subnet for the cluster internal network
     # See Cluster API documentation for details
+    # NOTE: can only specify one subnet for now
     subnetFilter:
       # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
       # name: tenant-internal-subnet

@@ -8,9 +8,8 @@
 template:
   spec:
     identityRef:
-      kind: Secret
       name: {{ include "openstack-cluster.cloudCredentialsSecretName" $ctx }}
-    cloudName: openstack
+      cloudName: openstack
     flavor: {{ $nodeGroup.machineFlavor | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
     {{- with $ctx.Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
@@ -21,17 +20,20 @@ template:
     {{- if $nodeGroup.machineRootVolume.diskSize }}
     rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
     {{- end }}
-    {{- if $nodeGroup.machineImageId }}
-    imageUUID: {{ $nodeGroup.machineImageId }}
-    {{- else if $nodeGroup.machineImage }}
-    image: {{ tpl $nodeGroup.machineImage $ctx }}
-    {{- else if $ctx.Values.machineImageId }}
-    imageUUID: {{ $ctx.Values.machineImageId }}
-    {{- else if $ctx.Values.machineImage }}
-    image: {{ tpl $ctx.Values.machineImage $ctx }}
-    {{- else }}
-    {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
-    {{- end }}
+    image:
+      {{- if $nodeGroup.machineImageId }}
+      id: {{ $nodeGroup.machineImageId }}
+      {{- else if $nodeGroup.machineImage }}
+      filter:
+        name: {{ tpl $nodeGroup.machineImage $ctx }}
+      {{- else if $ctx.Values.machineImageId }}
+      id: {{ $ctx.Values.machineImageId }}
+      {{- else if $ctx.Values.machineImage }}
+      filter:
+        name: {{ tpl $ctx.Values.machineImage $ctx }}
+      {{- else }}
+      {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
+      {{- end }}
     {{- with $nodeGroup.additionalBlockDevices }}
     additionalBlockDevices:
       {{- range $name, $blockDevice := . }}
@@ -45,7 +47,7 @@ template:
             type: {{ . }}
             {{- end }}
             {{- with $blockDevice.availabilityZone }}
-            availabilityZone: {{ . }}
+            availabilityZone: {{toYaml . | nindent 14 }}
             {{- end }}
           {{- end }}
       {{- end }}
@@ -54,7 +56,8 @@ template:
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
     {{- with $nodeGroup.serverGroupId }}
-    serverGroupID: {{ . }}
+    serverGroup:
+      id: {{ . }}
     {{- end }}
 {{- end }}
 

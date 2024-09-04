@@ -12,9 +12,8 @@
 template:
   spec:
     identityRef:
-      kind: Secret
       name: {{ include "openstack-cluster.cloudCredentialsSecretName" . }}
-    cloudName: openstack
+      cloudName: openstack
     flavor: {{ .Values.controlPlane.machineFlavor | required ".Values.controlPlane.machineFlavor is required" }}
     {{- with .Values.machineSSHKeyName }}
     sshKeyName: {{ . }}
@@ -25,17 +24,20 @@ template:
     {{- if .Values.controlPlane.machineRootVolume.diskSize }}
     rootVolume: {{ toYaml .Values.controlPlane.machineRootVolume | nindent 6 }}
     {{- end }}
-    {{- if .Values.controlPlane.machineImageId }}
-    imageUUID: {{ .Values.controlPlane.machineImageId }}
-    {{- else if .Values.controlPlane.machineImage }}
-    image: {{ tpl .Values.controlPlane.machineImage . }}
-    {{- else if .Values.machineImageId }}
-    imageUUID: {{ .Values.machineImageId }}
-    {{- else if .Values.machineImage }}
-    image: {{ tpl .Values.machineImage . }}
-    {{- else }}
-    {{- fail "Either controlPlane.machineImageId, controlPlane.machineImage, machineImage or machineImageId is required" }}
-    {{- end }}
+    image:
+      {{- if .Values.controlPlane.machineImageId }}
+      id: {{ .Values.controlPlane.machineImageId }}
+      {{- else if .Values.controlPlane.machineImage }}
+      filter:
+        name: {{ tpl .Values.controlPlane.machineImage . }}
+      {{- else if .Values.machineImageId }}
+      id: {{ .Values.machineImageId }}
+      {{- else if .Values.machineImage }}
+      filter:
+        name: {{ tpl .Values.machineImage . }}
+      {{- else }}
+      {{- fail "Either controlPlane.machineImageId, controlPlane.machineImage, machineImage or machineImageId is required" }}
+      {{- end }}
     {{- with $blockDevices }}
     additionalBlockDevices:
       {{- range $name, $blockDevice := . }}
@@ -49,7 +51,7 @@ template:
             type: {{ . }}
             {{- end }}
             {{- with $blockDevice.availabilityZone }}
-            availabilityZone: {{ . }}
+            availabilityZone: {{toYaml . | nindent 14 }}
             {{- end }}
           {{- end }}
       {{- end }}
@@ -58,7 +60,8 @@ template:
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
     {{- with .Values.controlPlane.serverGroupId }}
-    serverGroupID: {{ . }}
+    serverGroup:
+      id: {{ . }}
     {{- end }}
 {{- end }}
 
