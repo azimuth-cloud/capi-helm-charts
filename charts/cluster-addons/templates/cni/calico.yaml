@@ -132,12 +132,39 @@ spec:
   targetNamespace: {{ .Values.cni.calico.release.namespace }}
   releaseName: cni-calico-monitoring
   manifestSources:
+    # As of 3.28.1, the Tigera operator now creates a calico-typha-metrics service itself,
+    # but uses a different port name
+    # On upgraded deployments, the Tigera operator happily adopts the existing service but breaks
+    # the metrics collection when the port is renamed
+    # On new deployments, this release fails because the service exists but is not owned by
+    # the Helm release
+    #
+    # In order to avoid this happening again, this release no longer relies on any services
+    # created by the operator for metrics collection, instead managing our own services with
+    # a naming convention that is unlikely to conflict with Calico resources
+
     # calico-kube-controllers
     - template: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: cni-calico-monitoring-kube-controllers
+          namespace: calico-system
+          labels:
+            app.kubernetes.io/name: cni-calico-monitoring
+            app.kubernetes.io/component: kube-controllers
+        spec:
+          clusterIP: None
+          ports:
+            - name: metrics-port
+              port: 9094
+          selector:
+            k8s-app: calico-kube-controllers
+        ---
         apiVersion: monitoring.coreos.com/v1
         kind: ServiceMonitor
         metadata:
-          name: calico-kube-controllers-metrics
+          name: cni-calico-monitoring-kube-controllers
           namespace: calico-system
         spec:
           endpoints:
@@ -147,16 +174,18 @@ spec:
               - calico-system
           selector:
             matchLabels:
-              k8s-app: calico-kube-controllers
+              app.kubernetes.io/name: cni-calico-monitoring
+              app.kubernetes.io/component: kube-controllers
     # calico-node
     - template: |
         apiVersion: v1
         kind: Service
         metadata:
-          name: calico-node-metrics
+          name: cni-calico-monitoring-node
           namespace: calico-system
           labels:
-            k8s-app: calico-node
+            app.kubernetes.io/name: cni-calico-monitoring
+            app.kubernetes.io/component: node
         spec:
           clusterIP: None
           ports:
@@ -168,7 +197,7 @@ spec:
         apiVersion: monitoring.coreos.com/v1
         kind: ServiceMonitor
         metadata:
-          name: calico-node-metrics
+          name: cni-calico-monitoring-node
           namespace: calico-system
         spec:
           endpoints:
@@ -178,16 +207,18 @@ spec:
               - calico-system
           selector:
             matchLabels:
-              k8s-app: calico-node
+              app.kubernetes.io/name: cni-calico-monitoring
+              app.kubernetes.io/component: node
     # calico-typha
     - template: |
         apiVersion: v1
         kind: Service
         metadata:
-          name: calico-typha-metrics
+          name: cni-calico-monitoring-typha
           namespace: calico-system
           labels:
-            k8s-app: calico-typha
+            app.kubernetes.io/name: cni-calico-monitoring
+            app.kubernetes.io/component: typha
         spec:
           clusterIP: None
           ports:
@@ -199,7 +230,7 @@ spec:
         apiVersion: monitoring.coreos.com/v1
         kind: ServiceMonitor
         metadata:
-          name: calico-typha-metrics
+          name: cni-calico-monitoring-typha
           namespace: calico-system
         spec:
           endpoints:
@@ -209,7 +240,8 @@ spec:
               - calico-system
           selector:
             matchLabels:
-              k8s-app: calico-typha
+              app.kubernetes.io/name: cni-calico-monitoring
+              app.kubernetes.io/component: typha
     # dashboard
     - template: |
         apiVersion: v1
