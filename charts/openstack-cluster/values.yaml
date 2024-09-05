@@ -93,6 +93,12 @@ registryMirrors:
   registry.k8s.io:
     - https://quay.io/v2/azimuth/registry.k8s.io
 
+# Proxy configuration for containerd.
+proxy:
+  http_proxy:
+  https_proxy:
+  no_proxy:
+
 # A map of trusted CAs to add to the system trust on cluster nodes
 trustedCAs: {}
   # custom-ca: |

@@ -25,6 +25,14 @@ preKubeadmCommands:
 {{- end }}
 {{- end }}
 
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.containerdRestart" -}}
+{{- if and .Values.proxy.http_proxy .Values.proxy.https_proxy .Values.proxy.no_proxy }}
+preKubeadmCommands:
+  - systemctl daemon-reload
+  - systemctl restart containerd
+{{- end }}
+{{- end }}
+
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" -}}
 clusterConfiguration:
   etcd:
@@ -107,6 +115,7 @@ spec:
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
           (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
           (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.containerdRestart" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" (list .Values.controlPlane.kubeadmConfigSpec .Values.osDistro) | fromYaml) |
         include "openstack-cluster.mergeConcatMany" |
         fromYaml
