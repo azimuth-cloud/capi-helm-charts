@@ -25,6 +25,23 @@ preKubeadmCommands:
 {{- end }}
 {{- end }}
 
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.oidc" -}}
+{{- if .Values.oidc.issuerUrl }}
+{{- with .Values.oidc }}
+clusterConfiguration:
+  apiServer:
+    extraArgs:
+      oidc-issuer-url: {{ quote .issuerUrl }}
+      oidc-client-id: {{ required "clientId is required for OIDC" .clientId | quote }}
+      oidc-username-claim: {{ quote .usernameClaim }}
+      oidc-username-prefix: {{ quote .usernamePrefix }}
+      oidc-groups-claim: {{ quote .groupsClaim }}
+      oidc-groups-prefix: {{ quote .groupsPrefix }}
+      oidc-signing-algs: {{ quote .signingAlgs }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" -}}
 clusterConfiguration:
   etcd:
@@ -102,6 +119,7 @@ spec:
       (
         list
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.oidc" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
