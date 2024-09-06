@@ -26,8 +26,8 @@ preKubeadmCommands:
 {{- end }}
 
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.oidc" -}}
-{{- if .Values.oidc.issuerUrl }}
-{{- with .Values.oidc }}
+{{- if .Values.global.oidc.issuerUrl }}
+{{- with .Values.global.oidc }}
 clusterConfiguration:
   apiServer:
     extraArgs:
