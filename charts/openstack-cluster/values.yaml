@@ -1,29 +1,5 @@
 ---
 
-global:
-  # Settings for connecting to the cluster using OpenID Connect (OIDC)
-  # If not specified, OIDC authentication is not enabled
-  oidc:
-    # The URL of the OIDC provider (i.e. the discovery URL with the well-known component removed)
-    # e.g. if the discovery URL is https://auth.example.com/.well-known/openid-configuration, the
-    #      given value should be https://auth.example.com
-    issuerUrl:
-    # The client ID that tokens are issued for
-    clientId:
-    # The claim to extract the username from
-    usernameClaim: sub
-    # The prefix to append to usernames from OIDC
-    # Used to prevent collisions with existing names, e.g. service accounts
-    # For example, if the claim specified in usernameClaim contains jbloggs and the prefix is set
-    # to oidc:, then in Kubernetes the user can be referred to as oidc:jbloggs
-    usernamePrefix: "oidc:"
-    # The claim to extract the user's groups from
-    groupsClaim: groups
-    # The prefix to append to groups from OIDC, similar to usernamePrefix
-    groupsPrefix: "oidc:"
-    # The signing algorithms that are accepted
-    signingAlgs: RS256
-
 # The name of an existing secret containing a clouds.yaml and optional cacert
 cloudCredentialsSecretName:
 # OR
@@ -54,6 +30,29 @@ projectPrefix: capi.stackhpc.com
 
 # Any extra annotations to add to the cluster
 clusterAnnotations: {}
+
+# Settings for connecting to the cluster using OpenID Connect (OIDC)
+# If not specified, OIDC authentication is not enabled
+oidc:
+  # The URL of the OIDC provider (i.e. the discovery URL with the well-known component removed)
+  # e.g. if the discovery URL is https://auth.example.com/.well-known/openid-configuration, the
+  #      given value should be https://auth.example.com
+  issuerUrl:
+  # The client ID that tokens are issued for
+  clientId:
+  # The claim to extract the username from
+  usernameClaim: sub
+  # The prefix to append to usernames from OIDC
+  # Used to prevent collisions with existing names, e.g. service accounts
+  # For example, if the claim specified in usernameClaim contains jbloggs and the prefix is set
+  # to oidc:, then in Kubernetes the user can be referred to as oidc:jbloggs
+  usernamePrefix: "oidc:"
+  # The claim to extract the user's groups from
+  groupsClaim: groups
+  # The prefix to append to groups from OIDC, similar to usernamePrefix
+  groupsPrefix: "oidc:"
+  # The signing algorithms that are accepted
+  signingAlgs: RS256
 
 # Values for the Kubernetes cluster network
 kubeNetwork:
