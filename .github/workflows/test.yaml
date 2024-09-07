@@ -19,7 +19,7 @@ on:
         default: false
 
 jobs:
-  # This job tests a clean deployment against the latest version
+  # This job tests a basic deployment against the latest version
   # It is the only job that runs when tests-full=false
   # For tests-full=true it creates an internal network + router and runs Sonobuoy in conformance mode
   # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
@@ -72,6 +72,78 @@ jobs:
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest${{ inputs.tests-full && '-full' || '' }}.yaml
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
+
+      - name: Delete Kubernetes 1.31 deployment
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+        if: ${{ always() }}
+
+      - name: Upload logs
+        uses: ./.github/actions/upload-logs
+        with:
+          name-suffix: ${{ github.job }}
+        if: ${{ always() }}
+
+      # Release the CI lock when we are done
+      - name: Release S3 lock
+        uses: azimuth-cloud/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: release
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}
+
+  # This job tests a deployment against the latest version with the dashboard, monitoring and ingress enabled
+  latest-addons:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.tests-full }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup
+
+      - name: Write cloud credential
+        run: echo "$OS_CLOUDS" > ./clouds.yaml
+        env:
+          OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
+
+      # This is the point at which we start to consume OpenStack resources
+      # We use the same resource as the Azimuth CI, so acquire the same CI lock
+      - name: Acquire S3 lock
+        uses: azimuth-cloud/github-actions/s3-lock@master
+        with:
+          host: ${{ vars.CI_S3_LOCK_HOST }}
+          access-key: ${{ secrets.CI_S3_LOCK_ACCESS_KEY }}
+          secret-key: ${{ secrets.CI_S3_LOCK_SECRET_KEY }}
+          bucket: ${{ vars.CI_S3_LOCK_BUCKET }}
+          action: acquire
+          # Include the job ID in the process ID
+          process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
+        # GitHub terminates jobs after 6 hours
+        # We don't want jobs to acquire the lock then get timed out before they can finish
+        # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
+        timeout-minutes: 180
+        if: ${{ vars.TARGET_CLOUD == 'arcus' }}
+
+      - name: Deploy Kubernetes 1.31 with all addons
+        uses: ./.github/actions/upgrade-and-test
+        with:
+          name: ci-${{ github.run_id }}-${{ github.job }}
+          os-cloud: ${{ vars.TARGET_CLOUD }}
+          chart-version: ${{ inputs.chart-version }}
+          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
+          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
+          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
+          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest-addons.yaml
 
       - name: Delete Kubernetes 1.31 deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
