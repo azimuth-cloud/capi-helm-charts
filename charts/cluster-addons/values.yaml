@@ -369,7 +369,7 @@ nodeProblemDetector:
 
 # Settings for any custom addons
 custom: {}
-  #  #Indexed by the name of the release on the target cluster
+  # # Indexed by the name of the release on the target cluster
   # my-custom-helm-release:
   #   # Indicates that this is a Helm addon
   #   kind: HelmRelease
