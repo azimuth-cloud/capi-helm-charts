@@ -302,7 +302,7 @@ are managed by creating a Helm chart and release using them, and the Helm releas
 lifecycle of the resulting resources. To specify custom manifests to install:
 
 ```yaml
-custom: {}
+custom:
   # The name of the Helm release that will contain the resources
   my-custom-manifests:
     kind: Manifests
