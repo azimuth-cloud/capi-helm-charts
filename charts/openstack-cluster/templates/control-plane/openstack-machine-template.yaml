@@ -71,17 +71,21 @@ template:
               name: {{ . }}
               {{- else }}
               {{- toYaml . | nindent 14 }}
+              {{- end }}
             {{- end }}
           {{- end }}
       {{- end }}
     {{- end }}
-    {{- end }}
     {{- with .Values.controlPlane.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
-    {{- with .Values.controlPlane.serverGroupId }}
+    {{- if or .Values.controlPlane.serverGroupFilter .Values.serverGroupId }}
     serverGroup:
-      id: {{ . }}
+      {{- if .Values.controlPlane.serverGroupFilter }}
+      {{- toYaml .Values.controlPlane.serverGroupFilter | nindent 6 }}
+      {{- else }}
+      id: {{ .Values.serverGroupId }}
+      {{- end }}
     {{- end }}
 {{- end }}
 

@@ -256,8 +256,15 @@ controlPlane:
 
     # diskSize: DEPRECATED - use sizeGiB
 
+  # Details of the server group to use for control plane machines
+  serverGroupFilter:
+    # id: 
+    # name: 
+
+  # DEPRECATED - use serverGroupFilter 
   # The ID of the server group to use for control plane machines
-  serverGroupId:
+  # serverGroupId:
+
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
   nodeLabels:
     # my.company.org/label: value
@@ -395,8 +402,15 @@ nodeGroupDefaults:
 
     # diskSize: DEPRECATED - use sizeGiB
     
+  # Details of the server group to use for machines in the node group
+  serverGroupFilter:
+    # id: 
+    # name: 
+
+  # DEPRECATED - use serverGroupFilter 
   # The ID of the server group to use for machines in the node group
-  serverGroupId:
+  # serverGroupId:
+
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
   # By default, nodes get the label "capi.stackhpc.com/node-group=<node group name>"
   nodeLabels:

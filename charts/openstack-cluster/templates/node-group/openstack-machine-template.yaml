@@ -75,9 +75,13 @@ template:
     {{- with $nodeGroup.machineNetworking.ports }}
     ports: {{ toYaml . | nindent 6 }}
     {{- end }}
-    {{- with $nodeGroup.serverGroupId }}
+    {{- if or $nodeGroup.serverGroupFilter $nodeGroup.serverGroupId }}
     serverGroup:
-      id: {{ . }}
+      {{- if $nodeGroup.serverGroupFilter }}
+      {{- toYaml $nodeGroup.serverGroupFilter | nindent 6 }}
+      {{- else }}
+      id: {{ $nodeGroup.serverGroupId }}
+      {{- end }}
     {{- end }}
 {{- end }}
 
