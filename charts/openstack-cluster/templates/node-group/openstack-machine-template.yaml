@@ -17,8 +17,23 @@ template:
     {{- if or $nodeGroup.machineConfigDrive $nodeGroup.additionalBlockDevices }}
     configDrive: true
     {{- end }}
-    {{- if $nodeGroup.machineRootVolume.diskSize }}
-    rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
+    {{- if or $nodeGroup.machineRootVolume.sizeGiB $nodeGroup.machineRootVolume.diskSize }}
+    rootVolume:
+      {{- with $nodeGroup.controlPlane.machineRootVolume }}
+      {{- $size := .sizeGiB | default .diskSize }}
+      sizeGiB: {{ $size }}
+      {{- $type := .type | default .volumeType }}
+      type: {{ $type }}
+      {{- with .blockDevice.availabilityZone }}
+      availabilityZone:
+        {{- if kindIs "string" . }}
+        name: {{ . }}
+        {{- else }}
+        {{- toYaml . | nindent 6 }}
+        {{- end }}
+      {{- end }}
+      {{- omit . "sizeGiB" "diskSize" "availabilityZone" "Type" "volumeType" | toYaml | nindent 6 }}
+      {{- end }}
     {{- end }}
     image:
       {{- if $nodeGroup.machineImageId }}
@@ -47,7 +62,12 @@ template:
             type: {{ . }}
             {{- end }}
             {{- with $blockDevice.availabilityZone }}
-            availabilityZone: {{toYaml . | nindent 14 }}
+            availabilityZone:
+              {{- if kindIs "string" . }}
+              name: {{ . }}
+              {{- else }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
             {{- end }}
           {{- end }}
       {{- end }}

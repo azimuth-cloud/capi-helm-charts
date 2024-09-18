@@ -136,6 +136,7 @@ etcd:
     # # The volume availability zone to use
     # # If not specified, the machine availability zone is used
     # availabilityZone:
+    #   name: az1
 
 # Settings for the Kubernetes API server
 apiServer:
@@ -196,15 +197,19 @@ controlPlane:
     ports:
   # The root volume spec for control plane machines
   machineRootVolume:
-    # The size of the disk to use
+    # The size of the disk to use in gibibytes (GiB)
     # If not given, the ephemeral root disk from the flavor is used
-    diskSize:
+    sizeGiB:
     # The volume type to use
     # If not specified, the default volume type is used
     # volumeType:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+    #   name: az1
+
+    # diskSize: DEPRECATED - use sizeGiB
+
   # The ID of the server group to use for control plane machines
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
@@ -228,6 +233,7 @@ controlPlane:
     #   # The volume availability zone to use
     #   # If not specified, the machine availability zone is used
     #   availabilityZone:
+    #     name: az1
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
@@ -330,15 +336,19 @@ nodeGroupDefaults:
     ports:
   # The root volume spec for machines in the node group
   machineRootVolume:
-    # The size of the disk to use
+    # The size of the disk to use in gibibytes (GiB)
     # If not given, the ephemeral root disk from the flavor is used
-    diskSize:
+    sizeGiB:
     # The volume type to use
     # If not specified, the default volume type is used
     # volumeType:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+    #   name: az1
+
+    # diskSize: DEPRECATED - use sizeGiB
+
   # The ID of the server group to use for machines in the node group
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
