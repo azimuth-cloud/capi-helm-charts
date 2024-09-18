@@ -19,7 +19,11 @@ spec:
   {{- with .Values.clusterNetworking }}
   {{- if .manageSecurityGroups }}
   managedSecurityGroups: 
+    {{- if eq .manageSecurityGroups "true" }}
     allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
+    {{- else }}
+    {{- toYaml .manageSecurityGroups | nindent 2 }}
+  {{- end }}
   {{- end }}
   {{- with .externalNetworkId }}
   externalNetwork:

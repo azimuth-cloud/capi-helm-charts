@@ -47,13 +47,31 @@ kubeNetwork:
 # Settings for the OpenStack networking for the cluster
 clusterNetworking:
   # Custom nameservers to use for the hosts
-  dnsNameservers:
   # Indicates if security groups should be managed by the cluster
-  manageSecurityGroups: true
-  # Indicates if the managed security groups should allow all in-cluster traffic
-  # The default CNI installed by the addons is Cilium, so this is true by default
-  allowAllInClusterTraffic: true
-  # The ID of the external network to use
+  # Its possible to add additional rules to the managed security groups 
+  # https://cluster-api-openstack.sigs.k8s.io/api/v1beta1/api#infrastructure.cluster.x-k8s.io/v1beta1.ManagedSecurityGroups
+  managedSecurityGroups: 
+    # Indicates if the managed security groups should allow all in-cluster traffic
+    # The default CNI installed by the addons is Cilium, so this is true by default
+    allowAllInClusterTraffic: true
+
+    # Add additional security group like so:
+    # allNodesSecurityGroupRules:
+    # - remoteManagedGroups:
+    # - controlplane
+    # - worker
+    # direction: ingress
+    # etherType: IPv4
+    # name: BGP (Calico)
+    # portRangeMin: 179
+    # portRangeMax: 179
+    # protocol: tcp
+    # description: "Allow BGP between control plane and workers"
+
+  # DEPRECATED fields see above
+  # manageSecurityGroups: true
+  # allowAllInClusterTraffic: true
+
   # If not given, the external network will be detected
   externalNetworkId:
   # Details of the internal network to use
@@ -348,7 +366,7 @@ nodeGroupDefaults:
     #   name: az1
 
     # diskSize: DEPRECATED - use sizeGiB
-
+    
   # The ID of the server group to use for machines in the node group
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
