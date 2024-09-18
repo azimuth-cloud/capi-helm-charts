@@ -19,6 +19,18 @@
 joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $nodeLabels | nindent 2 }}
 {{- end }}
 
+{{- define "openstack-cluster.nodegroup.kubeadmConfigSpec.containerdRestart" -}}
+{{- $ctx := index . 0 }}
+{{- $nodeGroup := index . 1 }}
+{{- $proxy := $ctx.Values.proxy | default dict }}
+{{- if and (hasKey $proxy "http_proxy") (hasKey $proxy "https_proxy") (hasKey $proxy "no_proxy") }}
+preKubeadmCommands:
+  - systemctl daemon-reload
+  - systemctl restart containerd
+{{- end }}
+{{- end }}
+
+
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
 {{- $ctx := index . 0 }}
 {{- $nodeGroup := index . 1 }}
@@ -26,6 +38,7 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $n
   list
     (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)
     (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml)
+    (include "openstack-cluster.nodegroup.kubeadmConfigSpec.containerdRestart" (list $ctx $nodeGroup) | fromYaml)
     (omit (include "openstack-cluster.osDistroKubeadmConfigSpec" (list $ctx) | fromYaml) "initConfiguration") 
     (pick (include "openstack-cluster.patchConfigSpec" (list $ctx ) | fromYaml) "preKubeadmCommands") |
   include "openstack-cluster.mergeConcatMany" |

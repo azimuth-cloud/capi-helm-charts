@@ -197,6 +197,7 @@ override_path = {{ ternary "true" "false" $overridePath }}
 
 {{/*
 Produces the kubeadmConfigSpec required to configure containerd.
+Configure proxy for containerd.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.containerd" -}}
 files:
@@ -210,6 +211,16 @@ files:
       # This file is created by the capi-helm-chart to ensure that its parent directory exists
     owner: root:root
     permissions: "0644"
+{{- if and .Values.proxy.http_proxy .Values.proxy.https_proxy .Values.proxy.no_proxy }}
+  - path: /etc/systemd/system/containerd.service.d/proxy.conf
+    content: |
+      [Service]
+      Environment="http_proxy={{ .Values.proxy.http_proxy }}"
+      Environment="https_proxy={{ .Values.proxy.https_proxy }}"
+      Environment="no_proxy={{ .Values.proxy.no_proxy }}"
+    owner: root:root
+    permissions: "0644"
+{{- end }}
 {{- if ne .Values.osDistro "flatcar" }}
   - path: /etc/containerd/config.toml
     content: |
