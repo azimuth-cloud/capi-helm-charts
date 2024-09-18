@@ -46,7 +46,7 @@ kubeNetwork:
 
 # Settings for the OpenStack networking for the cluster
 clusterNetworking:
-  # Custom nameservers to use for the hosts
+
   # Indicates if security groups should be managed by the cluster
   # Its possible to add additional rules to the managed security groups 
   # https://cluster-api-openstack.sigs.k8s.io/api/v1beta1/api#infrastructure.cluster.x-k8s.io/v1beta1.ManagedSecurityGroups
@@ -93,13 +93,30 @@ clusterNetworking:
       # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
       # name: tenant-internal-net
     # See Cluster API documentation for details
-    # NOTE: can only specify one subnet for now
+    
+    # Filter to find existing subnets to use 
+    # allows specification of two existing subnets for the dual-stack scenario.
+    subnets:
+      # - id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
+
+    # DEPRECATED - use subnets
     subnetFilter:
       # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
       # name: tenant-internal-subnet
-    # The CIDR to use if creating a cluster network
+    
+    # ManagedSubnets describe OpenStack Subnets to be created.
     # This is only used if neither of networkFilter and subnetFilter are given
-    nodeCidr: 192.168.3.0/24
+    managedSubnets:
+      - cidr: 192.168.3.0/24
+        # Custom nameservers to use for the hosts
+        dnsNameservers: 
+
+    # DEPRECATED - set in managedSubnets above
+    # nodeCidr: 192.168.3.0/24
+
+  # DEPRECATED - set in internalNetwork.managedSubnets 
+  # dnsNameservers: 
+
 
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
@@ -174,7 +191,7 @@ apiServer:
   # Indicates what loadbalancer provider to use. Default is amphora
   loadBalancerProvider:
   # Restrict loadbalancer access to select IPs
-  # allowedCidrs
+  # allowedCIDRs 
   #  - 192.168.0.0/16  # needed for cluster to init
   #  - 10.10.0.0/16  # IPv4 Internal Network
   #  - 123.123.123.123 # some other IPs

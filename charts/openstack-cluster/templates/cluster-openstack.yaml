@@ -18,12 +18,12 @@ spec:
   {{- end }}
   {{- with .Values.clusterNetworking }}
   {{- if .manageSecurityGroups }}
-  managedSecurityGroups: 
+  managedSecurityGroups:
     {{- if eq .manageSecurityGroups "true" }}
     allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
     {{- else }}
     {{- toYaml .manageSecurityGroups | nindent 2 }}
-  {{- end }}
+    {{- end }}
   {{- end }}
   disableExternalNetwork: {{ .disableExternalNetwork | default "false" }}
   {{- if or .externalNetworkFilter .externalNetworkId }}
@@ -32,27 +32,33 @@ spec:
     {{- toYaml .externalNetworkFilter | nindent 2 }}
     {{- else }}
     id: {{ .externalNetworkId }}
-  {{- end }}
+    {{- end }}
   {{- end }}
   {{- end }}
   {{- with .internalNetwork }}
-  {{- if or .networkFilter .subnetFilter }}
+  {{- if or .networkFilter .subnetFilter .subnets }}
   {{- with .networkFilter }}
   network: {{ . | toYaml | nindent 4 }}
   {{- end }}
-  {{- with .subnetFilter }}
+  {{- if or .subnets .subnetFilter }}
   subnets:
-    - {{ . | toYaml | nindent 4 }}
+  {{- if .subnets }}
+  {{- toYaml .subnets | nindent 2 }}
+  {{- else }}
+  - {{ toYaml .subnetFilter | nindent 4 }}
+  {{- end }}
   {{- end }}
   {{- else }}
   managedSubnets:
-    - cidr: {{ .nodeCidr }}
-      {{- with .dnsNameservers }}
-      dnsNameservers: {{ toYaml . | nindent 4 }}
-      {{- end }}
+  {{- if .managedSubnets }}
+  {{- toYaml .managedSubnets | nindent 2 }}
+  {{- else }}
+  - cidr: {{ .nodeCidr }}
+    dnsNameservers: {{ toYaml .Values.dnsNameservers | nindent 4 }}
   {{- end }}
   {{- end }}
   {{- end }}
+
   {{- with .Values.apiServer }}
   {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
@@ -60,14 +66,13 @@ spec:
   {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
   {{- end }}
-  {{- if .allowedCidrs }}
+  {{- if or .allowedCidrs .allowedCIDRs }}
     allowedCIDRs:
-      {{- range .allowedCidrs }}
+      {{- range .allowedCidrs | default .allowedCIDRs }}
       - {{ . }}
       {{- end}}
   {{- end }}
   {{- end }}
-
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}
