@@ -25,9 +25,15 @@ spec:
     {{- toYaml .manageSecurityGroups | nindent 2 }}
   {{- end }}
   {{- end }}
-  {{- with .externalNetworkId }}
+  disableExternalNetwork: {{ .disableExternalNetwork | default "false" }}
+  {{- if or .externalNetworkFilter .externalNetworkId }}
   externalNetwork:
-    id: {{ . }}
+    {{- if .externalNetworkFilter }}
+    {{- toYaml .externalNetworkFilter | nindent 2 }}
+    {{- else }}
+    id: {{ .externalNetworkId }}
+  {{- end }}
+  {{- end }}
   {{- end }}
   {{- with .internalNetwork }}
   {{- if or .networkFilter .subnetFilter }}

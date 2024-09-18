@@ -72,7 +72,18 @@ clusterNetworking:
   # manageSecurityGroups: true
   # allowAllInClusterTraffic: true
 
+  # Indicates whether or not to attempt to connect the cluster to an external network
+  disableExternalNetwork: false 
+
+  # Details of the external network to use 
+  # This option is ignored if disableExternalNetwork is set to true.
   # If not given, the external network will be detected
+  externalNetworkFilter:
+    # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
+    # name: tenant-external-net
+
+  # The ID of the external network to use 
+  # DEPRECATED - use externalNetwork 
   externalNetworkId:
   # Details of the internal network to use
   internalNetwork:
