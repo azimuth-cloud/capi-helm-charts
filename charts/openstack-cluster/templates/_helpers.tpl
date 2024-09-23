@@ -229,14 +229,15 @@ files:
     permissions: "0644"
 {{- end }}
 {{- if ne .Values.osDistro "flatcar" }}
-preKubeadmCommands: 
+preKubeadmCommands:
   - |
-      bash -s <<EOF
-      grep -q '[plugins."io.containerd.grpc.v1.cri".registry]' /etc/containerd/config.toml && exit
+      /usr/bin/bash -s <<EOF
+      grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
       cat <<CONTENT >> /etc/containerd/config.toml
       [plugins."io.containerd.grpc.v1.cri".registry]
         config_path = "/etc/containerd/certs.d"
       CONTENT
+      systemctl restart containerd
       EOF
 {{- end }}
 {{- end }}
