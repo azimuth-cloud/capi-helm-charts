@@ -100,8 +100,7 @@ For ease of use, this chart is written so that a `clouds.yaml` file can be given
 to the chart as a configuration file. When an application credential is created in Horizon,
 the corresponding `clouds.yaml` file can be downloaded, and should look something like this:
 
-> WARNING
-> 
+> [!WARNING]
 > The Cluster API OpenStack provider currently requires that the `project_id` is present,
 > which you will need to add manually.
 
@@ -340,7 +339,7 @@ kubectl --kubeconfig=./kubeconfig.my-cluster get po -A
 To deploy clusters which use Ignition such as Flatcar, you will need to override the following setting in your local `values.yaml`:
 
 ```yaml
-osDistro: flatcar 
+osDistro: flatcar
 ```
 
 ### Keystone Authentication Webhook
@@ -349,7 +348,7 @@ To deploy with the k8s-keystone-auth webhook enabled, set `authWebhook`
 to "k8s-keystone-auth".
 
 ```
-authWebhook: k8s-keystone-auth 
+authWebhook: k8s-keystone-auth
 ```
 
 See cluster-addons README for instructions on installing the `k8s-keystone-auth` subchart.
