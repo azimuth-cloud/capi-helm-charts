@@ -87,6 +87,27 @@ initConfiguration:
 {{- end }}
 {{- end }}
 
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.admissionConfigFile" -}}
+files:
+  - path: /etc/kubernetes/admission/configuration.yaml
+    contentFrom:
+      secret:
+        name: {{ include "openstack-cluster.componentName" (list . "admission-configuration") }}
+        key: admission-configuration.yaml
+    owner: root:root
+    permissions: "0644"
+clusterConfiguration:
+  apiServer:
+    extraArgs:
+      admission-control-config-file: /etc/kubernetes/admission/configuration.yaml
+    extraVolumes:
+      - name: admission-configuration
+        hostPath: /etc/kubernetes/admission
+        mountPath: /etc/kubernetes/admission
+        readOnly: true
+        pathType: Directory
+{{- end }}
+
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
@@ -99,7 +120,12 @@ metadata:
     helm.sh/resource-policy: keep
     # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
-  version: v{{ .Values.controlPlane.kubernetesVersion | default .Values.kubernetesVersion | required "One of .Values.controlPlane.kubernetesVersion or .Values.kubernetesVersion is required" | trimPrefix "v" }}
+  version: v{{
+    .Values.controlPlane.kubernetesVersion |
+      default .Values.kubernetesVersion |
+      required "One of .Values.controlPlane.kubernetesVersion or .Values.kubernetesVersion is required" |
+      trimPrefix "v"
+  }}
   replicas: {{ .Values.controlPlane.machineCount }}
   remediationStrategy: {{ toYaml .Values.controlPlane.remediationStrategy | nindent 4 }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
@@ -122,6 +148,7 @@ spec:
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.oidc" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.admissionConfigFile" . | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
           (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
           (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)
