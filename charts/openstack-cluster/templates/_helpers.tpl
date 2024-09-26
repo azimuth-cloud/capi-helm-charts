@@ -210,15 +210,6 @@ files:
       # This file is created by the capi-helm-chart to ensure that its parent directory exists
     owner: root:root
     permissions: "0644"
-{{- if ne .Values.osDistro "flatcar" }}
-  - path: /etc/containerd/config.toml
-    content: |
-      [plugins."io.containerd.grpc.v1.cri".registry]
-      config_path = "/etc/containerd/certs.d"
-    owner: root:root
-    permissions: "0644"
-    append: true
-{{- end }}
 {{- with .Values.registryMirrors }}
 {{- range $registry, $registrySpec := . }}
   - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
@@ -236,6 +227,18 @@ files:
         key: "auth.toml"
     owner: root:root
     permissions: "0644"
+{{- end }}
+{{- if ne .Values.osDistro "flatcar" }}
+preKubeadmCommands:
+  - |
+      /usr/bin/bash -s <<EOF
+      grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
+      cat <<CONTENT >> /etc/containerd/config.toml
+      [plugins."io.containerd.grpc.v1.cri".registry]
+        config_path = "/etc/containerd/certs.d"
+      CONTENT
+      systemctl restart containerd
+      EOF
 {{- end }}
 {{- end }}
 
