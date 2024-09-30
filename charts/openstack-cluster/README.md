@@ -32,6 +32,11 @@ templates for more details.
 - [Load-balancer provider](#load-balancer-provider)
 - [Cluster addons](#cluster-addons)
 - [Accessing a workload cluster](#accessing-a-workload-cluster)
+- [OpenID Connect authentication](#openid-connect-authentication)
+  - [Creating an OIDC client](#creating-an-oidc-client)
+  - [Configuring the cluster](#configuring-the-cluster)
+  - [Connecting to the cluster](#connecting-to-the-cluster)
+  - [Granting roles to users and groups from OIDC](#granting-roles-to-users-and-groups-from-oidc)
 - [Advanced](#advanced)
   - [Flatcar support](#flatcar-support)
   - [Keystone Authentication Webhook](#keystone-authentication-webhook)
@@ -324,13 +329,221 @@ addons:
 
 ## Accessing a workload cluster
 
-To access the cluster, use `clusterctl` to generate a kubeconfig file:
+To access the cluster, use `clusterctl` to fetch the kubeconfig file for the cluster:
 
 ```sh
 # Generate a kubeconfig and write it to a file
 clusterctl get kubeconfig my-cluster > kubeconfig.my-cluster
 # Use that kubeconfig to list pods on the workload cluster
 kubectl --kubeconfig=./kubeconfig.my-cluster get po -A
+```
+
+Note that this kubeconfig has full `cluster-admin` privileges, which are required by
+Cluster API to do its work. If you want to grant more granular access to the cluster,
+consider using OpenID Connect authentication.
+
+## OpenID Connect authentication
+
+Kubernetes is
+[able to use](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens)
+[OpenID Connect](https://openid.net/developers/how-connect-works/) tokens for authentication.
+
+Using this mechanism, you can grant access to your Kubernetes cluster using any OIDC provider,
+meaning that users can use their existing accounts to authenticate with the cluster. You can
+then define Kubernetes [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+rules to grant access to users and groups from the OIDC provider in the same way that you would
+for a service account for an application.
+
+> **NOTE**
+>
+> A full introduction to OpenID Connect is beyond the scope of this document, and as such
+> we assume some familiarity with the protocol. In particular, the reader should be familiar
+> with the concepts of an OIDC client and the different
+> [grant types](https://oauth.net/2/grant-types/) that are available.
+
+### Creating an OIDC client
+
+In order to configure your cluster to respect OIDC tokens, you must first create an OIDC client
+with your authentication provider. The best practice is to use a client per cluster. This process
+differs between authentication providers and is beyond the scope of this documentation. After
+creating a client you will be given a client ID which we will use later.
+
+When creating the client, you should [designate the client as public](https://oauth.net/2/client-types/),
+indicating that the application that is using the client is not able to keep a client secret safe.
+In our case, the application is `kubectl` on each individual user's machine, so this is clearly
+the case.
+
+If it is supported by your authentication provider, the
+[Device Code](https://oauth.net/2/grant-types/device-code/) grant type is the best choice for
+use from a terminal as it does not require a redirect URL, a local server, or a browser on
+the machine running the command. The user must have access to a device with a browser in
+order to authenticate with the authentication provider, but it does not have to be the same
+machine that is running `kubectl`.
+
+If the Device Code grant type is not available then the
+[Authorization Code + PKCE](https://oauth.net/2/pkce/) flow can be used instead. This flow
+requires the application to provide a callback URL that can receive the token - in a command-line
+application like `kubectl`, this is achieved by launching a local HTTP server for the duration
+of the authentication. You will need to supply `http://localhost:8000` as the redirect URL when
+creating the client. The machine running `kubectl` must have a browser available in order to
+open `http://localhost:8000` and follow the redirect chain for authentication.
+
+### Configuring the cluster
+
+Once you have created the OIDC client, you can configure the cluster to respect tokens issued for
+the client by the authentication provider. To do this, you need the client ID and the
+[discovery URL](https://swagger.io/docs/specification/authentication/openid-connect-discovery/)
+for the authentication provider.
+
+Setting the following values tells the Kubernetes API server to respect OIDC tokens for
+authentication:
+
+```yaml
+oidc:
+  # The discovery URL is https://auth.example.com/.well-known/openid-configuration
+  issuerUrl: https://auth.example.com
+  clientId: k8s-my-cluster
+```
+
+By default, the username will be taken from the `sub` claim and the user's groups from the
+`groups` claim. These can be changed using the following values:
+
+```yaml
+oidc:
+  usernameClaim: preferred_username
+  groupsClaim: roles
+```
+
+### Connecting to the cluster
+
+Once the cluster has been configured to respect OIDC tokens, it is then possible to create a
+single kubeconfig file that can be distributed to users of the cluster and allows each of
+those users to authenticate as themselves using the OIDC provider.
+
+To do this, we use the
+[exec support in kubeconfig](https://kubernetes.io/docs/reference/config-api/kubeconfig.v1/#ExecConfig)
+to configure `kubectl` to fetch an OIDC token using the
+[oidc-login](https://github.com/int128/kubelogin) plugin for `kubectl`. **Every user** of the
+cluster must have this plugin installed in order to use the kubeconfig described below.
+
+First, we must obtain the connection details for the Kubernetes API server. This can be done
+by querying the Cluster API resources for the cluster:
+
+```sh
+CLUSTER=my-cluster
+K8S_HOST="$(kubectl get cluster $CLUSTER -o go-template='{{.spec.controlPlaneEndpoint.host}}')"
+K8S_PORT="$(kubectl get cluster $CLUSTER -o go-template='{{.spec.controlPlaneEndpoint.port}}')"
+CADATA="$(kubectl get secret $CLUSTER-ca -o go-template='{{index .data "tls.crt"}}')"
+```
+
+Then we can create a kubeconfig file for connecting to the cluster using OIDC:
+
+```yaml
+apiVersion: v1
+kind: Config
+clusters:
+  - cluster:
+      certificate-authority-data: ${CADATA}
+      server: https://${K8S_HOST}:${K8S_PORT}
+    name: my-cluster
+users:
+  - name: oidc
+    user:
+      exec:
+        apiVersion: client.authentication.k8s.io/v1beta1
+        command: kubectl
+        args:
+          - oidc-login
+          - get-token
+          - --grant-type=device-code  # or authcode for Authorization Code + PKCE
+          - --oidc-issuer-url=https://auth.example.com
+          - --oidc-client-id=k8s-my-cluster
+contexts:
+- context:
+    cluster: my-cluster
+    user: oidc
+  name: oidc@my-cluster
+current-context: oidc@my-cluster
+preferences: {}
+```
+
+This kubeconfig file can then be used to connect to the cluster. For example, you can see what
+user Kubernetes thinks you have authenticated as:
+
+```sh
+$ kubectl auth whoami
+ATTRIBUTE   VALUE
+Username    oidc:jbloggs
+Groups      [oidc:admins oidc:my-cluster-users system:authenticated]
+```
+
+When using the `device-code` grant type, a URL is generated for the user to visit to sign in to
+the authentication provider and (if required) approve the application to use their data. If the
+command is run on a machine with a browser this URL is opened automatically, otherwise the URL
+is printed out and can be visited in the browser on another device.
+
+When using the `authcode` grant type, the machine must have a browser available in order to
+perform the authentication.
+
+### Granting roles to users and groups from OIDC
+
+By default, users from OIDC are not permitted to access any resources:
+
+```sh
+$ kubectl get po -A
+Error from server (Forbidden): pods is forbidden: User "oidc:jbloggs" cannot list resource "pods" in API group "" at the cluster scope
+```
+
+Kubernetes [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) can
+be used to grant access to resources in Kubernetes for users and groups from OIDC. For example,
+to grant all users with the `admins` group in their OIDC claims the `cluster-admin` role, the
+following could be used:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oidc-cluster-admin
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    # Groups from OIDC have the prefix 'oidc:' in Kubernetes
+    # This is to avoid collisions with other types of group
+    # The same is true for users from OIDC
+    name: oidc:admins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+```
+
+> A full discussion of Kubernetes RBAC authorization is beyond the scope of this document. Please
+> consult the [official docs](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
+
+If you want to manage a set of RBAC resources for OIDC users and groups as part of the cluster
+deployment, this can be accomplished using a [custom addon](../cluster-addons/#custom-addons):
+
+```yaml
+addons:
+  custom:
+    oidc-rbac:
+      kind: Manifests
+      spec:
+        namespace: oidc-system
+        manifests:
+          oidc-cluster-admin.yaml: |
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: oidc-cluster-admin
+            subjects:
+              - apiGroup: rbac.authorization.k8s.io
+                kind: Group
+                name: oidc:admins
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: cluster-admin
 ```
 
 ## Advanced

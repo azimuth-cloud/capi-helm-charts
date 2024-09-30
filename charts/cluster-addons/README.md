@@ -20,6 +20,7 @@ see how addons are defined.
 - [Ingress controllers](#ingress-controllers)
 - [Metrics server](#metrics-server)
 - [Monitoring and logging](#monitoring-and-logging)
+- [Custom addons](#custom-addons)
 
 ## Container Network Interface (CNI) plugins
 
@@ -266,4 +267,56 @@ By default, Grafana is only available from within the cluster and must be access
 
 ```sh
 kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000:80
+```
+
+## Custom addons
+
+This chart is able to manage the deployment of custom addons.
+
+For example, to manage the deployment of a custom Helm chart:
+
+```yaml
+custom:
+  # This is the name of the Helm release
+  my-custom-helm-release:
+    kind: HelmRelease
+    spec:
+      # The namespace for the release
+      namespace: my-namespace
+      # The chart to use
+      chart:
+        repo: https://my-project/charts
+        name: my-chart
+        version: 1.5.0
+      # The values to use for the release
+      values:
+        name1: value1
+        name2:
+          complex:
+            nested:
+              - value
+```
+
+It is also possible to manage the deployment of arbitrary manifests to the cluster. The manifests
+are managed by creating a Helm chart and release using them, and the Helm release manages the
+lifecycle of the resulting resources. To specify custom manifests to install:
+
+```yaml
+custom:
+  # The name of the Helm release that will contain the resources
+  my-custom-manifests:
+    kind: Manifests
+    spec:
+      # The namespace for the Helm release that will contain the resources
+      # For namespace-scoped resources, this is the namespace that the resources will be created
+      # in (unless overridden in the manifest itself)
+      namespace: my-namespace
+      manifests:
+        secret.yaml: |-
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: my-secret
+          stringData:
+            secret-file: "secret-data"
 ```

@@ -9,7 +9,8 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  # Ensure that any template syntax in the values is ignored
+  # Ensure that any Jinja template syntax in the manifests is ignored when the
+  # resources are templated by the addon provider by wrapping in {% raw %}
   values: |
     {%- raw %}
     {{- toYaml $addon.spec.values | nindent 4 }}
@@ -43,7 +44,8 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list $ $name) | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  # Ensure that any template syntax in the manifests is ignored
+  # Ensure that any Jinja template syntax in the manifests is ignored when the
+  # resources are templated by the addon provider by wrapping in {% raw %}
   {{- range $key, $manifest := $addon.spec.manifests }}
   {{ $key }}: |
     {%- raw %}
