@@ -87,7 +87,7 @@ The progress of these steps can also be monitored using the OpenStack Horizon da
 
 Commonly encountered issues at this stage (usually visible in the CAPO controller logs) include:
 
-- Incorrectly formatted cloud credentials (see [these docs](./charts/openstack-cluster/README#openstack-credentials))
+- Incorrectly formatted cloud credentials (see [these docs](./README.md#openstack-credentials))
 
 - Insufficient quota in the target OpenStack project (for various resources such as networks, subnets, security groups etc.)
 
