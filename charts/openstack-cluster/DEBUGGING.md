@@ -34,9 +34,9 @@ sequenceDiagram
 This page describes the various milestones that occur between the initial creation of an openstack-cluster [Helm release](https://helm.sh/docs/glossary/#release) and a fully functional cluster which is ready for use. At each step in the list below, some commonly encountered issues are highlighted; however, this should not be treated as an exhaustive list and further investigation may be required on a case by case basis.
 
 > [!IMPORTANT]
-> In all of the code snippets below, any commands which are targeting the Cluster API management cluster will be denoted with `--kubeconfig capi-mgmt` whereas those targetting the workload cluster will use `--kubeconfig workload`.
+> In all of the code snippets below, any commands which are targeting the Cluster API management cluster will be denoted with `--kubeconfig capi-mgmt` whereas those targeting the workload cluster will use `--kubeconfig workload`.
 
-When an openstack-cluster Helm release is created, the provided Helm values are used to generate a set of Kubernetes yaml resources which are then applied to the cluster. The generated resources can be viewed using the Helm CLI:
+When an instance of the openstack-cluster Helm chart is installed on the CAPI management cluster, the provided Helm values are used to generate a set of Kubernetes yaml resources which are then applied to the cluster. The generated resources can be viewed using the Helm CLI:
 
 ```
 helm --kubeconfig capi-mgmt get manifest <release-name>
@@ -87,7 +87,7 @@ The progress of these steps can also be monitored using the OpenStack Horizon da
 
 Commonly encountered issues at this stage (usually visible in the CAPO controller logs) include:
 
-- Incorrectly formatted cloud credentials (see [these docs](https://github.com/azimuth-cloud/capi-helm-charts/blob/main/charts/openstack-cluster/README.md#openstack-credentials))
+- Incorrectly formatted cloud credentials (see [these docs](./charts/openstack-cluster/README#openstack-credentials))
 
 - Insufficient quota in the target OpenStack project (for various resources such as networks, subnets, security groups etc.)
 
@@ -136,7 +136,7 @@ Commonly encountered issues (usually visible in the CAPO controller logs) includ
 Now that the first control plane node has initialised successfully, the kubeconfig for the workload cluster will be written to a Kubernetes `Secret` named `<cluster-name>-kubeconfig` on the CAPI management cluster. At this point, the kubeconfig can be extracted from the secret for use with `kubectl` using the following command:
 
 ```
-kubectl --kubeconfig capi-mgmt get secret <cluster-name>-kubeconfig -o jsonpath='{.data.value}' > workload
+kubectl --kubeconfig capi-mgmt get secret <cluster-name>-kubeconfig -o jsonpath='{.data.value}' | base64 -d > workload
 ```
 
 The workload cluster API server can be queried using this kubeconfig, for example, by running
@@ -147,19 +147,17 @@ kubectl --kubeconfig workload get nodes
 
 which should show at least 1 cluster node.
 
-The [cluster-api-addon-provider](https://github.com/azimuth-cloud/cluster-api-addon-provider) will now begin to install the cluster addons. The progress of these addon installations can be monitored with
+The [cluster-api-addon-provider](https://github.com/azimuth-cloud/cluster-api-addon-provider) will now begin to install the workload cluster addons. Progress can be monitored with
 
 ```
 kubectl --kubeconfig capi-mgmt get helmreleases,manifests -A
 ```
 
-where each `helmrelease` resource on the management cluster represents a real Helm release that will be installed on the workload cluster. Similarly, each `manifest` resource represents a set of ad-hoc Kubernetes manifests which will be installed on the workload cluster.
+where each `helmrelease` resource on the management cluster represents a [Helm release](https://helm.sh/docs/glossary/#release) that will be installed on the workload cluster. Similarly, each `manifest` resource represents a set of ad-hoc Kubernetes manifests which will be installed on the workload cluster.
 
-Any errors during the installation of the addons onto the workload cluster will be written to the logs of the `cluster-api-addon-provider` pod.
+If the addons stall during installation for an extended period of time (e.g. 10 minutes or more) then it may also be worth checking for any pods on the workload cluster which are not in a `Running` state and investigating the root cause of the issues for each problematic pod.
 
-If the addons stall during installation for an extended period of time (e.g. 10 minutes or more) then it may also be worth checking for any pods on the workload cluster which are not in a `Running` state and investigating the root cause of the issues with any problematic pods.
-
-Issues discovered on some clouds at this stage include:
+Possible issues at this stage include (but are not limit to):
 
 - Insufficient volume quota in the target OpenStack project (some addons required separate Cinder volumes). These kind of errors will be surfaced in the logs for the various pods in the `openstack-system` namespace on the workload cluster.
 
@@ -167,7 +165,7 @@ Issues discovered on some clouds at this stage include:
 
 ### Remaining Nodes and Addons
 
-Once the essential addons required for a functional cluster (e.g. a [CNI](https://github.com/azimuth-cloud/capi-helm-charts/tree/main/charts/cluster-addons#container-network-interface-cni-plugins)) have been installed, the remaining control plane and worker nodes for the cluster will be provisioned and the addon installation process will proceed untill all workload cluster addons are installed.
+Once the essential addons required for a functional cluster (e.g. a [CNI](https://github.com/azimuth-cloud/capi-helm-charts/tree/main/charts/cluster-addons#container-network-interface-cni-plugins)) have been installed, the remaining control plane and worker nodes for the cluster will be provisioned and the addon installation process will proceed until all workload cluster addons are installed.
 
 Any errors while provisioning the remaining cluster nodes will appear in the `capo-controller-manager` pod logs on the management cluster.
 
