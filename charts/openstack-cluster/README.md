@@ -288,7 +288,9 @@ nodeGroupDefaults:
 If the target cloud uses the
 [OVN Octavia driver](https://docs.openstack.org/ovn-octavia-provider/latest/admin/driver.html),
 Kubernetes clusters should be configured to use OVN for any load-balancers that are created,
-either by Cluster API or by the OpenStack Cloud Controller Manager for `LoadBalancer` services:
+either by Cluster API or by the OpenStack Cloud Controller Manager for `LoadBalancer` services.
+In addition, lb-method must be set to `SOURCE_IP_PORT`, as the OVN provder does not support the
+default `ROUND_ROBIN`:
 
 ```yaml
 apiServer:
@@ -299,6 +301,7 @@ addons:
     cloudConfig:
       LoadBalancer:
         lb-provider: ovn
+        lb-method: SOURCE_IP_PORT
 ```
 
 ## Cluster addons
