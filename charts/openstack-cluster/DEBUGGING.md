@@ -2,7 +2,7 @@
 
 ## Cluster Creation Summary
 
-The following diagram represents a high-level summary of cluster creation process. Each stage is described in more detail below.
+The following diagram represents a high-level summary of the cluster creation process. Each stage is described in more detail below.
 
 ```mermaid
 sequenceDiagram
@@ -31,10 +31,10 @@ sequenceDiagram
 
 ## Provisioning Stages
 
-This section describes the various milestones that occur between the initial creation of an openstack-cluster [Helm release](https://helm.sh/docs/glossary/#release) and a fully functional cluster which is ready for use. At each step in the list below, some commonly encountered issues are highlighted; however, this should not be treated as an exhaustive list and further investigation may be required on a case by case basis.
+This section describes the various milestones that occur between the initial creation of an openstack-cluster [Helm release](https://helm.sh/docs/glossary/#release) and a fully functional workload cluster which is ready to use. At each step in the list below, some commonly encountered issues are highlighted; however, this should not be treated as an exhaustive list and further investigation may be required on a case by case basis.
 
 > [!IMPORTANT]
-> In all of the code snippets below, any commands which are targeting the Cluster API management cluster will be denoted with `--kubeconfig capi-mgmt` whereas those targeting the workload cluster will use `--kubeconfig workload`.
+> In all of the code snippets below, any command targeting the Cluster API management cluster will be denoted with `--kubeconfig capi-mgmt` whereas those targeting the workload cluster will use `--kubeconfig workload`.
 
 When an instance of the openstack-cluster Helm chart is installed on a CAPI management cluster, the provided Helm values are used to generate a set of Kubernetes yaml resources which are then applied to the cluster. The generated resources can be viewed using the Helm CLI:
 
@@ -71,7 +71,7 @@ The two key top-level resources in the above list are the `Cluster` and `OpenSta
 
 ### OpenStack Networking components
 
-After performing some initial validation on the provided configuration, the `capo-controller-manager` pod will create various OpenStack resources. Depending on the provided Helm values, the created resources may include an OpenStack tenant network and subnet, a Neutron router connecting the tenant network to the configured external network, and an Octavia load balancer for the workload cluster's Kubernetes API server. The creation of these resources (and any errors encountered) will be logged in the `capo-controller-manager` pod, the logs for which can be inspected using
+After performing some initial validation on the provided configuration, the `capo-controller-manager` pod will create various OpenStack resources. Depending on the provided Helm values, the created resources may include an OpenStack tenant network and subnet, a Neutron router connecting the tenant network to the configured external network and an Octavia load balancer for the workload cluster's Kubernetes API server. The creation of these resources (and any errors encountered) will be logged in the `capo-controller-manager` pod, the logs for which can be inspected using
 
 ```
 kubectl --kubeconfig capi-mgmt logs -n capo-system deployment/capo-controller-manager
@@ -99,31 +99,10 @@ After creating any necessary networking resources, the CAPO controller will crea
 
 ```
  Your Kubernetes control-plane has initialized successfully!
-
- To start using your cluster, you need to run the following as a regular user:
-
-   mkdir -p $HOME/.kube
-   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-   sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
- Alternatively, if you are the root user, you can run:
-
-   export KUBECONFIG=/etc/kubernetes/admin.conf
-
- You should now deploy a pod network to the cluster.
-.yaml" with one of the options listed at:
-   https://kubernetes.io/docs/concepts/cluster-administration/addons/
-
- You can now join any number of control-plane nodes by copying certificate authorities
- and service account keys on each node and then running the following as root:
-
-   kubeadm join <ip-address>:6443 --token <join-token> \
- 	--discovery-token-ca-cert-hash <hash> \
- 	--control-plane
 ```
 
 > [!NOTE]
-> No manual kubeadm commands are required as the remaining cluster nodes will join the cluster automatically. The above output is just the standard help text output from `kubeadm`.
+> The server logs will also display some messages which mention running manual `kubeadm join` commands for the remaining cluster nodes. This is just the standard help text output from `kubeadm` and should be ignored. No manual kubeadm commands are required - the remaining cluster nodes will join the cluster automatically.
 
 Commonly encountered issues (usually visible in the CAPO controller logs) include:
 
@@ -139,7 +118,7 @@ Now that the first control plane node has initialised successfully, we can begin
 kubectl --kubeconfig capi-mgmt get secret <cluster-name>-kubeconfig -o go-template='{{.data.value | base64decode}}' > workload
 ```
 
-The workload cluster API server can be queried using this kubeconfig, for example, by running
+The workload cluster's API server can be queried using this kubeconfig, for example, by running
 
 ```
 kubectl --kubeconfig workload get nodes
@@ -164,7 +143,7 @@ kubectl --kubeconfig capi-mgmt logs -n capi-addon-system deployment/cluster-api-
 and should include messages such as
 
 ```
-[2024-10-08 09:59:15,097] pyhelm3.command      [INFO    ] command succeeded: helm upgrade cni-calico-monitoring /tmp/tmp6c291nsx --history-max 10 --install --output json --timeout 1h --values '<stdin>' --cleanup-on-fail --create-namespace --namespace tigera-operator --reset-values --version 0.1.0+27028c0a --wait --wait-for-jobs --kubeconfig /tmp/tmpsn88ktuu
+[INFO    ] command succeeded: helm upgrade cni-calico-monitoring /tmp/tmp6c291nsx --history-max 10 --install --output json --timeout 1h --values '<stdin>' --cleanup-on-fail --create-namespace --namespace tigera-operator --reset-values --version 0.1.0+27028c0a --wait --wait-for-jobs --kubeconfig /tmp/tmpsn88ktuu
 ```
 
 which indicate successful installation of addons on the workload cluster. The corresponding Helm releases on the workload cluster can be viewed with
@@ -173,21 +152,20 @@ which indicate successful installation of addons on the workload cluster. The co
 helm --kubeconfig workload list -Aa
 ```
 
-If the addons stall during installation for an extended period of time (e.g. 10 minutes or more) then it is possible tha the addon provider's `helm upgrade --install` command has encountered an error. If this happens, check for any `helmreleases` on the management cluster that are not yet in a `Deployed` state and investigate the corresponding resources on the workload cluster, including any pods which are not in a `Running` state. Further investigation of the root cause of the issues for any problematic pod may be required.
+If the addons stall during installation for an extended period of time (e.g. 10 minutes or more) then it is possible that one or more of the the addon provider's `helm upgrade --install` commands have encountered an error. If this happens, start by checking for any `helmreleases` on the management cluster that are not yet in a `Deployed` state then investigate the corresponding resources for that Helm release on the workload cluster, including any pods which are not in a `Running` state. Further investigation into the root cause of the issues for any problematic pod may be required.
 
+Possible errors at this stage include (but are not limit to):
 
-Possible issues at this stage include (but are not limit to):
-
-- Failure to create `PersistentVolume` resources on the workload cluster that may be required for some addons (e.g. the `kube-prometheus-stack` and `loki-stack` addons). This may be caused by insufficient volume quota in the target OpenStack project or other Cinder CSI misconfiguration on the workload cluster.
+- Failure to create `PersistentVolume` resources on the workload cluster which are required by some addons (e.g. the `kube-prometheus-stack` and `loki-stack` Helm releases which are part of the monitoring stack addon). This may be caused by insufficient volume quota in the target OpenStack project or other Cinder CSI misconfiguration on the workload cluster.
 
 - Failure to create `Service` resources of type `LoadBalancer` on the workload cluster (e.g. if the NGINX ingress controller addon is enabled). This again may be caused by insufficient OpenStack quotas or permissions.
 
-- Network IP range clashes. For example, the [workload cluster's internal network config](https://github.com/azimuth-cloud/capi-helm-charts/blob/37ab14468c5b6abeec75aa12e5328bb6468e84c8/charts/openstack-cluster/values.yaml#L34-L45) may clashes with other important IP addresses such as the CIDR for the OpenStack subnet on which the cluster was provisioned or some cloud-specific on-site DNS servers.
+- Network IP range clashes. For example, the [workload cluster's internal network config](https://github.com/azimuth-cloud/capi-helm-charts/blob/37ab14468c5b6abeec75aa12e5328bb6468e84c8/charts/openstack-cluster/values.yaml#L34-L45) may clashes with other important IP addresses such as the CIDR for the OpenStack subnet on which the cluster was provisioned or some cloud-specific on-site DNS servers. In this case, the workload cluster's internal networking config may need to be modified via the Helm values.
 
 ### Remaining Nodes and Addons
 
-Once the essential addons required for a functional cluster (e.g. a [CNI](https://github.com/azimuth-cloud/capi-helm-charts/tree/main/charts/cluster-addons#container-network-interface-cni-plugins)) have been installed, the remaining control plane and worker nodes for the cluster will be provisioned and the addon installation process will proceed until all workload cluster addons are installed.
+Once the essential addons which are required for a functional cluster (e.g. a [CNI](https://github.com/azimuth-cloud/capi-helm-charts/tree/main/charts/cluster-addons#container-network-interface-cni-plugins)) have been installed, the remaining control plane and worker nodes for the cluster will be provisioned and the addon installation process will proceed until all workload cluster addons are installed.
 
 Any errors while provisioning the remaining cluster nodes will appear in the `capo-controller-manager` pod logs on the management cluster.
 
-Any errors while installing the cluster addons will likely appear either in the `cluster-api-addon-provider` pod logs on the management cluster, in the output of `helm --kubeconfig workload list -aA` on the workload cluster, or in any of the logs or events for pods in an unready state on the workload cluster.
+Any errors encountered while installing the cluster addons will likely appear either in the `cluster-api-addon-provider` pod logs on the management cluster, in the output of `helm --kubeconfig workload list -aA` on the workload cluster, or in any of the logs or events for pods in an unready state on the workload cluster.
