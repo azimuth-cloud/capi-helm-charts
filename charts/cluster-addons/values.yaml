@@ -12,7 +12,13 @@ cni:
   type: calico
   # Settings for the calico CNI
   # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
+  # Defaults in this Helm chart for encapsulation and bgp are for VXLAN.
+  # To enable BGP mode Calico:
+  # 1. Set encapsulation:None and bgp:Enabled
+  # 2. Ensure all nodes have the pod CIDR in allowed address pairs on network ports.
   calico:
+    bgp: Disabled
+    encapsulation: VXLAN
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
