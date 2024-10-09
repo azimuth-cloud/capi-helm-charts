@@ -1,4 +1,4 @@
-# Debugging
+# Debugging a Cluster API cluster on OpenStack
 
 ## Cluster Creation Summary
 
@@ -31,12 +31,12 @@ sequenceDiagram
 
 ## Provisioning Stages
 
-This page describes the various milestones that occur between the initial creation of an openstack-cluster [Helm release](https://helm.sh/docs/glossary/#release) and a fully functional cluster which is ready for use. At each step in the list below, some commonly encountered issues are highlighted; however, this should not be treated as an exhaustive list and further investigation may be required on a case by case basis.
+This section describes the various milestones that occur between the initial creation of an openstack-cluster [Helm release](https://helm.sh/docs/glossary/#release) and a fully functional cluster which is ready for use. At each step in the list below, some commonly encountered issues are highlighted; however, this should not be treated as an exhaustive list and further investigation may be required on a case by case basis.
 
 > [!IMPORTANT]
 > In all of the code snippets below, any commands which are targeting the Cluster API management cluster will be denoted with `--kubeconfig capi-mgmt` whereas those targeting the workload cluster will use `--kubeconfig workload`.
 
-When an instance of the openstack-cluster Helm chart is installed on the CAPI management cluster, the provided Helm values are used to generate a set of Kubernetes yaml resources which are then applied to the cluster. The generated resources can be viewed using the Helm CLI:
+When an instance of the openstack-cluster Helm chart is installed on a CAPI management cluster, the provided Helm values are used to generate a set of Kubernetes yaml resources which are then applied to the cluster. The generated resources can be viewed using the Helm CLI:
 
 ```
 helm --kubeconfig capi-mgmt get manifest <release-name>
@@ -87,11 +87,11 @@ The progress of these steps can also be monitored using the OpenStack Horizon da
 
 Commonly encountered issues at this stage (usually visible in the CAPO controller logs) include:
 
-- Incorrectly formatted cloud credentials (see [these docs](./README.md#openstack-credentials))
+- Incorrectly formatted cloud credentials (see [these docs](./README.md#openstack-credentials)).
 
-- Insufficient quota in the target OpenStack project (for various resources such as networks, subnets, security groups etc.)
+- Insufficient quota in the target OpenStack project (for various resources such as networks, subnets, security groups etc).
 
-- Incorrect network names, IDs or other filters (e.g. if both an ID and a name are provided simultaneously in network filter config then CAPO might do [unexpected things](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/6560f8882a2aa7ece3d13d47f2f2badbcba348c3/api/v1beta1/types.go#L160))
+- Incorrect network names, IDs or other filters (e.g. if both an ID and a name are provided simultaneously in network filter config then CAPO might do [unexpected things](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/6560f8882a2aa7ece3d13d47f2f2badbcba348c3/api/v1beta1/types.go#L160)).
 
 ### First control plane node
 
@@ -133,10 +133,10 @@ Commonly encountered issues (usually visible in the CAPO controller logs) includ
 
 ### Essential Addons
 
-Now that the first control plane node has initialised successfully, the kubeconfig for the workload cluster will be written to a Kubernetes `Secret` named `<cluster-name>-kubeconfig` on the CAPI management cluster. At this point, the kubeconfig can be extracted from the secret for use with `kubectl` using the following command:
+Now that the first control plane node has initialised successfully, we can begin to interact with the workload cluster's API server. At this point, the kubeconfig for the workload cluster will have been written to a Kubernetes `Secret` named `<cluster-name>-kubeconfig` on the CAPI management cluster. The contents of the kubeconfig file can be extracted for use with `kubectl` using the following command:
 
 ```
-kubectl --kubeconfig capi-mgmt get secret <cluster-name>-kubeconfig -o jsonpath='{.data.value}' | base64 -d > workload
+kubectl --kubeconfig capi-mgmt get secret <cluster-name>-kubeconfig -o go-template='{{.data.value | base64decode}}' > workload
 ```
 
 The workload cluster API server can be queried using this kubeconfig, for example, by running
@@ -145,7 +145,7 @@ The workload cluster API server can be queried using this kubeconfig, for exampl
 kubectl --kubeconfig workload get nodes
 ```
 
-which should show at least 1 cluster node.
+which should show at least 1 control-plane node with status 'Ready'.
 
 The [cluster-api-addon-provider](https://github.com/azimuth-cloud/cluster-api-addon-provider) will now begin to install the workload cluster addons. Progress can be monitored with
 
@@ -155,11 +155,32 @@ kubectl --kubeconfig capi-mgmt get helmreleases,manifests -A
 
 where each `helmrelease` resource on the management cluster represents a [Helm release](https://helm.sh/docs/glossary/#release) that will be installed on the workload cluster. Similarly, each `manifest` resource represents a set of ad-hoc Kubernetes manifests which will be installed on the workload cluster.
 
-If the addons stall during installation for an extended period of time (e.g. 10 minutes or more) then it may also be worth checking for any pods on the workload cluster which are not in a `Running` state and investigating the root cause of the issues for each problematic pod.
+The logs for the addon provider can be viewed with
+
+```
+kubectl --kubeconfig capi-mgmt logs -n capi-addon-system deployment/cluster-api-addon-provider
+```
+
+and should include messages such as
+
+```
+[2024-10-08 09:59:15,097] pyhelm3.command      [INFO    ] command succeeded: helm upgrade cni-calico-monitoring /tmp/tmp6c291nsx --history-max 10 --install --output json --timeout 1h --values '<stdin>' --cleanup-on-fail --create-namespace --namespace tigera-operator --reset-values --version 0.1.0+27028c0a --wait --wait-for-jobs --kubeconfig /tmp/tmpsn88ktuu
+```
+
+which indicate successful installation of addons on the workload cluster. The corresponding Helm releases on the workload cluster can be viewed with
+
+```
+helm --kubeconfig workload list -Aa
+```
+
+If the addons stall during installation for an extended period of time (e.g. 10 minutes or more) then it is possible tha the addon provider's `helm upgrade --install` command has encountered an error. If this happens, check for any `helmreleases` on the management cluster that are not yet in a `Deployed` state and investigate the corresponding resources on the workload cluster, including any pods which are not in a `Running` state. Further investigation of the root cause of the issues for any problematic pod may be required.
+
 
 Possible issues at this stage include (but are not limit to):
 
-- Insufficient volume quota in the target OpenStack project (some addons required separate Cinder volumes). These kind of errors will be surfaced in the logs for the various pods in the `openstack-system` namespace on the workload cluster.
+- Failure to create `PersistentVolume` resources on the workload cluster that may be required for some addons (e.g. the `kube-prometheus-stack` and `loki-stack` addons). This may be caused by insufficient volume quota in the target OpenStack project or other Cinder CSI misconfiguration on the workload cluster.
+
+- Failure to create `Service` resources of type `LoadBalancer` on the workload cluster (e.g. if the NGINX ingress controller addon is enabled). This again may be caused by insufficient OpenStack quotas or permissions.
 
 - Network IP range clashes. For example, the [workload cluster's internal network config](https://github.com/azimuth-cloud/capi-helm-charts/blob/37ab14468c5b6abeec75aa12e5328bb6468e84c8/charts/openstack-cluster/values.yaml#L34-L45) may clashes with other important IP addresses such as the CIDR for the OpenStack subnet on which the cluster was provisioned or some cloud-specific on-site DNS servers.
 

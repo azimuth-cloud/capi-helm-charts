@@ -25,9 +25,3 @@ Currently, the following charts are available:
 | [cluster-addons](./charts/cluster-addons) | Deploys addons into a Kubernetes cluster, e.g. CNI. |
 | [etcd-defrag](./charts/etcd-defrag/) | Installs a `CronJob` for running [etcd defragmentation](https://etcd.io/docs/v3.5/op-guide/maintenance/#defragmentation). |
 | [openstack-cluster](./charts/openstack-cluster) | Deploys a Kubernetes cluster on an OpenStack cloud. |
-
-# Usage
-
-## OpenStack
-
-See the openstack-cluster chart [README.md](./charts/openstack-cluster/README.md) for deployment instructions and [DEBUGGING.md](./charts/openstack-cluster/DEBUGGING.md) for debugging tips.

@@ -37,6 +37,7 @@ templates for more details.
   - [Configuring the cluster](#configuring-the-cluster)
   - [Connecting to the cluster](#connecting-to-the-cluster)
   - [Granting roles to users and groups from OIDC](#granting-roles-to-users-and-groups-from-oidc)
+- [Troubleshooting](./DEBUGGING.md)
 - [Advanced](#advanced)
   - [Flatcar support](#flatcar-support)
   - [Keystone Authentication Webhook](#keystone-authentication-webhook)
@@ -544,6 +545,12 @@ addons:
               kind: ClusterRole
               name: cluster-admin
 ```
+
+
+## Troubleshooting
+
+See [DEBUGGING.md](./charts/openstack-cluster/DEBUGGING.md).
+
 
 ## Advanced
 
