@@ -1,5 +1,5 @@
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackCluster
 metadata:
   name: {{ include "openstack-cluster.clusterName" . }}
@@ -11,34 +11,54 @@ metadata:
     # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
   identityRef:
-    kind: Secret
     name: {{ include "openstack-cluster.cloudCredentialsSecretName" . }}
-  cloudName: openstack
+    cloudName: openstack
   {{- with .Values.controlPlaneEndpoint }}
   controlPlaneEndpoint: {{ toYaml . | nindent 4 }}
   {{- end }}
   {{- with .Values.clusterNetworking }}
-  {{- with .dnsNameservers }}
-  dnsNameservers: {{ toYaml . | nindent 4 }}
+  {{- if .manageSecurityGroups }}
+  managedSecurityGroups:
+    {{- if eq .manageSecurityGroups "true" }}
+    allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
+    {{- else }}
+    {{- toYaml .manageSecurityGroups | nindent 2 }}
+    {{- end }}
   {{- end }}
-  managedSecurityGroups: {{ .manageSecurityGroups }}
-  allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
-  {{- with .externalNetworkId }}
-  externalNetworkId: {{ . }}
+  disableExternalNetwork: {{ .disableExternalNetwork | default "false" }}
+  {{- if or .externalNetworkFilter .externalNetworkId }}
+  externalNetwork:
+    {{- if .externalNetworkFilter }}
+    {{- toYaml .externalNetworkFilter | nindent 2 }}
+    {{- else }}
+    id: {{ .externalNetworkId }}
+    {{- end }}
+  {{- end }}
   {{- end }}
   {{- with .internalNetwork }}
-  {{- if or .networkFilter .subnetFilter }}
+  {{- if or .networkFilter .subnetFilter .subnets }}
   {{- with .networkFilter }}
   network: {{ . | toYaml | nindent 4 }}
   {{- end }}
-  {{- with .subnetFilter }}
-  subnet: {{ . | toYaml | nindent 4 }}
+  {{- if or .subnets .subnetFilter }}
+  subnets:
+  {{- if .subnets }}
+  {{- toYaml .subnets | nindent 2 }}
+  {{- else }}
+  - {{ toYaml .subnetFilter | nindent 4 }}
+  {{- end }}
   {{- end }}
   {{- else }}
-  nodeCidr: {{ .nodeCidr }}
+  managedSubnets:
+  {{- if .managedSubnets }}
+  {{- toYaml .managedSubnets | nindent 2 }}
+  {{- else }}
+  - cidr: {{ .nodeCidr }}
+    dnsNameservers: {{ toYaml .Values.dnsNameservers | nindent 4 }}
   {{- end }}
   {{- end }}
   {{- end }}
+
   {{- with .Values.apiServer }}
   {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
@@ -46,14 +66,13 @@ spec:
   {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
   {{- end }}
-  {{- if .allowedCidrs }}
-    allowedCidrs:
-      {{- range .allowedCidrs }}
+  {{- if or .allowedCidrs .allowedCIDRs }}
+    allowedCIDRs:
+      {{- range .allowedCidrs | default .allowedCIDRs }}
       - {{ . }}
       {{- end}}
   {{- end }}
   {{- end }}
-
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}

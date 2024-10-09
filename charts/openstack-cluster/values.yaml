@@ -69,15 +69,44 @@ kubeNetwork:
 
 # Settings for the OpenStack networking for the cluster
 clusterNetworking:
-  # Custom nameservers to use for the hosts
-  dnsNameservers:
+
   # Indicates if security groups should be managed by the cluster
-  manageSecurityGroups: true
-  # Indicates if the managed security groups should allow all in-cluster traffic
-  # The default CNI installed by the addons is Cilium, so this is true by default
-  allowAllInClusterTraffic: true
-  # The ID of the external network to use
+  # Its possible to add additional rules to the managed security groups 
+  # https://cluster-api-openstack.sigs.k8s.io/api/v1beta1/api#infrastructure.cluster.x-k8s.io/v1beta1.ManagedSecurityGroups
+  managedSecurityGroups: 
+    # Indicates if the managed security groups should allow all in-cluster traffic
+    # The default CNI installed by the addons is Cilium, so this is true by default
+    allowAllInClusterTraffic: true
+
+    # Add additional security group like so:
+    # allNodesSecurityGroupRules:
+    # - remoteManagedGroups:
+    # - controlplane
+    # - worker
+    # direction: ingress
+    # etherType: IPv4
+    # name: BGP (Calico)
+    # portRangeMin: 179
+    # portRangeMax: 179
+    # protocol: tcp
+    # description: "Allow BGP between control plane and workers"
+
+  # DEPRECATED fields see above
+  # manageSecurityGroups: true
+  # allowAllInClusterTraffic: true
+
+  # Indicates whether or not to attempt to connect the cluster to an external network
+  disableExternalNetwork: false 
+
+  # Details of the external network to use 
+  # This option is ignored if disableExternalNetwork is set to true.
   # If not given, the external network will be detected
+  externalNetworkFilter:
+    # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
+    # name: tenant-external-net
+
+  # The ID of the external network to use 
+  # DEPRECATED - use externalNetwork 
   externalNetworkId:
   # Details of the internal network to use
   internalNetwork:
@@ -86,14 +115,31 @@ clusterNetworking:
     networkFilter:
       # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
       # name: tenant-internal-net
-    # Filter to find an existing subnet for the cluster internal network
     # See Cluster API documentation for details
+    
+    # Filter to find existing subnets to use 
+    # allows specification of two existing subnets for the dual-stack scenario.
+    subnets:
+      # - id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
+
+    # DEPRECATED - use subnets
     subnetFilter:
       # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
       # name: tenant-internal-subnet
-    # The CIDR to use if creating a cluster network
+    
+    # ManagedSubnets describe OpenStack Subnets to be created.
     # This is only used if neither of networkFilter and subnetFilter are given
-    nodeCidr: 192.168.3.0/24
+    managedSubnets:
+      - cidr: 192.168.3.0/24
+        # Custom nameservers to use for the hosts
+        dnsNameservers: 
+
+    # DEPRECATED - set in managedSubnets above
+    # nodeCidr: 192.168.3.0/24
+
+  # DEPRECATED - set in internalNetwork.managedSubnets 
+  # dnsNameservers: 
+
 
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
@@ -159,6 +205,7 @@ etcd:
     # # The volume availability zone to use
     # # If not specified, the machine availability zone is used
     # availabilityZone:
+    #   name: az1
 
 # Settings for the Kubernetes API server
 apiServer:
@@ -167,7 +214,7 @@ apiServer:
   # Indicates what loadbalancer provider to use. Default is amphora
   loadBalancerProvider:
   # Restrict loadbalancer access to select IPs
-  # allowedCidrs
+  # allowedCIDRs 
   #  - 192.168.0.0/16  # needed for cluster to init
   #  - 10.10.0.0/16  # IPv4 Internal Network
   #  - 123.123.123.123 # some other IPs
@@ -237,17 +284,28 @@ controlPlane:
     ports:
   # The root volume spec for control plane machines
   machineRootVolume:
-    # The size of the disk to use
+    # The size of the disk to use in gibibytes (GiB)
     # If not given, the ephemeral root disk from the flavor is used
-    diskSize:
+    sizeGiB:
     # The volume type to use
     # If not specified, the default volume type is used
     # volumeType:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+    #   name: az1
+
+    # diskSize: DEPRECATED - use sizeGiB
+
+  # Details of the server group to use for control plane machines
+  serverGroupFilter:
+    # id: 
+    # name: 
+
+  # DEPRECATED - use serverGroupFilter 
   # The ID of the server group to use for control plane machines
-  serverGroupId:
+  # serverGroupId:
+
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
   nodeLabels:
     # my.company.org/label: value
@@ -269,6 +327,7 @@ controlPlane:
     #   # The volume availability zone to use
     #   # If not specified, the machine availability zone is used
     #   availabilityZone:
+    #     name: az1
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
@@ -371,17 +430,28 @@ nodeGroupDefaults:
     ports:
   # The root volume spec for machines in the node group
   machineRootVolume:
-    # The size of the disk to use
+    # The size of the disk to use in gibibytes (GiB)
     # If not given, the ephemeral root disk from the flavor is used
-    diskSize:
+    sizeGiB:
     # The volume type to use
     # If not specified, the default volume type is used
     # volumeType:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+    #   name: az1
+
+    # diskSize: DEPRECATED - use sizeGiB
+    
+  # Details of the server group to use for machines in the node group
+  serverGroupFilter:
+    # id: 
+    # name: 
+
+  # DEPRECATED - use serverGroupFilter 
   # The ID of the server group to use for machines in the node group
-  serverGroupId:
+  # serverGroupId:
+
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
   # By default, nodes get the label "capi.stackhpc.com/node-group=<node group name>"
   nodeLabels:
