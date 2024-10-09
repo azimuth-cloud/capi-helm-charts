@@ -39,6 +39,8 @@ templates for more details.
   - [Granting roles to users and groups from OIDC](#granting-roles-to-users-and-groups-from-oidc)
 - [Troubleshooting](./DEBUGGING.md)
 - [Advanced](#advanced)
+- [Configuring admission controllers](#configuring-admission-controllers)
+  - [Configuring pod security standards](#configuring-pod-security-standards)
   - [Flatcar support](#flatcar-support)
   - [Keystone Authentication Webhook](#keystone-authentication-webhook)
 
@@ -286,7 +288,9 @@ nodeGroupDefaults:
 If the target cloud uses the
 [OVN Octavia driver](https://docs.openstack.org/ovn-octavia-provider/latest/admin/driver.html),
 Kubernetes clusters should be configured to use OVN for any load-balancers that are created,
-either by Cluster API or by the OpenStack Cloud Controller Manager for `LoadBalancer` services:
+either by Cluster API or by the OpenStack Cloud Controller Manager for `LoadBalancer` services.
+In addition, lb-method must be set to `SOURCE_IP_PORT`, as the OVN provder does not support the
+default `ROUND_ROBIN`:
 
 ```yaml
 apiServer:
@@ -297,6 +301,7 @@ addons:
     cloudConfig:
       LoadBalancer:
         lb-provider: ovn
+        lb-method: SOURCE_IP_PORT
 ```
 
 ## Cluster addons
@@ -554,9 +559,83 @@ See [DEBUGGING.md](./charts/openstack-cluster/DEBUGGING.md).
 
 ## Advanced
 
+## Configuring admission controllers
+
+An admission controller in Kubernetes has the ability to intercept API requests after
+authentication and authorization but before the object is persisted, and is able to
+modify and/or validate the object.
+
+Kubernetes has a number of
+[admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+that are used for things like
+[enforcing quotas](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#resourcequota),
+[setting the default storage class](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#resourcequota)
+and
+[enforcing pod security standards](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podsecurity).
+
+These charts allow the configuration of admiission controllers to be set when needed using
+`apiServer.admissionConfiguration`. An example of using this to configure the default pod
+security standard for the cluster is given below.
+
+### Configuring pod security standards
+
+The
+[Pod Security admission controller](https://kubernetes.io/docs/concepts/security/pod-security-admission/)
+is responsible for checking pod definitions against the Kubernetes
+[Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+before allowing them to enter the cluster.
+
+By default, the `privileged` pod security standard applies, meaning that any pod is allowed to
+be created in any namespace. The `baseline` and `restricted` standards have policies that pods
+must meet to be permitted - see the Kubernetes documentation for the specific policies that apply
+for each.
+
+The standards can be applied in one of three modes:
+
+  * `enforce` - policy violations cause the pod to be rejected
+  * `audit` - policy violations are recorded in the audit log, if enabled
+  * `warn` - policy violations trigger a user-facing warning
+
+A different standard can be applied for each mode, e.g. enforce the `baseline` standard but
+warn users when their workloads violate the `restricted` standard.
+
+Pod security standards can be
+[applied at the namespace level](https://kubernetes.io/docs/tutorials/security/ns-level-pss/)
+using annotations on `Namespace` resources, but default standards can also be
+[applied at the cluster level](https://kubernetes.io/docs/tutorials/security/cluster-level-pss/)
+by passing configuration to the `PodSecurity` admission controller:
+
+```yaml
+apiServer:
+  admissionConfiguration:
+    PodSecurity:
+      apiVersion: pod-security.admission.config.k8s.io/v1
+      kind: PodSecurityConfiguration
+      # The default standards for enforce, audit and warn
+      defaults:
+        enforce: baseline
+        enforce-version: latest
+        audit: baseline
+        audit-version: latest
+        warn: restricted
+        warn-version: latest
+      exemptions:
+        # Any users who are exempt from the checks
+        usernames: []
+        # Any runtime classes that are exempt from the checks
+        runtimeClasses: []
+        # Any namespaces that are exempt from the checks
+        namespaces:
+          - kube-system
+```
+
+The configuration format is
+[documented here](https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-admission-controller/#configure-the-admission-controller).
+
 ### Flatcar support
 
-To deploy clusters which use Ignition such as Flatcar, you will need to override the following setting in your local `values.yaml`:
+To deploy clusters which use Ignition such as Flatcar, you will need to override the following
+setting in your local `values.yaml`:
 
 ```yaml
 osDistro: flatcar
