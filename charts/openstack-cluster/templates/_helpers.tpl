@@ -134,7 +134,20 @@ nodeRegistration:
     node-labels: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
 {{- end }}
 
-{{/* Converts a v1alpha7 Neutron filter to a v1beta1 filter */}}
+{{/*
+Converts the tags in a Neutron filter when required.
+*/}}
+{{- define "openstack-cluster.convert.tags" -}}
+{{- if kindIs "string" . -}}
+{{- splitList "," . | toYaml }}
+{{- else -}}
+{{- toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Converts a v1alpha7 Neutron filter to a v1beta1 filter.
+*/}}
 {{- define "openstack-cluster.convert.neutronFilter" -}}
 {{- if hasKey . "id" -}}
 id: {{ .id }}
@@ -144,16 +157,16 @@ filter:
   {{- toYaml . | nindent 2 }}
   {{- end }}
   {{- with .tags }}
-  tags: {{ splitList "," . | toYaml | nindent 4 }}
+  tags: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
   {{- end }}
   {{- with .tagsAny }}
-  tagsAny: {{ splitList "," . | toYaml | nindent 4 }}
+  tagsAny: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
   {{- end }}
   {{- with .notTags }}
-  notTags: {{ splitList "," . | toYaml | nindent 4 }}
+  notTags: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
   {{- end }}
   {{- with .notTagsAny }}
-  notTagsAny: {{ splitList "," . | toYaml | nindent 4 }}
+  notTagsAny: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
   {{- end }}
 {{- end }}
 {{- end }}
