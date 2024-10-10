@@ -37,6 +37,7 @@ templates for more details.
   - [Configuring the cluster](#configuring-the-cluster)
   - [Connecting to the cluster](#connecting-to-the-cluster)
   - [Granting roles to users and groups from OIDC](#granting-roles-to-users-and-groups-from-oidc)
+- [Troubleshooting](./DEBUGGING.md)
 - [Advanced](#advanced)
 - [Configuring admission controllers](#configuring-admission-controllers)
   - [Configuring pod security standards](#configuring-pod-security-standards)
@@ -107,8 +108,7 @@ For ease of use, this chart is written so that a `clouds.yaml` file can be given
 to the chart as a configuration file. When an application credential is created in Horizon,
 the corresponding `clouds.yaml` file can be downloaded, and should look something like this:
 
-> WARNING
-> 
+> [!WARNING]
 > The Cluster API OpenStack provider currently requires that the `project_id` is present,
 > which you will need to add manually.
 
@@ -551,6 +551,12 @@ addons:
               name: cluster-admin
 ```
 
+
+## Troubleshooting
+
+See [DEBUGGING.md](./charts/openstack-cluster/DEBUGGING.md).
+
+
 ## Advanced
 
 ## Configuring admission controllers
@@ -632,7 +638,7 @@ To deploy clusters which use Ignition such as Flatcar, you will need to override
 setting in your local `values.yaml`:
 
 ```yaml
-osDistro: flatcar 
+osDistro: flatcar
 ```
 
 ### Keystone Authentication Webhook
@@ -641,7 +647,7 @@ To deploy with the k8s-keystone-auth webhook enabled, set `authWebhook`
 to "k8s-keystone-auth".
 
 ```
-authWebhook: k8s-keystone-auth 
+authWebhook: k8s-keystone-auth
 ```
 
 See cluster-addons README for instructions on installing the `k8s-keystone-auth` subchart.
