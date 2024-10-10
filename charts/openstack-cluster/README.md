@@ -37,10 +37,10 @@ templates for more details.
   - [Configuring the cluster](#configuring-the-cluster)
   - [Connecting to the cluster](#connecting-to-the-cluster)
   - [Granting roles to users and groups from OIDC](#granting-roles-to-users-and-groups-from-oidc)
-- [Troubleshooting](./DEBUGGING.md)
-- [Advanced](#advanced)
 - [Configuring admission controllers](#configuring-admission-controllers)
   - [Configuring pod security standards](#configuring-pod-security-standards)
+- [Troubleshooting](#troubleshooting)
+- [Advanced](#advanced)
   - [Flatcar support](#flatcar-support)
   - [Keystone Authentication Webhook](#keystone-authentication-webhook)
 
@@ -551,14 +551,6 @@ addons:
               name: cluster-admin
 ```
 
-
-## Troubleshooting
-
-See [DEBUGGING.md](./charts/openstack-cluster/DEBUGGING.md).
-
-
-## Advanced
-
 ## Configuring admission controllers
 
 An admission controller in Kubernetes has the ability to intercept API requests after
@@ -631,6 +623,12 @@ apiServer:
 
 The configuration format is
 [documented here](https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-admission-controller/#configure-the-admission-controller).
+
+## Troubleshooting
+
+See [DEBUGGING.md](./DEBUGGING.md).
+
+## Advanced
 
 ### Flatcar support
 
