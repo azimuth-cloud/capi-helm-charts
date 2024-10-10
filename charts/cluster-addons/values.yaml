@@ -245,7 +245,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 59.1.0
+      version: 65.1.1
     release:
       namespace: monitoring-system
       values:
