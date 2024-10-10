@@ -362,7 +362,7 @@ nodeProblemDetector:
   chart:
     repo: https://charts.deliveryhero.io
     name: node-problem-detector
-    version: 2.3.13
+    version: 2.3.14
   release:
     namespace: node-problem-detector
     values: {}
