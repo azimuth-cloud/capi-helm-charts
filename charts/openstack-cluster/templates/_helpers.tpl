@@ -135,6 +135,43 @@ nodeRegistration:
 {{- end }}
 
 {{/*
+Converts the tags in a Neutron filter when required.
+*/}}
+{{- define "openstack-cluster.convert.tags" -}}
+{{- if kindIs "string" . -}}
+{{- splitList "," . | toYaml }}
+{{- else -}}
+{{- toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Converts a v1alpha7 Neutron filter to a v1beta1 filter.
+*/}}
+{{- define "openstack-cluster.convert.neutronFilter" -}}
+{{- if hasKey . "id" -}}
+id: {{ .id }}
+{{- else -}}
+filter:
+  {{- with omit . "tags" "tagsAny" "notTags" "notTagsAny" }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- with .tags }}
+  tags: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
+  {{- end }}
+  {{- with .tagsAny }}
+  tagsAny: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
+  {{- end }}
+  {{- with .notTags }}
+  notTags: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
+  {{- end }}
+  {{- with .notTagsAny }}
+  notTagsAny: {{ include "openstack-cluster.convert.tags" . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Outputs the content for a containerd registry file containing mirror configuration.
 */}}
 {{- define "openstack-cluster.registryFile" -}}

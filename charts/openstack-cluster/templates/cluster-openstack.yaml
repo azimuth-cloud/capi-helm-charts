@@ -1,5 +1,5 @@
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackCluster
 metadata:
   name: {{ include "openstack-cluster.clusterName" . }}
@@ -11,31 +11,35 @@ metadata:
     # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
   identityRef:
-    kind: Secret
     name: {{ include "openstack-cluster.cloudCredentialsSecretName" . }}
-  cloudName: openstack
+    cloudName: openstack
   {{- with .Values.controlPlaneEndpoint }}
   controlPlaneEndpoint: {{ toYaml . | nindent 4 }}
   {{- end }}
   {{- with .Values.clusterNetworking }}
-  {{- with .dnsNameservers }}
-  dnsNameservers: {{ toYaml . | nindent 4 }}
+  {{- if .manageSecurityGroups }}
+  managedSecurityGroups:
+    allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
   {{- end }}
-  managedSecurityGroups: {{ .manageSecurityGroups }}
-  allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
   {{- with .externalNetworkId }}
-  externalNetworkId: {{ . }}
+  externalNetwork:
+    id: {{ . }}
   {{- end }}
   {{- with .internalNetwork }}
   {{- if or .networkFilter .subnetFilter }}
   {{- with .networkFilter }}
-  network: {{ . | toYaml | nindent 4 }}
+  network: {{ include "openstack-cluster.convert.neutronFilter" . | nindent 4 }}
   {{- end }}
   {{- with .subnetFilter }}
-  subnet: {{ . | toYaml | nindent 4 }}
+  subnets:
+    - {{ include "openstack-cluster.convert.neutronFilter" . | nindent 6 }}
   {{- end }}
   {{- else }}
-  nodeCidr: {{ .nodeCidr }}
+  managedSubnets:
+    - cidr: {{ .nodeCidr }}
+      {{- with .dnsNameservers }}
+      dnsNameservers: {{ toYaml . | nindent 8 }}
+      {{- end }}
   {{- end }}
   {{- end }}
   {{- end }}
@@ -43,17 +47,16 @@ spec:
   {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
     enabled: true
-  {{- if .loadBalancerProvider }}
+    {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
-  {{- end }}
-  {{- if .allowedCidrs }}
+    {{- end }}
+    {{- if .allowedCidrs }}
     allowedCidrs:
       {{- range .allowedCidrs }}
       - {{ . }}
       {{- end}}
+    {{- end }}
   {{- end }}
-  {{- end }}
-
   disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}
