@@ -25,6 +25,9 @@ machineImageId:
 # The name of the SSH key to inject into cluster machines
 machineSSHKeyName:
 
+# Global metadata items to add to each machine
+machineMetadata: {}
+
 # The prefix used for project labels and annotations
 projectPrefix: capi.stackhpc.com
 
@@ -246,6 +249,8 @@ controlPlane:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+  # Specific metadata for control plane nodes
+  machineMetadata: {}
   # The ID of the server group to use for control plane machines
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
@@ -380,6 +385,9 @@ nodeGroupDefaults:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
     # availabilityZone:
+  # Specific metadata for worker nodes
+  # Can also be specified for each node group
+  machineMetadata: {}
   # The ID of the server group to use for machines in the node group
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group

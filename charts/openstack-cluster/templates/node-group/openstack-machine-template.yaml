@@ -74,6 +74,13 @@ template:
     serverGroup:
       id: {{ . }}
     {{- end }}
+    {{- with mergeOverwrite $ctx.Values.machineMetadata $nodeGroup.machineMetadata }}
+    serverMetadata:
+      {{- range $k, $v := . }}
+      - key: {{ quote $k }}
+        value: {{ quote $v }}
+      {{- end }}
+    {{- end }}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.mt.checksum" -}}

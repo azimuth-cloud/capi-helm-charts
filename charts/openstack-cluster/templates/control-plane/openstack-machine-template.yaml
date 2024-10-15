@@ -78,6 +78,13 @@ template:
     serverGroup:
       id: {{ . }}
     {{- end }}
+    {{- with mergeOverwrite .Values.machineMetadata .Values.controlPlane.machineMetadata }}
+    serverMetadata:
+      {{- range $k, $v := . }}
+      - key: {{ quote $k }}
+        value: {{ quote $v }}
+      {{- end }}
+    {{- end }}
 {{- end }}
 
 {{- define "openstack-cluster.controlplane.mt.checksum" -}}
