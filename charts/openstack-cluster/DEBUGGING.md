@@ -87,7 +87,7 @@ The progress of these steps can also be monitored using the OpenStack Horizon da
 
 > [!WARNING]
 >
-> ### Cluster autoscaler crash-looping
+> #### Cluster autoscaler crash-looping
 >
 > During the provisioning of a workload cluster, the cluster autoscaler pod running on the CAPI management cluster will not start correctly until the workload `kubeconfig` secret is available, which in turn cannot happen until the API server's load balancer has been provisioned (since the IP for the loadbalancer is required to populate the `host` field within the kubeconfig). Therefore, an autoscaler pod in `CrashLoopBackoff` state is **extremely unlikely** to be the root cause of any cluster creation issues. If the pod is crash looping then first check that all of the OpenStack networking resources have been correctly provisioned and that there are no OpenStack API errors in the CAPO controller manager logs.
 
