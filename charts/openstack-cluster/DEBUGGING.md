@@ -85,6 +85,9 @@ I0730 14:27:45.708588  1 openstackcluster_controller.go:432] "Reconciling networ
 
 The progress of these steps can also be monitored using the OpenStack Horizon dashboard or the `openstack` CLI.
 
+> [!WARNING]
+> During the provisioning of a workload cluster, the cluster autoscaler pod running on the CAPI management cluster will not start correctly until the workload `kubeconfig` secret is available, which in turn cannot happen until the API server's load balancer has been provisioned (since the IP for the loadbalancer is required to populate the `host` field within the kubeconfig). Therefore, an autoscaler pod in `CrashLoopBackoff` state is **almost always a red herring rather than the root cause of any cluster creation issues**. If the pod is crash looping then first check that all of the OpenStack networking resources have been correctly provisioned and that there are no OpenStack API errors in the CAPO controller manager logs.
+
 Commonly encountered issues at this stage (usually visible in the CAPO controller logs) include:
 
 - Incorrectly formatted cloud credentials (see [these docs](./README.md#openstack-credentials)).
