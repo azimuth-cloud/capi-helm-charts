@@ -247,13 +247,17 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: cni-calico-dashboard
+          name: cni-calico-dashboards
           labels:
             grafana_dashboard: "1"
         data:
-          cni-calico-dashboard.json: |
+          cni-calico-felix-dashboard.json: |
             {% raw %}
-            {{- .Files.Get "grafana-dashboards/cni-calico-dashboard.json" | nindent 12 }}
+            {{- .Files.Get "grafana-dashboards/cni-calico-felix-dashboard.json" | nindent 12 }}
+            {% endraw %}
+          cni-calico-typha-dashboard.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/cni-calico-typha-dashboard.json" | nindent 12 }}
             {% endraw %}
 {{- end }}
 {{- end }}
