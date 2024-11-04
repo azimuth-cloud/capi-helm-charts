@@ -1,0 +1,134 @@
+{{- if .Values.kyverno.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    {{- if .Values.monitoring.enabled }}
+    metrics:
+      enabled: true
+      prometheusRule:
+        enabled: true
+        defaultRules:
+          create: true
+      serviceMonitor:
+        enabled: true
+    {{- else }}
+    metrics:
+      enabled: false
+    {{- end }}
+  overrides: |
+    {{- toYaml .Values.kyverno.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.kyverno.chart | nindent 4 }}
+  targetNamespace: {{ .Values.kyverno.release.namespace }}
+  releaseName: kyverno
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-config
+        key: overrides
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.kyverno.release.namespace }}
+  releaseName: kyverno
+  manifestSources:
+    # Add ServiceMonitors for kyverno
+
+    # Service metrics
+    - template: |
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: kyverno-admission-controller
+          namespace: kyverno
+        spec:
+          endpoints:
+            - port: kyverno-svc-metrics
+          namespaceSelector:
+            matchNames:
+              - kyverno
+          selector:
+            matchLabels:
+              app.kubernetes.io/instance: kyverno
+              app.kubernetes.io/component: admission-controller
+    # Background controller
+    - template: |
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: kyverno-background-controller
+          namespace: kyverno
+        spec:
+          endpoints:
+            - port: kyverno-background-controller-metrics
+          namespaceSelector:
+            matchNames:
+              - kyverno
+          selector:
+            matchLabels:
+              app.kubernetes.io/instance: kyverno
+              app.kubernetes.io/component: background-controller
+    # Cleanup controller
+    - template: |
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: kyverno-cleanup-controller
+          namespace: kyverno
+        spec:
+          endpoints:
+            - port: kyverno-cleanup-controller-metrics
+          namespaceSelector:
+            matchNames:
+              - kyverno
+          selector:
+            matchLabels:
+              app.kubernetes.io/instance: kyverno
+              app.kubernetes.io/component: cleanup-controller
+    # Reports controller
+    - template: |
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: kyverno-reports-controller
+          namespace: kyverno
+        spec:
+          endpoints:
+            - port: kyverno-reports-controller-metrics
+          namespaceSelector:
+            matchNames:
+              - kyverno
+          selector:
+            matchLabels:
+              app.kubernetes.io/instance: kyverno
+              app.kubernetes.io/component: reports-controller
+{{- end }}
