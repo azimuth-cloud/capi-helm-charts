@@ -1,0 +1,19 @@
+{{- $namespaces := list "calico-apiserver" "calico-system" "default" "gpu-operator" "kube-node-lease" "kube-public" "kube-system" "kubernetes-dashboard" "kyverno" "monitoring-system" "network-operator" "node-feature-discovery" "node-problem-detector" "openstack-system" "tigera-operator" }}
+{{- range $namespace := $namespaces }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "cluster-addons.componentName" $ }}-restricted
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "cluster-addons.componentLabels" (list $ "kyverno") | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "cluster-addons.componentName" $ }}-config
+  namespace: {{ $.Values.kyverno.release.namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "cluster-addons.componentName" $ }}-restricted-readonly
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
