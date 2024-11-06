@@ -1,7 +1,7 @@
 docker.io:
   images:
     grafana/grafana:
-    - 11.2.2-security-01
+    - 11.3.0
 quay.io:
   images:
     kiwigrid/k8s-sidecar:
