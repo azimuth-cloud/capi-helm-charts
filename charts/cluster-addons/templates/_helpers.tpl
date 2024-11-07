@@ -50,5 +50,5 @@ Create a list of system namespaces.
 */}}
 {{- define "cluster-addons.systemNamespaces" -}}
 {{- $namespaces := list "calico-apiserver" "calico-system" "default" "gpu-operator" "kube-node-lease" "kube-public" "kube-system" "kubernetes-dashboard" "kyverno" "monitoring-system" "network-operator" "node-feature-discovery" "node-problem-detector" "openstack-system" "tigera-operator" -}}
-{{- $namespaces -}}
+{{- $namespaces | join " " -}}
 {{- end -}}
