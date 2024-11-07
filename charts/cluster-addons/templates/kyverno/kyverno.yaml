@@ -97,20 +97,9 @@ spec:
               any:
               - resources:
                   namespaces:
-                    - "calico-apiserver"
-                    - "calico-system"
-                    - "gpu-operator"
-                    - "kube-node-lease"
-                    - "kube-public"
-                    - "kube-system"
-                    - "kubernetes-dashboard"
-                    - "kyverno"
-                    - "monitoring-system"
-                    - "network-operator"
-                    - "node-feature-discovery"
-                    - "node-problem-detector"
-                    - "openstack-system"
-                    - "tigera-operator"
+                {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
+                    - "{{ $namespace }}"
+                {{- end }}
             validate:
               podSecurity:
                 level: restricted
