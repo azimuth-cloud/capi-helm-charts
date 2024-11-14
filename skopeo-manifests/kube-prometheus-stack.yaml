@@ -7,15 +7,15 @@ quay.io:
     kiwigrid/k8s-sidecar:
     - 1.28.0
     prometheus-operator/prometheus-config-reloader:
-    - v0.77.2
+    - v0.78.1
     prometheus-operator/prometheus-operator:
-    - v0.77.2
+    - v0.78.1
     prometheus/alertmanager:
     - v0.27.0
     prometheus/node-exporter:
     - v1.8.2
     prometheus/prometheus:
-    - v2.55.0
+    - v2.55.1
     thanos/thanos:
     - v0.36.1
 registry.k8s.io:
@@ -23,4 +23,4 @@ registry.k8s.io:
     ingress-nginx/kube-webhook-certgen:
     - v20221220-controller-v1.5.1-58-g787ea74b6
     kube-state-metrics/kube-state-metrics:
-    - v2.13.0
+    - v2.14.0
