@@ -53,6 +53,11 @@ spec:
                 {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
                     - "{{ $namespace }}"
                 {{- end }}
+                {{- if .Values.monitoring.enabled }}
+                {{- range $namespace := ( include "cluster-addons.monitoringNamespaces" . | splitList " " ) }}
+                    - "{{ $namespace }}"
+                {{- end }}
+                {{- end }}
             validate:
               podSecurity:
                 level: restricted

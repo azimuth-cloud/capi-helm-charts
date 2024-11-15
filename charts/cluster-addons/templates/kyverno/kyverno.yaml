@@ -47,6 +47,7 @@ spec:
         name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-config
         key: overrides
 ---
+{{- if .Values.monitoring.enabled }}
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
@@ -131,4 +132,5 @@ spec:
             matchLabels:
               app.kubernetes.io/instance: kyverno
               app.kubernetes.io/component: reports-controller
+{{- end }}
 {{- end }}
