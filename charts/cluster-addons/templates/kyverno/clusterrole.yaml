@@ -3,7 +3,7 @@
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-cluster-role
   labels: {{ include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
