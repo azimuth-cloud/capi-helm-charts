@@ -1,21 +1,21 @@
 {{- if .Values.kyverno.enabled }}
-{{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
----
+# Create a single Manifests resource
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}
-  labels: {{ include "cluster-addons.componentLabels" (list $ "kyverno") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
-  clusterName: {{ include "cluster-addons.clusterName" $ }}
+  clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  targetNamespace: {{ $.Values.kyverno.release.namespace }}
+  targetNamespace: {{ .Values.kyverno.release.namespace }}
   releaseName: kyverno
   manifestSources:
-    # Read-only role for system namespaces
+    # Read-only role for each system namespace
+    {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
     - template: |
         apiVersion: rbac.authorization.k8s.io/v1
         kind: RoleBinding
@@ -32,5 +32,5 @@ spec:
           kind: ClusterRole
           name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-restricted-readonly
           apiGroup: rbac.authorization.k8s.io
-{{- end }}
+    {{- end }}
 {{- end }}
