@@ -374,7 +374,7 @@ kyverno:
   chart:
     repo: https://kyverno.github.io/kyverno/
     name: kyverno
-    version: 1.13.0
+    version: 3.3.3
   release:
     namespace: kyverno
     values: {}
