@@ -63,7 +63,6 @@ spec:
   releaseName: kyverno
   manifestSources:
     # Add ServiceMonitors for kyverno
-
     # Service metrics
     - template: |
         apiVersion: monitoring.coreos.com/v1
