@@ -21,7 +21,7 @@ spec:
         metadata:
           name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-restricted-readonly
           labels:
-            {{- include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+            {{- include "cluster-addons.componentLabels" (list . "kyverno") | nindent 12 }}
         rules:
         - apiGroups: [""]
           resources:
