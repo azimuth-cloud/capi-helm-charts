@@ -1,38 +1,57 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+{{- if .Values.kyverno.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-restricted-readonly
-  labels:
-    {{- include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
-rules:
-- apiGroups: [""]
-  resources:
-    - "pods"
-    - "services"
-    - "configmaps"
-    - "events"
-    - "replicationcontrollers"
-    - "limitranges"
-    - "resourcequotas"
-    - "endpoints"
-    - "nodes"
-    - "persistentvolumeclaims"
-    - "persistentvolumes"
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources:
-    - "deployments"
-    - "daemonsets"
-    - "replicasets"
-    - "statefulsets"
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["batch"]
-  resources:
-    - "jobs"
-    - "cronjobs"
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["networking.k8s.io"]
-  resources:
-    - "networkpolicies"
-    - "ingresses"
-  verbs: ["get", "list", "watch"]
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.kyverno.release.namespace }}
+  releaseName: kyverno
+  manifestSources:
+    # Read-only role for system namespaces
+    - template: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-restricted-readonly
+          labels:
+            {{- include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+        rules:
+        - apiGroups: [""]
+          resources:
+            - "pods"
+            - "services"
+            - "configmaps"
+            - "events"
+            - "replicationcontrollers"
+            - "limitranges"
+            - "resourcequotas"
+            - "endpoints"
+            - "nodes"
+            - "persistentvolumeclaims"
+            - "persistentvolumes"
+          verbs: ["get", "list", "watch"]
+        - apiGroups: ["apps"]
+          resources:
+            - "deployments"
+            - "daemonsets"
+            - "replicasets"
+            - "statefulsets"
+          verbs: ["get", "list", "watch"]
+        - apiGroups: ["batch"]
+          resources:
+            - "jobs"
+            - "cronjobs"
+          verbs: ["get", "list", "watch"]
+        - apiGroups: ["networking.k8s.io"]
+          resources:
+            - "networkpolicies"
+            - "ingresses"
+          verbs: ["get", "list", "watch"]
+{{- end }}

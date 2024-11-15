@@ -61,50 +61,6 @@ spec:
   targetNamespace: {{ .Values.kyverno.release.namespace }}
   releaseName: kyverno
   manifestSources:
-    # Apply Restricted Pod Security Standard
-    # NOTE(tylerchristie): Any new system namespaces will need to be added to the 
-    # exclude filter of the ruleset.
-    - template: |
-        apiVersion: kyverno.io/v1
-        kind: ClusterPolicy
-        metadata:
-          name: podsecurity-subrule-restricted
-          annotations:
-            policies.kyverno.io/title: Restricted Pod Security Standards
-            policies.kyverno.io/category: Pod Security, EKS Best Practices
-            policies.kyverno.io/severity: medium
-            kyverno.io/kyverno-version: {{ .Values.kyverno.chart.version }}
-            policies.kyverno.io/minversion: 1.8.0
-            kyverno.io/kubernetes-version: "{{ .Values.kubernetesVersion }}"
-            policies.kyverno.io/subject: Pod
-            policies.kyverno.io/description: >-
-              The restricted profile of the Pod Security Standards, which is inclusive of
-              the baseline profile, is a collection of all the most common configurations
-              that can be taken to secure Pods. Beginning with Kyverno 1.8, an entire profile
-              may be assigned to the cluster through a single rule. This policy configures the
-              restricted profile through the latest version of the Pod Security Standards cluster wide.      
-        spec:
-          background: true
-          validationFailureAction: Audit
-          rules:
-          - name: restricted
-            match:
-              any:
-              - resources:
-                  kinds:
-                  - Pod
-            exclude:
-              any:
-              - resources:
-                  namespaces:
-                {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
-                    - "{{ $namespace }}"
-                {{- end }}
-            validate:
-              podSecurity:
-                level: restricted
-                version: latest
-
     # Add ServiceMonitors for kyverno
 
     # Service metrics

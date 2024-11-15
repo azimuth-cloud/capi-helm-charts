@@ -1,20 +1,36 @@
 {{- if .Values.kyverno.enabled }}
 {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-restricted
-  namespace: {{ $namespace }}
-  labels:
-    {{- include "cluster-addons.componentLabels" (list $ "kyverno") | nindent 4 }}
-subjects:
-- kind: ServiceAccount
-  name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-config
-  namespace: {{ $.Values.kyverno.release.namespace }}
-roleRef:
-  kind: ClusterRole
-  name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-restricted-readonly
-  apiGroup: rbac.authorization.k8s.io
+  name: {{ include "cluster-addons.componentName" (list . "kyverno") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.kyverno.release.namespace }}
+  releaseName: kyverno
+  manifestSources:
+    # Read-only role for system namespaces
+    - template: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-restricted
+          namespace: {{ $namespace }}
+          labels:
+            {{- include "cluster-addons.componentLabels" (list $ "kyverno") | nindent 4 }}
+        subjects:
+        - kind: ServiceAccount
+          name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-config
+          namespace: {{ $.Values.kyverno.release.namespace }}
+        roleRef:
+          kind: ClusterRole
+          name: {{ include "cluster-addons.componentName" (list $ "kyverno") }}-restricted-readonly
+          apiGroup: rbac.authorization.k8s.io
 {{- end }}
 {{- end }}
