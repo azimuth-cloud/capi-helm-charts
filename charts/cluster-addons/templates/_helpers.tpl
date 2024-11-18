@@ -52,11 +52,3 @@ Create a list of system namespaces.
 {{- $namespaces := list "calico-apiserver" "calico-system" "default" "gpu-operator" "kube-node-lease" "kube-public" "kube-system" "network-operator" "node-feature-discovery" "node-problem-detector" "openstack-system" "tigera-operator" -}}
 {{- $namespaces | join " " -}}
 {{- end -}}
-
-{{/*
-Create a list of monitoring namespaces.
-*/}}
-{{- define "cluster-addons.monitoringNamespaces" -}}
-{{- $namespaces := list "kubernetes-dashboard" "monitoring-system" -}}
-{{- $namespaces | join " " -}}
-{{- end -}}
