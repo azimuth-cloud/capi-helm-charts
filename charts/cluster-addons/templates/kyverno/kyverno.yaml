@@ -22,6 +22,23 @@ stringData:
     metrics:
       enabled: false
     {{- end }}
+    config:
+      webhooks:
+        # Exclude namespaces
+        - namespaceSelector:
+            matchExpressions:
+            - key: kubernetes.io/metadata.name
+              operator: NotIn
+              values:
+              {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
+                  - {{ $namespace }}
+              {{- end }}
+              {{- if .Values.monitoring.enabled }}
+                  - monitoring-system
+              {{- end }}
+              {{- if .Values.kubernetesDashboard.enabled }}
+                  - kubernetes-dashboard
+              {{- end }}
   overrides: |
     {{- toYaml .Values.kyverno.release.values | nindent 4 }}
 ---

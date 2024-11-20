@@ -46,19 +46,6 @@ spec:
               - resources:
                   kinds:
                   - Pod
-            exclude:
-              any:
-              - resources:
-                  namespaces:
-                {{- range $namespace := ( include "cluster-addons.systemNamespaces" . | splitList " " ) }}
-                    - "{{ $namespace }}"
-                {{- end }}
-                {{- if .Values.monitoring.enabled }}
-                    - monitoring-system
-                {{- end }}
-                {{- if .Values.kubernetesDashboard.enabled }}
-                    - kubernetes-dashboard
-                {{- end }}
             validate:
               podSecurity:
                 level: restricted
