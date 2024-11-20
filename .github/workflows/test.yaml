@@ -144,10 +144,6 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest-addons.yaml
-      
-      - name: debug
-        uses: lhotari/action-upterm@v1
-        if: success() || failure()
 
       - name: Delete Kubernetes 1.31 deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
