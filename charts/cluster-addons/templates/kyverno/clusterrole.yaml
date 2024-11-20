@@ -23,35 +23,7 @@ spec:
           labels:
             {{- include "cluster-addons.componentLabels" (list . "kyverno") | nindent 12 }}
         rules:
-        - apiGroups: [""]
-          resources:
-            - "pods"
-            - "services"
-            - "configmaps"
-            - "events"
-            - "replicationcontrollers"
-            - "limitranges"
-            - "resourcequotas"
-            - "endpoints"
-            - "nodes"
-            - "persistentvolumeclaims"
-            - "persistentvolumes"
-          verbs: ["get", "list", "watch"]
-        - apiGroups: ["apps"]
-          resources:
-            - "deployments"
-            - "daemonsets"
-            - "replicasets"
-            - "statefulsets"
-          verbs: ["get", "list", "watch"]
-        - apiGroups: ["batch"]
-          resources:
-            - "jobs"
-            - "cronjobs"
-          verbs: ["get", "list", "watch"]
-        - apiGroups: ["networking.k8s.io"]
-          resources:
-            - "networkpolicies"
-            - "ingresses"
+        - apiGroups: ["*"]
+          resources: ["*"]
           verbs: ["get", "list", "watch"]
 {{- end }}
