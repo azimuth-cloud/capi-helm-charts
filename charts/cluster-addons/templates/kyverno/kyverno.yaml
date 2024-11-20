@@ -51,8 +51,8 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "kyvernoPolicies") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "kyvernoPolicies") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "kyverno-policies") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno-policies") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
