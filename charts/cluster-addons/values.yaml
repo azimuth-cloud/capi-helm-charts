@@ -380,7 +380,7 @@ kyverno:
     values: {}
 
 # Kyverno pod security standards
-kyverno-policies:
+kyvernoPolicies:
   # Indicates if Kyverno Policies should be installed
   enabled: true
   chart:

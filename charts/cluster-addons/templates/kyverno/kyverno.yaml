@@ -47,20 +47,22 @@ spec:
         name: {{ include "cluster-addons.componentName" (list . "kyverno") }}-config
         key: overrides
 ---
+{{- if .Values.kyvernoPolicies.enabled }}
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "kyverno-policies") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "kyverno-policies") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "kyvernoPolicies") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "kyvernoPolicies") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.kyverno-policies.chart | nindent 4 }}
-  targetNamespace: {{ .Values.kyverno-policies.release.namespace }}
+  chart: {{ toYaml .Values.kyvernoPolicies.chart | nindent 4 }}
+  targetNamespace: {{ .Values.kyvernoPolicies.release.namespace }}
   releaseName: kyverno-policies
+{{- end }}
 ---
 {{- if .Values.monitoring.enabled }}
 apiVersion: addons.stackhpc.com/v1alpha1
