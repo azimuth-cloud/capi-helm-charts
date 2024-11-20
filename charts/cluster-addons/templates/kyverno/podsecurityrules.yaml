@@ -1,4 +1,4 @@
-{{- if .Values.kyverno.enabled }}
+{{- if .Values.kyverno-policies.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests

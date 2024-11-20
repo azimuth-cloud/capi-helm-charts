@@ -379,6 +379,18 @@ kyverno:
     namespace: kyverno
     values: {}
 
+# Kyverno pod security standards
+kyverno-policies:
+  # Indicates if Kyverno Policies should be installed
+  enabled: true
+  chart:
+    repo: https://kyverno.github.io/kyverno/
+    name: kyverno-policies
+    version: 3.3.3
+  release:
+    namespace: kyverno
+    values: {}
+
 # Settings for any custom addons
 custom: {}
   # # Indexed by the name of the release on the target cluster
