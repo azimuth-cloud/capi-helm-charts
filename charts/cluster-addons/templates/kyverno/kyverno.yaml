@@ -24,7 +24,7 @@ stringData:
     {{- end }}
     config:
       webhooks:
-      - namespaceSelector:
+        namespaceSelector:
           matchExpressions:
           - key: kubernetes.io/metadata.name
             operator: NotIn
