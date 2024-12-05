@@ -1,15 +1,15 @@
 docker.io:
   images:
     grafana/grafana:
-    - 11.3.0
+    - 11.3.1
 quay.io:
   images:
     kiwigrid/k8s-sidecar:
     - 1.28.0
     prometheus-operator/prometheus-config-reloader:
-    - v0.78.1
+    - v0.78.2
     prometheus-operator/prometheus-operator:
-    - v0.78.1
+    - v0.78.2
     prometheus/alertmanager:
     - v0.27.0
     prometheus/node-exporter:
@@ -17,7 +17,7 @@ quay.io:
     prometheus/prometheus:
     - v2.55.1
     thanos/thanos:
-    - v0.36.1
+    - v0.37.0
 registry.k8s.io:
   images:
     ingress-nginx/kube-webhook-certgen:
