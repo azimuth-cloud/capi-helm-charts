@@ -108,16 +108,11 @@ For ease of use, this chart is written so that a `clouds.yaml` file can be given
 to the chart as a configuration file. When an application credential is created in Horizon,
 the corresponding `clouds.yaml` file can be downloaded, and should look something like this:
 
-> [!WARNING]
-> The Cluster API OpenStack provider currently requires that the `project_id` is present,
-> which you will need to add manually.
-
 ```yaml
 clouds:
   openstack:
     auth:
       auth_url: https://my.cloud:5000
-      project_id: "<project id>"
       application_credential_id: "<app cred id>"
       application_credential_secret: "<app cred secret>"
     region_name: "RegionOne"
