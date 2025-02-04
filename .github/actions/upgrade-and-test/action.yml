@@ -77,7 +77,7 @@ runs:
     # However, in some cases the cluster will never become unready, e.g.
     # in the chart upgrade tests if there are no changes to templates
     # In this case, we time out after 2m which should be enough time for
-    # the controllers to react
+    # the controllers to react
     - name: Wait for cluster not ready
       shell: bash
       run: |-
@@ -152,7 +152,7 @@ runs:
       if: "${{ inputs.sonobuoy-upload == 'yes' }}"
 
     - name: Upload sonobuoy results artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: sonobuoy-results-${{ inputs.name }}
         path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
