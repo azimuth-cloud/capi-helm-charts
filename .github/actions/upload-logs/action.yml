@@ -22,7 +22,7 @@ runs:
         kubectl -n capi-janitor-system logs deploy/cluster-api-janitor-openstack > capi-janitor-openstack-logs.txt
 
     - name: Upload controller log artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: cluster-api-controller-logs-${{ inputs.name-suffix }}
         path: ./*-logs.txt
