@@ -72,7 +72,7 @@ template:
       {{- end }}
     {{- end }}
     {{- with .Values.controlPlane.machineNetworking.ports }}
-    ports: {{ toYaml . | nindent 6 }}
+    ports: {{ include "openstack-cluster.convert.neutronPortsFilter" . | nindent 6 }}
     {{- end }}
     {{- with .Values.controlPlane.serverGroupId }}
     serverGroup:
