@@ -94,7 +94,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
-      version: 2.31.2
+      version: 2.32.0
     values:
       csi:
         plugin:
