@@ -146,6 +146,23 @@ Converts the tags in a Neutron filter when required.
 {{- end }}
 
 {{/*
+Converts a v1alpha7 Neutron ports filter to a v1beta1 filter.
+*/}}
+{{- define "openstack-cluster.convert.neutronPortsFilter" -}}
+{{- $ports := list -}}
+{{- range $p := . -}}
+{{- with $p.network -}}
+{{- if not ( hasKey . "filter" ) -}}
+{{- $portNetwork := include "openstack-cluster.convert.neutronFilter" . | fromYaml -}}
+{{- $p := set $p "network" $portNetwork -}}
+{{- end -}}
+{{- $ports = append $ports $p -}}
+{{- end -}}
+{{- end -}}
+{{- toYaml $ports }}
+{{- end }}
+
+{{/*
 Converts a v1alpha7 Neutron filter to a v1beta1 filter.
 */}}
 {{- define "openstack-cluster.convert.neutronFilter" -}}
