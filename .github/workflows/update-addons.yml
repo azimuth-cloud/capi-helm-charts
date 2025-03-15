@@ -98,6 +98,9 @@ jobs:
 
           - key: node-problem-detector
             path: nodeProblemDetector.chart
+          
+          - key: kyverno
+            path: kyverno.chart
 
     name: ${{ matrix.key }}
     steps:
