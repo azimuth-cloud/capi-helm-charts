@@ -73,7 +73,8 @@ kubeNetwork:
 # Settings for the OpenStack networking for the cluster
 clusterNetworking:
   # Custom nameservers to use for the hosts
-  dnsNameservers:
+  # Deprecated; use `clusterNetworking.internalNetwork.dnsNameservers` instead.
+  # dnsNameservers: []
   # Indicates if security groups should be managed by the cluster
   manageSecurityGroups: true
   # Indicates if the managed security groups should allow all in-cluster traffic
@@ -97,6 +98,9 @@ clusterNetworking:
     # The CIDR to use if creating a cluster network
     # This is only used if neither of networkFilter and subnetFilter are given
     nodeCidr: 192.168.3.0/24
+    # List of nameserver IPs to use when creating a cluster network.
+    # This is only used if neither of networkFilter and subnetFilter are given
+    dnsNameservers:
 
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
