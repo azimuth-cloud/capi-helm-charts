@@ -350,7 +350,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 23.7.0
+    version: 25.1.0
   release:
     namespace: network-operator
     values: {}
