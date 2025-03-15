@@ -317,7 +317,7 @@ nodeFeatureDiscovery:
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.17.1
+    version: 0.17.2
   release:
     namespace: node-feature-discovery
     values: {}
