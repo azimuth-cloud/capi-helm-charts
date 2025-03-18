@@ -395,6 +395,7 @@ restrictedAdmission:
           - cilium-secrets
           - kube-node-lease
           - kube-public
+          - oidc-system
 
 # Settings for any custom addons
 custom: {}
