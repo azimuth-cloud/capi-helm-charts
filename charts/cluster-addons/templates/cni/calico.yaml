@@ -70,7 +70,7 @@ spec:
         apiVersion: projectcalico.org/v3
         kind: GlobalNetworkPolicy
         metadata:
-          name: {{ include "cluster-addons.componentName" (list . "deny-egress") }}
+          name: default.{{ include "cluster-addons.componentName" (list . "deny-egress") }}
         spec:
           order: {{ .Values.cni.calico.globalNetworkPolicy.denyPriority }}
           namespaceSelector: {{ .Values.cni.calico.globalNetworkPolicy.denyNamespaceSelector }}
@@ -95,7 +95,7 @@ spec:
         apiVersion: projectcalico.org/v3
         kind: GlobalNetworkPolicy
         metadata:
-          name: {{ include "cluster-addons.componentName" (list . "allow-global-egress") }}
+          name: default.{{ include "cluster-addons.componentName" (list . "allow-global-egress") }}
         spec:
           order: {{ .Values.cni.calico.globalNetworkPolicy.allowPriority }}
           types:
