@@ -68,7 +68,7 @@ template:
       {{- end }}
     {{- end }}
     {{- with $nodeGroup.machineNetworking.ports }}
-    ports: {{ toYaml . | nindent 6 }}
+    ports: {{ include "openstack-cluster.convert.neutronPortsFilter" . | nindent 6 }}
     {{- end }}
     {{- with $nodeGroup.serverGroupId }}
     serverGroup:
