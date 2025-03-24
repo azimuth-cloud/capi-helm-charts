@@ -345,7 +345,7 @@ intelDevicePlugin:
   enabled: false
   repo:
     url: https://github.com/azimuth-cloud/intel-device-plugin-kustomize
-    tag: v0.1.0
+    tag: v0.2.0
   gpuPlugin:
     image: intel/intel-gpu-plugin:0.30.0
     sharedDevNum: 1
@@ -354,6 +354,9 @@ intelDevicePlugin:
     enableMonitoring: true
     nodeSelector:
       gpu.intel.com/product: Max_1550
+  gpuMonitoring:
+    enabled: true
+    prometheusIntegrationEnabled: true
 
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:

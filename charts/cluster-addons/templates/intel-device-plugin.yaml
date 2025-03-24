@@ -27,6 +27,7 @@ spec:
   kubeConfig:
     secretRef:
       name: {{ .Values.clusterName }}-kubeconfig
+  path: ./gpu-plugin
   patches:
     - patch: |-
         apiVersion: deviceplugin.intel.com/v1
@@ -41,4 +42,44 @@ spec:
           enableMonitoring: {{ .Values.intelDevicePlugin.gpuPlugin.enableMonitoring }}
           nodeSelector:
             {{- toYaml .Values.intelDevicePlugin.gpuPlugin.nodeSelector | nindent 12 }}
+{{- if .Values.intelDevicePlugin.gpuMonitoring.enabled }}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: intel-xpumanager-kustomization
+  namespace: intel-xpumanager
+spec:
+  interval: 10m
+  targetNamespace: intel-xpumanager
+  sourceRef:
+    kind: GitRepository
+    name: intel-device-plugin-kustomization-repo
+  prune: true
+  timeout: 1m
+  kubeConfig:
+    secretRef:
+      name: {{ .Values.clusterName }}-kubeconfig
+  path: ./gpu-monitoring/manager
+{{- if .Values.intelDevicePlugin.gpuMonitoring.prometheusIntegrationEnabled }}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: intel-xpumanager-prom-services-kustomization
+  namespace: intel-xpumanager
+spec:
+  interval: 10m
+  targetNamespace: intel-xpumanager
+  sourceRef:
+    kind: GitRepository
+    name: intel-device-plugin-kustomization-repo
+  prune: true
+  timeout: 1m
+  kubeConfig:
+    secretRef:
+      name: {{ .Values.clusterName }}-kubeconfig
+  path: ./gpu-monitoring/prometheus-services
+{{- end }}
+{{- end }}
 {{- end }}
