@@ -1,0 +1,44 @@
+{{- if .Values.intelDevicePlugin.enabled }}
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: intel-device-plugin-kustomization-repo
+  namespace: intel
+spec:
+  interval: 5m
+  url: {{ .Values.intelDevicePlugin.repo.url }}
+  ref:
+    tag: {{ .Values.intelDevicePlugin.repo.tag }}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: intel-device-plugin-kustomization
+  namespace: intel
+spec:
+  interval: 10m
+  targetNamespace: intel
+  sourceRef:
+    kind: GitRepository
+    name: intel-device-plugin-kustomization-repo
+  prune: true
+  timeout: 1m
+  kubeConfig:
+    secretRef:
+      name: {{ .Values.clusterName }}-kubeconfig
+  patches:
+    - patch: |-
+        apiVersion: deviceplugin.intel.com/v1
+        kind: GpuDevicePlugin
+        metadata:
+          name: gpudeviceplugin-config
+        spec:
+          image: {{ .Values.intelDevicePlugin.gpuPlugin.image }}
+          sharedDevNum: {{ .Values.intelDevicePlugin.gpuPlugin.sharedDevNum }}
+          preferredAllocationPolicy: {{ .Values.intelDevicePlugin.gpuPlugin.preferredAllocationPolicy }}
+          logLevel: {{ .Values.intelDevicePlugin.gpuPlugin.logLevel }}
+          enableMonitoring: {{ .Values.intelDevicePlugin.gpuPlugin.enableMonitoring }}
+          nodeSelector:
+            {{- toYaml .Values.intelDevicePlugin.gpuPlugin.nodeSelector | nindent 12 }}
+{{- end }}

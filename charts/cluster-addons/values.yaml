@@ -340,6 +340,21 @@ nvidiaGPUOperator:
         serviceMonitor:
           enabled: true
 
+# Settings for Intel Device Plugin and Monitoring
+intelDevicePlugin:
+  enabled: false
+  repo:
+    url: https://github.com/azimuth-cloud/intel-device-plugin-kustomize
+    tag: v0.1.0
+  gpuPlugin:
+    image: intel/intel-gpu-plugin:0.30.0
+    sharedDevNum: 1
+    preferredAllocationPolicy: none
+    logLevel: 4
+    enableMonitoring: true
+    nodeSelector:
+      gpu.intel.com/product: Max_1550
+
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:
   # Indicates if the network operator should be enabled
