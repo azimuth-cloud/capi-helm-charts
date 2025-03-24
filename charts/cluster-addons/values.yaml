@@ -191,6 +191,19 @@ etcdDefrag:
     namespace: kube-system
     values: {}
 
+# Settings for cert-manager (dependency of Intel Device Plugin)
+certManager:
+  enabled: false
+  chart:
+    repo: https://charts.jetstack.io
+    name: cert-manager
+    version: v1.17.0
+  release:
+    namespace: cert-manager
+    values:
+      crds:
+        enabled: true
+
 # Settings for the metrics server
 # https://github.com/kubernetes-sigs/metrics-server#helm-chart
 metricsServer:
@@ -345,7 +358,7 @@ intelDevicePlugin:
   enabled: false
   repo:
     url: https://github.com/azimuth-cloud/intel-device-plugin-kustomize
-    tag: v0.2.0
+    tag: v0.1.0
   gpuPlugin:
     image: intel/intel-gpu-plugin:0.30.0
     sharedDevNum: 1

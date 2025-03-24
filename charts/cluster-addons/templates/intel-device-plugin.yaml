@@ -4,7 +4,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
   name: intel-device-plugin-kustomization-repo
-  namespace: intel
+  namespace: default
 spec:
   interval: 5m
   url: {{ .Values.intelDevicePlugin.repo.url }}
@@ -15,10 +15,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: intel-device-plugin-kustomization
-  namespace: intel
+  namespace: default
 spec:
   interval: 10m
-  targetNamespace: intel
   sourceRef:
     kind: GitRepository
     name: intel-device-plugin-kustomization-repo
@@ -48,7 +47,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: intel-xpumanager-kustomization
-  namespace: intel-xpumanager
+  namespace: default
 spec:
   interval: 10m
   targetNamespace: intel-xpumanager
@@ -67,7 +66,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: intel-xpumanager-prom-services-kustomization
-  namespace: intel-xpumanager
+  namespace: default
 spec:
   interval: 10m
   targetNamespace: intel-xpumanager
