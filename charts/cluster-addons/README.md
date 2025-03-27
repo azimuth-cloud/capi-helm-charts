@@ -269,6 +269,17 @@ By default, Grafana is only available from within the cluster and must be access
 kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000:80
 ```
 
+## Restricted Admission Policies
+
+This chart is able to deploy a library of [ValidatingAdmissionPolicies](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/) which will secure specified namespaces so that they are compliant with the `restricted` [Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/) but provides options to loosen or disable certain controls if necessary. These are disabled by default and can be enabled by setting:
+
+```sh
+restrictedAdmission:
+  enabled: false
+```
+
+By default the Kubernetes and CAPI system namespaces and namespaces used by other addons are excluded from these policies. The namespaces to include or exclude can be set by overriding `restrictedAdmission.release.values.defaultBindingNamespaceSelector`. The namespaces that individual controls are applied to can be configured by overriding `restrictedAdmission.release.values.defaultBindingNamespaceSelector.$CONTROL_KEY` for the respective control.
+
 ## Custom addons
 
 This chart is able to manage the deployment of custom addons.
