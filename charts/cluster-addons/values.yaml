@@ -396,6 +396,8 @@ restrictedAdmission:
           - kube-node-lease
           - kube-public
           - oidc-system
+          - calico-system
+          - calico-apiserver
 
 # Settings for any custom addons
 custom: {}
