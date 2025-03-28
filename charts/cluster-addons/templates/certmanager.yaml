@@ -1,0 +1,39 @@
+{{-
+  if or
+    .Values.intelDevicePlugin.enabled
+    .Values.certManager.enabled
+}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cert-manager") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "cert-manager") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  overrides: |
+    {{- toYaml .Values.certManager.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cert-manager") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cert-manager") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart:
+    repo: {{ .Values.certManager.chart.repo }}
+    name: {{ .Values.certManager.chart.name }}
+    version: {{ default .Chart.Version .Values.certManager.chart.version }}
+  targetNamespace: {{ .Values.certManager.release.namespace }}
+  releaseName: cert-manager
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "cert-manager") }}-config
+        key: overrides
+{{- end }}
