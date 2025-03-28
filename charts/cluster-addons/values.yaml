@@ -340,6 +340,46 @@ nvidiaGPUOperator:
         serviceMonitor:
           enabled: true
 
+intelDevicePlugin:
+  enabled: false
+  operator:
+    chart:
+      repo: https://intel.github.io/helm-charts
+      name: intel-device-plugins-operator
+      version: 0.32.0
+    release:
+      namespace: intel
+      values:
+        manager:
+          devices:
+            gpu: true
+  gpuPlugin:
+    chart:
+      repo: https://intel.github.io/helm-charts
+      name: intel-device-plugins-gpu
+      version: 0.32.0
+    release:
+      namespace: intel
+      values:
+        sharedDevNum: 1
+        preferredAllocationPolicy: none
+        logLevel: 4
+        enableMonitoring: true
+        # nodeSelector:
+        #   gpu.intel.com/product: Max_1550
+    
+certManager:
+  enabled: false
+  chart:
+    repo: https://charts.jetstack.io
+    name: cert-manager
+    version: v1.17.0
+  release:
+    namespace: cert-manager
+    values:
+      crds:
+        enabled: true
+
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:
   # Indicates if the network operator should be enabled
