@@ -19,6 +19,10 @@ on:
         value: ${{ jobs.produce_outputs.outputs.kube-1-31-image }}
       kube-1-31-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-31-version }}
+      kube-1-32-image:
+        value: ${{ jobs.produce_outputs.outputs.kube-1-32-image }}
+      kube-1-32-version:
+        value: ${{ jobs.produce_outputs.outputs.kube-1-32-version }}
 
 jobs:
   image_manifest:
@@ -53,6 +57,9 @@ jobs:
             skip: ${{ github.event.pull_request.draft }}
           - name: kube-1-31
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-31-jammy }}
+            skip: ${{ github.event.pull_request.draft }}
+          - name: kube-1-32
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-32-jammy }}
             skip: false
     steps:
       - name: Checkout
@@ -107,6 +114,8 @@ jobs:
       kube-1-30-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-30 }}
       kube-1-31-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-31 }}
       kube-1-31-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-31 }}
+      kube-1-32-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-32 }}
+      kube-1-32-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-32 }}
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
