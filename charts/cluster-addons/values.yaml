@@ -370,7 +370,7 @@ nodeProblemDetector:
 restrictedAdmission:
   enabled: false
   chart:
-    repo: https://stackhpc.github.io/restricted-pss-vaps-helm/
+    repo: https://azimuth-cloud.github.io/restricted-pss-vaps-helm/
     name: restricted-pss-vaps
     version: 0.3.0
   release:
@@ -398,6 +398,7 @@ restrictedAdmission:
           - oidc-system
           - calico-system
           - calico-apiserver
+          - intel
 
 # Settings for any custom addons
 custom: {}
