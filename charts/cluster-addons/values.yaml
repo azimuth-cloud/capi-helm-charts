@@ -367,6 +367,12 @@ intelDevicePlugin:
         enableMonitoring: true
         # nodeSelector:
         #   gpu.intel.com/product: Max_1550
+  xpuManagerMonitoring:
+    enabled: true
+    namespace: intel
+    repo:
+      url: https://github.com/intel/xpumanager
+      tag: V1.2.39
     
 certManager:
   enabled: false
