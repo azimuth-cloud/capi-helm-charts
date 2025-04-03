@@ -1,5 +1,8 @@
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
+{{- if not (regexMatch "^[a-z][a-z0-9\\-]+[a-z0-9]$" $nodeGroup.name) }}
+{{ fail (printf "Node group name must be at least three characters long and must contain only lower-case alphanumeric characters and dashes (found name: %s)" $nodeGroup.name) }}
+{{- end -}}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
