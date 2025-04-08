@@ -14,7 +14,7 @@ stringData:
     # Since we deploy in kube-system, we need a PDB to allow eviction to happen
     podDisruptionBudget:
       enabled: true
-      minAvailable: 0
+      maxUnavailable: 1
   overrides: |
     {{- toYaml .Values.metricsServer.release.values | nindent 4 }}
 ---
