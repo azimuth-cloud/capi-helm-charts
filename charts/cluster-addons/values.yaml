@@ -359,21 +359,14 @@ nodeProblemDetector:
 
 # Settings for Longhorn
 longhorn:
-  enabled: true
+  enabled: false
   chart:
     repo: https://charts.longhorn.io
     name: longhorn
     version: v1.8.0
   release:
     namespace: longhorn-system
-    values:
-      persistence:
-        defaultNodeSelector:
-          enable: true
-          selector: "capi.stackhpc.com: dawn"
-      defaultSettings:
-        defaultDataPath: /mnt/nvme
-        defaultDataLocality: strict-local
+    values: {}
 
 # Settings for any custom addons
 custom: {}
