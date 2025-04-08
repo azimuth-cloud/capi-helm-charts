@@ -369,8 +369,6 @@ intelDevicePlugin:
         - key: "feature.node.kubernetes.io/gpu-dedicated"
           operator: "Exists"
           effect: "NoSchedule"
-        # nodeSelector:
-        #   gpu.intel.com/product: Max_1550
   xpuManagerMonitoring:
     enabled: true
     namespace: intel
