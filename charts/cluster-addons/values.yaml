@@ -375,7 +375,7 @@ intelDevicePlugin:
     repo:
       url: https://github.com/intel/xpumanager
       tag: V1.2.39
-    
+
 certManager:
   enabled: false
   chart:
