@@ -353,6 +353,13 @@ intelDevicePlugin:
         manager:
           devices:
             gpu: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 160Mi
   gpuPlugin:
     chart:
       repo: https://intel.github.io/helm-charts
