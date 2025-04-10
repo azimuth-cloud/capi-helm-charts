@@ -51,13 +51,15 @@ spec:
     provider: {{ .loadBalancerProvider }}
     {{- end }}
     {{- if .allowedCidrs }}
-    allowedCidrs:
+    allowedCIDRs:
       {{- range .allowedCidrs }}
       - {{ . }}
       {{- end}}
     {{- end }}
   {{- end }}
-  disableAPIServerFloatingIP: {{ not .associateFloatingIP }}
+  {{- if not .associateFloatingIP }}
+  disableAPIServerFloatingIP: true
+  {{- end }}
   {{- with .floatingIP }}
   apiServerFloatingIP: {{ . }}
   {{- end }}
