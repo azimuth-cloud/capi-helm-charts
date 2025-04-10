@@ -1,0 +1,32 @@
+{{- if .Values.intelDevicePlugin.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "intel-device-plugin-gpu") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "intel-device-plugin-gpu") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  overrides: |
+    {{- toYaml .Values.intelDevicePlugin.gpuPlugin.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "intel-device-plugin-gpu") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-device-plugin-gpu") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.intelDevicePlugin.gpuPlugin.chart | nindent 4 }}
+  targetNamespace: {{ .Values.intelDevicePlugin.gpuPlugin.release.namespace }}
+  releaseName: intel-device-plugin-gpu
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "intel-device-plugin-gpu") }}-config
+        key: overrides
+{{- end }}

@@ -340,6 +340,61 @@ nvidiaGPUOperator:
         serviceMonitor:
           enabled: true
 
+intelDevicePlugin:
+  enabled: false
+  operator:
+    chart:
+      repo: https://intel.github.io/helm-charts
+      name: intel-device-plugins-operator
+      version: 0.32.0
+    release:
+      namespace: intel
+      values:
+        manager:
+          devices:
+            gpu: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 160Mi
+  gpuPlugin:
+    chart:
+      repo: https://intel.github.io/helm-charts
+      name: intel-device-plugins-gpu
+      version: 0.32.0
+    release:
+      namespace: intel
+      values:
+        sharedDevNum: 1
+        preferredAllocationPolicy: none
+        logLevel: 4
+        enableMonitoring: true
+        tolerations:
+        - key: "gpu.intel.com/i915"
+          operator: "Exists"
+          effect: "NoSchedule"
+  xpuManagerMonitoring:
+    enabled: true
+    namespace: intel
+    repo:
+      url: https://github.com/intel/xpumanager
+      tag: V1.2.39
+
+certManager:
+  enabled: false
+  chart:
+    repo: https://charts.jetstack.io
+    name: cert-manager
+    version: v1.17.0
+  release:
+    namespace: cert-manager
+    values:
+      crds:
+        enabled: true
+
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:
   # Indicates if the network operator should be enabled
@@ -366,6 +421,38 @@ nodeProblemDetector:
   release:
     namespace: node-problem-detector
     values: {}
+
+restrictedAdmission:
+  enabled: false
+  chart:
+    repo: https://stackhpc.github.io/restricted-pss-vaps-helm/
+    name: restricted-pss-vaps
+    version: 0.3.0
+  release:
+    namespace: default
+    values:
+      defaultBindingNamespaceSelector:
+        matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+          - tigera-operator
+          - kube-system
+          - csi-ceph-system
+          - openstack-system
+          - kubernetes-dashboard
+          - ingress-nginx
+          - monitoring-system
+          - node-feature-discovery
+          - gpu-operator
+          - network-operator
+          - node-problem-detector
+          - cilium-secrets
+          - kube-node-lease
+          - kube-public
+          - oidc-system
+          - calico-system
+          - calico-apiserver
 
 # Settings for any custom addons
 custom: {}
