@@ -4,6 +4,7 @@ apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "intel-xpumanager-services") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpumanager-services") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   targetNamespace: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
@@ -56,7 +57,8 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: intel-xpu-monitoring-repo
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpu-monitoring-repo") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpu-monitoring-repo") | nindent 4 }}
 spec:
   interval: 5m
   url: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.repo.url }}
@@ -66,12 +68,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: intel-xpu-monitoring
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpu-monitoring") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpu-monitoring") | nindent 4 }}
 spec:
   interval: 10m
   sourceRef:
     kind: GitRepository
-    name: intel-xpu-monitoring-repo
+    name: {{ include "cluster-addons.componentName" (list . "intel-xpu-monitoring-repo") }}
   prune: true
   timeout: 1m
   targetNamespace: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
@@ -83,8 +86,8 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "ingress-nginx-dashboards") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "ingress-nginx-dashboards") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpu-dashboard") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpu-dashboard") | nindent 4 }}
   annotations:
     # Tell Argo to ignore the non-controller owner references for this object
     argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
