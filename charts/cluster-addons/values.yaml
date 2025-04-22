@@ -373,7 +373,7 @@ intelDevicePlugin:
         logLevel: 4
         enableMonitoring: true
         tolerations:
-        - key: "feature.node.kubernetes.io/gpu-dedicated"
+        - key: "gpu.intel.com/i915"
           operator: "Exists"
           effect: "NoSchedule"
   xpuManagerMonitoring:
