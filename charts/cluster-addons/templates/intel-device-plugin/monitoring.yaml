@@ -57,7 +57,6 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
   name: intel-xpu-monitoring-repo
-  namespace: default
 spec:
   interval: 5m
   url: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.repo.url }}
@@ -68,7 +67,6 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: intel-xpu-monitoring
-  namespace: default
 spec:
   interval: 10m
   sourceRef:
