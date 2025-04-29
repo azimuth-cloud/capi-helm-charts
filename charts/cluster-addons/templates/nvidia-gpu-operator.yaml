@@ -35,17 +35,6 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "nvidia-gpu-operator") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "nvidia-gpu-operator") | nindent 4 }}
-  annotations:
-    # Tell Argo to ignore the non-controller owner references for this object
-    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
-    # When using the Argo addon provider, we want to use kubectl apply
-    # This is because some of the resources fail to validate when using server-side apply
-    # See https://github.com/NVIDIA/gpu-operator/issues/478
-    #
-    # We use the annotation rather than the spec so that the resource is compatible with
-    # both the legacy and Argo addon providers
-    addons.stackhpc.com/sync-options: |
-      { "serverSideApply": false }
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true

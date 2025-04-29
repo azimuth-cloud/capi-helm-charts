@@ -33,9 +33,6 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
-  annotations:
-    # Tell Argo to ignore the non-controller owner references for this object
-    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
@@ -56,9 +53,6 @@ kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico-globalnetpolicy") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico-globalnetpolicy") | nindent 4 }}
-  annotations:
-    # Tell Argo to ignore the non-controller owner references for this object
-    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
@@ -104,14 +98,14 @@ spec:
             - action: Allow
               ipVersion: 4
               destination:
-                nets: 
+                nets:
                 {{- range .Values.cni.calico.globalNetworkPolicy.allowEgressCidrs }}
                   - {{ . }}
                 {{ end }}
             - action: Allow
               ipVersion: 6
               destination:
-                nets: 
+                nets:
                 {{- range .Values.cni.calico.globalNetworkPolicy.allowv6EgressCidrs }}
                   - {{ . }}
                 {{ end }}
@@ -123,9 +117,6 @@ kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "cni-calico-monitoring") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico-monitoring") | nindent 4 }}
-  annotations:
-    # Tell Argo to ignore the non-controller owner references for this object
-    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
@@ -242,7 +233,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: cni-calico-monitoring
               app.kubernetes.io/component: typha
-    # dashboard
+    # dashboard
     - template: |
         apiVersion: v1
         kind: ConfigMap
