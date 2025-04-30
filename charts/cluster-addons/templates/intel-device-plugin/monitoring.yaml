@@ -82,6 +82,17 @@ spec:
     secretRef:
       name: {{ include "cluster-addons.clusterName" . }}-kubeconfig
   path: ./deployment/kubernetes/daemonset/base
+  patches:
+  - patch: |
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "gpu.intel.com/i915"
+            operator: "Exists"
+            effect: "NoSchedule"
+    target:
+      kind: DaemonSet
+      name: intel-xpumanager
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
