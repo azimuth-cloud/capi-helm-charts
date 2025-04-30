@@ -367,6 +367,39 @@ nodeProblemDetector:
     namespace: node-problem-detector
     values: {}
 
+restrictedAdmission:
+  enabled: false
+  chart:
+    repo: https://azimuth-cloud.github.io/restricted-pss-vaps-helm/
+    name: restricted-pss-vaps
+    version: 0.3.0
+  release:
+    namespace: default
+    values:
+      defaultBindingNamespaceSelector:
+        matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+          - tigera-operator
+          - kube-system
+          - csi-ceph-system
+          - openstack-system
+          - kubernetes-dashboard
+          - ingress-nginx
+          - monitoring-system
+          - node-feature-discovery
+          - gpu-operator
+          - network-operator
+          - node-problem-detector
+          - cilium-secrets
+          - kube-node-lease
+          - kube-public
+          - oidc-system
+          - calico-system
+          - calico-apiserver
+          - intel
+
 # Settings for any custom addons
 custom: {}
   # # Indexed by the name of the release on the target cluster

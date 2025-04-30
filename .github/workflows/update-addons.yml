@@ -99,6 +99,9 @@ jobs:
           - key: node-problem-detector
             path: nodeProblemDetector.chart
 
+          - key: restricted-admission
+            path: restrictedAdmission.chart
+
     name: ${{ matrix.key }}
     steps:
       - name: Checkout
