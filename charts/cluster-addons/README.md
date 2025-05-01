@@ -272,10 +272,13 @@ kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000
 ## Intel Device Plugin
 
 Deploys in the Intel Device Plugin operator for managing Intel devices,
-alongside GPU plugin CRDs for the operator to add Intel GPU resources to nodes. [Upstream GPU options](https://github.com/intel/helm-charts/tree/main/charts/gpu-device-plugin#configuration) can be modified by overriding the defaults in
-`intelDevicePlugin.gpuPlugin.release.values`. Prometheus metrics and service monitors
-are also provided by Intel XPU Manager, which is managed by Flux resources on the
-CAPI management cluster.
+alongside GPU plugin CRDs for the operator to add Intel GPU resources to nodes. 
+[Upstream GPU options](https://github.com/intel/helm-charts/tree/main/charts/gpu-device-plugin#configuration) 
+can be modified by overriding the defaults in `intelDevicePlugin.gpuPlugin.release.values`. 
+Prometheus exporters and service monitors are also provided by Intel XPU Manager, which is 
+managed by FluxCD resources on the CAPI management cluster. Note that if XPU monitoring is enabled,
+a Flux controller must be installed on the management cluster. See the upstream 
+[installation docs.](https://fluxcd.io/flux/installation/)
 
 ## Custom addons
 
