@@ -48,7 +48,7 @@ spec:
             app: intel-xpumanager
         namespaceSelector:
           matchNames:
-            - default
+            - {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
         endpoints:
           - port: metrics
             path: /metrics
