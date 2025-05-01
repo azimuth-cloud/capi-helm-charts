@@ -5,10 +5,9 @@ metadata:
   name: {{ include "openstack-cluster.clusterName" . }}
   labels: {{ include "openstack-cluster.labels" . | nindent 4 }}
   annotations:
-    # We let Cluster API clean up this resource
+    # We let Cluster API clean up this resource
     # Deleting it ourselves, which CAPI is not expecting, can cause some nasty race conditions
     helm.sh/resource-policy: keep
-    # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
 spec:
   identityRef:
     name: {{ include "openstack-cluster.cloudCredentialsSecretName" . }}

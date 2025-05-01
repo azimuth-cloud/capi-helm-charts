@@ -9,9 +9,6 @@ metadata:
   labels:
     {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
     {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
-  annotations:
-    # Tell Argo to ignore the non-controller owner references for this object
-    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" $ }}
   selector:
