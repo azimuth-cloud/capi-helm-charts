@@ -71,6 +71,8 @@ jobs:
 
           - key: intel-device-plugin-gpu
             path: intelDevicePlugin.gpuPlugin.chart
+            additional-images: |-
+              docker.io/intel/intel-gpu-plugin:{0}
 
           - key: intel-device-plugin-operator
             path: intelDevicePlugin.operator.chart
