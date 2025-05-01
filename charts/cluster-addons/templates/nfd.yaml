@@ -3,6 +3,7 @@
     .Values.nodeFeatureDiscovery.enabled
     .Values.nvidiaGPUOperator.enabled
     .Values.mellanoxNetworkOperator.enabled
+    .Values.intelDevicePlugin.enabled
 }}
 ---
 apiVersion: v1

@@ -69,6 +69,12 @@ jobs:
           - key: node-feature-discovery
             path: nodeFeatureDiscovery.chart
 
+          - key: intel-device-plugin-gpu
+            path: intelDevicePlugin.gpuPlugin.chart
+
+          - key: intel-device-plugin-operator
+            path: intelDevicePlugin.operator.chart
+
           - key: nvidia-gpu-operator
             path: nvidiaGPUOperator.chart
             values: |

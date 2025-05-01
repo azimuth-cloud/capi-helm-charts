@@ -1,0 +1,123 @@
+{{- if and .Values.intelDevicePlugin.enabled .Values.intelDevicePlugin.xpuManagerMonitoring.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpumanager-services") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpumanager-services") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  targetNamespace: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
+  releaseName: intel-xpumanager-services
+  manifestSources:
+  - template: |
+      #
+      # Copyright (C) 2021-2023 Intel Corporation
+      # SPDX-License-Identifier: MIT
+      # @file service-intel-xpum.yaml
+      #
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          app: intel-xpumanager
+        name: intel-xpumanager
+      spec:
+        ports:
+        - name: metrics
+          port: 29999
+          protocol: TCP
+        selector:
+          app: intel-xpumanager
+        sessionAffinity: None
+  - template: |
+      #
+      # Copyright (C) 2021-2023 Intel Corporation
+      # SPDX-License-Identifier: MIT
+      # @file servicemonitor-intel-xpum.yaml
+      #
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: intel-xpumanager
+        labels:
+          app: intel-xpumanager
+      spec:
+        selector:
+          matchLabels:
+            app: intel-xpumanager
+        namespaceSelector:
+          matchNames:
+            - {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
+        endpoints:
+          - port: metrics
+            path: /metrics
+            interval: 5s
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpu-monitoring-repo") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpu-monitoring-repo") | nindent 4 }}
+spec:
+  interval: 5m
+  url: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.repo.url }}
+  ref:
+    tag: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.repo.tag }}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpu-monitoring") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpu-monitoring") | nindent 4 }}
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: {{ include "cluster-addons.componentName" (list . "intel-xpu-monitoring-repo") }}
+  prune: true
+  timeout: 1m
+  targetNamespace: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
+  kubeConfig:
+    secretRef:
+      name: {{ include "cluster-addons.clusterName" . }}-kubeconfig
+  path: ./deployment/kubernetes/daemonset/base
+  patches:
+  - patch: |
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "gpu.intel.com/i915"
+            operator: "Exists"
+            effect: "NoSchedule"
+    target:
+      kind: DaemonSet
+      name: intel-xpumanager
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "intel-xpu-dashboard") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "intel-xpu-dashboard") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.intelDevicePlugin.xpuManagerMonitoring.namespace }}
+  releaseName: xpu-manager-dashboard
+  manifestSources:
+  - template: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: xpu-manager-dashboard
+        labels:
+          grafana_dashboard: "1"
+      data:
+        intel-xpu-dashboard.json: |
+          {% raw %}
+          {{- .Files.Get "grafana-dashboards/intel-xpu-dashboard.json" | nindent 12 }}
+          {% endraw %}
+{{- end }}

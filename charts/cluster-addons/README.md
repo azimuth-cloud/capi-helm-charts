@@ -269,6 +269,14 @@ By default, Grafana is only available from within the cluster and must be access
 kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000:80
 ```
 
+## Intel Device Plugin
+
+Deploys in the Intel Device Plugin operator for managing Intel devices,
+alongside GPU plugin CRDs for the operator to add Intel GPU resources to nodes. [Upstream GPU options](https://github.com/intel/helm-charts/tree/main/charts/gpu-device-plugin#configuration) can be modified by overriding the defaults in
+`intelDevicePlugin.gpuPlugin.release.values`. Prometheus metrics and service monitors
+are also provided by Intel XPU Manager, which is managed by Flux resources on the
+CAPI management cluster.
+
 ## Custom addons
 
 This chart is able to manage the deployment of custom addons.
