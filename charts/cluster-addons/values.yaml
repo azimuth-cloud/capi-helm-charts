@@ -373,9 +373,9 @@ intelDevicePlugin:
         logLevel: 4
         enableMonitoring: true
         tolerations:
-        - key: "gpu.intel.com/i915"
-          operator: "Exists"
-          effect: "NoSchedule"
+          - key: "gpu.intel.com/i915"
+            operator: "Exists"
+            effect: "NoSchedule"
   xpuManagerMonitoring:
     enabled: true
     namespace: intel
