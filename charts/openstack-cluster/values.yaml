@@ -314,9 +314,6 @@ controlPlane:
     # controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus can reach
     # them to collect metrics
     clusterConfiguration:
-      apiServer:
-        extraArgs:
-          cloud-provider: external
       controllerManager:
         extraArgs:
           cloud-provider: external
