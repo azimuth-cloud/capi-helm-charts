@@ -23,6 +23,7 @@ jobs:
     steps:
       - name: Workflow approved
         run: exit 0
+    if: ${{ github.repository != 'azimuth-cloud/capi-helm-charts' }}
 
   lint:
     needs: [wait_for_approval]
