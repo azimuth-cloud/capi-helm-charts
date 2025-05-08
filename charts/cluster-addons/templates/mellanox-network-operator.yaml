@@ -46,6 +46,17 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "mellanox-network-operator") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "mellanox-network-operator") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+    # When using the Argo addon provider, we want to use regular apply for the generated app
+    # This is because some of the resources fail to validate when using server-side apply
+    # See https://github.com/Mellanox/network-operator/issues/452
+    #
+    # We use the annotation rather than the spec so that the resource is compatible with
+    # both the legacy and Argo addon providers
+    addons.stackhpc.com/sync-options: |
+      { "serverSideApply": false }
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
