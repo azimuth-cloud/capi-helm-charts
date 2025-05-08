@@ -76,6 +76,9 @@ kind: HelmRelease
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "kube-prometheus-stack") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
@@ -90,7 +93,7 @@ spec:
         name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack") }}-config
         key: overrides
   # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks to
-  # ensure that it happens correctly
+  # ensure that it happens correctly
   lifecycleHooks:
     {{- if or $alertmanagerVolumeSize $prometheusVolumeSize }}
     preUpgrade:
@@ -156,6 +159,9 @@ kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "kube-prometheus-stack-dashboards") }}
   labels: {{ include "cluster-addons.componentLabels" (list . "kube-prometheus-stack-dashboards") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
