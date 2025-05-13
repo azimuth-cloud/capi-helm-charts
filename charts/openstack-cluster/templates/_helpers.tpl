@@ -413,7 +413,7 @@ webhooks and policies for audit logging can be added here.
         authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
         authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
 {{/*
-Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
+Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging)
 in future
 */}}
 {{- end }}
@@ -475,4 +475,22 @@ Produces integration for k8s-keystone-auth webhook on apiserver
         current-context: webhook
       owner: root:root
       permissions: "0644"
+{{- end }}
+
+{{/*
+Returns "true" if the node group defaults have autoscaling enabled
+or if any single node group has autoscaling enabled.
+*/}}
+{{- define "openstack-cluster.autoscalingEnabled" }}
+{{- $autoscalingEnabled := false }}
+{{- if .Values.nodeGroupDefaults.autoscale }}
+  {{- $autoscalingEnabled = true }}
+{{- else }}
+  {{- range .Values.nodeGroups }}
+    {{- if and (hasKey . "autoscale") (eq (index . "autoscale") true) }}
+      {{- $autoscalingEnabled = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- $autoscalingEnabled }}
 {{- end }}
