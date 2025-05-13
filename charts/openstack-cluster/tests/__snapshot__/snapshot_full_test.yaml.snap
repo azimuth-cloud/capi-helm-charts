@@ -2350,6 +2350,96 @@ templated manifests should match snapshot:
               systemctl restart containerd
               EOF
   71: |
+    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+    kind: KubeadmConfigTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: e1d1a382f8640c6551c40f3da6902e8d45a774e09fe30be4898ba00a70a63a67
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-2
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-2-e1d1a382
+    spec:
+      template:
+        spec:
+          files:
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/conf.d/.keepdir
+              permissions: "0644"
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/certs.d/.keepdir
+              permissions: "0644"
+            - content: |2
+                server = "https://registry-1.docker.io"
+                [host."https://quay.io/v2/azimuth/docker.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/docker.io/hosts.toml
+              permissions: "0644"
+            - content: |2
+                server = "https://ghcr.io"
+                [host."https://quay.io/v2/azimuth/ghcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/ghcr.io/hosts.toml
+              permissions: "0644"
+            - content: |2
+                server = "https://nvcr.io"
+                [host."https://quay.io/v2/azimuth/nvcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/nvcr.io/hosts.toml
+              permissions: "0644"
+            - content: |2
+                server = "https://quay.io"
+                [host."https://quay.io/v2/azimuth/quay.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/quay.io/hosts.toml
+              permissions: "0644"
+            - content: |2
+                server = "https://registry.k8s.io"
+                [host."https://quay.io/v2/azimuth/registry.k8s.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+              permissions: "0644"
+          joinConfiguration:
+            nodeRegistration:
+              kubeletExtraArgs:
+                cloud-provider: external
+                node-labels: capi.stackhpc.com/node-group=group-2
+              name: '{{ local_hostname }}'
+          preKubeadmCommands:
+            - |-
+              /usr/bin/bash -s <<EOF
+              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
+              cat <<CONTENT >> /etc/containerd/config.toml
+              [plugins."io.containerd.grpc.v1.cri".registry]
+                config_path = "/etc/containerd/certs.d"
+              CONTENT
+              systemctl restart containerd
+              EOF
+  72: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -2398,7 +2488,57 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  72: |
+  73: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineDeployment
+    metadata:
+      annotations:
+        cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
+        cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-2
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-2
+    spec:
+      clusterName: RELEASE-NAME
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-2
+          cluster.x-k8s.io/cluster-name: RELEASE-NAME
+      strategy:
+        rollingUpdate:
+          deletePolicy: Random
+          maxSurge: 0
+          maxUnavailable: 1
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: worker
+            capi.stackhpc.com/node-group: group-2
+        spec:
+          bootstrap:
+            configRef:
+              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+              kind: KubeadmConfigTemplate
+              name: RELEASE-NAME-group-2-e1d1a382
+          clusterName: RELEASE-NAME
+          infrastructureRef:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: OpenStackMachineTemplate
+            name: RELEASE-NAME-group-2-26685203
+          nodeDeletionTimeout: 5m0s
+          nodeDrainTimeout: 5m0s
+          nodeVolumeDetachTimeout: 5m0s
+          version: v1.29.2
+  74: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -2426,7 +2566,35 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  73: |
+  75: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineHealthCheck
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-2
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-2
+    spec:
+      clusterName: RELEASE-NAME
+      maxUnhealthy: 100%
+      nodeStartupTimeout: 30m0s
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-2
+      unhealthyConditions:
+        - status: Unknown
+          timeout: 5m0s
+          type: Ready
+        - status: "False"
+          timeout: 5m0s
+          type: Ready
+  76: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -2451,7 +2619,32 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  74: |
+  77: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackMachineTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: 2668520359b6b0cda12be8a8a3bfeafa8e9d6866f2f3122b08e9755eb30c0d1c
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-2
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-2-26685203
+    spec:
+      template:
+        spec:
+          flavor: vm.large
+          identityRef:
+            cloudName: openstack
+            name: RELEASE-NAME-cloud-credentials
+          image:
+            filter:
+              name: ubuntu-jammy-kube-v1.29.2
+  78: |
     apiVersion: v1
     kind: Secret
     metadata:

@@ -1,3 +1,13 @@
+nodeGroups:
+  - name: group-1
+    machineFlavor: vm.small
+    machineCount: 1
+  - name: group-2
+    machineFlavor: vm.large
+    machineCountMin: 1
+    machineCountMax: 3
+    autoscale: true
+
 # Enable as many addons as possible for template
 # validation and snapshot testing
 addons:
