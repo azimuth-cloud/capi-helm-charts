@@ -1,26 +1,3 @@
-kubernetesVersion: 1.29.2
-machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
-controlPlane:
-  machineFlavor: vm.small
-nodeGroups:
-  - name: group-1
-    machineFlavor: vm.small
-    machineCount: 1
-  - name: group-2
-    machineFlavor: vm.xlarge
-    machineCount: 3
-
-clouds:
-  openstack:
-    auth:
-      auth_url: https://my.cloud:5000
-      application_credential_id: "<app cred id>"
-      application_credential_secret: "<app cred secret>"
-    region_name: "RegionOne"
-    interface: "public"
-    identity_api_version: 3
-    auth_type: "v3applicationcredential"
-
 # Enable as many addons as possible for template
 # validation and snapshot testing
 addons:
