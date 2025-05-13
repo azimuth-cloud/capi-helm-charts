@@ -42,4 +42,4 @@ jobs:
             --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
 
       - name: Run manifest snapshot test
-        run: docker run -ti --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
+        run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
