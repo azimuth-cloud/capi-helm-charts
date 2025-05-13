@@ -6,13 +6,6 @@ on:
         type: string
         description: The Git ref under test.
         required: true
-  # TODO: Remove after testing
-  workflow_dispatch:
-    inputs:
-      ref:
-        type: string
-        description: The Git ref under test.
-        required: true
 
 
 jobs:
@@ -22,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref }}
           fetch-depth: 0
 
       - name: Set up Helm
