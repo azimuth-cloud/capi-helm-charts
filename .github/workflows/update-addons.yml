@@ -168,6 +168,12 @@ jobs:
               )
             }}
 
+      - name: Update manifest snapshots
+        run: |-
+          docker run -i --rm -v $(pwd):/apps \
+            helmunittest/helm-unittest -u \
+            charts/openstack-cluster
+
       - name: Generate app token for PR
         uses: azimuth-cloud/github-actions/generate-app-token@master
         id: generate-app-token
