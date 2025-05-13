@@ -7,7 +7,6 @@ on:
         description: The Git ref under test.
         required: true
 
-
 jobs:
   lint:
     runs-on: ubuntu-latest

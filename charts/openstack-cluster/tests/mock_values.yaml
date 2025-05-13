@@ -58,7 +58,6 @@ addons:
   mellanoxNetworkOperator:
     enabled: true
   nodeProblemDetector:
-    # Indicates if the node problem detector should be enabled
     enabled: true
   custom:
     my-custom-helm-release:
