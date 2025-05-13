@@ -1,0 +1,84 @@
+kubernetesVersion: 1.29.2
+machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
+controlPlane:
+  machineFlavor: vm.small
+nodeGroups:
+  - name: group-1
+    machineFlavor: vm.small
+    machineCount: 1
+  - name: group-2
+    machineFlavor: vm.xlarge
+    machineCount: 3
+
+clouds:
+  openstack:
+    auth:
+      auth_url: https://my.cloud:5000
+      application_credential_id: "<app cred id>"
+      application_credential_secret: "<app cred secret>"
+    region_name: "RegionOne"
+    interface: "public"
+    identity_api_version: 3
+    auth_type: "v3applicationcredential"
+
+# Enable as many addons as possible for template
+# validation and snapshot testing
+addons:
+  csi:
+    cephfs:
+      enabled: true
+  openstack:
+    enabled: true
+    ccm:
+      enabled: true
+    csiCinder:
+      enabled: true
+    csiManila:
+      enabled: true
+    k8sKeystoneAuth:
+      enabled: true
+  etcDefrag:
+    enabled: true
+  metricsServer:
+    enabled: true
+  kubernetesDashboard:
+    enabled: true
+  ingress:
+    enabled: true
+  monitoring:
+    enabled: true
+  nvidiaGPUOperator:
+    enabled: true
+  nodeFeatureDiscovery:
+    enabled: true
+  intelDevicePlugin:
+    enabled: true
+  certManager:
+    enabled: true
+  mellanoxNetworkOperator:
+    enabled: true
+  nodeProblemDetector:
+    # Indicates if the node problem detector should be enabled
+    enabled: true
+  custom:
+    my-custom-helm-release:
+      kind: HelmRelease
+      spec:
+        namespace: my-namespace
+        chart:
+          repo: https://my-project/charts
+          name: my-chart
+          version: 1.5.0
+        values: {}
+    my-custom-manifests:
+      kind: Manifests
+      spec:
+        namespace: my-namespace
+        manifests:
+          secret.yaml: |-
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: my-secret
+            stringData:
+              secret-file: "secret-data"
