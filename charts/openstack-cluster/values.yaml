@@ -214,8 +214,11 @@ osDistro: ubuntu
 #
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
-# possible values: k8s-keystone-auth
+# possible values: k8s-keystone-auth, azimuth-authorization-webhook
 # authWebhook: k8s-keystone-auth
+
+azimuthAuthorizationWebhook:
+  server: https://127.0.0.1/authorize
 
 # Settings for the control plane
 controlPlane:

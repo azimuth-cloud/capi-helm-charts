@@ -412,6 +412,8 @@ webhooks and policies for audit logging can be added here.
 {{- if eq $authWebhook "k8s-keystone-auth" }}
         authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
         authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
+{{- else if eq $authWebhook "azimuth-authorization-webhook" }}
+        authorization-webhook-config-file: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
 {{/*
 Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
 in future
@@ -426,6 +428,8 @@ in future
 {{- include "openstack-cluster.webhookPatches" $ctx }}
 {{- if eq $authWebhook "k8s-keystone-auth" }}
 {{- include "openstack-cluster.k8sKeystoneAuthWebhook" $ctx }}
+{{- else if eq $authWebhook "azimuth-authorization-webhook" }}
+{{- include "openstack-cluster.azimuthAuthorizationWebhook" $ctx }}
 {{/*
 Add else if blocks with other webhooks or policy files in future.
 */}}
@@ -434,10 +438,9 @@ Add else if blocks with other webhooks or policy files in future.
 {{- end }}
 
 {{/*
-Produces integration for k8s-keystone-auth webhook on apiserver
+Create and mount a directory for webhooks
 */}}
-{{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
-  files:
+{{- define "openstack-cluster.webhookMountDirectoryFile"}}
     - path: /etc/kubernetes/patches/kube-apiserver0+strategic.yaml
       permissions: "0644"
       owner: root:root
@@ -454,6 +457,14 @@ Produces integration for k8s-keystone-auth webhook on apiserver
               path: /etc/kubernetes/webhooks
               type: DirectoryOrCreate
             name: kube-webhooks
+{{- end }}
+
+{{/*
+Produces integration for k8s-keystone-auth webhook on apiserver
+*/}}
+{{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
+  files:
+{{- include "openstack-cluster.webhookMountDirectoryFile" . }}
     - path: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
       content: |
         ---
@@ -464,6 +475,35 @@ Produces integration for k8s-keystone-auth webhook on apiserver
           - cluster:
               insecure-skip-tls-verify: true
               server: https://127.0.0.1:8443/webhook
+            name: webhook
+        users:
+          - name: webhook
+        contexts:
+          - context:
+              cluster: webhook
+              user: webhook
+            name: webhook
+        current-context: webhook
+      owner: root:root
+      permissions: "0644"
+{{- end }}
+
+{{/*
+Produces integration for azimuth_authorization_webhook on apiserver
+*/}}
+{{- define "openstack-cluster.azimuthAuthorizationWebhook" }}
+  files:
+{{- include "openstack-cluster.webhookMountDirectoryFile" . }}
+    - path: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
+      content: |
+        ---
+        apiVersion: v1
+        kind: Config
+        preferences: {}
+        clusters:
+          - cluster:
+              insecure-skip-tls-verify: true
+              server: {{ $.Values.azimuthAuthorizationWebhook.server }}
             name: webhook
         users:
           - name: webhook
