@@ -43,6 +43,10 @@ jobs:
             type: github
             repo: helm/helm
           
+          - key: openstack-resource-controller
+            type: github
+            repo: k-orc/openstack-resource-controller
+
           - key: sonobuoy
             type: github
             repo: vmware-tanzu/sonobuoy
