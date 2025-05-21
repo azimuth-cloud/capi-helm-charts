@@ -21,6 +21,7 @@ runs:
         echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cert-manager=$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "helm=$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "openstack-resource-controller=$(jq -r '.["openstack-resource-controller"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "sonobuoy=$(jq -r '.["sonobuoy"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
       env:
         DEPENDENCIES_PATH: ${{ inputs.dependencies-path }}
@@ -61,6 +62,17 @@ runs:
           --set installCRDs=true \
           --wait \
           --timeout 10m
+
+    - name: Install latest kubectl binary
+      uses: azure/setup-kubectl@v4
+
+    - name: Install openstack-resource-controller
+      shell: bash
+      run: >
+        kubectl apply --server-side -f \
+          https://github.com/k-orc/openstack-resource-controller/releases/download/${ORC_VERSION}/install.yaml
+      env:
+        ORC_VERSION: ${{ steps.deps.outputs.openstack-resource-controller }}
 
     - name: Install clusterctl
       shell: bash

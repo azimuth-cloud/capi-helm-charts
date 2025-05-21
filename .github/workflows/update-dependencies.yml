@@ -42,6 +42,10 @@ jobs:
           - key: helm
             type: github
             repo: helm/helm
+          
+          - key: openstack-resource-controller
+            type: github
+            repo: k-orc/openstack-resource-controller
 
           - key: sonobuoy
             type: github
