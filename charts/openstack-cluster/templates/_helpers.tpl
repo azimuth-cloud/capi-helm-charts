@@ -507,6 +507,11 @@ Produces integration for azimuth_authorization_webhook on apiserver
             name: webhook
         users:
           - name: webhook
+            {{ if $.Values.azimuthAuthorizationWebhook.basicAuth.enabled -}}
+            user:
+              username: {{ $.Values.azimuthAuthorizationWebhook.basicAuth.username }}
+              password: {{ $.Values.azimuthAuthorizationWebhook.basicAuth.password }}
+            {{- end }}
         contexts:
           - context:
               cluster: webhook

@@ -219,6 +219,10 @@ osDistro: ubuntu
 
 azimuthAuthorizationWebhook:
   server: https://127.0.0.1/authorize
+  basicAuth:
+    enabled: false
+    # username:
+    # password:
 
 # Settings for the control plane
 controlPlane:
