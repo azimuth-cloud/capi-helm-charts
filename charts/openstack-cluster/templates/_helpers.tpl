@@ -415,6 +415,7 @@ webhooks and policies for audit logging can be added here.
 {{- else if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-mode: {{ $ctx.Values.azimuthAuthorizationWebhook.authChain }}
         authorization-webhook-config-file: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
+        authorization-webhook-version: {{ $ctx.Values.azimuthAuthorizationWebhook.webhookVersion }}
 {{/*
 Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
 in future

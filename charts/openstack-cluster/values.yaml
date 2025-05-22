@@ -220,6 +220,7 @@ osDistro: ubuntu
 azimuthAuthorizationWebhook:
   authChain: Webhook,Node,RBAC
   server: https://127.0.0.1/authorize
+  webhookVersion: v1
   basicAuth:
     enabled: false
     # username:
