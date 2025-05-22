@@ -218,6 +218,7 @@ osDistro: ubuntu
 # authWebhook: k8s-keystone-auth
 
 azimuthAuthorizationWebhook:
+  authChain: Webhook,Node,RBAC
   server: https://127.0.0.1/authorize
   basicAuth:
     enabled: false

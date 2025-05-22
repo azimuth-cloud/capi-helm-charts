@@ -413,7 +413,7 @@ webhooks and policies for audit logging can be added here.
         authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
         authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
 {{- else if eq $authWebhook "azimuth-authorization-webhook" }}
-        authorization-mode: Webhook,Node,RBAC
+        authorization-mode: {{ $ctx.Values.azimuthAuthorizationWebhook.authChain }}
         authorization-webhook-config-file: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
 {{/*
 Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
