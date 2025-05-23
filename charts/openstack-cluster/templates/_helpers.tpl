@@ -413,9 +413,7 @@ webhooks and policies for audit logging can be added here.
         authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
         authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
 {{- else if eq $authWebhook "azimuth-authorization-webhook" }}
-        authorization-mode: {{ $ctx.Values.azimuthAuthorizationWebhook.authChain }}
-        authorization-webhook-config-file: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
-        authorization-webhook-version: {{ $ctx.Values.azimuthAuthorizationWebhook.webhookVersion }}
+        authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
 Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
 in future
@@ -522,4 +520,25 @@ Produces integration for azimuth_authorization_webhook on apiserver
         current-context: webhook
       owner: root:root
       permissions: "0644"
+    - path: /etc/kubernetes/webhooks/authorization_config.yaml
+      content: |
+        ---
+        apiVersion: apiserver.config.k8s.io/v1
+        kind: AuthorizationConfiguration
+        authorizers:
+          - type: Webhook
+            name: webhook
+            webhook:
+              subjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
+              matchConditionSubjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
+              failurePolicy: NoOpinion # CHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEME
+              connectionInfo:
+                type: KubeConfigFile
+                kubeConfigFile: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
+              matchConditions:
+              - expression: has(request.group) && 'oidc:/platform-users' in request.group
+          - type: Node
+            name: node
+          - type: RBAC
+            name: rbac
 {{- end }}
