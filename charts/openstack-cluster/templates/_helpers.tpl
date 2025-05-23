@@ -529,6 +529,7 @@ Produces integration for azimuth_authorization_webhook on apiserver
           - type: Webhook
             name: webhook
             webhook:
+              timeout: {{ $.Values.azimuthAuthorizationWebhook.timeout }}
               subjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
               matchConditionSubjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
               failurePolicy: NoOpinion # CHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEMECHANGEME
@@ -536,7 +537,7 @@ Produces integration for azimuth_authorization_webhook on apiserver
                 type: KubeConfigFile
                 kubeConfigFile: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
               matchConditions:
-              - expression: has(request.group) && 'oidc:/platform-users' in request.group
+              - expression: has(request.groups) && 'oidc:/platform-users' in request.groups
           - type: Node
             name: node
           - type: RBAC

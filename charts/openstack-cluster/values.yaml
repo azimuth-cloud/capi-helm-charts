@@ -220,6 +220,7 @@ osDistro: ubuntu
 azimuthAuthorizationWebhook:
   server: https://127.0.0.1/authorize
   webhookVersion: v1
+  timeout: 10s
   basicAuth:
     enabled: false
     # username:
