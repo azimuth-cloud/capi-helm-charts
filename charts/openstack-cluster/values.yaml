@@ -223,6 +223,10 @@ azimuthAuthorizationWebhook:
   server: https://127.0.0.1/authorize
   webhookVersion: v1
   timeout: 10s
+  failurePolicy: Deny
+  additionalAuthorizers:
+    - type: RBAC
+      name: rbac
   basicAuth:
     enabled: false
     # username:
