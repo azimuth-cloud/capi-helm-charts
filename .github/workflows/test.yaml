@@ -282,17 +282,6 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Deploy Kubernetes 1.29 for Kubernetes upgrade test
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-${{ github.job }}
-          os-cloud: ${{ vars.TARGET_CLOUD }}
-          chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-29-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-29-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-
       - name: Upgrade to Kubernetes 1.30
         uses: ./.github/actions/upgrade-and-test
         with:
