@@ -227,6 +227,8 @@ azimuthAuthorizationWebhook:
   additionalAuthorizers:
     - type: RBAC
       name: rbac
+    - type: Node
+      name: node
   basicAuth:
     enabled: false
     # username:
