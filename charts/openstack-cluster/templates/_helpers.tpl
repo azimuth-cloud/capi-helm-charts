@@ -495,6 +495,10 @@ Produces integration for azimuth_authorization_webhook on apiserver
 {{- define "openstack-cluster.azimuthAuthorizationWebhook" }}
   files:
 {{- include "openstack-cluster.webhookMountDirectoryFile" . }}
+    {{- if $.Values.azimuthAuthorizationWebhook.tls.enabled }}
+    - path: /etc/kubernetes/webhooks/ca.pem
+      content: {{ $.Values.azimuthAuthorizationWebhook.tls.cert | toYaml | nindent 12 }}
+    {{- end }}
     - path: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
       content: |
         ---
@@ -503,7 +507,11 @@ Produces integration for azimuth_authorization_webhook on apiserver
         preferences: {}
         clusters:
           - cluster:
+              {{- if $.Values.azimuthAuthorizationWebhook.tls.enabled }}
+              certificate-authority: /etc/kubernetes/webhooks/ca.pem
+              {{- else }}
               insecure-skip-tls-verify: true
+              {{- end }}
               server: {{ $.Values.azimuthAuthorizationWebhook.server }}
             name: webhook
         users:

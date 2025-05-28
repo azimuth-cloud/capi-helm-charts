@@ -233,6 +233,9 @@ azimuthAuthorizationWebhook:
     enabled: false
     # username:
     # password:
+  tls:
+    enabled: false
+    # cert:
 
 # Settings for the control plane
 controlPlane:
