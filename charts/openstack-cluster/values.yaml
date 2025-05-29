@@ -229,10 +229,6 @@ azimuthAuthorizationWebhook:
       name: node
     - type: RBAC
       name: rbac
-  basicAuth:
-    enabled: false
-    # username:
-    # password:
   tls:
     enabled: false
     # cert:
