@@ -216,8 +216,8 @@ osDistro: ubuntu
 #
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
-# possible values: k8s-keystone-auth, azimuth-authorization-webhook
-# authWebhook: k8s-keystone-auth
+# possible values: none, k8s-keystone-auth, azimuth-authorization-webhook
+authWebhook: none
 
 azimuthAuthorizationWebhook:
   server: https://127.0.0.1/authorize
@@ -225,10 +225,10 @@ azimuthAuthorizationWebhook:
   timeout: 10s
   failurePolicy: Deny
   additionalAuthorizers:
-    - type: RBAC
-      name: rbac
     - type: Node
       name: node
+    - type: RBAC
+      name: rbac
   basicAuth:
     enabled: false
     # username:

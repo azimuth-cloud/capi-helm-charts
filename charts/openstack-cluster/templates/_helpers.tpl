@@ -408,7 +408,7 @@ webhooks and policies for audit logging can be added here.
     apiServer:
       extraArgs:
         v: {{ $ctx.Values.apiServer.logLevel | quote }}
-{{- if $authWebhook }}
+{{- if ne $authWebhook "none" }}
 {{- if eq $authWebhook "k8s-keystone-auth" }}
         authorization-mode: Node,Webhook,RBAC
         authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
