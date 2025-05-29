@@ -236,6 +236,12 @@ azimuthAuthorizationWebhook:
   tls:
     enabled: false
     # cert:
+  # Should at least include the values provided to .Values.protectedNamespaces in
+  # https://github.com/azimuth-cloud/azimuth-authorization-webhook/blob/main/chart/values.yaml
+  filteredNamespaces:
+  - kube-system
+  - openstack-system
+  extraPreFilters: []
 
 # Settings for the control plane
 controlPlane:

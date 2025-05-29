@@ -546,7 +546,14 @@ Produces integration for azimuth_authorization_webhook on apiserver
                 type: KubeConfigFile
                 kubeConfigFile: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
               matchConditions:
-              - expression: has(request.groups) && 'oidc:/platform-users' in request.groups
+                {{- $quotedNSList := list }}
+                {{- range $.Values.azimuthAuthorizationWebhook.filteredNamespaces }}
+                {{- $quotedNSList = append $quotedNSList (quote .) }}
+                {{- end }}
+                - expression: has(request.resourceAttributes) && request.resourceAttributes.namespace in [{{ join "," $quotedNSList }}]
+              {{- range $.Values.azimuthAuthorizationWebhook.extraPreFilters }}
+                - expression: {{ . }}
+              {{- end }}
           {{- range $.Values.azimuthAuthorizationWebhook.additionalAuthorizers }}
           - type: {{ .type }}
             name: {{ .name }}
