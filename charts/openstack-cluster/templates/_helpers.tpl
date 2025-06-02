@@ -545,7 +545,7 @@ Produces integration for azimuth_authorization_webhook on apiserver
                 {{- range $.Values.azimuthAuthorizationWebhook.filteredNamespaces }}
                 {{- $quotedNSList = append $quotedNSList (quote .) }}
                 {{- end }}
-                - expression: has(request.resourceAttributes) && request.resourceAttributes.namespace in [{{ join "," $quotedNSList }}]
+                - expression: has(request.resourceAttributes) && (!has(request.resourceAttributes.namespace) || request.resourceAttributes.namespace == "" || request.resourceAttributes.namespace in [{{ join "," $quotedNSList }}])
               {{- range $.Values.azimuthAuthorizationWebhook.extraPreFilters }}
                 - expression: {{ . }}
               {{- end }}
