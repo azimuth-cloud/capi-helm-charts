@@ -23,3 +23,5 @@
 .vscode/
 # Documentation files
 *.md
+# Helm unit-test files
+tests/
