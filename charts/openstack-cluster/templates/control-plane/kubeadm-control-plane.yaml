@@ -69,6 +69,58 @@ mounts:
 {{- end }}
 {{- end }}
 
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.etcdEncryption" -}}
+{{- if .Values.etcd.encryption.enabled }}
+preKubeadmCommands:
+  - mkdir -p /etc/kubernetes/enc
+  - mkdir -p /etc/kubernetes/patches
+initConfiguration:
+  patches:
+    directory: /etc/kubernetes/patches
+joinConfiguration:
+  patches:
+    directory: /etc/kubernetes/patches
+clusterConfiguration:
+  apiServer:
+    extraArgs:
+      encryption-provider-config: /etc/kubernetes/enc/enc.yaml
+files:
+  - path: /etc/kubernetes/patches/kube-apiserver1+strategic.yaml
+    permissions: "0644"
+    owner: root:root
+    content: |
+      spec:
+        containers:
+        -  name: kube-apiserver
+            volumeMounts:
+            - mountPath: /etc/kubernetes/enc
+              name: kube-enc
+              readOnly: true
+        volumes:
+        - hostPath:
+            path: /etc/kubernetes/enc
+            type: DirectoryOrCreate
+          name: kube-enc
+  - path: /etc/kubernetes/enc/enc.yaml
+    content: |
+      apiVersion: apiserver.config.k8s.io/v1
+      kind: EncryptionConfiguration
+      resources:
+        - resources:
+            {{- .Values.etcd.encryption.resources | toYaml | nindent 10 }}
+          providers:
+            - {{ .Values.etcd.encryption.provider }}:
+                keys:
+                  {{- range .Values.etcd.encryption.keys }}
+                  - name: {{ .name }}
+                    secret: {{ .secret }}
+                  {{- end }}
+            - identity: {} # fallback to allow reading unencrypted secrets e.g during initial migration
+    owner: root:root
+    permissions: "0644"
+{{- end }}
+{{- end -}}
+
 {{/*
   NOTE(mkjpryor)
   When Cilium is enabled with the kube-proxy replacement, we need to skip kube-proxy
@@ -146,6 +198,7 @@ spec:
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.oidc" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcdEncryption" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.admissionConfigFile" . | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
