@@ -111,6 +111,9 @@ files:
           providers:
             - {{ .Values.etcd.encryption.provider }}:
                 keys:
+                  {{- if eq (len (required "Keys required for etcd encryption" .Values.etcd.encryption.keys)) 0 }}
+                  {{- fail "Keys required for etcd encryption" }}
+                  {{- end }}
                   {{- range .Values.etcd.encryption.keys }}
                   - name: {{ .name }}
                     secret: {{ .secret }}
