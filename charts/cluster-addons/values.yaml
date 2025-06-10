@@ -230,7 +230,7 @@ ingress:
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.12.1
+      version: 4.12.2
     release:
       namespace: ingress-nginx
       values: {}
@@ -317,7 +317,7 @@ nodeFeatureDiscovery:
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.17.2
+    version: 0.17.3
   release:
     namespace: node-feature-discovery
     values: {}
@@ -332,7 +332,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v24.9.2
+    version: v25.3.0
   release:
     namespace: gpu-operator
     values:
@@ -405,7 +405,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 23.7.0
+    version: 25.1.0
   release:
     namespace: network-operator
     values: {}

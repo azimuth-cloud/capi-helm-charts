@@ -134,7 +134,7 @@ working cluster:
 
 ```yaml
 # The target Kubernetes version
-kubernetesVersion: 1.29.2
+kubernetesVersion: 1.33.1
 
 # An image with the required software installed at the target version
 machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
