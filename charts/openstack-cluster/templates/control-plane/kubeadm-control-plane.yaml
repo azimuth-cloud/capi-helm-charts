@@ -111,13 +111,8 @@ files:
           providers:
             - {{ .Values.etcd.encryption.provider }}:
                 keys:
-                  {{- if eq (len (required "Keys required for etcd encryption" .Values.etcd.encryption.keys)) 0 }}
-                  {{- fail "Keys required for etcd encryption" }}
-                  {{- end }}
-                  {{- range .Values.etcd.encryption.keys }}
-                  - name: {{ .name }}
-                    secret: {{ .secret }}
-                  {{- end }}
+                  - name: key1
+                    secret: {{ (lookup "v1" "Secret" "azimuth" (print .Release.Name "-etcd-key")).data.key }}
             - identity: {} # fallback to allow reading unencrypted secrets e.g during initial migration
     owner: root:root
     permissions: "0644"

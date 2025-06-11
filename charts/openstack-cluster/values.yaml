@@ -157,10 +157,6 @@ etcd:
     # K8s resources to encrypt
     resources:
       - secrets
-    # Encryptions keys, should be in format
-    # - name: keyname
-    #   secret: <base-64-encoded-encryption-key>
-    keys: []
     # Encyption provider, see https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/#providers
     provider: secretbox
   # The block device configuration for etcd
