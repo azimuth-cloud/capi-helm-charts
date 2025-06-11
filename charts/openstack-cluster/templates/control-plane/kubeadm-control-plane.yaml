@@ -91,11 +91,11 @@ files:
     content: |
       spec:
         containers:
-        -  name: kube-apiserver
-            volumeMounts:
-            - mountPath: /etc/kubernetes/enc
-              name: kube-enc
-              readOnly: true
+        - name: kube-apiserver
+          volumeMounts:
+          - mountPath: /etc/kubernetes/enc
+            name: kube-enc
+            readOnly: true
         volumes:
         - hostPath:
             path: /etc/kubernetes/enc
