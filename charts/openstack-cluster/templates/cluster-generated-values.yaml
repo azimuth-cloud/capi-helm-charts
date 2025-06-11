@@ -1,3 +1,4 @@
+{{- if .Values.etcd.encryption.enabled }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -102,3 +103,4 @@ spec:
         - azimuth
       restartPolicy: Never
       serviceAccountName: gen-hook-sa
+{{- end }}
