@@ -112,7 +112,12 @@ files:
             - {{ .Values.etcd.encryption.provider }}:
                 keys:
                   - name: key1
-                    secret: {{ (lookup "v1" "Secret" .Release.Namespace (print .Release.Name "-etcd-key")).data.key | default (randAlphaNum 32 | b64enc)  }}
+                    {{- $secret := (lookup "v1" "Secret" .Release.Namespace (print .Release.Name "-etcd-key")) -}}
+                    {{- if $secret }}
+                    secret: {{ $secret.data.key }}
+                    {{- else }}
+                    secret: "Fallback value for CI only"
+                    {{- end }}
             - identity: {} # fallback to allow reading unencrypted secrets e.g during initial migration
     owner: root:root
     permissions: "0644"
