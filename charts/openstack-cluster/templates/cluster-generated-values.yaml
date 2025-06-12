@@ -7,14 +7,14 @@ annotations:
   helm.sh/hook-weight: "0"
   helm.sh/resource-policy: keep
 metadata:
-  name: gen-hook-sa
-  namespace: azimuth
+  name: {{ .Release.Name }}-secret-gen-hook
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Release.Name }}-value-generator
-  namespace: azimuth
+  name: {{ .Release.Name }}-secret-gen-hook
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: pre-install
     helm.sh/hook-weight: "1"
@@ -35,8 +35,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .Release.Name }}-value-generator
-  namespace: azimuth
+  name: {{ .Release.Name }}-secret-gen-hook
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: pre-install
     helm.sh/hook-weight: "2"
@@ -44,18 +44,18 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ .Release.Name }}-value-generator
+  name: {{ .Release.Name }}-secret-gen-hook
 subjects:
 - kind: ServiceAccount
-  name: gen-hook-sa
-  namespace: azimuth
+  name: {{ .Release.Name }}-secret-gen-hook
+  namespace: {{ .Release.Namespace }}
 ---
 # Create secrets dynamically retrievable by helm on cluster creation
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: secret-create
-  namespace: azimuth
+  name: {{ .Release.Name }}-secret-create
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: pre-install
     helm.sh/hook-weight: "3"
@@ -74,16 +74,16 @@ spec:
         - {{ .Release.Name }}-etcd-key
         - --from-literal=key={{ randAlphaNum 32 }}
         - -n
-        - azimuth
+        - {{ .Release.Namespace }}
       restartPolicy: Never
-      serviceAccountName: gen-hook-sa
+      serviceAccountName: {{ .Release.Name }}-secret-gen-hook
 ---
 # Delete secret on cluster deletion
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: secret-cleanup
-  namespace: azimuth
+  name: {{ .Release.Name }}-secret-cleanup
+  namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-weight: "4"
@@ -100,7 +100,7 @@ spec:
         - secret
         - {{ .Release.Name }}-etcd-key
         - -n
-        - azimuth
+        - {{ .Release.Namespace }}
       restartPolicy: Never
-      serviceAccountName: gen-hook-sa
+      serviceAccountName: {{ .Release.Name }}-secret-gen-hook
 {{- end }}
