@@ -113,6 +113,8 @@ files:
                 keys:
                   - name: key1
                     {{- $secret := (lookup "v1" "Secret" .Release.Namespace (print .Release.Name "-etcd-key")) -}}
+                    foo: {{ .Release.Namespace }} {{ print .Release.Name "-etcd-key" }}
+                    bar: {{ (lookup "v1" "Secret" .Release.Namespace (print .Release.Name "-etcd-key")) }}
                     {{- if $secret }}
                     secret: {{ $secret.data.key }}
                     {{- else }}
