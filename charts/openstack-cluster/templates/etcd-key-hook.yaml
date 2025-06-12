@@ -1,15 +1,5 @@
 {{- if .Values.etcd.encryption.enabled }}
 ---
-apiVersion: v1
-kind: ServiceAccount
-annotations:
-  helm.sh/hook: pre-install
-  helm.sh/hook-weight: "0"
-  helm.sh/resource-policy: keep
-metadata:
-  name: {{ .Release.Name }}-secret-gen-hook
-  namespace: {{ .Release.Namespace }}
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -18,6 +8,7 @@ metadata:
   annotations:
     helm.sh/hook: pre-install
     helm.sh/hook-weight: "1"
+    # helm.sh/resource-policy: keep
     helm.sh/resource-policy: keep
 rules:
 - apiGroups:
@@ -47,7 +38,7 @@ roleRef:
   name: {{ .Release.Name }}-secret-gen-hook
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-secret-gen-hook
+  name: default
   namespace: {{ .Release.Namespace }}
 ---
 # Create secrets dynamically retrievable by helm on cluster creation
@@ -76,7 +67,7 @@ spec:
         - -n
         - {{ .Release.Namespace }}
       restartPolicy: Never
-      serviceAccountName: {{ .Release.Name }}-secret-gen-hook
+      serviceAccountName: default
 ---
 # Delete secret on cluster deletion
 apiVersion: batch/v1
@@ -87,7 +78,8 @@ metadata:
   annotations:
     helm.sh/hook: pre-delete
     helm.sh/hook-weight: "4"
-    helm.sh/hook-delete-policy: hook-succeeded
+    #helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/resource-policy: keep
 spec:
   template:
     spec:
@@ -102,5 +94,5 @@ spec:
         - -n
         - {{ .Release.Namespace }}
       restartPolicy: Never
-      serviceAccountName: {{ .Release.Name }}-secret-gen-hook
+      serviceAccountName: default
 {{- end }}
