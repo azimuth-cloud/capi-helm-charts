@@ -226,7 +226,7 @@ osDistro: ubuntu
 authWebhook: none
 
 azimuthAuthorizationWebhook:
-  server: # required, e.g https://example.com/authorize
+  server:  # required, e.g https://example.com/authorize
   webhookVersion: v1
   timeout: 10s
   failurePolicy: Deny
@@ -237,7 +237,7 @@ azimuthAuthorizationWebhook:
       name: rbac
   tls:
     enabled: true
-    cert: # required
+    cert:  # required
   # Should at least include the values provided to .Values.protectedNamespaces in
   # https://github.com/azimuth-cloud/azimuth-authorization-webhook/blob/main/chart/values.yaml
   filteredNamespaces:
