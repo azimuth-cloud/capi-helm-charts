@@ -191,6 +191,12 @@ apiServer:
   # The port to use for the API server
   port: 6443
   # Log level
+  # 0: Errors
+  # 1: Config info and correctable errors (e.g unhealthy node)
+  # 2: System state changes
+  # 3: Extended system state change info
+  # 4: Debug
+  # 5: Trace
   logLevel: 2
   # The configuration for the built-in admission controllers
   # This should be a map of the controller name to the configuration for the controller
@@ -220,7 +226,7 @@ osDistro: ubuntu
 authWebhook: none
 
 azimuthAuthorizationWebhook:
-  server: https://127.0.0.1/authorize
+  server: # required, e.g https://example.com/authorize
   webhookVersion: v1
   timeout: 10s
   failurePolicy: Deny
@@ -230,8 +236,8 @@ azimuthAuthorizationWebhook:
     - type: RBAC
       name: rbac
   tls:
-    enabled: false
-    # cert:
+    enabled: true
+    cert: # required
   # Should at least include the values provided to .Values.protectedNamespaces in
   # https://github.com/azimuth-cloud/azimuth-authorization-webhook/blob/main/chart/values.yaml
   filteredNamespaces:
