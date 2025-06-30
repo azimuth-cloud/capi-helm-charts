@@ -5,7 +5,7 @@ docker.io:
 quay.io:
   images:
     kiwigrid/k8s-sidecar:
-    - 1.30.0
+    - 1.30.5
     prometheus-operator/prometheus-config-reloader:
     - v0.83.0
     prometheus-operator/prometheus-operator:
@@ -15,12 +15,12 @@ quay.io:
     prometheus/node-exporter:
     - v1.9.1
     prometheus/prometheus:
-    - v3.4.1
+    - v3.4.2
     thanos/thanos:
-    - v0.38.0
+    - v0.39.0
 registry.k8s.io:
   images:
     ingress-nginx/kube-webhook-certgen:
     - v1.5.4
     kube-state-metrics/kube-state-metrics:
-    - v2.15.0
+    - v2.16.0
