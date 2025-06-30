@@ -116,7 +116,11 @@ files:
                     {{- if $secret }}
                     secret: {{ $secret.data.key }}
                     {{- else }}
-                    secret: "Fallback value for CI only"
+                    #  Set so that chart can pass CI linting. Will break real clusters as not base64 encoded; this is intentional
+                    #  as an alternative to silently adding non-idempotent Helm generated secrets to the cluster. If you are seeing this
+                    #  value inside a running cluster, there has been an issue retrieving the {{ print .Release.Name "-etcd-key" }} secret
+                    #  for this cluster
+                    secret: "Fallback value for linting only"
                     {{- end }}
             - identity: {} # fallback to allow reading unencrypted secrets e.g during initial migration
     owner: root:root

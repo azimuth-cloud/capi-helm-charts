@@ -57,6 +57,14 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Create etcd encryption key
+      shell: bash
+      env:
+        ETCD_KEY: ${{ secrets.ETCD_KEY }}
+      run: |-
+        echo $ETCD_KEY > etcd-secret-file.txt
+        kubectl create secret generic ${{ inputs.name }}-etcd-key --dry-run=client --from-file=key=etcd-secret-file.txt -o yaml | kubectl apply -f -
+        
     - name: Install or upgrade cluster from directory
       shell: bash
       run: |-
