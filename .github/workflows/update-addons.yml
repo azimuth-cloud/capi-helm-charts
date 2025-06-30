@@ -170,7 +170,8 @@ jobs:
 
       - name: Update manifest snapshots
         run: |-
-          docker run -i --rm -v $(pwd):/apps \
+          helm dependency update && \
+            docker run -i --rm -v $(pwd):/apps \
             helmunittest/helm-unittest -u \
             charts/openstack-cluster
 
