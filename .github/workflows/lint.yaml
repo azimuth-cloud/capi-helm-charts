@@ -22,11 +22,6 @@ jobs:
         with:
           version: v3.15.3
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          check-latest: true
-
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2
 
@@ -36,3 +31,17 @@ jobs:
             --target-branch ${{ github.event.repository.default_branch }} \
             --all \
             --validate-maintainers=false
+
+      - name: Run template validation
+        run: |-
+          helm template foo charts/openstack-cluster -f charts/openstack-cluster/tests/mock_values.yaml \
+            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            --strict --summary \
+            --schema-location default \
+            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+
+      # NOTE: Run the following command locally to generate updated snapshots:
+      # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
+      - name: Run manifest snapshot test
+        run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster

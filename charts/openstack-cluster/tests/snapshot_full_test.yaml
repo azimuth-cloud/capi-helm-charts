@@ -1,0 +1,10 @@
+# To update manifest snapshots run helm unittest plugin with -u option:
+# docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest -u charts/openstack-cluster
+suite: Manifest snapshot tests
+values:
+  - values_base.yaml
+  - values_full.yaml
+tests:
+  - it: templated manifests should match snapshot
+    asserts:
+      - matchSnapshot: {}
