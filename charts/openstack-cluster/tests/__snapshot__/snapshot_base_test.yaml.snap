@@ -170,7 +170,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 23.7.0
+        version: 25.1.0
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -282,7 +282,7 @@ templated manifests should match snapshot:
       chart:
         name: node-feature-discovery
         repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-        version: 0.17.2
+        version: 0.17.3
       clusterName: RELEASE-NAME
       releaseName: node-feature-discovery
       targetNamespace: node-feature-discovery
@@ -386,7 +386,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v24.9.2
+        version: v25.3.0
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
@@ -609,7 +609,7 @@ templated manifests should match snapshot:
                 - --v=4
               command:
                 - /cluster-autoscaler
-              image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0
+              image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.4
               imagePullPolicy: IfNotPresent
               livenessProbe:
                 httpGet:
@@ -773,6 +773,7 @@ templated manifests should match snapshot:
           apiServer:
             extraArgs:
               admission-control-config-file: /etc/kubernetes/admission/configuration.yaml
+              v: "2"
             extraVolumes:
               - hostPath: /etc/kubernetes/admission
                 mountPath: /etc/kubernetes/admission

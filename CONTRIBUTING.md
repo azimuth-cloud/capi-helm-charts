@@ -14,6 +14,7 @@ the saved snapshots to allow your changes to pass the automated tests. The easie
 is to run the helm unittest command inside a docker container from the repo root.
 
 ```
+helm dependency update charts/openstack-cluster
 docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
 ```
 

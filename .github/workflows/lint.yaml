@@ -34,7 +34,9 @@ jobs:
 
       - name: Run template validation
         run: |-
-          helm template foo charts/openstack-cluster -f charts/openstack-cluster/tests/mock_values.yaml \
+          helm template foo charts/openstack-cluster \
+            -f charts/openstack-cluster/tests/values_base.yaml \
+            -f charts/openstack-cluster/tests/values_full.yaml \
             | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
             --strict --summary \
             --schema-location default \
