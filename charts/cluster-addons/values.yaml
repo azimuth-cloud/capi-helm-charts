@@ -346,7 +346,7 @@ intelDevicePlugin:
     chart:
       repo: https://intel.github.io/helm-charts
       name: intel-device-plugins-operator
-      version: 0.32.0
+      version: 0.32.1
     release:
       namespace: intel
       values:
