@@ -773,6 +773,7 @@ templated manifests should match snapshot:
           apiServer:
             extraArgs:
               admission-control-config-file: /etc/kubernetes/admission/configuration.yaml
+              encryption-provider-config: /etc/kubernetes/enc/enc.yaml
               v: "2"
             extraVolumes:
               - hostPath: /etc/kubernetes/admission
@@ -796,6 +797,41 @@ templated manifests should match snapshot:
             extraArgs:
               bind-address: 0.0.0.0
         files:
+          - content: |
+              spec:
+                containers:
+                - name: kube-apiserver
+                  volumeMounts:
+                  - mountPath: /etc/kubernetes/enc
+                    name: kube-enc
+                    readOnly: true
+                volumes:
+                - hostPath:
+                    path: /etc/kubernetes/enc
+                    type: DirectoryOrCreate
+                  name: kube-enc
+            owner: root:root
+            path: /etc/kubernetes/patches/kube-apiserver1+strategic.yaml
+            permissions: "0644"
+          - content: |
+              apiVersion: apiserver.config.k8s.io/v1
+              kind: EncryptionConfiguration
+              resources:
+                - resources:
+                  - secrets
+                  providers:
+                    - secretbox:
+                        keys:
+                          - name: key1
+                            #  Set so that chart can pass CI linting. Will break real clusters as not base64 encoded; this is intentional
+                            #  as an alternative to silently adding non-idempotent Helm generated secrets to the cluster. If you are seeing this
+                            #  value inside a running cluster, there has been an issue retrieving the RELEASE-NAME-etcd-key secret
+                            #  for this cluster
+                            secret: "Fallback value for linting only"
+                    - identity: {} # fallback to allow reading unencrypted secrets e.g during initial migration
+            owner: root:root
+            path: /etc/kubernetes/enc/enc.yaml
+            permissions: "0644"
           - contentFrom:
               secret:
                 key: admission-configuration.yaml
@@ -871,12 +907,18 @@ templated manifests should match snapshot:
             kubeletExtraArgs:
               cloud-provider: external
             name: '{{ local_hostname }}'
+          patches:
+            directory: /etc/kubernetes/patches
         joinConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
               cloud-provider: external
             name: '{{ local_hostname }}'
+          patches:
+            directory: /etc/kubernetes/patches
         preKubeadmCommands:
+          - mkdir -p /etc/kubernetes/enc
+          - mkdir -p /etc/kubernetes/patches
           - |-
             /usr/bin/bash -s <<EOF
             grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
