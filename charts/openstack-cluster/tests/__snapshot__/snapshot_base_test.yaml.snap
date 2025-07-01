@@ -35,8 +35,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico
@@ -48,7 +46,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.29.1
+        version: v3.29.3
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -63,8 +61,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico-globalnetpolicy
@@ -96,8 +92,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: etcd-defrag
@@ -165,10 +159,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        addons.stackhpc.com/sync-options: |
-          { "serverSideApply": false }
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: mellanox-network-operator
@@ -180,7 +170,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 23.7.0
+        version: 25.1.0
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -209,15 +199,13 @@ templated manifests should match snapshot:
         # Since we deploy in kube-system, we need a PDB to allow eviction to happen
         podDisruptionBudget:
           enabled: true
-          minAvailable: 0
+          maxUnavailable: 1
       overrides: |
         {}
   9: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: metrics-server
@@ -283,8 +271,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: node-feature-discovery
@@ -296,7 +282,7 @@ templated manifests should match snapshot:
       chart:
         name: node-feature-discovery
         repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-        version: 0.17.1
+        version: 0.17.3
       clusterName: RELEASE-NAME
       releaseName: node-feature-discovery
       targetNamespace: node-feature-discovery
@@ -328,8 +314,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: node-problem-detector
@@ -391,10 +375,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        addons.stackhpc.com/sync-options: |
-          { "serverSideApply": false }
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: nvidia-gpu-operator
@@ -406,7 +386,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v24.9.2
+        version: v25.3.0
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
@@ -452,8 +432,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: ccm-openstack
@@ -465,7 +443,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.32.0
+        version: 2.33.0
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
@@ -480,8 +458,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cloud-config
@@ -543,8 +519,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: csi-cinder
@@ -571,8 +545,6 @@ templated manifests should match snapshot:
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: ControllerReferencesOnly=true
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: csi-cinder
