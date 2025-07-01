@@ -72,8 +72,7 @@ jobs:
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest${{ inputs.tests-full && '-full' || '' }}.yaml
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Delete Kubernetes 1.32 deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -146,8 +145,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-32-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest-addons.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Delete Kubernetes 1.32 deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -222,8 +220,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-32-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/etcd-volume.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Delete etcd volume test deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -298,8 +295,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Upgrade to Kubernetes 1.31
         uses: ./.github/actions/upgrade-and-test
@@ -311,8 +307,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Upgrade to Kubernetes 1.32
         uses: ./.github/actions/upgrade-and-test
@@ -324,8 +319,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-32-image }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Delete Kubernetes upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
@@ -428,8 +422,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-32-image }}
           defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Update test environment with current dependencies
         uses: ./current/.github/actions/setup
@@ -447,8 +440,7 @@ jobs:
           image-id: ${{ fromJson(inputs.images).kube-1-32-image }}
           defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
-        env:
-          ETCD_KEY: ${{ secrets.ETCD_KEY }}
+          etcd-key: ${{ secrets.ETCD_KEY }}
 
       - name: Delete chart upgrade deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait

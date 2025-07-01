@@ -53,12 +53,17 @@ inputs:
     description: Specify "yes" to skip the workload status check
     required: true
     default: "no"
+  etcd-key:
+    description: etcd encryption key
+    required: true
 
 runs:
   using: "composite"
   steps:
     - name: Create etcd encryption key
       shell: bash
+      env:
+        ETCD_KEY: ${{ inputs.etcd-key }}
       run: |-
         echo $ETCD_KEY > etcd-secret-file.txt
         kubectl create secret generic ${{ inputs.name }}-etcd-key --dry-run=client --from-file=key=etcd-secret-file.txt -o yaml | kubectl apply -f -
@@ -77,11 +82,11 @@ runs:
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
 
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
-      with:
-        ## limits ssh access and adds the ssh public key for the user which triggered the workflow
-        limit-access-to-actor: true
+    # - name: Setup upterm session
+    #   uses: lhotari/action-upterm@v1
+    #   with:
+    #     ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+    #     limit-access-to-actor: true
 
     # Wait for any upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
