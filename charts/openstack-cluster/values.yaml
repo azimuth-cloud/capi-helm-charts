@@ -153,7 +153,7 @@ etcd:
     listen-metrics-urls: http://0.0.0.0:2381
   # At-rest encryption settings
   encryption:
-    enabled: true
+    enabled: false
     # K8s resources to encrypt
     resources:
       - secrets
