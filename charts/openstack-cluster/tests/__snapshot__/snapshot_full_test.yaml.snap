@@ -1628,7 +1628,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.32.0
+        version: 2.33.0
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system
