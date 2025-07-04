@@ -1846,7 +1846,7 @@ templated manifests should match snapshot:
       chart:
         name: k8s-keystone-auth
         repo: https://catalyst-cloud.github.io/capi-plugin-helm-charts
-        version: 1.4.0
+        version: 1.5.1
       clusterName: RELEASE-NAME
       releaseName: k8s-keystone-auth
       targetNamespace: kube-system
