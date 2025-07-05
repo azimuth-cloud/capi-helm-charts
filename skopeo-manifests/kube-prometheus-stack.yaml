@@ -17,10 +17,10 @@ quay.io:
     prometheus/prometheus:
     - v3.4.2
     thanos/thanos:
-    - v0.39.0
+    - v0.39.1
 registry.k8s.io:
   images:
     ingress-nginx/kube-webhook-certgen:
-    - v1.5.4
+    - v1.6.0
     kube-state-metrics/kube-state-metrics:
     - v2.16.0
