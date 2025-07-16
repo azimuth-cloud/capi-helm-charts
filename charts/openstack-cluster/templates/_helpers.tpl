@@ -392,9 +392,16 @@ ignition:
 Create folders necessary for webhook integration.
 */}}
 {{- define "openstack-cluster.webhookPatches" }}
+{{- $authWebhook := .Values.authWebhook }}
   preKubeadmCommands:
     - mkdir -p /etc/kubernetes/webhooks
     - mkdir -p /etc/kubernetes/patches
+{{- if eq $authWebhook "k8s-keystone-auth" }}
+    - mkdir -p /etc/kubernetes/keystone-auth
+  postKubeadmCommands:
+    - cp /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/keystone-auth/kube-apiserver.yaml
+    - kubectl kustomize /etc/kubernetes/keystone-auth -o /etc/kubernetes/manifests/kube-apiserver.yaml
+{{- end }}
 {{- end }}
 
 {{/*
@@ -409,11 +416,7 @@ webhooks and policies for audit logging can be added here.
       extraArgs:
         v: {{ $ctx.Values.apiServer.logLevel | quote }}
 {{- if ne $authWebhook "none" }}
-{{- if eq $authWebhook "k8s-keystone-auth" }}
-        authorization-mode: Node,Webhook,RBAC
-        authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
-        authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
-{{- else if eq $authWebhook "azimuth-authorization-webhook" }}
+{{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
 Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
@@ -466,6 +469,25 @@ Produces integration for k8s-keystone-auth webhook on apiserver
 {{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
   files:
 {{- include "openstack-cluster.webhookMountDirectoryFile" . }}
+    - path: /etc/kubernetes/keystone-auth/kustomization.yml
+      permissions: "0644"
+      owner: root:root
+      content: |
+        resources:
+        - kube-apiserver.yaml
+        patches:
+        - patch: |-
+            - op: add
+              path: /spec/containers/0/command/-
+              value: --authentication-token-webhook-config-file=/etc/kubernetes/webhooks/keystone_webhook_config.yaml
+            - op: add
+              path: /spec/containers/0/command/-
+              value: --authorization-webhook-config-file=/etc/kubernetes/webhooks/keystone_webhook_config.yaml
+            - op: add
+              path: /spec/containers/0/command/-
+              value: --authorization-mode=Webhook
+          target:
+            kind: Pod
     - path: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
       content: |
         ---
