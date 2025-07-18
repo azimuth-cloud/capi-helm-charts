@@ -62,6 +62,9 @@ and the chart repository containing this chart must be configured:
 helm repo add capi https://azimuth-cloud.github.io/capi-helm-charts
 ```
 
+An example script for installing these prerequisites on an existing
+Kubernetes cluster is available [here](../../scripts/dev-capi-mgmt-setup.sh).
+
 ## OpenStack images
 
 Cluster API uses an
