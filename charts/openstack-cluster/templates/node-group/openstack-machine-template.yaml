@@ -109,5 +109,8 @@ metadata:
     # Cluster API complains when old templates disappear before it has rolled all the machines over
     # When deploying with Helm, leave the resource behind and let Cluster API clean it up
     helm.sh/resource-policy: keep
+    # Allow Argo to clean up old templates by ignoring the non-controller owner references,
+    # but only after the cluster has become healthy again
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true,PruneLast=true"
 spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
 {{- end }}
