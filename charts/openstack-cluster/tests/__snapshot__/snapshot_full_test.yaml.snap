@@ -1484,7 +1484,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v25.3.0
+        version: v25.3.2
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
