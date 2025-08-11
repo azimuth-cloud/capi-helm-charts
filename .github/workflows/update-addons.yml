@@ -107,6 +107,9 @@ jobs:
           - key: node-problem-detector
             path: nodeProblemDetector.chart
 
+          - key: reloader
+            path: reloader.chart
+
     name: ${{ matrix.key }}
     steps:
       - name: Checkout

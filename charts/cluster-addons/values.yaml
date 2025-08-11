@@ -178,6 +178,21 @@ openstack:
       name: k8s-keystone-auth
       version: 1.4.0
 
+# Setting for Reloader used to restart workloads on Secret/ConfigMap changes
+reloader:
+  # Indicates if Reloader should be enabled
+  enabled: false
+  chart:
+    repo: https://stakater.github.io/stakater-charts
+    name: reloader
+    version: 2.2.0
+  release:
+    # Deploy to the same namespace as OpenStack services
+    namespace: openstack-system
+    values:
+      reloader:
+        watchGlobally: false # Restrict scope to namespace
+
 # Settings for etcd defragmentation jobs
 etcdDefrag:
   # Indicates if the etcd defragmentation job should be enabled

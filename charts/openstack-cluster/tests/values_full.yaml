@@ -46,6 +46,8 @@ addons:
     enabled: true
   nodeProblemDetector:
     enabled: true
+  reloader:
+    enabled: true
   custom:
     my-custom-helm-release:
       kind: HelmRelease
