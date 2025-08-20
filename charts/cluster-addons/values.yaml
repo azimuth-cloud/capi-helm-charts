@@ -288,6 +288,9 @@ monitoring:
             replication_factor: 1
           storage:
             type: 'filesystem'
+          persistence:
+            enabled: true
+            size: 10Gi
         singleBinary:
           replicas: 1
         monitoring:
