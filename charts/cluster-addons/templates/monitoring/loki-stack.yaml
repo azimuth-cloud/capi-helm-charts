@@ -25,7 +25,7 @@ spec:
   bootstrap: true
   chart: {{ toYaml .Values.monitoring.lokiStack.chart | nindent 4 }}
   targetNamespace: {{ .Values.monitoring.lokiStack.release.namespace }}
-  releaseName: loki
+  releaseName: loki-stack
   valuesSources:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
