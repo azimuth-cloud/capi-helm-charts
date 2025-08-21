@@ -284,7 +284,7 @@ monitoring:
       values:
         config:
           clients:
-            - url: http://loki.{{ .Values.monitoring.lokiStack.release.namespace }}:3100
+            - url: http://loki.{{ .Values.monitoring.lokiStack.release.namespace}}:3100
   lokiStack:
     enabled: true
     chart:
