@@ -289,6 +289,19 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+  promtail:
+    enabled: true
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: promtail
+      version: 6.17.0
+    release:
+      namespace: monitoring-system
+      values:
+        config:
+          clients:
+            - url: http://loki.{{ .Values.monitoring.lokiStack.release.namespace}}:3100/loki/api/v1/push
+              tenant_id: "1"
   lokiStack:
     enabled: true
     chart:
