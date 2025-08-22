@@ -324,8 +324,7 @@ monitoring:
           replicas: 1
         monitoring:
           dashboards:
-            enabled: false
-        
+            enabled: false    
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
