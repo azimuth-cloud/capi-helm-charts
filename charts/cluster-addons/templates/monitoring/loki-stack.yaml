@@ -15,7 +15,7 @@ stringData:
   overrides: |
     {{- toYaml .Values.monitoring.lokiStack.release.values | nindent 4 }}
 ---
-apiVersion: v1dd
+apiVersion: v1
 kind: Secret
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
