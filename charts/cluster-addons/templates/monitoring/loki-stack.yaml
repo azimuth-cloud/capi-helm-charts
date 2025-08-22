@@ -82,7 +82,7 @@ spec:
         name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
         key: overrides
   # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks
-  # to ensure that it happens correctly
+  # to ensure that it happens correctly@
   lifecycleHooks:
     preUpgrade:
       - apiVersion: apps/v1
