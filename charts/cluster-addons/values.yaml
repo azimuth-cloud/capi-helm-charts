@@ -308,8 +308,8 @@ monitoring:
           replicas: 1
         monitoring:
           dashboards:
-            enabled: false    
-  # Configuration for the blackbox exporter
+            enabled: false
+# Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
     chart:
