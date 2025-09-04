@@ -314,6 +314,9 @@ monitoring:
                 index:
                   prefix: index_
                   period: 24h
+          persistence:
+            enabled: true
+            size: 10Gi
         write:
           replicas: 0
         read:
