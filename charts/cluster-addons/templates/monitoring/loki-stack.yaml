@@ -160,19 +160,19 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki-stack-dashboards") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack-dashboards") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "loki-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki-dashboards") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
   targetNamespace: {{ .Values.monitoring.loki.release.namespace }}
-  releaseName: loki-stack-dashboards
+  releaseName: loki-dashboards
   manifestSources:
     - template: |
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: loki-stack-grafana-datasource
+          name: loki-grafana-datasource
           labels:
             grafana_datasource: "1"
         data:
@@ -181,7 +181,7 @@ spec:
             datasources:
               - name: Loki
                 type: loki
-                url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}:3100
+                url: http://loki.{{ .Values.monitoring.loki.release.namespace }}:3100
                 access: proxy
                 version: 1
                 isDefault: false
@@ -189,7 +189,7 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: loki-stack-grafana-dashboards
+          name: loki-grafana-dashboards
           labels:
             grafana_dashboard: "1"
         data:
