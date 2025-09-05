@@ -18,8 +18,8 @@ stringData:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
@@ -55,13 +55,13 @@ spec:
                 requests:
                   storage: {{ .Values.monitoring.loki.release.values.loki.persistence.size }}
     {{- else }}
-      postUpgrade:
-        - apiVersion: v1
-          kind: PersistentVolumeClaim
-          selector:
-            app: loki
-            release: loki
-          action: delete
+    postUpgrade:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki
+        action: delete
     {{- end }}
     # After deleting the release, remove the PVCs
     postDelete:
@@ -96,7 +96,7 @@ spec:
             datasources:
               - name: Loki
                 type: loki
-                url: http://loki.{{ .Values.monitoring.loki.release.namespace }}:3100
+                url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}:3100
                 access: proxy
                 version: 1
                 isDefault: false
