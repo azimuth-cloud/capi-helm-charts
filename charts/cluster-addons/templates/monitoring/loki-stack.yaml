@@ -60,8 +60,8 @@ stringData:
           - name: machine-id
             mountPath: /etc/machine-id
             readOnly: true
-    overrides: |
-      {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
+  overrides: |
+    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
