@@ -55,13 +55,13 @@ spec:
                 requests:
                   storage: {{ .Values.monitoring.loki.release.values.loki.persistence.size }}
     {{- else }}
-    postUpgrade:
-      - apiVersion: v1
-        kind: PersistentVolumeClaim
-        selector:
-          app: loki
-          release: loki
-        action: delete
+      postUpgrade:
+        - apiVersion: v1
+          kind: PersistentVolumeClaim
+          selector:
+            app: loki
+            release: loki
+          action: delete
     {{- end }}
     # After deleting the release, remove the PVCs
     postDelete:
