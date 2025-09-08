@@ -329,7 +329,10 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-            storageClass: null  # do NOT let helm create a new disk
+            storageClass: null
+            labels:
+              app: loki
+              release: loki-stack
             selector:
               matchLabels:
                 app: loki
