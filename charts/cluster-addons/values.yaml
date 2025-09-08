@@ -320,8 +320,7 @@ monitoring:
             type: 'filesystem'
           schemaConfig:
             configs:
-              - from: 2024-04-01
-                object_store: filesystem
+              - object_store: filesystem
                 store: tsdb
                 schema: v13
                 index:
@@ -330,6 +329,11 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
+            storageClass: null  # do NOT let helm create a new disk
+            selector:
+              matchLabels:
+                app: loki
+                release: loki-stack
         write:
           replicas: 0
         read:
@@ -338,8 +342,6 @@ monitoring:
           replicas: 0
         singleBinary:
           replicas: 1
-        chunksCache:
-          enabled: false
 # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
