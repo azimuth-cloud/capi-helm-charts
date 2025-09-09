@@ -94,7 +94,7 @@ spec:
         kind: PersistentVolumeClaim
         selector:
           app: loki
-          release: loki
+          release: loki-stack
         action: patch
         options:
           data:
@@ -108,7 +108,7 @@ spec:
         kind: PersistentVolumeClaim
         selector:
           app: loki
-          release: loki
+          release: loki-stack
         action: delete
     {{- end }}
     # After deleting the release, remove the PVCs
@@ -117,7 +117,7 @@ spec:
         kind: PersistentVolumeClaim
         selector:
           app: loki
-          release: loki
+          release: loki-stack
         action: delete
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
