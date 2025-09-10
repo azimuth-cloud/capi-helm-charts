@@ -311,6 +311,7 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
+        fullnameOverride: loki-stack
         deploymentMode: SingleBinary
         loki:
           auth_enabled: false
