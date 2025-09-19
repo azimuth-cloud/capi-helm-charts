@@ -321,14 +321,14 @@ monitoring:
             type: 'filesystem'
           schema_config:
             configs:
-              - from: "2020-10-24"
-                store: boltdb-shipper
-                schema: v11
-                object_store: filesystem
-                index:
-                  prefix: index_
-                  period: 24h
-              - from: "2025-09-18"
+              # - from: "2020-10-24"
+              #   store: boltdb-shipper
+              #   schema: v11
+              #   object_store: filesystem
+              #   index:
+              #     prefix: index_
+              #     period: 24h
+              - from: "2025-09-19"
                 store: tsdb
                 schema: v13
                 object_store: filesystem
@@ -339,13 +339,13 @@ monitoring:
             enabled: true
             size: 10Gi
             storageClass: null
-            labels:
-              app: loki
-              release: loki-stack
-            selector:
-              matchLabels:
-                app: loki
-                release: loki-stack
+            # labels:
+            #   app: loki
+            #   release: loki-stack
+            # selector:
+            #   matchLabels:
+            #     app: loki
+            #     release: loki-stack
         write:
           replicas: 0
         read:
