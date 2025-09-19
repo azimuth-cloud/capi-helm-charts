@@ -321,13 +321,13 @@ monitoring:
             type: 'filesystem'
           schema_config:
             configs:
-              # - from: "2020-10-24"
-              #   store: boltdb-shipper
-              #   schema: v11
-              #   object_store: filesystem
-              #   index:
-              #     prefix: index_
-              #     period: 24h
+              - from: "2020-10-24"
+                store: boltdb-shipper
+                schema: v11
+                object_store: filesystem
+                index:
+                  prefix: index_
+                  period: 24h
               - from: "2025-09-18"
                 store: tsdb
                 schema: v13
