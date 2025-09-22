@@ -1,0 +1,31 @@
+{{- if .Values.reloader.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "reloader") }}-cfg
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "reloader") | nindent 4 }}
+stringData:
+  values: |
+    {{- toYaml .Values.reloader.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "reloader") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "reloader") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.reloader.chart | nindent 4 }}
+  targetNamespace: {{ .Values.reloader.release.namespace }}
+  releaseName: reloader
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "reloader") }}-cfg
+        key: values
+{{- end }}

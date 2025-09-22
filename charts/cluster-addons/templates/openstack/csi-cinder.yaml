@@ -34,6 +34,10 @@ stringData:
     storageClass:
       enabled: false
     clusterID: {{ include "cluster-addons.clusterName" . }}
+    {{- if .Values.reloader.enabled }}
+    commonAnnotations:
+      secret.reloader.stakater.com/reload: cloud-config
+    {{- end }}
   overrides: |
     {{- toYaml .Values.openstack.csiCinder.values | nindent 4 }}
 ---
