@@ -191,7 +191,8 @@ reloader:
     namespace: openstack-system
     values:
       reloader:
-        watchGlobally: false # Restrict scope to namespace
+        # Restrict scope to namespace
+        watchGlobally: false
 
 # Settings for etcd defragmentation jobs
 etcdDefrag:
