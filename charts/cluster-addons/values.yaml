@@ -335,6 +335,10 @@ monitoring:
                 index:
                   prefix: index_
                   period: 24h
+          storage_config:
+            tsdb_shipper:
+              active_index_directory: /data/tsdb-index
+              cache_location: /data/tsdb-cache
           persistence:
             enabled: true
             size: 10Gi
