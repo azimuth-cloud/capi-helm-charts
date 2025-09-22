@@ -328,7 +328,7 @@ monitoring:
                 index:
                   prefix: index_
                   period: 24h
-              - from: "2025-09-19"
+              - from: "2025-09-23"
                 store: tsdb
                 schema: v13
                 object_store: filesystem
