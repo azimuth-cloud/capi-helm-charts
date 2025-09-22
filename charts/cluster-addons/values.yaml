@@ -339,13 +339,12 @@ monitoring:
           storage_config:
             # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
             boltdb_shipper:
-              active_index_directory: /data/index
-              build_per_tenant_index: true
-              cache_location: /data/boltdb-cache
+              active_index_directory: /var/loki/index
+              cache_location: /var/loki/boltdb-cache
             # New tsdb-shipper configuration
             tsdb_shipper:
-              active_index_directory: /data/tsdb-index
-              cache_location: /data/tsdb-cache
+              active_index_directory: /var/loki/tsdb-index
+              cache_location: /var/loki/tsdb-cache
           persistence:
             enabled: true
             size: 10Gi
