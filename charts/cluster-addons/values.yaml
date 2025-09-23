@@ -319,23 +319,30 @@ monitoring:
             replication_factor: 1
           storage:
             type: 'filesystem'
-          schemaConfig:
+          schema_config:
             configs:
-              - from: "2020-10-24"
+              - from: "2020-05-15"
                 store: boltdb-shipper
+                object_store: filesystem
                 schema: v11
-                object_store: filesystem
                 index:
                   prefix: index_
                   period: 24h
-              - from: "2025-09-23"
+              - from: "2025-09-24"
                 store: tsdb
-                schema: v13
                 object_store: filesystem
+                schema: v11   # same schema, just TSDB
                 index:
                   prefix: index_
                   period: 24h
- 
+              - from: "2025-10-01"
+                store: tsdb
+                object_store: filesystem
+                schema: v13   # upgrade schema later
+                index:
+                  prefix: index_
+                  period: 24h
+
           storage_config:
             # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
             boltdb_shipper:
