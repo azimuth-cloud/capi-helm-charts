@@ -4,7 +4,7 @@
 {{- fail (printf "Node group name must be at least three characters long and must contain only lower-case alphanumeric characters and dashes (found name: %s)" $nodeGroup.name) }}
 {{- end }}
 ---
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
   name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
@@ -35,7 +35,10 @@ spec:
   {{- if not $nodeGroup.autoscale }}
   replicas: {{ $nodeGroup.machineCount | required (printf "no machine count specified for node group '%s'" $nodeGroup.name) }}
   {{- end }}
-  strategy: {{ toYaml $nodeGroup.rolloutStrategy | nindent 4 }}
+  rollout:
+    strategy: {{ toYaml $nodeGroup.rollout.strategy | nindent 6 }}
+  deletion:
+    order: {{ $nodeGroup.deletion.order }}
   selector:
     matchLabels:
       {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 6 }}
@@ -59,14 +62,15 @@ spec:
       {{- end }}
       bootstrap:
         configRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          apiGroup: bootstrap.cluster.x-k8s.io
           kind: KubeadmConfigTemplate
           name: {{ include "openstack-cluster.nodegroup.kct.name" (list $ $nodeGroup) }}
       infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: OpenStackMachineTemplate
         name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
-      nodeDrainTimeout: {{ $nodeGroup.nodeDrainTimeout }}
-      nodeVolumeDetachTimeout: {{ $nodeGroup.nodeVolumeDetachTimeout }}
-      nodeDeletionTimeout: {{ $nodeGroup.nodeDeletionTimeout }}
+      deletion:
+        nodeDrainTimeoutSeconds: {{ $nodeGroup.nodeDrainTimeoutSeconds }}
+        nodeVolumeDetachTimeoutSeconds: {{ $nodeGroup.nodeVolumeDetachTimeoutSeconds }}
+        nodeDeletionTimeoutSeconds: {{ $nodeGroup.nodeDeletionTimeoutSeconds }}
 {{- end }}

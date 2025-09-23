@@ -131,7 +131,8 @@ Outputs the node registration object for setting node labels.
 {{- define "openstack-cluster.nodeRegistration.nodeLabels" -}}
 nodeRegistration:
   kubeletExtraArgs:
-    node-labels: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
+    - name: "node-labels"
+      value: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
 {{- end }}
 
 {{/*
@@ -414,7 +415,8 @@ webhooks and policies for audit logging can be added here.
   clusterConfiguration:
     apiServer:
       extraArgs:
-        v: {{ $ctx.Values.apiServer.logLevel | quote }}
+        - name: "v"
+          value: {{ $ctx.Values.apiServer.logLevel | quote }}
 {{- if ne $authWebhook "none" }}
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
