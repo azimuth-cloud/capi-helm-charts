@@ -107,6 +107,9 @@ jobs:
           - key: node-problem-detector
             path: nodeProblemDetector.chart
 
+          - key: reloader
+            path: reloader.chart
+
     name: ${{ matrix.key }}
     steps:
       - name: Checkout
@@ -167,6 +170,14 @@ jobs:
                 steps.next.outputs.app-version
               )
             }}
+
+      - name: Update manifest snapshots
+        run: |-
+          helm dependency update charts/openstack-cluster && \
+            docker run -i --rm --user $(id -u) \
+            -v $(pwd):/apps \
+            helmunittest/helm-unittest -u \
+            charts/openstack-cluster
 
       - name: Generate app token for PR
         uses: azimuth-cloud/github-actions/generate-app-token@master

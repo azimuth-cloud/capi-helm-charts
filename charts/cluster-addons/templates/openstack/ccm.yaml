@@ -25,6 +25,10 @@ stringData:
         effect: NoSchedule
       - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
+    {{- if .Values.reloader.enabled }}
+    commonAnnotations:
+      secret.reloader.stakater.com/reload: cloud-config
+    {{- end }}
   overrides: |
     {{- toYaml .Values.openstack.ccm.values | nindent 4 }}
 ---

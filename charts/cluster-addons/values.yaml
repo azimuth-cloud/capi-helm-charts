@@ -178,6 +178,22 @@ openstack:
       name: k8s-keystone-auth
       version: 1.4.0
 
+# Setting for Reloader used to restart workloads on Secret/ConfigMap changes
+reloader:
+  # Indicates if Reloader should be enabled
+  enabled: false
+  chart:
+    repo: https://stakater.github.io/stakater-charts
+    name: reloader
+    version: 2.2.0
+  release:
+    # Deploy to the same namespace as OpenStack services
+    namespace: openstack-system
+    values:
+      reloader:
+        # Restrict scope to namespace
+        watchGlobally: false
+
 # Settings for etcd defragmentation jobs
 etcdDefrag:
   # Indicates if the etcd defragmentation job should be enabled
@@ -230,7 +246,7 @@ ingress:
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.12.2
+      version: 4.13.2
     release:
       namespace: ingress-nginx
       values: {}
@@ -245,7 +261,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 75.3.3
+      version: 75.6.1
     release:
       namespace: monitoring-system
       values:
@@ -332,7 +348,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v25.3.0
+    version: v25.3.4
   release:
     namespace: gpu-operator
     values:

@@ -392,9 +392,16 @@ ignition:
 Create folders necessary for webhook integration.
 */}}
 {{- define "openstack-cluster.webhookPatches" }}
+{{- $authWebhook := .Values.authWebhook }}
   preKubeadmCommands:
     - mkdir -p /etc/kubernetes/webhooks
     - mkdir -p /etc/kubernetes/patches
+{{- if eq $authWebhook "k8s-keystone-auth" }}
+    - mkdir -p /etc/kubernetes/keystone-auth
+  postKubeadmCommands:
+    - cp /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/keystone-auth/kube-apiserver.yaml
+    - kubectl kustomize /etc/kubernetes/keystone-auth -o /etc/kubernetes/manifests/kube-apiserver.yaml
+{{- end }}
 {{- end }}
 
 {{/*
@@ -407,11 +414,10 @@ webhooks and policies for audit logging can be added here.
   clusterConfiguration:
     apiServer:
       extraArgs:
-{{- if $authWebhook }}
-        authorization-mode: Node,Webhook,RBAC
-{{- if eq $authWebhook "k8s-keystone-auth" }}
-        authentication-token-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
-        authorization-webhook-config-file: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
+        v: {{ $ctx.Values.apiServer.logLevel | quote }}
+{{- if ne $authWebhook "none" }}
+{{- if eq $authWebhook "azimuth-authorization-webhook" }}
+        authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
 Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
 in future
@@ -426,6 +432,8 @@ in future
 {{- include "openstack-cluster.webhookPatches" $ctx }}
 {{- if eq $authWebhook "k8s-keystone-auth" }}
 {{- include "openstack-cluster.k8sKeystoneAuthWebhook" $ctx }}
+{{- else if eq $authWebhook "azimuth-authorization-webhook" }}
+{{- include "openstack-cluster.azimuthAuthorizationWebhook" $ctx }}
 {{/*
 Add else if blocks with other webhooks or policy files in future.
 */}}
@@ -434,10 +442,9 @@ Add else if blocks with other webhooks or policy files in future.
 {{- end }}
 
 {{/*
-Produces integration for k8s-keystone-auth webhook on apiserver
+Create and mount a directory for webhooks
 */}}
-{{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
-  files:
+{{- define "openstack-cluster.webhookMountDirectoryFile"}}
     - path: /etc/kubernetes/patches/kube-apiserver0+strategic.yaml
       permissions: "0644"
       owner: root:root
@@ -454,6 +461,33 @@ Produces integration for k8s-keystone-auth webhook on apiserver
               path: /etc/kubernetes/webhooks
               type: DirectoryOrCreate
             name: kube-webhooks
+{{- end }}
+
+{{/*
+Produces integration for k8s-keystone-auth webhook on apiserver
+*/}}
+{{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
+  files:
+{{- include "openstack-cluster.webhookMountDirectoryFile" . }}
+    - path: /etc/kubernetes/keystone-auth/kustomization.yml
+      permissions: "0644"
+      owner: root:root
+      content: |
+        resources:
+        - kube-apiserver.yaml
+        patches:
+        - patch: |-
+            - op: add
+              path: /spec/containers/0/command/-
+              value: --authentication-token-webhook-config-file=/etc/kubernetes/webhooks/keystone_webhook_config.yaml
+            - op: add
+              path: /spec/containers/0/command/-
+              value: --authorization-webhook-config-file=/etc/kubernetes/webhooks/keystone_webhook_config.yaml
+            - op: add
+              path: /spec/containers/0/command/-
+              value: --authorization-mode=Webhook
+          target:
+            kind: Pod
     - path: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
       content: |
         ---
@@ -475,4 +509,70 @@ Produces integration for k8s-keystone-auth webhook on apiserver
         current-context: webhook
       owner: root:root
       permissions: "0644"
+{{- end }}
+
+{{/*
+Produces integration for azimuth_authorization_webhook on apiserver
+*/}}
+{{- define "openstack-cluster.azimuthAuthorizationWebhook" }}
+  files:
+{{- include "openstack-cluster.webhookMountDirectoryFile" . }}
+    {{- if $.Values.azimuthAuthorizationWebhook.tls.enabled }}
+    - path: /etc/kubernetes/webhooks/ca.pem
+      content: {{ $.Values.azimuthAuthorizationWebhook.tls.cert | toYaml | nindent 12 }}
+    {{- end }}
+    - path: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
+      content: |
+        ---
+        apiVersion: v1
+        kind: Config
+        preferences: {}
+        clusters:
+          - cluster:
+              {{- if $.Values.azimuthAuthorizationWebhook.tls.enabled }}
+              certificate-authority: /etc/kubernetes/webhooks/ca.pem
+              {{- else }}
+              insecure-skip-tls-verify: true
+              {{- end }}
+              server: {{ $.Values.azimuthAuthorizationWebhook.server }}
+            name: webhook
+        users:
+          - name: webhook
+        contexts:
+          - context:
+              cluster: webhook
+              user: webhook
+            name: webhook
+        current-context: webhook
+      owner: root:root
+      permissions: "0644"
+    - path: /etc/kubernetes/webhooks/authorization_config.yaml
+      content: |
+        ---
+        apiVersion: apiserver.config.k8s.io/v1
+        kind: AuthorizationConfiguration
+        authorizers:
+          - type: Webhook
+            name: webhook
+            webhook:
+              timeout: {{ $.Values.azimuthAuthorizationWebhook.timeout }}
+              subjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
+              matchConditionSubjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
+              failurePolicy: {{ $.Values.azimuthAuthorizationWebhook.failurePolicy }}
+              connectionInfo:
+                type: KubeConfigFile
+                kubeConfigFile: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
+              matchConditions:
+                {{- $quotedNSList := list }}
+                {{- range $.Values.azimuthAuthorizationWebhook.filteredNamespaces }}
+                {{- $quotedNSList = append $quotedNSList (quote .) }}
+                {{- end }}
+                - expression: has(request.resourceAttributes) && (!has(request.resourceAttributes.namespace) || request.resourceAttributes.namespace == "" || request.resourceAttributes.namespace in [{{ join "," $quotedNSList }}])
+              {{- range $.Values.azimuthAuthorizationWebhook.extraPreFilters }}
+                - expression: {{ . }}
+              {{- end }}
+          {{- range $.Values.azimuthAuthorizationWebhook.additionalAuthorizers }}
+          - type: {{ .type }}
+            name: {{ .name }}
+          {{- end }}
 {{- end }}
