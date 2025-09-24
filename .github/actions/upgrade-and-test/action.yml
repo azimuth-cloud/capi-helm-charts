@@ -71,6 +71,20 @@ runs:
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
 
+    - name: Check for cluster deployment ready condition name
+      id: check-ready-condition
+      shell: bash
+      run: |-
+        ready=$(kubectl get clusters/${{ inputs.name }} \
+        -o jsonpath={.status.conditions} |\
+        jq -r '.[].type | select(test("^Ready$"))' |\
+        wc -l)
+        if [ $ready -eq 1 ]; then
+          echo "ready-condition-name=ready" >> $GITHUB_OUTPUT
+        else
+          echo "ready-condition-name=available" >> $GITHUB_OUTPUT
+        fi
+
     # Wait for any upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
     # progressing to wait for ready
@@ -82,7 +96,7 @@ runs:
       shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
-          --for=condition=ready=false \
+          --for=condition=${{ steps.check-ready-condition.outputs.ready-condition-name }}=false \
           --timeout 2m
       continue-on-error: true
 
@@ -90,7 +104,7 @@ runs:
       shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
-          --for=condition=ready \
+          --for=condition=${{ steps.check-ready-condition.outputs.ready-condition-name }} \
           --timeout 30m
 
     - name: Wait for machine deployments to be running
