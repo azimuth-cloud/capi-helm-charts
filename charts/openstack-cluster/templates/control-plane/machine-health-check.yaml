@@ -5,6 +5,9 @@ kind: MachineHealthCheck
 metadata:
   name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
   labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
 spec:
   clusterName: {{ include "openstack-cluster.clusterName" . }}
   selector:
