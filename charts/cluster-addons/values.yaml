@@ -289,27 +289,89 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
-  lokiStack:
+  promtail:
     enabled: true
     chart:
       repo: https://grafana.github.io/helm-charts
-      name: loki-stack
-      version: 2.10.2
+      name: promtail
+      version: 6.17.0
     release:
       namespace: monitoring-system
       values:
+        config:
+            clients:
+              - url: http://loki-stack.monitoring-system:3100/loki/api/v1/push
+                tenant_id: 1
+  loki:
+    enabled: true
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: loki
+      version: 5.48.0
+    release:
+      namespace: monitoring-system
+      values:
+        fullnameOverride: loki-stack
+        deploymentMode: SingleBinary
         loki:
-          # Enable retention and configure a default retention period of 31 days
-          config:
-            compactor:
-              retention_enabled: true
-            limits_config:
-              retention_period: 72h
-          # Enable persistence by default
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 1
+          storage:
+            type: 'filesystem'
+          schema_config:
+            configs:
+              - from: "2020-05-15"
+                store: boltdb-shipper
+                object_store: filesystem
+                schema: v11
+                index:
+                  prefix: index_
+                  period: 24h
+              - from: "2025-09-24"
+                store: tsdb
+                object_store: filesystem
+                schema: v11   # same schema, just TSDB
+                index:
+                  prefix: index_
+                  period: 24h
+              - from: "2025-10-01"
+                store: tsdb
+                object_store: filesystem
+                schema: v13   # upgrade schema later
+                index:
+                  prefix: index_
+                  period: 24h
+
+          storage_config:
+            # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
+            boltdb_shipper:
+              active_index_directory: /var/loki/index
+              cache_location: /var/loki/boltdb-cache
+            # New tsdb-shipper configuration
+            tsdb_shipper:
+              active_index_directory: /var/loki/tsdb-index
+              cache_location: /var/loki/tsdb-cache
           persistence:
             enabled: true
             size: 10Gi
-  # Configuration for the blackbox exporter
+            storageClass: null
+            # labels:
+            #   app: loki
+            #   release: loki-stack
+            # selector:
+            #   matchLabels:
+            #     app: loki
+            #     release: loki-stack
+        write:
+          replicas: 0
+        read:
+          replicas: 0
+        backend:
+          replicas: 0
+        singleBinary:
+          replicas: 1
+# Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
     chart:
