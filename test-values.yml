@@ -1,0 +1,6 @@
+---
+
+etcd:
+  extraArgs:
+    - name: "heartbeat-interval"
+      value: "500"
