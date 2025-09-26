@@ -34,6 +34,9 @@ spec:
     - {{ include "openstack-cluster.convert.neutronFilter" . | nindent 6 }}
   {{- end }}
   {{- else }}
+  {{- if .networkMTU }}
+  networkMTU: {{ .networkMTU }}
+  {{- end }}
   managedSubnets:
     - cidr: {{ .nodeCidr }}
       {{- with (default $.Values.clusterNetworking.dnsNameservers .dnsNameservers) }}
