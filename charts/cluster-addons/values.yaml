@@ -306,89 +306,120 @@ monitoring:
     enabled: true
     chart:
       repo: https://grafana.github.io/helm-charts
-      name: loki
+      name: loki-stack
       version: 5.48.0
     release:
       namespace: monitoring-system
       values:
-        commonConfig:
-          path_prefix: /var/loki/loki # default is /var/loki
-        fullnameOverride: loki-stack
-        deploymentMode: SingleBinary
+        # fullnameOverride: loki-stack
         loki:
           auth_enabled: false
           commonConfig:
             replication_factor: 1
+            path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
-          schema_config:
-            configs:
-              - from: "2019-05-15"
-                store: boltdb-shipper
-                object_store: filesystem
-                schema: v11
-                index:
-                  prefix: index_
-                  period: 24h
-              - from: "2025-10-1"
-                store: boltdb-shipper
-                object_store: filesystem
-                schema: v12
-                index:
-                  prefix: loki_index_
-                  period: 24h          
-          # schema_config:
-          #   configs:
-          #     - from: "2020-05-15"
-          #       store: boltdb-shipper
-          #       object_store: filesystem
-          #       schema: v11
-          #       index:
-          #         prefix: index_
-          #         period: 24h
-          #     - from: "2025-09-24"
-          #       store: tsdb
-          #       object_store: filesystem
-          #       schema: v11   # same schema, just TSDB
-          #       index:
-          #         prefix: index_
-          #         period: 24h
-          #     - from: "2025-10-01"
-          #       store: tsdb
-          #       object_store: filesystem
-          #       schema: v13   # upgrade schema later
-          #       index:
-          #         prefix: index_
-          #         period: 24h
-
-          storage_config:
-            # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
-            boltdb_shipper:
-              active_index_directory: /var/loki/index
-              cache_location: /var/loki/boltdb-cache
-          #   # New tsdb-shipper configuration
-          #   tsdb_shipper:
-          #     active_index_directory: /var/loki/tsdb-index
-          #     cache_location: /var/loki/tsdb-cache
-          persistence:
-            enabled: true
-            size: 10Gi
-            storageClass: null
-            # labels:
-            #   app: loki
-            #   release: loki-stack
-            # selector:
-            #   matchLabels:
-            #     app: loki
-            #     release: loki-stack
-        write:
-          replicas: 0
-        read:
-          replicas: 0
-        backend:
-          replicas: 0
         singleBinary:
           replicas: 1
+          # Prevent Loki data volume from being deleted
+          # when chart is uninstalled (TODO: remove this
+          # to match old loki-stack behaviour)
+          persistence:
+            enableStatefulSetAutoDeletePVC: false
+        # Disable components that are not in loki-stack
+        gateway:
+          enabled: false
+        monitoring:
+          lokiCanary:
+            enabled: false
+          # Disable selfMonitoring since we didn't use
+          # it in loki-stack either
+          selfMonitoring:
+            enabled: false
+            grafanaAgent:
+              installOperator: false
+        # Skip Helm tests since they require selfMonitoring
+        test:
+          enabled: false
+      # values:
+      #   commonConfig:
+      #     path_prefix: /var/loki/loki # default is /var/loki
+      #   fullnameOverride: loki-stack
+      #   deploymentMode: SingleBinary
+      #   loki:
+      #     auth_enabled: false
+      #     commonConfig:
+      #       replication_factor: 1
+      #     storage:
+      #       type: 'filesystem'
+      #     schema_config:
+      #       configs:
+      #         - from: "2019-05-15"
+      #           store: boltdb-shipper
+      #           object_store: filesystem
+      #           schema: v11
+      #           index:
+      #             prefix: index_
+      #             period: 24h
+      #         - from: "2025-10-1"
+      #           store: boltdb-shipper
+      #           object_store: filesystem
+      #           schema: v12
+      #           index:
+      #             prefix: loki_index_
+      #             period: 24h          
+      #     # schema_config:
+      #     #   configs:
+      #     #     - from: "2020-05-15"
+      #     #       store: boltdb-shipper
+      #     #       object_store: filesystem
+      #     #       schema: v11
+      #     #       index:
+      #     #         prefix: index_
+      #     #         period: 24h
+      #     #     - from: "2025-09-24"
+      #     #       store: tsdb
+      #     #       object_store: filesystem
+      #     #       schema: v11   # same schema, just TSDB
+      #     #       index:
+      #     #         prefix: index_
+      #     #         period: 24h
+      #     #     - from: "2025-10-01"
+      #     #       store: tsdb
+      #     #       object_store: filesystem
+      #     #       schema: v13   # upgrade schema later
+      #     #       index:
+      #     #         prefix: index_
+      #     #         period: 24h
+
+      #     # storage_config:
+      #     #   # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
+      #     #   boltdb_shipper:
+      #     #     active_index_directory: /var/loki/loki/index
+      #     #     cache_location: /var/loki/loki/boltdb-cache
+      #     #   # New tsdb-shipper configuration
+      #     #   tsdb_shipper:
+      #     #     active_index_directory: /var/loki/tsdb-index
+      #     #     cache_location: /var/loki/tsdb-cache
+      #     persistence:
+      #       enabled: true
+      #       size: 10Gi
+      #       storageClass: null
+      #       # labels:
+      #       #   app: loki
+      #       #   release: loki-stack
+      #       # selector:
+      #       #   matchLabels:
+      #       #     app: loki
+      #       #     release: loki-stack
+      #   write:
+      #     replicas: 0
+      #   read:
+      #     replicas: 0
+      #   backend:
+      #     replicas: 0
+      #   singleBinary:
+      #     replicas: 1
 # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
