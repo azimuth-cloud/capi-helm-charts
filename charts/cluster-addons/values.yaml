@@ -343,11 +343,11 @@ monitoring:
           #         prefix: index_
           #         period: 24h
 
-          # storage_config:
-          #   # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
-          #   boltdb_shipper:
-          #     active_index_directory: /var/loki/index
-          #     cache_location: /var/loki/boltdb-cache
+          storage_config:
+            # Old boltdb-shipper configuration. Included in example for reference but does not need changing.
+            boltdb_shipper:
+              active_index_directory: /var/loki/index
+              cache_location: /var/loki/boltdb-cache
           #   # New tsdb-shipper configuration
           #   tsdb_shipper:
           #     active_index_directory: /var/loki/tsdb-index
