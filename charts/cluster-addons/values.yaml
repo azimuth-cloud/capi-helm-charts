@@ -311,6 +311,8 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
+        commonConfig:
+          path_prefix: /var/loki/loki # default is /var/loki
         fullnameOverride: loki-stack
         deploymentMode: SingleBinary
         loki:
