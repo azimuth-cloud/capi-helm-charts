@@ -319,6 +319,22 @@ monitoring:
             replication_factor: 1
           storage:
             type: 'filesystem'
+          schema_config:
+            configs:
+              - from: "2019-05-15"
+                store: boltdb-shipper
+                object_store: filesystem
+                schema: v11
+                index:
+                  prefix: index_
+                  period: 24h
+              - from: "2025-10-1"
+                store: boltdb-shipper
+                object_store: filesystem
+                schema: v12
+                index:
+                  prefix: loki_index_
+                  period: 24h          
           # schema_config:
           #   configs:
           #     - from: "2020-05-15"
