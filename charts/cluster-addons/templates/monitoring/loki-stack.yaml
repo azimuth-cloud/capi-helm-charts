@@ -119,6 +119,7 @@ spec:
     #       app: loki
     #       release: loki-stack
     #     action: delete
+{{- end }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
@@ -205,4 +206,3 @@ spec:
             {% raw %}
             {{- .Files.Get "grafana-dashboards/loki-metrics-dashboard.json" | nindent 12 }}
             {% endraw %}
-{{- end }}
