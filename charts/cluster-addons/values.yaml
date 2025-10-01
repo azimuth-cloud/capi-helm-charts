@@ -289,6 +289,7 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+
   promtail:
     enabled: true
     chart:
@@ -303,6 +304,7 @@ monitoring:
               - url: http://loki-stack.monitoring-system:3100/loki/api/v1/push
                 tenant_id: 1
   loki:
+    enabled: true
     chart:
       # The chart repository that contains the chart to use
       repo: https://grafana.github.io/helm-charts
@@ -322,6 +324,10 @@ monitoring:
             path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
+          persistence:
+            enabled: true
+            size: 10Gi
+
         singleBinary:
           replicas: 1
           # Prevent Loki data volume from being deleted
