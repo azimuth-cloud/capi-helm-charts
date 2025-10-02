@@ -300,9 +300,9 @@ monitoring:
       namespace: monitoring-system
       values:
         config:
-            clients:
-              - url: http://loki-stack.monitoring-system:3100/loki/api/v1/push
-                tenant_id: 1
+          clients:
+            - url: http://loki-stack.monitoring-system:3100/loki/api/v1/push
+              tenant_id: 1
   loki:
     enabled: true
     chart:
