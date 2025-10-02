@@ -349,24 +349,6 @@ monitoring:
         # Skip Helm tests since they require selfMonitoring
         test:
           enabled: false
-    # chart:
-    #   # The chart repository that contains the chart to use
-    #   repo: https://grafana.github.io/helm-charts
-    #   # The name of the chart to use
-    #   name: loki
-    #   # The version of the chart to use (must be an exact version)
-    #   version: 5.48.0
-    # release:
-    #   namespace: monitoring-system
-    #   values:
-    #     fullnameOverride: loki-stack
-    #     deploymentMode: SingleBinary
-    #     loki:
-    #       auth_enabled: false
-    #       commonConfig:
-    #         replication_factor: 1
-    #       storage:
-    #         type: 'filesystem'
 # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
