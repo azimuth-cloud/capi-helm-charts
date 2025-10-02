@@ -995,7 +995,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 8316175f7413504139fb05d9adda0a8eea8c0effca39bca15060cdf7a804a2d1
+        capi.stackhpc.com/template-checksum: c8e20309a264ffa642f909594d0726d6155cef467f05e575d96e2d4b40f5618b
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1004,7 +1004,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-8316175f
+      name: RELEASE-NAME-group-1-c8e20309
     spec:
       template:
         spec:
@@ -1123,7 +1123,7 @@ templated manifests should match snapshot:
             configRef:
               apiGroup: bootstrap.cluster.x-k8s.io
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-8316175f
+              name: RELEASE-NAME-group-1-c8e20309
           clusterName: RELEASE-NAME
           deletion:
             nodeDeletionTimeoutSeconds: 300
