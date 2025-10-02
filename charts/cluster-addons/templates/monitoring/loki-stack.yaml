@@ -216,3 +216,5 @@ spec:
             {% raw %}
             {{- .Files.Get "grafana-dashboards/loki-metrics-dashboard.json" | nindent 12 }}
             {% endraw %}
+{{- end }}
+
