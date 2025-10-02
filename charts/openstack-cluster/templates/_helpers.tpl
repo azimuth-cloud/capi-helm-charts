@@ -273,7 +273,7 @@ files:
 {{- range $registry, $registrySpec := . }}
   - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
     content: |
-      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | nindent 6 }}
+      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | indent 6 }}
     owner: root:root
     permissions: "0644"
 {{- end }}
