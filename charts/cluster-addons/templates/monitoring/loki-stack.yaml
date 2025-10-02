@@ -149,7 +149,8 @@ spec:
         key: defaults
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
-        key: overrides---
+        key: overrides
+---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
