@@ -23,9 +23,8 @@ spec:
           containers:
             - name: {{ .Chart.Name }}
               image: {{
-                .Values.image.tag |
-                  default (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor) |
                   printf "%s:%s" .Values.image.repository
+                  (default .Capabilities.KubeVersion.Version .Values.image.tag)
               }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               # We run the defrag by execing into one of the etcd pods

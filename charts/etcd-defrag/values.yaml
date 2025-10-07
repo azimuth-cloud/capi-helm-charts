@@ -10,7 +10,7 @@ activeDeadlineSeconds: 3600
 
 # The kubectl image to use
 image:
-  repository: bitnami/kubectl
+  repository: rancher/kubectl
   pullPolicy: IfNotPresent
   tag: ""  # Defaults to the Kubernetes minor version, e.g. 1.28
 
