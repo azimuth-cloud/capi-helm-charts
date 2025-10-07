@@ -1,7 +1,6 @@
+# TODO: Add automation to keep this file up to date
 docker.io:
   images:
-    bitnami/kubectl:
-    - "1.30"
-    - "1.31"
-    - "1.32"
-    - "1.33"
+    rancher/kubectl:
+    - "v1.33.5"
+    - "v1.34.1"
