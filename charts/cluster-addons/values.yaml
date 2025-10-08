@@ -301,8 +301,7 @@ monitoring:
       values:
         config:
           clients:
-            - url: http://loki-stack.monitoring-system:3100/loki/api/v1/push
-              tenant_id: 1
+
   loki:
     enabled: true
     chart:
@@ -316,24 +315,44 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
+        # ensure that the name matches the old loki-stack
+        # HelmRelease so that it correctly re-adopts the PVC
         fullnameOverride: loki-stack
         loki:
           auth_enabled: false
           commonConfig:
             replication_factor: 1
+            # Specify path for new Loki to use same path in PVC
+            # as old loki-stack for reading/writing data
             path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
+            filesystem:
+              chunks_directory: /var/loki/loki/chunks
+              rules_directory: /var/loki/loki/rules
+          schemaConfig:
+            configs:
+              - from: "2020-10-24"
+                index:
+                  period: 24h
+                  prefix: index_
+                object_store: filesystem
+                schema: v11
+                store: boltdb-shipper
+              - from: "2025-10-11"
+                index:
+                  period: 24h
+                  prefix: loki_index_
+                object_store: filesystem
+                schema: v12
+                store: boltdb-shipper
+
           persistence:
             enabled: true
             size: 10Gi
 
         singleBinary:
           replicas: 1
-          # Prevent Loki data volume from being deleted
-          # when chart is uninstalled
-          persistence:
-            enableStatefulSetAutoDeletePVC: false
         # Disable components that are not in loki-stack
         gateway:
           enabled: false
