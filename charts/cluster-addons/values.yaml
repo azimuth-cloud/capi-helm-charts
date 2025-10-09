@@ -339,7 +339,7 @@ monitoring:
                 object_store: filesystem
                 schema: v11
                 store: boltdb-shipper
-              - from: "2025-10-11"
+              - from: "2025-10-15"
                 index:
                   period: 24h
                   prefix: loki_index_
