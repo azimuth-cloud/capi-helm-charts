@@ -31,7 +31,7 @@ stringData:
         # Get promtail to scrape systemd services
         config:
           clients:
-            - url: http://loki-stack.{{ Values.monitoring.loki.release.namespace }}:3100/loki/api/v1/push
+            - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}:3100/loki/api/v1/push
               tenant_id: 1
           snippets:
             extraScrapeConfigs: |
