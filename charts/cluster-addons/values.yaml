@@ -298,10 +298,10 @@ monitoring:
       version: 6.17.0
     release:
       namespace: monitoring-system
-      values:
-        config:
-          clients:
-            - url: http://loki-stack.monitoring-system.svc:3100/loki/api/v1/push
+    values:
+      config:
+        clients:
+          - url: http://loki-stack.monitoring-system.svc:3100/loki/api/v1/push
 
 
   loki:

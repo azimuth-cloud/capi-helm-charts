@@ -33,20 +33,20 @@ stringData:
           - url: http://loki-stack.monitoring-system:3100/loki/api/v1/push
             tenant_id: 1
         snippets:
-        extraScrapeConfigs: |
-          - job_name: journal
-            journal:
-              path: /var/log/journal
-              max_age: 12h
-              labels:
-                job: systemd-journal
-            relabel_configs:
-              - source_labels: ['__journal__systemd_unit']
-                target_label: 'unit'
-              - source_labels: ['__journal__hostname']
-                target_label: 'hostname'
-              - source_labels: ['__journal_priority_keyword']
-                target_label: level
+          extraScrapeConfigs: |
+            - job_name: journal
+              journal:
+                path: /var/log/journal
+                max_age: 12h
+                labels:
+                  job: systemd-journal
+              relabel_configs:
+                - source_labels: ['__journal__systemd_unit']
+                  target_label: 'unit'
+                - source_labels: ['__journal__hostname']
+                  target_label: 'hostname'
+                - source_labels: ['__journal_priority_keyword']
+                  target_label: level
     # Mount journal directory and machine-id file into promtail pods
         extraVolumes:
           - name: journal
@@ -63,7 +63,7 @@ stringData:
             mountPath: /etc/machine-id
             readOnly: true
   overrides: |
-    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
+    {{- toYaml .Values.monitoring.promtail.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
