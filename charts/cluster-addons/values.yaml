@@ -301,6 +301,8 @@ monitoring:
       values:
         config:
           clients:
+            - url: http://loki-stack.monitoring-system.svc:3100/loki/api/v1/push
+
 
   loki:
     enabled: true
