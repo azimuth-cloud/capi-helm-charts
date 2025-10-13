@@ -28,27 +28,26 @@ stringData:
       config:
         serviceMonitor:
           enabled: true
-        # Get promtail to scrape systemd services
-        config:
-          clients:
-            - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}:3100/loki/api/v1/push
-              tenant_id: 1
-          snippets:
-            extraScrapeConfigs: |
-              - job_name: journal
-                journal:
-                  path: /var/log/journal
-                  max_age: 12h
-                  labels:
-                    job: systemd-journal
-                relabel_configs:
-                  - source_labels: ['__journal__systemd_unit']
-                    target_label: 'unit'
-                  - source_labels: ['__journal__hostname']
-                    target_label: 'hostname'
-                  - source_labels: ['__journal_priority_keyword']
-                    target_label: level
-        # Mount journal directory and machine-id file into promtail pods
+        # Get promtail to scrape systemd services       
+        clients:
+          - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}:3100/loki/api/v1/push
+            tenant_id: 1
+        snippets:
+        extraScrapeConfigs: |
+          - job_name: journal
+            journal:
+              path: /var/log/journal
+              max_age: 12h
+              labels:
+                job: systemd-journal
+            relabel_configs:
+              - source_labels: ['__journal__systemd_unit']
+                target_label: 'unit'
+              - source_labels: ['__journal__hostname']
+                target_label: 'hostname'
+              - source_labels: ['__journal_priority_keyword']
+                target_label: level
+    # Mount journal directory and machine-id file into promtail pods
         extraVolumes:
           - name: journal
             hostPath:
@@ -114,7 +113,7 @@ spec:
           release: loki-stack
         action: delete
     {{- end }}
-
+{{- end }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
@@ -183,5 +182,5 @@ spec:
             {% raw %}
             {{- .Files.Get "grafana-dashboards/loki-metrics-dashboard.json" | nindent 12 }}
             {% endraw %}
-{{- end }}
+
 
