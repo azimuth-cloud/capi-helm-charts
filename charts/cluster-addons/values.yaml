@@ -298,11 +298,11 @@ monitoring:
       version: 6.17.0
     release:
       namespace: monitoring-system
-      values:
-        config:
-          # Get promtail to push promtail logs to an external Loki
-          clients:
-            - url: ""
+      # values:
+      #   config:
+      #     # Get promtail to push promtail logs to an external Loki
+      #     clients:
+      #       - url: ""
 
   loki:
     enabled: true
