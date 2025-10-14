@@ -29,7 +29,7 @@ stringData:
         enabled: true
       # Get promtail to scrape systemd services       
       clients:
-        - url: http://loki-stack.monitoring-system.svc:3100/loki/api/v1/push
+        - url: http://loki-stack.{{ Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
           tenant_id: 1
       snippets:
         extraScrapeConfigs: |

@@ -298,8 +298,11 @@ monitoring:
       version: 6.17.0
     release:
       namespace: monitoring-system
-
-
+      values:
+        config:
+          # Get promtail to push promtail logs to an external Loki
+          clients:
+            - url: ""
 
   loki:
     enabled: true
@@ -322,7 +325,7 @@ monitoring:
           commonConfig:
             replication_factor: 1
             # Specify path for new Loki to use same path in PVC
-            # as old loki-stack for reading/writing data
+            # as old loki-stack for reading previously logged data
             path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
@@ -345,11 +348,9 @@ monitoring:
                 object_store: filesystem
                 schema: v12
                 store: boltdb-shipper
-
           persistence:
             enabled: true
             size: 10Gi
-
         singleBinary:
           replicas: 1
         # Disable components that are not in loki-stack
@@ -367,7 +368,7 @@ monitoring:
         # Skip Helm tests since they require selfMonitoring
         test:
           enabled: false
-# Configuration for the blackbox exporter
+  # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
     chart:
