@@ -358,16 +358,16 @@ monitoring:
           enabled: false
         monitoring:
           lokiCanary:
-            enabled: false
+            enabled: true
           # Disable selfMonitoring since we didn't use
           # it in loki-stack either
           selfMonitoring:
-            enabled: false
+            enabled: true
             grafanaAgent:
               installOperator: false
         # Skip Helm tests since they require selfMonitoring
         test:
-          enabled: false
+          enabled: true
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
