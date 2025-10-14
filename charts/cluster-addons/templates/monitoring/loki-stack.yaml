@@ -31,6 +31,7 @@ stringData:
       clients:
         {{- if not .Values.monitoring.promtail.release.values.config.clients }}
         - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
+        {{- end }}
           tenant_id: 1
       snippets:
         extraScrapeConfigs: |
