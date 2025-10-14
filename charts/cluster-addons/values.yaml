@@ -354,20 +354,20 @@ monitoring:
         singleBinary:
           replicas: 1
         # Disable components that are not in loki-stack
-        gateway:
-          enabled: false
-        monitoring:
-          lokiCanary:
-            enabled: true
-          # Disable selfMonitoring since we didn't use
-          # it in loki-stack either
-          selfMonitoring:
-            enabled: true
-            grafanaAgent:
-              installOperator: false
-        # Skip Helm tests since they require selfMonitoring
-        test:
-          enabled: true
+        # gateway:
+        #   enabled: false
+        # monitoring:
+        #   lokiCanary:
+        #     enabled: true
+        #   # Disable selfMonitoring since we didn't use
+        #   # it in loki-stack either
+        #   selfMonitoring:
+        #     enabled: true
+        #     grafanaAgent:
+        #       installOperator: false
+        # # Skip Helm tests since they require selfMonitoring
+        # test:
+        #   enabled: true
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
