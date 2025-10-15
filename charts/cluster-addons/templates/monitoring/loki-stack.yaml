@@ -67,21 +67,20 @@ stringData:
         readOnly: true
   overrides: |
     {{- $values := .Values.monitoring.promtail.release.values }}
-    config:
-      {{- /* Handle clients only if URL is non-empty */}}
-      {{- $clients := $values.config.clients | default list }}
-      {{- if $clients }}
-        clients:
-          {{- range $i, $c := $clients }}
-            {{- if and $c.url (ne $c.url "") }}
-          - url: {{ $c.url }}
-            tenant_id: {{ $c.tenant_id | default 1 }}
-            {{- end }}
-          {{- end }}
+    {{- $clients := $values.config.clients | default list }}
+    {{- /* Build clients only if non-empty URL */}}
+    {{- if $clients }}
+    clients:
+      {{- range $i, $c := $clients }}
+        {{- if and $c.url (ne $c.url "") }}
+      - url: {{ $c.url }}
+        tenant_id: {{ $c.tenant_id | default 1 }}
+        {{- end }}
       {{- end }}
-      {{- /* Merge the rest of the config excluding clients */}}
-      {{- $rest := $values | omit "config" }}
-      {{- toYaml $rest | nindent 4 }}
+    {{- end }}
+    {{- /* Merge the rest of values.yaml, excluding clients */}}
+    {{- $rest := $values | omit "config" }}
+    {{- toYaml $rest | nindent 0 }}
 #    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
