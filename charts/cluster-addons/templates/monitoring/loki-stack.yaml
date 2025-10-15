@@ -28,14 +28,8 @@ stringData:
       serviceMonitor:
         enabled: true
       clients:
-        {{- $c := index .Values.monitoring.promtail.release.values.config.clients 0 | default dict }}
-        {{- if and $c.url (ne $c.url "") }}
-        - url: {{ $c.url }}
-          tenant_id: {{ $c.tenant_id | default 1 }}
-        {{- else }}
         - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
           tenant_id: 1
-        {{- end }}
       snippets:
         extraScrapeConfigs: |
           - job_name: journal
@@ -66,22 +60,7 @@ stringData:
         mountPath: /etc/machine-id
         readOnly: true
   overrides: |
-    {{- $values := .Values.monitoring.promtail.release.values }}
-    {{- $clients := $values.config.clients | default list }}
-    {{- /* Build clients only if non-empty URL */}}
-    {{- if $clients }}
-    clients:
-      {{- range $i, $c := $clients }}
-        {{- if and $c.url (ne $c.url "") }}
-      - url: {{ $c.url }}
-        tenant_id: {{ $c.tenant_id | default 1 }}
-        {{- end }}
-      {{- end }}
-    {{- end }}
-    {{- /* Merge the rest of values.yaml, excluding clients */}}
-    {{- $rest := $values | omit "config" }}
-    {{- toYaml $rest | nindent 0 }}
-#    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
+    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
