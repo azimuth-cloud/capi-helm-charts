@@ -27,24 +27,15 @@ stringData:
     config:
       serviceMonitor:
         enabled: true
-      # Get promtail to scrape systemd services   
       clients:
-        {{- if .Values.monitoring.promtail.release.values.config.clients }}
-          {{- $c := index .Values.monitoring.promtail.release.values.config.clients 0 }}
-          {{- if ne $c.url "" }}
+        {{- $c := index .Values.monitoring.promtail.release.values.config.clients 0 | default dict }}
+        {{- if and $c.url (ne $c.url "") }}
         - url: {{ $c.url }}
           tenant_id: {{ $c.tenant_id | default 1 }}
-          {{- else }}
-        - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
-          tenant_id: 1
-          {{- end }}
         {{- else }}
         - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
           tenant_id: 1
-        {{- end }}    
-      # clients:
-      #   - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
-      #     tenant_id: 1
+        {{- end }}
       snippets:
         extraScrapeConfigs: |
           - job_name: journal
@@ -60,7 +51,6 @@ stringData:
                 target_label: 'hostname'
               - source_labels: ['__journal_priority_keyword']
                 target_label: level
-    # Mount journal directory and machine-id file into promtail pods
     extraVolumes:
       - name: journal
         hostPath:
@@ -77,20 +67,19 @@ stringData:
         readOnly: true
   overrides: |
     {{- $values := .Values.monitoring.promtail.release.values }}
-    {{- $clients := $values.config.clients }}
     config:
+      {{- /* Handle clients only if URL is non-empty */}}
+      {{- $clients := $values.config.clients | default list }}
       {{- if $clients }}
         clients:
           {{- range $i, $c := $clients }}
-            {{- if ne $c.url "" }}
+            {{- if and $c.url (ne $c.url "") }}
           - url: {{ $c.url }}
             tenant_id: {{ $c.tenant_id | default 1 }}
-            {{- else }}
-          # Skip empty URL
             {{- end }}
           {{- end }}
       {{- end }}
-      {{- /* Copy the rest of the values.yaml config excluding clients */}}
+      {{- /* Merge the rest of the config excluding clients */}}
       {{- $rest := $values | omit "config" }}
       {{- toYaml $rest | nindent 4 }}
 #    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
