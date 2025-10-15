@@ -76,7 +76,24 @@ stringData:
         mountPath: /etc/machine-id
         readOnly: true
   overrides: |
-    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
+    {{- $values := .Values.monitoring.promtail.release.values }}
+    {{- $clients := $values.config.clients }}
+    config:
+      {{- if $clients }}
+        clients:
+          {{- range $i, $c := $clients }}
+            {{- if ne $c.url "" }}
+          - url: {{ $c.url }}
+            tenant_id: {{ $c.tenant_id | default 1 }}
+            {{- else }}
+          # Skip empty URL
+            {{- end }}
+          {{- end }}
+      {{- end }}
+      {{- /* Copy the rest of the values.yaml config excluding clients */}}
+      {{- $rest := $values | omit "config" }}
+      {{- toYaml $rest | nindent 4 }}
+#    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
