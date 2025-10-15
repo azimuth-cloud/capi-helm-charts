@@ -290,19 +290,14 @@ monitoring:
                     requests:
                       storage: 10Gi
 
-  promtail:
+  alloy:
     enabled: true
     chart:
       repo: https://grafana.github.io/helm-charts
-      name: promtail
-      version: 6.17.0
+      name: alloy
+      version: 1.3.1
     release:
       namespace: monitoring-system
-      values:
-        config:
-          # Get promtail to push promtail logs to an external Loki
-          clients:
-            - url: ""
 
   loki:
     enabled: true
@@ -312,7 +307,7 @@ monitoring:
       # The name of the chart to use
       name: loki
       # The version of the chart to use (must be an exact version)
-      version: 5.48.0
+      version: 6.42.0
     # The Helm values to use for the release
     release:
       namespace: monitoring-system
@@ -341,13 +336,13 @@ monitoring:
                 object_store: filesystem
                 schema: v11
                 store: boltdb-shipper
-              - from: "2025-10-15"
+              - from: 2023-10-20 ①
+                store: tsdb ②
+                object_store: filesystem ③
+                schema: v13 ④
                 index:
+                  prefix: index_
                   period: 24h
-                  prefix: loki_index_
-                object_store: filesystem
-                schema: v12
-                store: boltdb-shipper
           persistence:
             enabled: true
             size: 10Gi

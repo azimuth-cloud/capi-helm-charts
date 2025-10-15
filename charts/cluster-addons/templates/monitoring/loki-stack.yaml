@@ -14,40 +14,143 @@ stringData:
         enabled: true
   overrides: |
     {{- toYaml .Values.monitoring.loki.release.values | nindent 4 }}
+# kubectl get secret promtail -n monitoring-system -o jsonpath="{.data.promtail\.yaml}" --kubeconfig loki10 | base64 --decode
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "alloy") }}-config
   labels:
-    {{- include "cluster-addons.componentLabels" (list . "promtail") | nindent 4 }}
+    {{- include "cluster-addons.componentLabels" (list . "alloy") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    config:
-      serviceMonitor:
-        enabled: true
-      # Get promtail to scrape systemd services       
-      clients:
-        {{- if not .Values.monitoring.promtail.release.values.config.clients }}
-        - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
-        {{- end }}
-          tenant_id: 1
-      snippets:
-        extraScrapeConfigs: |
-          - job_name: journal
-            journal:
-              path: /var/log/journal
-              max_age: 12h
-              labels:
-                job: systemd-journal
-            relabel_configs:
-              - source_labels: ['__journal__systemd_unit']
-                target_label: 'unit'
-              - source_labels: ['__journal__hostname']
-                target_label: 'hostname'
-              - source_labels: ['__journal_priority_keyword']
-                target_label: level
+    discovery.kubernetes "kubernetes_pods" {
+      role = "pod"
+    }
+
+    discovery.relabel "kubernetes_pods" {
+      targets = discovery.kubernetes.kubernetes_pods.targets
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_controller_name"]
+        regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+        target_label  = "__tmp_controller_name"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
+        regex         = "^;*([^;]+)(;.*)?$"
+        target_label  = "app"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_instance", "__meta_kubernetes_pod_label_instance"]
+        regex         = "^;*([^;]+)(;.*)?$"
+        target_label  = "instance"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component", "__meta_kubernetes_pod_label_component"]
+        regex         = "^;*([^;]+)(;.*)?$"
+        target_label  = "component"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        target_label  = "node_name"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+
+      rule {
+        source_labels = ["namespace", "app"]
+        separator     = "/"
+        target_label  = "job"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+        separator     = "/"
+        target_label  = "__path__"
+        replacement   = "/var/log/pods/*$1/*.log"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash", "__meta_kubernetes_pod_annotation_kubernetes_io_config_hash", "__meta_kubernetes_pod_container_name"]
+        separator     = "/"
+        regex         = "true/(.*)"
+        target_label  = "__path__"
+        replacement   = "/var/log/pods/*$1/*.log"
+      }
+    }
+
+    local.file_match "kubernetes_pods" {
+      path_targets = discovery.relabel.kubernetes_pods.output
+    }
+
+    loki.process "kubernetes_pods" {
+      forward_to = [loki.write.default.receiver]
+
+      stage.cri { }
+    }
+
+    loki.source.file "kubernetes_pods" {
+      targets               = local.file_match.kubernetes_pods.targets
+      forward_to            = [loki.process.kubernetes_pods.receiver]
+      legacy_positions_file = "/run/promtail/positions.yaml"
+    }
+
+    discovery.relabel "journal" {
+      targets = []
+
+      rule {
+        source_labels = ["__journal__systemd_unit"]
+        target_label  = "unit"
+      }
+
+      rule {
+        source_labels = ["__journal__hostname"]
+        target_label  = "hostname"
+      }
+
+      rule {
+        source_labels = ["__journal_priority_keyword"]
+        target_label  = "level"
+      }
+    }
+
+    loki.source.journal "journal" {
+      max_age       = "12h0m0s"
+      path          = "/var/log/journal"
+      relabel_rules = discovery.relabel.journal.rules
+      forward_to    = [loki.write.default.receiver]
+      labels        = {
+        job = "systemd-journal",
+      }
+    }
+
+    loki.write "default" {
+      endpoint {
+        url       = "http://loki-stack.monitoring-system.svc:3100/loki/api/v1/push"
+        tenant_id = "1"
+      }
+      external_labels = {}
+    }
+
     # Mount journal directory and machine-id file into promtail pods
     extraVolumes:
       - name: journal
@@ -64,7 +167,7 @@ stringData:
         mountPath: /etc/machine-id
         readOnly: true
   overrides: |
-    {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
+    {{- toYaml .Values.monitoring.alloy.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
