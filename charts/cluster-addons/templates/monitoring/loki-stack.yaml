@@ -12,6 +12,8 @@ stringData:
     loki:
       serviceMonitor:
         enabled: true
+        labels:
+          release: kube-prometheus-stack-prometheus
   overrides: |
     {{- toYaml .Values.monitoring.loki.release.values | nindent 4 }}
 ---
@@ -27,6 +29,8 @@ stringData:
     config:
       serviceMonitor:
         enabled: true
+        labels:
+          release: kube-prometheus-stack-prometheus
       clients:
         {{- if not (and .Values.monitoring.promtail.release.values.config (and .Values.monitoring.promtail.release.values.config.clients (ne (index .Values.monitoring.promtail.release.values.config.clients 0).url ""))) }}
         - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
