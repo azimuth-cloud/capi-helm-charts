@@ -349,21 +349,6 @@ monitoring:
             size: 10Gi
         singleBinary:
           replicas: 1
-        # gateway:
-        #   enabled: false
-        # monitoring:
-        #   lokiCanary:
-        #     enabled: false
-        #   # Disable selfMonitoring since we didn't use
-        #   # it in loki-stack either
-        #   selfMonitoring:
-        #     enabled: false
-        #     grafanaAgent:
-        #       installOperator: false
-        # # Skip Helm tests since they require selfMonitoring
-        # test:
-        #   enabled: false
-
 
   # Configuration for the blackbox exporter
   blackboxExporter:
