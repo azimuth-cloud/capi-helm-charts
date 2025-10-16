@@ -2194,8 +2194,7 @@ templated manifests should match snapshot:
             owner: root:root
             path: /etc/containerd/certs.d/.keepdir
             permissions: "0644"
-          - content: |2
-
+          - content: |
               server = "https://registry-1.docker.io"
               [host."https://quay.io/v2/azimuth/docker.io"]
               capabilities = ["pull", "resolve"]
@@ -2204,8 +2203,7 @@ templated manifests should match snapshot:
             owner: root:root
             path: /etc/containerd/certs.d/docker.io/hosts.toml
             permissions: "0644"
-          - content: |2
-
+          - content: |
               server = "https://ghcr.io"
               [host."https://quay.io/v2/azimuth/ghcr.io"]
               capabilities = ["pull", "resolve"]
@@ -2214,8 +2212,7 @@ templated manifests should match snapshot:
             owner: root:root
             path: /etc/containerd/certs.d/ghcr.io/hosts.toml
             permissions: "0644"
-          - content: |2
-
+          - content: |
               server = "https://nvcr.io"
               [host."https://quay.io/v2/azimuth/nvcr.io"]
               capabilities = ["pull", "resolve"]
@@ -2224,8 +2221,7 @@ templated manifests should match snapshot:
             owner: root:root
             path: /etc/containerd/certs.d/nvcr.io/hosts.toml
             permissions: "0644"
-          - content: |2
-
+          - content: |
               server = "https://quay.io"
               [host."https://quay.io/v2/azimuth/quay.io"]
               capabilities = ["pull", "resolve"]
@@ -2234,8 +2230,7 @@ templated manifests should match snapshot:
             owner: root:root
             path: /etc/containerd/certs.d/quay.io/hosts.toml
             permissions: "0644"
-          - content: |2
-
+          - content: |
               server = "https://registry.k8s.io"
               [host."https://quay.io/v2/azimuth/registry.k8s.io"]
               capabilities = ["pull", "resolve"]
@@ -2391,8 +2386,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/.keepdir
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://registry-1.docker.io"
                 [host."https://quay.io/v2/azimuth/docker.io"]
                 capabilities = ["pull", "resolve"]
@@ -2401,8 +2395,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/docker.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://ghcr.io"
                 [host."https://quay.io/v2/azimuth/ghcr.io"]
                 capabilities = ["pull", "resolve"]
@@ -2411,8 +2404,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/ghcr.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://nvcr.io"
                 [host."https://quay.io/v2/azimuth/nvcr.io"]
                 capabilities = ["pull", "resolve"]
@@ -2421,8 +2413,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/nvcr.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://quay.io"
                 [host."https://quay.io/v2/azimuth/quay.io"]
                 capabilities = ["pull", "resolve"]
@@ -2431,8 +2422,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/quay.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://registry.k8s.io"
                 [host."https://quay.io/v2/azimuth/registry.k8s.io"]
                 capabilities = ["pull", "resolve"]
@@ -2486,8 +2476,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/.keepdir
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://registry-1.docker.io"
                 [host."https://quay.io/v2/azimuth/docker.io"]
                 capabilities = ["pull", "resolve"]
@@ -2496,8 +2485,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/docker.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://ghcr.io"
                 [host."https://quay.io/v2/azimuth/ghcr.io"]
                 capabilities = ["pull", "resolve"]
@@ -2506,8 +2494,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/ghcr.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://nvcr.io"
                 [host."https://quay.io/v2/azimuth/nvcr.io"]
                 capabilities = ["pull", "resolve"]
@@ -2516,8 +2503,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/nvcr.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://quay.io"
                 [host."https://quay.io/v2/azimuth/quay.io"]
                 capabilities = ["pull", "resolve"]
@@ -2526,8 +2512,7 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/quay.io/hosts.toml
               permissions: "0644"
-            - content: |2
-
+            - content: |
                 server = "https://registry.k8s.io"
                 [host."https://quay.io/v2/azimuth/registry.k8s.io"]
                 capabilities = ["pull", "resolve"]
