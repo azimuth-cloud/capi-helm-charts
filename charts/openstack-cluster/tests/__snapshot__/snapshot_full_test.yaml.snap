@@ -1186,6 +1186,9 @@ templated manifests should match snapshot:
         loki:
           serviceMonitor:
             enabled: true
+          monitoring:
+            dashboards:
+              enabled: false
       overrides: |
         fullnameOverride: loki-stack
         loki:
