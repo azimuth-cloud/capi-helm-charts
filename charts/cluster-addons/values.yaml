@@ -337,7 +337,7 @@ monitoring:
                 object_store: filesystem
                 schema: v11
                 store: boltdb-shipper
-              - from: "2025-10-15"
+              - from: "2025-10-17"
                 index:
                   period: 24h
                   prefix: loki_index_
@@ -349,20 +349,20 @@ monitoring:
             size: 10Gi
         singleBinary:
           replicas: 1
-        gateway:
-          enabled: false
-        monitoring:
-          lokiCanary:
-            enabled: false
-          # Disable selfMonitoring since we didn't use
-          # it in loki-stack either
-          selfMonitoring:
-            enabled: false
-            grafanaAgent:
-              installOperator: false
-        # Skip Helm tests since they require selfMonitoring
-        test:
-          enabled: false
+        # gateway:
+        #   enabled: false
+        # monitoring:
+        #   lokiCanary:
+        #     enabled: false
+        #   # Disable selfMonitoring since we didn't use
+        #   # it in loki-stack either
+        #   selfMonitoring:
+        #     enabled: false
+        #     grafanaAgent:
+        #       installOperator: false
+        # # Skip Helm tests since they require selfMonitoring
+        # test:
+        #   enabled: false
 
 
   # Configuration for the blackbox exporter
