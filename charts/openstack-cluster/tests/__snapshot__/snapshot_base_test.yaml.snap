@@ -229,6 +229,66 @@ templated manifests should match snapshot:
             key: overrides
             name: RELEASE-NAME-metrics-server-config
   10: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: promtail
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-promtail
+    spec:
+      bootstrap: true
+      chart:
+        name: promtail
+        repo: https://grafana.github.io/helm-charts
+        version: 6.17.0
+      clusterName: RELEASE-NAME
+      releaseName: promtail
+      targetNamespace: monitoring-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-promtail-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-promtail-config
+  11: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: loki-dashboards
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-loki-dashboards
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: |
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: loki-grafana-datasource
+              labels:
+                grafana_datasource: "1"
+            data:
+              loki-datasource.yaml: |-
+                apiVersion: 1
+                datasources:
+                  - name: Loki
+                    type: loki
+                    url: http://loki-stack.monitoring-system:3100
+                    access: proxy
+                    version: 1
+                    isDefault: false
+        - template: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: loki-grafana-dashboards\n  labels:\n    grafana_dashboard: \"1\"\ndata:\n  loki-pod-logs-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"grafana\",\n              \"uid\": \"-- Grafana --\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Search pod logs stored in Loki\",\n      \"editable\": false,\n      \"fiscalYearStartMonth\": 0,\n      \"graphTooltip\": 0,\n      \"id\": 31,\n      \"links\": [],\n      \"panels\": [\n        {\n          \"datasource\": \"Loki\",\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"hidden\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"bars\",\n                \"fillOpacity\": 100,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 3,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": false\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"sum(count_over_time({namespace=\\\"$namespace\\\", pod=~\\\"$pod\\\"} |~ \\\"$search\\\"[$__interval]))\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": \"Loki\",\n          \"gridPos\": {\n            \"h\": 25,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 3\n          },\n          \"id\": 2,\n          \"maxDataPoints\": \"\",\n          \"options\": {\n            \"dedupStrategy\": \"none\",\n            \"enableLogDetails\": true,\n            \"prettifyLogMessage\": false,\n            \"showCommonLabels\": false,\n            \"showLabels\": false,\n            \"showTime\": true,\n            \"sortOrder\": \"Descending\",\n            \"wrapLogMessage\": true\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"{namespace=\\\"$namespace\\\", pod=~\\\"$pod\\\"} |~ \\\"$search\\\"\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Logs Panel\",\n          \"type\": \"logs\"\n        }\n      ],\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": [\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": true,\n              \"text\": \"ingress-nginx\",\n              \"value\": \"ingress-nginx\"\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values(namespace)\",\n            \"hide\": 0,\n            \"includeAll\": false,\n            \"multi\": false,\n            \"name\": \"namespace\",\n            \"options\": [],\n            \"query\": \"label_values(namespace)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": false,\n              \"text\": \"All\",\n              \"value\": \"$__all\"\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values({namespace=~\\\"$namespace\\\"}, pod)\",\n            \"hide\": 0,\n            \"includeAll\": true,\n            \"multi\": true,\n            \"name\": \"pod\",\n            \"options\": [],\n            \"query\": \"label_values({namespace=~\\\"$namespace\\\"}, pod)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"current\": {},\n            \"hide\": 0,\n            \"name\": \"search\",\n            \"options\": [],\n            \"query\": \"\",\n            \"skipUrlSync\": false,\n            \"type\": \"textbox\"\n          }\n        ]\n      },\n      \"time\": {\n        \"from\": \"now-6h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"Loki / Pod Logs\",\n      \"uid\": \"209fd89b771c318dd442225414a50b59\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    \n    {% endraw %}\n  loki-systemd-logs-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"grafana\",\n              \"uid\": \"-- Grafana --\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Search systemd logs stored in Loki\",\n      \"editable\": false,\n      \"fiscalYearStartMonth\": 0,\n      \"graphTooltip\": 0,\n      \"id\": 33,\n      \"links\": [],\n      \"panels\": [\n        {\n          \"datasource\": \"Loki\",\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"hidden\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"bars\",\n                \"fillOpacity\": 100,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 3,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": false\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"sum(count_over_time({unit=~\\\"$unit\\\", hostname=~\\\"$hostname\\\"} |~ \\\"$search\\\"[$__interval]))\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": \"Loki\",\n          \"gridPos\": {\n            \"h\": 25,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 3\n          },\n          \"id\": 2,\n          \"maxDataPoints\": \"\",\n          \"options\": {\n            \"dedupStrategy\": \"none\",\n            \"enableLogDetails\": true,\n            \"prettifyLogMessage\": false,\n            \"showCommonLabels\": false,\n            \"showLabels\": false,\n            \"showTime\": true,\n            \"sortOrder\": \"Descending\",\n            \"wrapLogMessage\": true\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"{unit=~\\\"$unit\\\", hostname=~\\\"$hostname\\\"} |~ \\\"$search\\\"\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Logs Panel\",\n          \"type\": \"logs\"\n        }\n      ],\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": [\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": true,\n              \"text\": \"ansible-init.service\",\n              \"value\": \"ansible-init.service\"\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values(unit)\",\n            \"hide\": 0,\n            \"includeAll\": false,\n            \"multi\": false,\n            \"name\": \"unit\",\n            \"options\": [],\n            \"query\": \"label_values(unit)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": true,\n              \"text\": [\n                \"All\"\n              ],\n              \"value\": [\n                \"$__all\"\n              ]\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values({unit=~\\\"$unit\\\"}, hostname)\",\n            \"hide\": 0,\n            \"includeAll\": true,\n            \"multi\": true,\n            \"name\": \"hostname\",\n            \"options\": [],\n            \"query\": \"label_values({unit=~\\\"$unit\\\"}, hostname)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"current\": {},\n            \"hide\": 0,\n            \"name\": \"search\",\n            \"options\": [],\n            \"query\": \"\",\n            \"skipUrlSync\": false,\n            \"type\": \"textbox\"\n          }\n        ]\n      },\n      \"time\": {\n        \"from\": \"now-3h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"Loki / Systemd Logs\",\n      \"uid\": \"fa1bd43aed803111be9cc923cada9811\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    \n    {% endraw %}\n  loki-metrics-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"datasource\",\n              \"uid\": \"grafana\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Loki and Promtail metrics.\",\n      \"editable\": true,\n      \"fiscalYearStartMonth\": 0,\n      \"gnetId\": 10880,\n      \"graphTooltip\": 0,\n      \"id\": 32,\n      \"links\": [],\n      \"panels\": [\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 8,\n          \"interval\": \"\",\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": false\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"avg_over_time(loki_ingester_chunk_entries_count[5m])\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Loki's stored chunk entries\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 12,\n            \"y\": 0\n          },\n          \"id\": 2,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"rate (loki_distributor_ingester_appends_total[1m])\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Average batch appends sent to ingesters (Loki)\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"default\": true,\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 8\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"min\",\n                \"sum\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"editorMode\": \"code\",\n              \"expr\": \"sum(promtail_file_bytes_total{pod=~\\\".*\\\"}) by (pod)\",\n              \"legendFormat\": \"{{pod}}\",\n              \"range\": true,\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Number of bytes total by promtail\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 16\n          },\n          \"id\": 4,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"sum (promtail_encoded_bytes_total{pod=~'.*'}) by (pod)\",\n              \"format\": \"time_series\",\n              \"instant\": false,\n              \"legendFormat\": \"{{ pod }}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Number of bytes encoded and ready to send by Promtail\",\n          \"type\": \"timeseries\"\n        }\n      ],\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": []\n      },\n      \"time\": {\n        \"from\": \"now-6h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"Loki / Metrics\",\n      \"uid\": \"MQHVDmtWk\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    {% endraw %}\n"
+      releaseName: loki-dashboards
+      targetNamespace: monitoring-system
+  12: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -267,7 +327,7 @@ templated manifests should match snapshot:
                   - vendor
       overrides: |
         {}
-  11: |
+  13: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -293,7 +353,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-feature-discovery-config
-  12: |
+  14: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -310,7 +370,7 @@ templated manifests should match snapshot:
           enabled: false
       overrides: |
         {}
-  13: |
+  15: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -336,7 +396,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-problem-detector-config
-  14: |
+  16: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -371,7 +431,7 @@ templated manifests should match snapshot:
         dcgmExporter:
           serviceMonitor:
             enabled: true
-  15: |
+  17: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -397,7 +457,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-nvidia-gpu-operator-config
-  16: |
+  18: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -428,7 +488,7 @@ templated manifests should match snapshot:
             effect: NoSchedule
       overrides: |
         {}
-  17: |
+  19: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -454,7 +514,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-ccm-openstack-config
-  18: |
+  20: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -471,7 +531,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
       releaseName: cloud-config
       targetNamespace: openstack-system
-  19: |
+  21: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -515,7 +575,7 @@ templated manifests should match snapshot:
               tolerations:
               - effect: NoSchedule
                 key: node-role.kubernetes.io/control-plane
-  20: |
+  22: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -541,7 +601,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-csi-cinder-config
-  21: |
+  23: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -570,7 +630,7 @@ templated manifests should match snapshot:
             volumeBindingMode: WaitForFirstConsumer
       releaseName: csi-cinder-storageclass
       targetNamespace: openstack-system
-  22: |
+  24: |
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -637,7 +697,7 @@ templated manifests should match snapshot:
             - name: kubeconfig
               secret:
                 secretName: RELEASE-NAME-kubeconfig
-  23: |
+  25: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -669,7 +729,7 @@ templated manifests should match snapshot:
           - get
           - patch
           - update
-  24: |
+  26: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
@@ -688,7 +748,7 @@ templated manifests should match snapshot:
       - kind: ServiceAccount
         name: RELEASE-NAME-autoscaler
         namespace: NAMESPACE
-  25: |
+  27: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -699,7 +759,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-autoscaler
-  26: |
+  28: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -724,7 +784,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  27: |
+  29: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -754,7 +814,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  28: |
+  30: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -915,7 +975,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.29.2
-  29: |
+  31: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -941,7 +1001,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  30: |
+  32: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -965,7 +1025,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  31: |
+  33: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -981,7 +1041,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  32: |
+  34: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1076,7 +1136,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  33: |
+  35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1125,7 +1185,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  34: |
+  36: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1153,7 +1213,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  35: |
+  37: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1178,7 +1238,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  36: |
+  38: |
     apiVersion: v1
     kind: Secret
     metadata:
