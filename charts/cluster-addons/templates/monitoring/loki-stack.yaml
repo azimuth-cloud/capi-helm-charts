@@ -117,7 +117,7 @@ spec:
           release: loki-stack
         action: delete
     {{- end }}
-{{- end }}
+
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
@@ -137,6 +137,7 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
         key: overrides
+{{- end }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
