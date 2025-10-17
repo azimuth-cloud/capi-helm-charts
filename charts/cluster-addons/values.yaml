@@ -323,6 +323,9 @@ monitoring:
             filesystem:
               chunks_directory: /var/loki/loki/chunks
               rules_directory: /var/loki/loki/rules
+          persistence:
+            enabled: true
+            size: 10Gi
           schemaConfig:
             configs:
               - from: "2020-10-24"
@@ -341,9 +344,6 @@ monitoring:
                   period: 24h
           pattern_ingester:
               enabled: true
-                #         limits_config:
-            #              allow_structured_metadata: false
-            # volume_enabled: true
           ruler:
             enable_api: true
           limits_config:
