@@ -312,15 +312,11 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
-        # ensure that the name matches the old loki-stack
-        # HelmRelease so that it correctly re-adopts the PVC
         fullnameOverride: loki-stack
         loki:
           auth_enabled: false
           commonConfig:
             replication_factor: 1
-            # Specify path for new Loki to use same path in PVC
-            # as old loki-stack for reading previously logged data
             path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
@@ -336,18 +332,54 @@ monitoring:
                 object_store: filesystem
                 schema: v11
                 store: boltdb-shipper
-              - from: 2023-10-20 ①
-                store: tsdb ②
-                object_store: filesystem ③
-                schema: v13 ④
+              - from: "2025-10-17"
+                store: tsdb
+                object_store: filesystem
+                schema: v13
                 index:
-                  prefix: index_
+                  prefix: loki_index_
                   period: 24h
-          persistence:
-            enabled: true
-            size: 10Gi
+          pattern_ingester:
+              enabled: true
+                #         limits_config:
+            #              allow_structured_metadata: false
+            # volume_enabled: true
+          ruler:
+            enable_api: true
+          limits_config:
+            allow_structured_metadata: false
+        deploymentMode: SingleBinary
+
         singleBinary:
           replicas: 1
+
+        # Zero out replica counts of other deployment modes
+        backend:
+          replicas: 0
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+
+        ingester:
+          replicas: 0
+        querier:
+          replicas: 0
+        queryFrontend:
+          replicas: 0
+        queryScheduler:
+          replicas: 0
+        distributor:
+          replicas: 0
+        compactor:
+          replicas: 0
+        indexGateway:
+          replicas: 0
+        bloomCompactor:
+          replicas: 0
+        bloomGateway:
+          replicas: 0
+
 
   # Configuration for the blackbox exporter
   blackboxExporter:
