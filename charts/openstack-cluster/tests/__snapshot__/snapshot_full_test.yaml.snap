@@ -291,9 +291,7 @@ templated manifests should match snapshot:
       name: RELEASE-NAME-my-custom-helm-release-config
     stringData:
       values: |
-        {%- raw %}
         {}
-        {%- endraw %}
   10: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
@@ -330,14 +328,12 @@ templated manifests should match snapshot:
       name: RELEASE-NAME-my-custom-manifests-config
     stringData:
       secret.yaml: |
-        {%- raw %}
         apiVersion: v1
         kind: Secret
         metadata:
           name: my-secret
         stringData:
           secret-file: "secret-data"
-        {%- endraw %}
   12: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
