@@ -31,6 +31,7 @@ stringData:
     config:
       serviceMonitor:
         enabled: true
+      # Get promtail to scrape systemd services
       clients:
         {{- if not (and .Values.monitoring.promtail.release.values.config (and .Values.monitoring.promtail.release.values.config.clients (ne (index .Values.monitoring.promtail.release.values.config.clients 0).url ""))) }}
         - url: http://loki-stack.{{ .Values.monitoring.loki.release.namespace }}.svc:3100/loki/api/v1/push
@@ -52,6 +53,7 @@ stringData:
                 target_label: 'hostname'
               - source_labels: ['__journal_priority_keyword']
                 target_label: level
+        # Mount journal directory and machine-id file into promtail pods
     extraVolumes:
       - name: journal
         hostPath:
