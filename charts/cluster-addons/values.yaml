@@ -337,6 +337,7 @@ monitoring:
                 object_store: filesystem
                 schema: v11
                 store: boltdb-shipper
+                # placeholder to replace with a future date in loki template
               - from: "2025-10-17"
                 index:
                   period: 24h
