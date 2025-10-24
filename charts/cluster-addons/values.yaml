@@ -318,6 +318,10 @@ monitoring:
         fullnameOverride: loki-stack
         loki:
           auth_enabled: false
+          compactor:
+            retention_enabled: true
+            limits_config:
+              retention_period: 72h
           commonConfig:
             replication_factor: 1
             # Specify path for new Loki to use same path in PVC
