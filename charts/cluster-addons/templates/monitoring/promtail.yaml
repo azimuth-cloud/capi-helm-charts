@@ -14,7 +14,7 @@ stringData:
         enabled: true
       # Get promtail to scrape systemd services
       clients:
-        {{- $clients := dig "monitoring" "promtail" "release" "values" "config" "clients" .Values nil }}
+        {{- $clients := dig "monitoring" "promtail" "release" "values" "config" "clients" .Values dict }}
         {{- if not $clients }}
         {{- with .Values.monitoring.loki.release }}
         - url: - url: http://{{ .values.fullnameOverride | default .name }}.{{ .namespace }}.svc:3100/loki/api/v1/push
