@@ -330,6 +330,8 @@ monitoring:
               rules_directory: /var/loki/loki/rules
           schemaConfig:
             configs:
+                # The old schema used for historical logs.
+                # The "from" date marks from when the old data was written
               - from: "2020-10-24"
                 index:
                   period: 24h
@@ -337,7 +339,8 @@ monitoring:
                 object_store: filesystem
                 schema: v11
                 store: boltdb-shipper
-                # placeholder to replace with a future date in loki template
+                # To push in new logs upgraded to v12 schema from a future 
+                # date, specified as a placeholder to replace in the loki template
               - from: "2025-10-17"
                 index:
                   period: 24h
@@ -350,6 +353,7 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
+          enableStatefulSetAutoDeletePVC: false
 
   # Configuration for the blackbox exporter
   blackboxExporter:

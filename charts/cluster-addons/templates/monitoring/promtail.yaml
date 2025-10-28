@@ -36,7 +36,7 @@ stringData:
                 target_label: 'hostname'
               - source_labels: ['__journal_priority_keyword']
                 target_label: level
-        # Mount journal directory and machine-id file into promtail pods
+    # Mount journal directory and machine-id file into promtail pods
     extraVolumes:
       - name: journal
         hostPath:
