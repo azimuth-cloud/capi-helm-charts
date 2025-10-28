@@ -66,6 +66,14 @@ spec:
           app: loki
           release: loki-stack
         action: delete
+    # After deleting the release, remove the PVCs
+    postDelete:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app: loki
+          release: loki-stack
+        action: delete
     {{- end }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
