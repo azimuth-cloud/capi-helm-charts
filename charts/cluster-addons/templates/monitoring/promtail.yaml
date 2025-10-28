@@ -72,3 +72,4 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
         key: overrides
+{{- end }}

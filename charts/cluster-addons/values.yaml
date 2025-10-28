@@ -318,10 +318,6 @@ monitoring:
         fullnameOverride: loki-stack
         loki:
           auth_enabled: false
-          compactor:
-            retention_enabled: true
-            limits_config:
-              retention_period: 72h
           commonConfig:
             replication_factor: 1
             # Specify path for new Loki to use same path in PVC
@@ -349,11 +345,11 @@ monitoring:
                 object_store: filesystem
                 schema: v12
                 store: boltdb-shipper
+        singleBinary:
+          replicas: 1
           persistence:
             enabled: true
             size: 10Gi
-        singleBinary:
-          replicas: 1
 
   # Configuration for the blackbox exporter
   blackboxExporter:
