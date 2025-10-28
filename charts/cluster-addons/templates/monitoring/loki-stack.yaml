@@ -45,7 +45,7 @@ spec:
         kind: StatefulSet
         name: loki
         action: delete
-    {{- if .Values.monitoring.loki.release.values.loki.singleBinary.persistence.enabled }}
+    {{- if .Values.monitoring.loki.release.values.singleBinary.persistence.enabled }}
       - apiVersion: v1
         kind: PersistentVolumeClaim
         selector:
@@ -57,7 +57,7 @@ spec:
             spec:
               resources:
                 requests:
-                  storage: {{ .Values.monitoring.loki.release.values.loki.singleBinary.persistence.size }}
+                  storage: {{ .Values.monitoring.loki.release.values.singleBinary.persistence.size }}
     {{- else }}
     postUpgrade:
       - apiVersion: v1
