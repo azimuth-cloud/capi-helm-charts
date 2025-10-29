@@ -353,7 +353,7 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-          # enableStatefulSetAutoDeletePVC: false
+            enableStatefulSetAutoDeletePVC: false
 
   # Configuration for the blackbox exporter
   blackboxExporter:
