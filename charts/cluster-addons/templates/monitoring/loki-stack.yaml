@@ -12,6 +12,9 @@ stringData:
     loki:
       serviceMonitor:
         enabled: true
+    monitoring:
+      dashboards:
+        enabled: false
   overrides: |
     # Modify the date for storage of newer log data in schema config to a future date of 24 hours from now 
     {{- $values := deepCopy .Values.monitoring.loki.release.values }}
@@ -66,6 +69,7 @@ spec:
           app: loki
           release: loki-stack
         action: delete
+    {{- end }}
     # After deleting the release, remove the PVCs
     postDelete:
       - apiVersion: v1
@@ -74,7 +78,6 @@ spec:
           app: loki
           release: loki-stack
         action: delete
-    {{- end }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease

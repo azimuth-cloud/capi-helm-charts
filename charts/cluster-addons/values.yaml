@@ -317,6 +317,10 @@ monitoring:
         # HelmRelease so that it correctly re-adopts the PVC
         fullnameOverride: loki-stack
         loki:
+          compactor:
+            retention_enabled: true
+          limits_config:
+            retention_period: 72h
           auth_enabled: false
           commonConfig:
             replication_factor: 1
@@ -354,7 +358,6 @@ monitoring:
             enabled: true
             size: 10Gi
             enableStatefulSetAutoDeletePVC: false
-
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
