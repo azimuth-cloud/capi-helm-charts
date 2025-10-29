@@ -354,6 +354,7 @@ monitoring:
                 store: boltdb-shipper
         singleBinary:
           replicas: 1
+          # Enable persistence by default
           persistence:
             enabled: true
             size: 10Gi
