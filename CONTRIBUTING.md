@@ -18,4 +18,6 @@ helm dependency update charts/openstack-cluster
 docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
 ```
 
-where the `-u` option is used to update the existing snapshots.
+where the `-u` option is used to update the existing snapshots. If you receive
+permissions errors when trying to update snapshots, ensure that you are using
+the latest version of the `helmunittest/helm-unittest` image.
