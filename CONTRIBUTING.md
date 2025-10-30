@@ -20,4 +20,4 @@ docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-c
 
 where the `-u` option is used to update the existing snapshots. If you receive
 permissions errors when trying to update snapshots, ensure that you are using
-the latest version of the `helmunittest/helm-unittest`.
+the latest version of the `helmunittest/helm-unittest` image.
