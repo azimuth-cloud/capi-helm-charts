@@ -282,7 +282,7 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Upgrade to Kubernetes 1.32
+      - name: Create cluster at Kubernetes 1.32
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
