@@ -282,28 +282,6 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Upgrade to Kubernetes 1.30
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-${{ github.job }}
-          os-cloud: ${{ vars.TARGET_CLOUD }}
-          chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-30-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-30-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-
-      - name: Upgrade to Kubernetes 1.31
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-${{ github.job }}
-          os-cloud: ${{ vars.TARGET_CLOUD }}
-          chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-31-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-31-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-
       - name: Upgrade to Kubernetes 1.32
         uses: ./.github/actions/upgrade-and-test
         with:
