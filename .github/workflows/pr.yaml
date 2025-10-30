@@ -1,11 +1,13 @@
 name: test pr
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - synchronize
       - ready_for_review
       - reopened
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.head_ref }}
