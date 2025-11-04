@@ -19,6 +19,7 @@ AZIMUTH_IMAGES_TAG=$(echo $DEPENDENCIES_JSON | jq -r '.["azimuth-images"]')
 CLUSTER_API=$(echo $DEPENDENCIES_JSON | jq -r '.["cluster-api"]')
 CLUSTER_API_JANITOR_OPENSTACK=$(echo $DEPENDENCIES_JSON | jq -r '.["cluster-api-janitor-openstack"]')
 CLUSTER_API_PROVIDER_OPENSTACK=$(echo $DEPENDENCIES_JSON | jq -r '.["cluster-api-provider-openstack"]')
+OPENSTACK_RESOURCE_CONTROLLER=$(echo $DEPENDENCIES_JSON | jq -r '.["openstack-resource-controller"]')
 CERT_MANAGER=$(echo $DEPENDENCIES_JSON | jq -r '.["cert-manager"]')
 
 # Install cert manager
@@ -37,7 +38,14 @@ CERT_MANAGER=$(echo $DEPENDENCIES_JSON | jq -r '.["cert-manager"]')
     exit
 }
 
+# Install OpenStack Resource Controller
+ORC_URL=https://github.com/k-orc/openstack-resource-controller/releases/download/${OPENSTACK_RESOURCE_CONTROLLER}/install.yaml
+kubectl apply --server-side --force-conflicts -f ${ORC_URL}
+
 # Install Cluster API resources
+# NOTE: replace `init` with `upgrade apply`
+# if CAPI management components are already
+# installed on the target cluster
 clusterctl init \
     --core cluster-api:$CLUSTER_API \
     --bootstrap kubeadm:$CLUSTER_API \
