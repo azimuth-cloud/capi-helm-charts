@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=values.schema.json
 
 # The name of the Cluster API cluster
 # if not given, the release name is used
@@ -19,6 +20,7 @@ cni:
       version: v3.29.3
     release:
       namespace: tigera-operator
+      # TODO: Reference external chart schema?
       values:
         nodeSelector:
           node-role.kubernetes.io/control-plane: ""
@@ -289,6 +291,10 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+
+  # @schema
+  # deprecated: true
+  # @schema
   lokiStack:
     enabled: true
     chart:
@@ -438,6 +444,10 @@ nodeProblemDetector:
     namespace: node-problem-detector
     values: {}
 
+# @schema
+# type: object
+# additionalProperties: true
+# @schema
 # Settings for any custom addons
 custom: {}
   # # Indexed by the name of the release on the target cluster

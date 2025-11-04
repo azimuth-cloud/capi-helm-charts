@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "activeDeadlineSeconds": {
+      "default": 3600,
+      "required": [],
+      "title": "activeDeadlineSeconds",
+      "type": "integer"
+    },
+    "affinity": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "affinity",
+      "type": "object"
+    },
+    "backoffLimit": {
+      "default": 3,
+      "description": "Abandon the defrag after three retries or one hour, whichever is sooner",
+      "required": [],
+      "title": "backoffLimit",
+      "type": "integer"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "image": {
+      "additionalProperties": false,
+      "description": "The kubectl image to use\nNOTE: Image must also include a bash shell\neven if it's not the default entrypoint",
+      "properties": {
+        "pullPolicy": {
+          "default": "IfNotPresent",
+          "required": [],
+          "title": "pullPolicy",
+          "type": "string"
+        },
+        "repository": {
+          "default": "bitnami/kubectl",
+          "required": [],
+          "title": "repository",
+          "type": "string"
+        },
+        "tag": {
+          "default": "latest",
+          "required": [],
+          "title": "tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "pullPolicy",
+        "tag"
+      ],
+      "title": "image",
+      "type": "object"
+    },
+    "imagePullSecrets": {
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "imagePullSecrets",
+      "type": "array"
+    },
+    "nodeSelector": {
+      "additionalProperties": false,
+      "description": "Scheduling parameters for the kubectl pod",
+      "required": [],
+      "title": "nodeSelector",
+      "type": "object"
+    },
+    "podSecurityContext": {
+      "additionalProperties": false,
+      "description": "Pod-level security context",
+      "properties": {
+        "runAsNonRoot": {
+          "default": true,
+          "required": [],
+          "title": "runAsNonRoot",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "runAsNonRoot"
+      ],
+      "title": "podSecurityContext",
+      "type": "object"
+    },
+    "resources": {
+      "additionalProperties": false,
+      "description": "Resources for the kubectl container",
+      "required": [],
+      "title": "resources",
+      "type": "object"
+    },
+    "schedule": {
+      "default": "0 0 * * *",
+      "description": "yaml-language-server: $schema=values.schema.json\nThe schedule for the cronjob (defaults to nightly)",
+      "required": [],
+      "title": "schedule",
+      "type": "string"
+    },
+    "securityContext": {
+      "additionalProperties": false,
+      "description": "Container-level security context",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "default": false,
+          "required": [],
+          "title": "allowPrivilegeEscalation",
+          "type": "boolean"
+        },
+        "capabilities": {
+          "additionalProperties": false,
+          "properties": {
+            "drop": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "drop",
+              "type": "array"
+            }
+          },
+          "required": [
+            "drop"
+          ],
+          "title": "capabilities",
+          "type": "object"
+        },
+        "readOnlyRootFilesystem": {
+          "default": true,
+          "required": [],
+          "title": "readOnlyRootFilesystem",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowPrivilegeEscalation",
+        "capabilities",
+        "readOnlyRootFilesystem"
+      ],
+      "title": "securityContext",
+      "type": "object"
+    },
+    "startingDeadlineSeconds": {
+      "default": 43200,
+      "description": "Allow the jobs to start up to 12 hours after the configured time\nIf it does not start within this time, just wait for the next one",
+      "required": [],
+      "title": "startingDeadlineSeconds",
+      "type": "integer"
+    },
+    "tolerations": {
+      "description": "Allow the pods to run on control plane nodes if they need to",
+      "items": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "effect": {
+                "default": "NoSchedule",
+                "required": [],
+                "title": "effect",
+                "type": "string"
+              },
+              "key": {
+                "default": "node-role.kubernetes.io/master",
+                "required": [],
+                "title": "key",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "effect"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "effect": {
+                "default": "NoSchedule",
+                "required": [],
+                "title": "effect",
+                "type": "string"
+              },
+              "key": {
+                "default": "node-role.kubernetes.io/control-plane",
+                "required": [],
+                "title": "key",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "effect"
+            ],
+            "type": "object"
+          }
+        ],
+        "required": []
+      },
+      "required": [],
+      "title": "tolerations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schedule",
+    "startingDeadlineSeconds",
+    "backoffLimit",
+    "activeDeadlineSeconds",
+    "image",
+    "imagePullSecrets",
+    "podSecurityContext",
+    "securityContext",
+    "resources",
+    "nodeSelector",
+    "tolerations",
+    "affinity"
+  ],
+  "type": "object"
+}

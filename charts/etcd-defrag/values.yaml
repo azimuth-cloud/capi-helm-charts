@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=values.schema.json
 # The schedule for the cronjob (defaults to nightly)
 schedule: "0 0 * * *"
 # Allow the jobs to start up to 12 hours after the configured time
