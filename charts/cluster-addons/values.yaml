@@ -289,7 +289,27 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
-
+  lokiStack:
+    enabled: true
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: loki-stack
+      version: 2.10.2
+    release:
+      namespace: monitoring-system
+      values:
+        loki:
+          # Enable retention and configure a default retention period of 31 days
+          config:
+            compactor:
+              retention_enabled: true
+            limits_config:
+              retention_period: 72h
+          # Enable persistence by default
+          persistence:
+            enabled: true
+            size: 10Gi
+            
   promtail:
     enabled: true
     chart:

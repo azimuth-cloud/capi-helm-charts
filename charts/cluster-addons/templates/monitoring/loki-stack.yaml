@@ -1,44 +1,76 @@
-{{- if and .Values.monitoring.enabled .Values.monitoring.loki.enabled }}
+{{- if and .Values.monitoring.enabled .Values.monitoring.lokiStack.enabled }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
+  name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
   labels:
-    {{- include "cluster-addons.componentLabels" (list . "loki") | nindent 4 }}
+    {{- include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
     loki:
       serviceMonitor:
         enabled: true
-    monitoring:
-      dashboards:
-        enabled: false
+    promtail:
+      serviceMonitor:
+        enabled: true
+      # Get promtail to scrape systemd services
+      config:
+        snippets:
+          extraScrapeConfigs: |
+            - job_name: journal
+              journal:
+                path: /var/log/journal
+                max_age: 12h
+                labels:
+                  job: systemd-journal
+              relabel_configs:
+                - source_labels: ['__journal__systemd_unit']
+                  target_label: 'unit'
+                - source_labels: ['__journal__hostname']
+                  target_label: 'hostname'
+                - source_labels: ['__journal_priority_keyword']
+                  target_label: level
+      # Mount journal directory and machine-id file into promtail pods
+      extraVolumes:
+        - name: journal
+          hostPath:
+            path: /var/log/journal
+        - name: machine-id
+          hostPath:
+            path: /etc/machine-id
+      extraVolumeMounts:
+        - name: journal
+          mountPath: /var/log/journal
+          readOnly: true
+        - name: machine-id
+          mountPath: /etc/machine-id
+          readOnly: true
+    grafana:
+      sidecar:
+        datasources:
+          enabled: false
   overrides: |
-    # Modify the date for storage of newer log data in schema config to a future date of 24 hours from now 
-    {{- $values := deepCopy .Values.monitoring.loki.release.values }}
-    {{- $dateToUpgrade := (now | dateModify "24h") | date "2006-01-02" }}
-    {{- $_ := set (index (index $values.loki.schemaConfig.configs 1)) "from" $dateToUpgrade }}
-    {{- toYaml $values | nindent 4 }}
+    {{- toYaml .Values.monitoring.lokiStack.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.monitoring.loki.chart | nindent 4 }}
-  targetNamespace: {{ .Values.monitoring.loki.release.namespace }}
-  releaseName: loki
+  chart: {{ toYaml .Values.monitoring.lokiStack.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.lokiStack.release.namespace }}
+  releaseName: loki-stack
   valuesSources:
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
         key: defaults
     - secret:
-        name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
+        name: {{ include "cluster-addons.componentName" (list . "loki-stack") }}-config
         key: overrides
   # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks
   # to ensure that it happens correctly
@@ -46,9 +78,9 @@ spec:
     preUpgrade:
       - apiVersion: apps/v1
         kind: StatefulSet
-        name: loki
+        name: loki-stack
         action: delete
-    {{- if .Values.monitoring.loki.release.values.singleBinary.persistence.enabled }}
+    {{- if .Values.monitoring.lokiStack.release.values.loki.persistence.enabled }}
       - apiVersion: v1
         kind: PersistentVolumeClaim
         selector:
@@ -60,7 +92,7 @@ spec:
             spec:
               resources:
                 requests:
-                  storage: {{ .Values.monitoring.loki.release.values.singleBinary.persistence.size }}
+                  storage: {{ .Values.monitoring.lokiStack.release.values.loki.persistence.size }}
     {{- else }}
     postUpgrade:
       - apiVersion: v1
@@ -120,19 +152,19 @@ spec:
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
-  name: {{ include "cluster-addons.componentName" (list . "loki-dashboards") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "loki-dashboards") | nindent 4 }}
+  name: {{ include "cluster-addons.componentName" (list . "loki-stack-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki-stack-dashboards") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  targetNamespace: {{ .Values.monitoring.loki.release.namespace }}
-  releaseName: loki-dashboards
+  targetNamespace: {{ .Values.monitoring.lokiStack.release.namespace }}
+  releaseName: loki-stack-dashboards
   manifestSources:
     - template: |
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: loki-grafana-datasource
+          name: loki-stack-grafana-datasource
           labels:
             grafana_datasource: "1"
         data:
@@ -141,9 +173,7 @@ spec:
             datasources:
               - name: Loki
                 type: loki
-                {{- with .Values.monitoring.loki.release }}
-                url: http://{{ .values.fullnameOverride | default .name }}.{{ .namespace }}:3100
-                {{- end }}
+                url: http://loki-stack.{{ .Values.monitoring.lokiStack.release.namespace }}:3100
                 access: proxy
                 version: 1
                 isDefault: false
@@ -151,7 +181,7 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: loki-grafana-dashboards
+          name: loki-stack-grafana-dashboards
           labels:
             grafana_dashboard: "1"
         data:

@@ -63,6 +63,9 @@ jobs:
           - key: loki
             path: monitoring.loki.chart
 
+          - key: loki-stack
+            path: monitoring.lokiStack.chart
+
           - key: promtail
             path: monitoring.promtail.chart
             
