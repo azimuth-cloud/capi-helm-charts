@@ -1,4 +1,7 @@
 {{- if and .Values.monitoring.enabled .Values.monitoring.loki.enabled }}
+{{- if and .Values.monitoring.lokiStack.enabled .Values.monitoring.loki.enabled }}
+{{- fail (printf "Cannot enable both 'lokiStack' and 'loki' addons simultaneously; please choose one.") }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
