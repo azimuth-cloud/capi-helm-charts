@@ -365,8 +365,7 @@ monitoring:
           #       object_store: filesystem
           #       schema: v11
           #       store: boltdb-shipper
-          #       # To push in new logs upgraded to v12 schema from a future
-          #       # date, specified as a placeholder to replace in the loki template
+          #       # The "from" date marks from when the new data is written
           #     - from: "2025-10-17"
           #       index:
           #         period: 24h
