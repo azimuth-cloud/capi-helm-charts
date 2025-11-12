@@ -94,8 +94,8 @@ spec:
             datasources:
               - name: Loki
                 type: loki
-                {{- with .Values.monitoring.loki.release }}
-                url: http://{{ .values.fullnameOverride | default .name }}.{{ .namespace }}:3100
+                {{- with .Values.monitoring.loki }}
+                url: http://{{ .values.fullnameOverride | default .chart.name }}.{{ .release.namespace }}:3100
                 {{- end }}
                 access: proxy
                 version: 1
