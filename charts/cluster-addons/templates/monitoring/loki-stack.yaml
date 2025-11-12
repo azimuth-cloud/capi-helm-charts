@@ -103,6 +103,7 @@ spec:
         action: delete
     {{- end }}
 ---
+
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
