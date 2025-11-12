@@ -380,10 +380,9 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-            # Set enableStatefulSetAutoDeletePVC to false
             # to prevent automatic deletion of PVCs when the
             # StatefulSet is deleted in case historical logs are needed
-            # enableStatefulSetAutoDeletePVC: false
+            enableStatefulSetAutoDeletePVC: false
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true

@@ -1,5 +1,4 @@
 {{- if and .Values.monitoring.enabled .Values.monitoring.lokiStack.enabled }}
-{{ include "cluster-addons.enableLoki" . }}
 ---
 apiVersion: v1
 kind: Secret
@@ -103,14 +102,6 @@ spec:
           release: loki-stack
         action: delete
     {{- end }}
-    # After deleting the release, remove the PVCs
-    postDelete:
-      - apiVersion: v1
-        kind: PersistentVolumeClaim
-        selector:
-          app: loki
-          release: loki-stack
-        action: delete
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
