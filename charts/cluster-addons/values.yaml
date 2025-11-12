@@ -333,9 +333,10 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
+        # In case historical logs are required, configure fullnameOverride to
         # ensure that the name matches the old loki-stack
         # HelmRelease so that it correctly re-adopts the PVC
-        fullnameOverride: loki-stack
+        # fullnameOverride: loki-stack
         loki:
           compactor:
             retention_enabled: true
@@ -346,7 +347,8 @@ monitoring:
             replication_factor: 1
             # Specify path for new Loki to use same path in PVC
             # as old loki-stack for reading previously logged data
-            path_prefix: /var/loki/loki
+            # required in case historical logs are needed
+            # path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
             filesystem:
@@ -354,15 +356,15 @@ monitoring:
               rules_directory: /var/loki/loki/rules
           schemaConfig:
             configs:
-                # The old schema used for historical logs.
+                # The old schema used in case historical logs are needed
                 # The "from" date marks from when the old data was written
-              - from: "2020-10-24"
-                index:
-                  period: 24h
-                  prefix: index_
-                object_store: filesystem
-                schema: v11
-                store: boltdb-shipper
+              # - from: "2020-10-24"
+              #   index:
+              #     period: 24h
+              #     prefix: index_
+              #   object_store: filesystem
+              #   schema: v11
+              #   store: boltdb-shipper
                 # To push in new logs upgraded to v12 schema from a future
                 # date, specified as a placeholder to replace in the loki template
               - from: "2025-10-17"
@@ -378,7 +380,10 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-            enableStatefulSetAutoDeletePVC: false
+            # Set enableStatefulSetAutoDeletePVC to false
+            # to prevent automatic deletion of PVCs when the
+            # StatefulSet is deleted in case historical logs are needed
+            # enableStatefulSetAutoDeletePVC: false
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
