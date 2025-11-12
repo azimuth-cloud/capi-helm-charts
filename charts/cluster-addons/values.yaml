@@ -354,26 +354,26 @@ monitoring:
             filesystem:
               chunks_directory: /var/loki/loki/chunks
               rules_directory: /var/loki/loki/rules
-          schemaConfig:
-            configs:
-                # The old schema used in case historical logs are needed
-                # The "from" date marks from when the old data was written
-              # - from: "2020-10-24"
-              #   index:
-              #     period: 24h
-              #     prefix: index_
-              #   object_store: filesystem
-              #   schema: v11
-              #   store: boltdb-shipper
-                # To push in new logs upgraded to v12 schema from a future
-                # date, specified as a placeholder to replace in the loki template
-              - from: "2025-10-17"
-                index:
-                  period: 24h
-                  prefix: loki_index_
-                object_store: filesystem
-                schema: v12
-                store: boltdb-shipper
+          # Schema configuration needed in case historical logs are needed
+          # schemaConfig:
+          #   configs:
+          #       # The "from" date marks from when the old data was written
+          #     - from: "2020-10-24"
+          #       index:
+          #         period: 24h
+          #         prefix: index_
+          #       object_store: filesystem
+          #       schema: v11
+          #       store: boltdb-shipper
+          #       # To push in new logs upgraded to v12 schema from a future
+          #       # date, specified as a placeholder to replace in the loki template
+          #     - from: "2025-10-17"
+          #       index:
+          #         period: 24h
+          #         prefix: loki_index_
+          #       object_store: filesystem
+          #       schema: v12
+          #       store: boltdb-shipper
         singleBinary:
           replicas: 1
           # Enable persistence by default
