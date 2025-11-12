@@ -19,11 +19,7 @@ stringData:
       dashboards:
         enabled: false
   overrides: |
-    # Modify the date for storage of newer log data in schema config to a future date of 24 hours from now 
-    {{- $values := deepCopy .Values.monitoring.loki.release.values }}
-    {{- $dateToUpgrade := (now | dateModify "24h") | date "2006-01-02" }}
-    {{- $_ := set (index (index $values.loki.schemaConfig.configs 1)) "from" $dateToUpgrade }}
-    {{- toYaml $values | nindent 4 }}
+    {{- toYaml .Values.monitoring.loki.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
