@@ -309,7 +309,7 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-            
+
   promtail:
     enabled: true
     chart:
