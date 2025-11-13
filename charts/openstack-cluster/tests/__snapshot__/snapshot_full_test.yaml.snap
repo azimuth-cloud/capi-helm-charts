@@ -1253,13 +1253,6 @@ templated manifests should match snapshot:
         version: 2.10.2
       clusterName: RELEASE-NAME
       lifecycleHooks:
-        postDelete:
-          - action: delete
-            apiVersion: v1
-            kind: PersistentVolumeClaim
-            selector:
-              app: loki
-              release: loki-stack
         preUpgrade:
           - action: delete
             apiVersion: apps/v1
