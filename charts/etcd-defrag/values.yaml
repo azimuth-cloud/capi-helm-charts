@@ -9,10 +9,12 @@ backoffLimit: 3
 activeDeadlineSeconds: 3600
 
 # The kubectl image to use
+# NOTE: Image must also include a bash shell
+# even if it's not the default entrypoint
 image:
-  repository: rancher/kubectl
+  repository: bitnami/kubectl
   pullPolicy: IfNotPresent
-  tag: ""  # Defaults to the Kubernetes minor version, e.g. 1.28
+  tag: latest
 
 imagePullSecrets: []
 
