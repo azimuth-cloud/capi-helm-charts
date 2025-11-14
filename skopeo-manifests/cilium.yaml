@@ -1,8 +1,8 @@
 quay.io:
   images:
     cilium/cilium:
-    - v1.17.0
+    - v1.18.4
     cilium/cilium-envoy:
-    - v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e
+    - v1.34.10-1762597008-ff7ae7d623be00078865cff1b0672cc5d9bfc6d5
     cilium/operator-generic:
-    - v1.17.0
+    - v1.18.4
