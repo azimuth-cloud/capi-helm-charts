@@ -104,44 +104,6 @@ spec:
     {{- end }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
-kind: HelmRelease
-metadata:
-  name: {{ include "cluster-addons.componentName" (list . "promtail") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "promtail") | nindent 4 }}
-spec:
-  clusterName: {{ include "cluster-addons.clusterName" . }}
-  bootstrap: true
-  chart: {{ toYaml .Values.monitoring.promtail.chart | nindent 4 }}
-  targetNamespace: {{ .Values.monitoring.promtail.release.namespace }}
-  releaseName: promtail
-  valuesSources:
-    - secret:
-        name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
-        key: defaults
-    - secret:
-        name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
-        key: overrides
----
-apiVersion: addons.stackhpc.com/v1alpha1
-kind: HelmRelease
-metadata:
-  name: {{ include "cluster-addons.componentName" (list . "promtail") }}
-  labels: {{ include "cluster-addons.componentLabels" (list . "promtail") | nindent 4 }}
-spec:
-  clusterName: {{ include "cluster-addons.clusterName" . }}
-  bootstrap: true
-  chart: {{ toYaml .Values.monitoring.promtail.chart | nindent 4 }}
-  targetNamespace: {{ .Values.monitoring.promtail.release.namespace }}
-  releaseName: promtail
-  valuesSources:
-    - secret:
-        name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
-        key: defaults
-    - secret:
-        name: {{ include "cluster-addons.componentName" (list . "promtail") }}-config
-        key: overrides
----
-apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
 metadata:
   name: {{ include "cluster-addons.componentName" (list . "loki-stack-dashboards") }}
