@@ -441,20 +441,20 @@ nodeProblemDetector:
 # Settings for any custom addons
 custom: {}
   # # Indexed by the name of the release on the target cluster
-  # my-custom-helm-release:
+  zabbix-helm-release:
   #   # Indicates that this is a Helm addon
-  #   kind: HelmRelease
-  #   spec:
+     kind: HelmRelease
+     spec:
   #     # The namespace that the addon should be in
-  #     namespace: my-namespace
+       namespace: zabbix
   #     # Details of the Helm chart to use
-  #     chart:
+       chart:
   #       # The chart repository that contains the chart to use
-  #       repo: https://my-project/charts
+         repo: https://cdn.zabbix.com/zabbix/integrations/kubernetes-helm/7.4
   #       # The name of the chart to use
-  #       name: my-chart
+         name: zabbix-helm-chart
   #       # The version of the chart to use (must be an exact version)
-  #       version: 1.5.0
+         version: 1.6.8
   #     # The Helm values to use for the release
   #     values: {}
   # # Indexed by the name of the release on the target cluster
