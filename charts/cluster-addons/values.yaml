@@ -336,7 +336,7 @@ monitoring:
         # In case historical logs are required, configure fullnameOverride to
         # ensure that the name matches the old loki-stack
         # HelmRelease so that it correctly re-adopts the PVC
-        # fullnameOverride: loki-stack
+        fullnameOverride: check-stack
         loki:
           compactor:
             retention_enabled: true
