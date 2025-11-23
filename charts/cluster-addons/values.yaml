@@ -351,9 +351,11 @@ monitoring:
             # path_prefix: /var/loki/loki
           storage:
             type: 'filesystem'
-            filesystem:
-              chunks_directory: /var/loki/loki/chunks
-              rules_directory: /var/loki/loki/rules
+            # Required configuration to store data in /var/loki
+            # if historical data is needed
+            # filesystem:
+            #   chunks_directory: /var/loki/loki/chunks
+            #   rules_directory: /var/loki/loki/rules
           # Schema configuration needed in case historical logs are needed
           # schemaConfig:
           #   configs:
