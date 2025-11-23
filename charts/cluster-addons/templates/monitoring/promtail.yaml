@@ -16,7 +16,7 @@ stringData:
       clients:
         {{- $clients := dig "promtail" "release" "values" "config" "clients" nil .Values.monitoring }}
         {{- if not $clients }}
-        {{- with .Values.monitoring.loki }}
+        {{- with .Values.monitoring.loki_v2 }}
         - url: http://{{ .Release.Values.fullnameOverride | default .Chart.Name }}.{{ .Release.Namespace }}.svc:3100/loki/api/v1/push
           tenant_id: 1
         {{- end }}

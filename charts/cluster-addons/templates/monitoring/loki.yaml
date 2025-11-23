@@ -1,5 +1,6 @@
-{{- if and .Values.monitoring.enabled .Values.monitoring.loki.enabled }}
-{{- if and .Values.monitoring.lokiStack.enabled .Values.monitoring.loki.enabled }}
+{{- if and .Values.monitoring.enabled .Values.monitoring.loki_v2.enabled }}
+# TODO: Update this to include Loki v3 once the new addon is available
+{{- if and .Values.monitoring.lokiStack.enabled .Values.monitoring.loki_v2.enabled }}
 {{- fail (printf "Cannot enable both 'lokiStack' and 'loki' addons simultaneously; please choose one.") }}
 {{- end }}
 ---
@@ -12,14 +13,13 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    loki:
-      serviceMonitor:
-        enabled: true
+    serviceMonitor:
+      enabled: true
     monitoring:
       dashboards:
         enabled: false
   overrides: |
-    {{- toYaml .Values.monitoring.loki.release.values | nindent 4 }}
+    {{- toYaml .Values.monitoring.loki_v2.release.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
@@ -29,8 +29,8 @@ metadata:
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.monitoring.loki.chart | nindent 4 }}
-  targetNamespace: {{ .Values.monitoring.loki.release.namespace }}
+  chart: {{ toYaml .Values.monitoring.loki_v2.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.loki_v2.release.namespace }}
   releaseName: loki
   valuesSources:
     - secret:
@@ -47,7 +47,7 @@ spec:
         kind: StatefulSet
         name: loki
         action: delete
-    {{- if .Values.monitoring.loki.release.values.singleBinary.persistence.enabled }}
+    {{- if .Values.monitoring.loki_v2.release.values.singleBinary.persistence.enabled }}
       - apiVersion: v1
         kind: PersistentVolumeClaim
         selector:
@@ -59,7 +59,7 @@ spec:
             spec:
               resources:
                 requests:
-                  storage: {{ .Values.monitoring.loki.release.values.singleBinary.persistence.size }}
+                  storage: {{ .Values.monitoring.loki_v2.release.values.singleBinary.persistence.size }}
     {{- else }}
     postUpgrade:
       - apiVersion: v1
@@ -78,7 +78,7 @@ metadata:
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  targetNamespace: {{ .Values.monitoring.loki.release.namespace }}
+  targetNamespace: {{ .Values.monitoring.loki_v2.release.namespace }}
   releaseName: loki-dashboards
   manifestSources:
     - template: |
@@ -94,7 +94,7 @@ spec:
             datasources:
               - name: Loki
                 type: loki
-                {{- with .Values.monitoring.loki }}
+                {{- with .Values.monitoring.loki_v2 }}
                 url: http://{{ .Release.Values.fullnameOverride | default .Chart.Name }}.{{ .Release.Namespace }}:3100
                 {{- end }}
                 access: proxy
