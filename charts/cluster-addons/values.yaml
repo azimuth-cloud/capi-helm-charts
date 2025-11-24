@@ -439,7 +439,7 @@ nodeProblemDetector:
     values: {}
 
 # Settings for any custom addons
-custom: {}
+custom: 
   # # Indexed by the name of the release on the target cluster
   zabbix-helm-release:
   #   # Indicates that this is a Helm addon
