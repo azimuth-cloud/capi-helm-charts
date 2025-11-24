@@ -106,6 +106,9 @@ jobs:
 
           - key: node-problem-detector
             path: nodeProblemDetector.chart
+          
+          - key: kyverno
+            path: kyverno.chart
 
           - key: reloader
             path: reloader.chart
