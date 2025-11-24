@@ -443,18 +443,18 @@ custom:
   # # Indexed by the name of the release on the target cluster
   zabbix-helm-release:
   #   # Indicates that this is a Helm addon
-      kind: HelmRelease
-      spec:
+    kind: HelmRelease
+    spec:
   #     # The namespace that the addon should be in
-        namespace: zabbix
+      namespace: zabbix
   #     # Details of the Helm chart to use
-        chart:
-  #       # The chart repository that contains the chart to use
-          repo: https://cdn.zabbix.com/zabbix/integrations/kubernetes-helm/7.4
-  #       # The name of the chart to use
-          name: zabbix-helm-chart
-  #       # The version of the chart to use (must be an exact version)
-          version: 1.6.8
+      chart:
+  #     # The chart repository that contains the chart to use
+        repo: https://cdn.zabbix.com/zabbix/integrations/kubernetes-helm/7.4
+  #     # The name of the chart to use
+        name: zabbix-helm-chart
+  #     # The version of the chart to use (must be an exact version)
+        version: 1.6.8
   #     # The Helm values to use for the release
   #     values: {}
   # # Indexed by the name of the release on the target cluster
