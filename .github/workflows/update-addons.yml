@@ -61,7 +61,7 @@ jobs:
             path: monitoring.kubePrometheusStack.chart
 
           - key: loki
-            path: monitoring.loki.chart
+            path: monitoring.loki_v2.chart
 
           - key: loki-stack
             path: monitoring.lokiStack.chart

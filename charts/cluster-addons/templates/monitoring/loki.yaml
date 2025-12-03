@@ -1,6 +1,6 @@
 {{- if and .Values.monitoring.enabled .Values.monitoring.loki_v2.enabled }}
 # TODO: Update this to include Loki v3 once the new addon is available
-{{- if and .Values.monitoring.lokiStack.enabled .Values.monitoring.loki_v2.enabled }}
+{{- if .Values.monitoring.lokiStack.enabled }}
 {{- fail (printf "Cannot enable both 'lokiStack' and 'loki' addons simultaneously; please choose one.") }}
 {{- end }}
 ---
@@ -13,9 +13,9 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    serviceMonitor:
-      enabled: true
     monitoring:
+      serviceMonitor:
+        enabled: true
       dashboards:
         enabled: false
   overrides: |
@@ -52,7 +52,7 @@ spec:
         kind: PersistentVolumeClaim
         selector:
           app: loki
-          release: loki-stack
+          release: loki
         action: patch
         options:
           data:
@@ -66,7 +66,7 @@ spec:
         kind: PersistentVolumeClaim
         selector:
           app: loki
-          release: loki-stack
+          release: loki
         action: delete
     {{- end }}
 ---
