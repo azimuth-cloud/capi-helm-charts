@@ -99,7 +99,7 @@
     },
     "schedule": {
       "default": "0 0 * * *",
-      "description": "yaml-language-server: $schema=values.schema.json\nThe schedule for the cronjob (defaults to nightly)",
+      "description": "The schedule for the cronjob (defaults to nightly)",
       "required": [],
       "title": "schedule",
       "type": "string"

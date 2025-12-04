@@ -51,7 +51,7 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "crds": {
                   "additionalProperties": false,
@@ -73,13 +73,11 @@
               "required": [
                 "crds"
               ],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -98,7 +96,10 @@
       "description": "The name of the Cluster API cluster\nif not given, the release name is used",
       "required": [],
       "title": "clusterName",
-      "type": "null"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "cni": {
       "additionalProperties": false,
@@ -239,8 +240,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
-                  "description": "TODO: Reference external chart schema?",
+                  "additionalProperties": true,
                   "properties": {
                     "nodeSelector": {
                       "additionalProperties": false,
@@ -262,13 +262,11 @@
                   "required": [
                     "nodeSelector"
                   ],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -326,15 +324,13 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -357,14 +353,16 @@
         "type": {
           "default": "calico",
           "description": "The CNI to deploy - supported values are calico or cilium",
+          "enum": [
+            "calico",
+            "cilium"
+          ],
           "required": [],
-          "title": "type",
-          "type": "string"
+          "title": "type"
         }
       },
       "required": [
         "enabled",
-        "type",
         "calico",
         "cilium"
       ],
@@ -425,15 +423,13 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -455,11 +451,101 @@
       "type": "object"
     },
     "custom": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "description": "Settings for any custom addons",
+      "patternProperties": {
+        ".*": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "HelmRelease",
+                  "required": []
+                },
+                "spec": {
+                  "properties": {
+                    "chart": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "required": [],
+                          "type": "string"
+                        },
+                        "repo": {
+                          "required": [],
+                          "type": "string"
+                        },
+                        "version": {
+                          "required": [],
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "type": "object"
+                    },
+                    "namespace": {
+                      "required": [],
+                      "type": "string"
+                    },
+                    "values": {
+                      "additionalProperties": true,
+                      "required": [],
+                      "type": "object"
+                    }
+                  },
+                  "required": []
+                }
+              },
+              "required": [],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "Manifests",
+                  "required": []
+                },
+                "spec": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "manifests": {
+                      "patternProperties": {
+                        ".*": {
+                          "required": [],
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "type": "object"
+                    },
+                    "namespace": {
+                      "required": [],
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "type": "object"
+            }
+          ],
+          "required": []
+        }
+      },
       "required": [],
       "title": "custom",
       "type": "object"
+    },
+    "enabled": {
+      "default": true,
+      "description": "Included for schema validation purposes\nHas no effect unless this chart is used\nas a dependency of the openstack-cluster\nchart.",
+      "required": [],
+      "title": "enabled",
+      "type": "boolean"
     },
     "etcdDefrag": {
       "additionalProperties": false,
@@ -484,13 +570,15 @@
               "default": "",
               "required": [],
               "title": "version",
-              "type": "null"
+              "type": [
+                "string",
+                "null"
+              ]
             }
           },
           "required": [
             "repo",
-            "name",
-            "version"
+            "name"
           ],
           "title": "chart",
           "type": "object"
@@ -513,15 +601,13 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -603,15 +689,13 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -685,7 +769,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "enableMonitoring": {
                       "default": true,
@@ -758,13 +842,11 @@
                     "enableMonitoring",
                     "tolerations"
                   ],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -820,7 +902,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "manager": {
                       "additionalProperties": false,
@@ -910,13 +992,11 @@
                     "manager",
                     "resources"
                   ],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -931,6 +1011,7 @@
         },
         "xpuManagerMonitoring": {
           "additionalProperties": false,
+          "description": "xpuManagerMonitoring requires Flux CD source\nand kustomization controllers to be installed\non the CAPI management cluster.",
           "properties": {
             "enabled": {
               "default": true,
@@ -1037,15 +1118,13 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -1110,15 +1189,13 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -1183,15 +1260,13 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -1259,15 +1334,13 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -1332,7 +1405,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "alertmanager": {
                       "additionalProperties": false,
@@ -1538,13 +1611,11 @@
                     "alertmanager",
                     "prometheus"
                   ],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -1607,7 +1678,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "loki": {
                       "additionalProperties": false,
@@ -1692,13 +1763,11 @@
                   "required": [
                     "loki"
                   ],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [
-                "namespace",
-                "values"
+                "namespace"
               ],
               "title": "release",
               "type": "object"
@@ -1771,15 +1840,13 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -1844,15 +1911,13 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -1917,7 +1982,7 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "dcgmExporter": {
                   "additionalProperties": false,
@@ -1949,13 +2014,11 @@
               "required": [
                 "dcgmExporter"
               ],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -2015,16 +2078,14 @@
               "type": "boolean"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
             "enabled",
-            "chart",
-            "values"
+            "chart"
           ],
           "title": "ccm",
           "type": "object"
@@ -2112,11 +2173,15 @@
                   "type": "boolean"
                 },
                 "allowedTopologies": {
+                  "additionalProperties": true,
                   "default": "",
                   "description": "The allowed topologies for the storage class",
                   "required": [],
                   "title": "allowedTopologies",
-                  "type": "null"
+                  "type": [
+                    "object",
+                    "null"
+                  ]
                 },
                 "availabilityZone": {
                   "default": "nova",
@@ -2137,7 +2202,10 @@
                   "description": "Filesystem type to use for volumes provisioned with the storage class\nIf not given, the default filesystem type will be used",
                   "required": [],
                   "title": "fstype",
-                  "type": "null"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "isClusterDefault": {
                   "default": true,
@@ -2172,7 +2240,10 @@
                   "description": "The Cinder volume type to use for volumes provisioned by the storage class\nIf not given, the default volume type will be used",
                   "required": [],
                   "title": "volumeType",
-                  "type": "null"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "required": [
@@ -2182,10 +2253,7 @@
                 "reclaimPolicy",
                 "allowVolumeExpansion",
                 "volumeBindingMode",
-                "allowedTopologies",
-                "fstype",
-                "availabilityZone",
-                "volumeType"
+                "availabilityZone"
               ],
               "title": "defaultStorageClass",
               "type": "object"
@@ -2198,7 +2266,7 @@
               "type": "boolean"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "csi": {
                   "additionalProperties": false,
@@ -2283,14 +2351,12 @@
               "required": [
                 "csi"
               ],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
             "enabled",
             "chart",
-            "values",
             "defaultStorageClass",
             "additionalStorageClasses"
           ],
@@ -2356,7 +2422,10 @@
                   "description": "The allowed topologies for the storage class",
                   "required": [],
                   "title": "allowedTopologies",
-                  "type": "null"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "enabled": {
                   "default": true,
@@ -2380,7 +2449,7 @@
                   "type": "string"
                 },
                 "parameters": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "description": "The parameters for the storage class\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters",
                   "properties": {
                     "type": {
@@ -2388,21 +2457,24 @@
                       "description": "The Manila share type to use\nIf not given and the Ceph CSI plugin is installed, cephfs is used",
                       "required": [],
                       "title": "type",
-                      "type": "null"
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     }
                   },
-                  "required": [
-                    "type"
-                  ],
-                  "title": "parameters",
-                  "type": "object"
+                  "required": [],
+                  "title": "parameters"
                 },
                 "provisioner": {
                   "default": "",
                   "description": "The provisioner for the storage class\nIf not given and the Ceph CSI plugin is installed, cephfs.manila.csi.openstack.org is used",
                   "required": [],
                   "title": "provisioner",
-                  "type": "null"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "reclaimPolicy": {
                   "default": "Delete",
@@ -2423,12 +2495,9 @@
                 "enabled",
                 "name",
                 "isClusterDefault",
-                "provisioner",
                 "reclaimPolicy",
                 "allowVolumeExpansion",
-                "volumeBindingMode",
-                "allowedTopologies",
-                "parameters"
+                "volumeBindingMode"
               ],
               "title": "defaultStorageClass",
               "type": "object"
@@ -2441,16 +2510,14 @@
               "type": "boolean"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "required": [],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
             "enabled",
             "chart",
-            "values",
             "defaultStorageClass",
             "additionalStorageClasses"
           ],
@@ -2590,7 +2657,7 @@
               "type": "string"
             },
             "values": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
                 "reloader": {
                   "additionalProperties": false,
@@ -2613,13 +2680,11 @@
               "required": [
                 "reloader"
               ],
-              "title": "values",
-              "type": "object"
+              "title": "values"
             }
           },
           "required": [
-            "namespace",
-            "values"
+            "namespace"
           ],
           "title": "release",
           "type": "object"
@@ -2635,7 +2700,7 @@
     }
   },
   "required": [
-    "clusterName",
+    "enabled",
     "cni",
     "csi",
     "openstack",
