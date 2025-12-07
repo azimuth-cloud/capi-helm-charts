@@ -1,4 +1,8 @@
 {{- if and .Values.monitoring.enabled .Values.monitoring.promtail.enabled }}
+# TODO: Update this to include Loki v3 once the new addon is available
+{{- if .Values.monitoring.lokiStack.enabled }}
+{{- fail (printf "Cannot enable both 'lokiStack' and 'promtail' addons simultaneously; please choose one.") }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
