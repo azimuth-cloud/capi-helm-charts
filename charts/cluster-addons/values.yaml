@@ -363,7 +363,7 @@ monitoring:
           auth_enabled: false
           commonConfig:
             replication_factor: 1
-            # If historical logs are required, configure Loki to use same 
+            # If historical logs are required, configure Loki to use same
             # path inside the data PVC as old loki-stack.
             # path_prefix: /var/loki/loki
           storage:
@@ -373,7 +373,7 @@ monitoring:
             # filesystem:
             #   chunks_directory: /var/loki/loki/chunks
             #   rules_directory: /var/loki/loki/rules
-          # If historical logs are required, additional schema configuration 
+          # If historical logs are required, additional schema configuration
           # is needed to allow loki to ingest old loki-stack logging data.
           # For example:
           # schemaConfig:
