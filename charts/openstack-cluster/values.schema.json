@@ -494,7 +494,7 @@
         },
         "enabled": {
           "default": true,
-          "description": "Included for schema validation purposes\nHas no effect unless this chart is used\nas a dependency of the openstack-cluster\nchart.",
+          "description": "Included for schema validation purposes.\nHas no effect unless this chart is used\nas a conditional dependency of the\nopenstack-cluster chart.",
           "required": [],
           "title": "enabled",
           "type": "boolean"
@@ -2455,11 +2455,10 @@
       "description": "Configuration for the cluster autoscaler",
       "properties": {
         "affinity": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "description": "Affinity rules for pods",
           "required": [],
-          "title": "affinity",
-          "type": "object"
+          "title": "affinity"
         },
         "extraArgs": {
           "additionalProperties": true,
@@ -2583,11 +2582,10 @@
           "type": "array"
         },
         "nodeSelector": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "description": "Node selector for pods",
           "required": [],
-          "title": "nodeSelector",
-          "type": "object"
+          "title": "nodeSelector"
         },
         "podSecurityContext": {
           "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/podsecuritycontext-v1.json",
@@ -2595,11 +2593,10 @@
           "required": []
         },
         "resources": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "description": "Resource requests and limits for pods",
           "required": [],
-          "title": "resources",
-          "type": "object"
+          "title": "resources"
         },
         "securityContext": {
           "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
@@ -2627,11 +2624,8 @@
       },
       "required": [
         "image",
-        "resources",
-        "nodeSelector",
         "tolerations",
-        "topologySpreadConstraints",
-        "affinity"
+        "topologySpreadConstraints"
       ],
       "title": "autoscaler",
       "type": "object"

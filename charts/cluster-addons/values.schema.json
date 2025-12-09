@@ -542,7 +542,7 @@
     },
     "enabled": {
       "default": true,
-      "description": "Included for schema validation purposes\nHas no effect unless this chart is used\nas a dependency of the openstack-cluster\nchart.",
+      "description": "Included for schema validation purposes.\nHas no effect unless this chart is used\nas a conditional dependency of the\nopenstack-cluster chart.",
       "required": [],
       "title": "enabled",
       "type": "boolean"

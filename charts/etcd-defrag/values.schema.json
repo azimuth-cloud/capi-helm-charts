@@ -9,10 +9,9 @@
       "type": "integer"
     },
     "affinity": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "required": [],
-      "title": "affinity",
-      "type": "object"
+      "title": "affinity"
     },
     "backoffLimit": {
       "default": 3,
@@ -67,14 +66,13 @@
       "type": "array"
     },
     "nodeSelector": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Scheduling parameters for the kubectl pod",
       "required": [],
-      "title": "nodeSelector",
-      "type": "object"
+      "title": "nodeSelector"
     },
     "podSecurityContext": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Pod-level security context",
       "properties": {
         "runAsNonRoot": {
@@ -87,15 +85,13 @@
       "required": [
         "runAsNonRoot"
       ],
-      "title": "podSecurityContext",
-      "type": "object"
+      "title": "podSecurityContext"
     },
     "resources": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Resources for the kubectl container",
       "required": [],
-      "title": "resources",
-      "type": "object"
+      "title": "resources"
     },
     "schedule": {
       "default": "0 0 * * *",
@@ -105,7 +101,7 @@
       "type": "string"
     },
     "securityContext": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Container-level security context",
       "properties": {
         "allowPrivilegeEscalation": {
@@ -150,8 +146,7 @@
         "capabilities",
         "readOnlyRootFilesystem"
       ],
-      "title": "securityContext",
-      "type": "object"
+      "title": "securityContext"
     },
     "startingDeadlineSeconds": {
       "default": 43200,
@@ -163,53 +158,9 @@
     "tolerations": {
       "description": "Allow the pods to run on control plane nodes if they need to",
       "items": {
-        "anyOf": [
-          {
-            "additionalProperties": false,
-            "properties": {
-              "effect": {
-                "default": "NoSchedule",
-                "required": [],
-                "title": "effect",
-                "type": "string"
-              },
-              "key": {
-                "default": "node-role.kubernetes.io/master",
-                "required": [],
-                "title": "key",
-                "type": "string"
-              }
-            },
-            "required": [
-              "key",
-              "effect"
-            ],
-            "type": "object"
-          },
-          {
-            "additionalProperties": false,
-            "properties": {
-              "effect": {
-                "default": "NoSchedule",
-                "required": [],
-                "title": "effect",
-                "type": "string"
-              },
-              "key": {
-                "default": "node-role.kubernetes.io/control-plane",
-                "required": [],
-                "title": "key",
-                "type": "string"
-              }
-            },
-            "required": [
-              "key",
-              "effect"
-            ],
-            "type": "object"
-          }
-        ],
-        "required": []
+        "additionalProperties": true,
+        "required": [],
+        "type": "object"
       },
       "required": [],
       "title": "tolerations",
@@ -222,13 +173,7 @@
     "backoffLimit",
     "activeDeadlineSeconds",
     "image",
-    "imagePullSecrets",
-    "podSecurityContext",
-    "securityContext",
-    "resources",
-    "nodeSelector",
-    "tolerations",
-    "affinity"
+    "imagePullSecrets"
   ],
   "type": "object"
 }
