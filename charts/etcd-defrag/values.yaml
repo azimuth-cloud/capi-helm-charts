@@ -33,6 +33,9 @@ podSecurityContext:
 # @schema
 securityContext:
   allowPrivilegeEscalation: false
+  # @schema
+  # additionalProperties: true
+  # @schema
   capabilities:
     drop: [ALL]
   readOnlyRootFilesystem: true
