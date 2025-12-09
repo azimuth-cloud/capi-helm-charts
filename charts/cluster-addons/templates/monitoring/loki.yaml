@@ -18,6 +18,16 @@ stringData:
         enabled: true
       dashboards:
         enabled: false
+    {{- if not .Values.monitoring.loki_v2.release.values.singleBinary.persistence.enabled }}
+    # Default Loki container user cannot write to container's /var/loki so use emptyDir instead
+    singleBinary:
+      extraVolumes:
+        - name: loki
+          emptyDir: {}
+      extraVolumeMounts:
+        - name: loki
+          mountPath: /var/loki
+    {{- end }}
   overrides: |
     {{- toYaml .Values.monitoring.loki_v2.release.values | nindent 4 }}
 ---
