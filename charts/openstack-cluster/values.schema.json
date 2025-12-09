@@ -365,7 +365,7 @@
           "type": "object"
         },
         "custom": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "description": "Settings for any custom addons",
           "required": [],
           "title": "custom",

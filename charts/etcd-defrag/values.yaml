@@ -66,6 +66,9 @@ securityContext:
   # type: boolean
   # @schema
   allowPrivilegeEscalation: false
+  # @schema
+  # additionalProperties: true
+  # @schema
   capabilities:
     # @schema
     # type: array
