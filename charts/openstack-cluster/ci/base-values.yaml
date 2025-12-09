@@ -1,4 +1,4 @@
-kubernetesVersion: 1.29.2
+kubernetesVersion: 1.00.0
 machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
 controlPlane:
   machineFlavor: vm.small

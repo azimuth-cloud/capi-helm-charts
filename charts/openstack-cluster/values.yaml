@@ -789,7 +789,7 @@ nodeGroupDefaults:
 #   additionalProperties: true
 # @schema
 nodeGroups:
-  - # The name of the node group
+  -  # The name of the node group
     name: md-0
     # The number of machines in the node group if autoscale is false
     machineCount: 3
