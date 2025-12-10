@@ -402,6 +402,7 @@ monitoring:
             size: 10Gi
             # Required to allow resizing of PVC during Helm upgrades
             enableStatefulSetAutoDeletePVC: false
+
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
