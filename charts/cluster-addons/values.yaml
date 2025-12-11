@@ -348,7 +348,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v25.10.0
+    version: v25.10.1
   release:
     namespace: gpu-operator
     values:
