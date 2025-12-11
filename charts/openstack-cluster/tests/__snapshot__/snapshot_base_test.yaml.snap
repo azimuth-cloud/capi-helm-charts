@@ -8,7 +8,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-cni-calico-config
     stringData:
       defaults: |
@@ -39,7 +39,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-cni-calico
     spec:
       bootstrap: true
@@ -65,7 +65,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico-globalnetpolicy
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-cni-calico-globalnetpolicy
     spec:
       bootstrap: true
@@ -81,14 +81,53 @@ templated manifests should match snapshot:
       labels:
         addons.stackhpc.com/watch: ""
         capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: zabbix-helm-release
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.1
+      name: RELEASE-NAME-zabbix-helm-release-config
+    stringData:
+      values: |
+        {%- raw %}
+        null
+        {%- endraw %}
+  5: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: zabbix-helm-release
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.1
+      name: RELEASE-NAME-zabbix-helm-release
+    spec:
+      bootstrap: true
+      chart:
+        name: zabbix-helm-chart
+        repo: https://cdn.zabbix.com/zabbix/integrations/kubernetes-helm/7.4
+        version: 1.6.8
+      clusterName: RELEASE-NAME
+      releaseName: zabbix-helm-release
+      targetNamespace: zabbix
+      valuesSources:
+        - secret:
+            key: values
+            name: RELEASE-NAME-zabbix-helm-release-config
+  6: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: etcd-defrag
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-etcd-defrag-config
     stringData:
       overrides: |
         {}
-  5: |
+  7: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -96,14 +135,14 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: etcd-defrag
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-etcd-defrag
     spec:
       bootstrap: true
       chart:
         name: etcd-defrag
         repo: https://azimuth-cloud.github.io/capi-helm-charts
-        version: 0.1.0
+        version: 0.1.1
       clusterName: RELEASE-NAME
       releaseName: etcd-defrag
       targetNamespace: kube-system
@@ -111,7 +150,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-etcd-defrag-config
-  6: |
+  8: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -120,7 +159,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: mellanox-network-operator
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-mellanox-network-operator-config
     stringData:
       defaults: |
@@ -155,7 +194,7 @@ templated manifests should match snapshot:
           deploy: false
       overrides: |
         {}
-  7: |
+  9: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -163,7 +202,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: mellanox-network-operator
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-mellanox-network-operator
     spec:
       bootstrap: true
@@ -181,7 +220,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-mellanox-network-operator-config
-  8: |
+  10: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -190,7 +229,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: metrics-server
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-metrics-server-config
     stringData:
       defaults: |
@@ -202,7 +241,7 @@ templated manifests should match snapshot:
           maxUnavailable: 1
       overrides: |
         {}
-  9: |
+  11: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -210,7 +249,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: metrics-server
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-metrics-server
     spec:
       bootstrap: true
@@ -228,7 +267,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-metrics-server-config
-  10: |
+  12: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -237,7 +276,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: node-feature-discovery
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-node-feature-discovery-config
     stringData:
       defaults: |
@@ -267,7 +306,7 @@ templated manifests should match snapshot:
                   - vendor
       overrides: |
         {}
-  11: |
+  13: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -275,7 +314,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: node-feature-discovery
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-node-feature-discovery
     spec:
       bootstrap: true
@@ -293,7 +332,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-feature-discovery-config
-  12: |
+  14: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -302,7 +341,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: node-problem-detector
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-node-problem-detector-config
     stringData:
       defaults: |
@@ -310,7 +349,7 @@ templated manifests should match snapshot:
           enabled: false
       overrides: |
         {}
-  13: |
+  15: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -318,7 +357,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: node-problem-detector
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-node-problem-detector
     spec:
       bootstrap: true
@@ -336,7 +375,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-problem-detector-config
-  14: |
+  16: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -345,7 +384,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: nvidia-gpu-operator
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-nvidia-gpu-operator-config
     stringData:
       defaults: |
@@ -371,7 +410,7 @@ templated manifests should match snapshot:
         dcgmExporter:
           serviceMonitor:
             enabled: true
-  15: |
+  17: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -379,7 +418,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: nvidia-gpu-operator
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-nvidia-gpu-operator
     spec:
       bootstrap: true
@@ -397,7 +436,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-nvidia-gpu-operator-config
-  16: |
+  18: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -406,7 +445,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: ccm-openstack
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-ccm-openstack-config
     stringData:
       defaults: |
@@ -428,7 +467,7 @@ templated manifests should match snapshot:
             effect: NoSchedule
       overrides: |
         {}
-  17: |
+  19: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -436,7 +475,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: ccm-openstack
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-ccm-openstack
     spec:
       bootstrap: true
@@ -454,7 +493,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-ccm-openstack-config
-  18: |
+  20: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -462,7 +501,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cloud-config
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-cloud-config
     spec:
       bootstrap: true
@@ -471,7 +510,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
       releaseName: cloud-config
       targetNamespace: openstack-system
-  19: |
+  21: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -480,7 +519,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: csi-cinder
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-csi-cinder-config
     stringData:
       defaults: |
@@ -515,7 +554,7 @@ templated manifests should match snapshot:
               tolerations:
               - effect: NoSchedule
                 key: node-role.kubernetes.io/control-plane
-  20: |
+  22: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -523,7 +562,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: csi-cinder
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-csi-cinder
     spec:
       bootstrap: true
@@ -541,7 +580,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-csi-cinder-config
-  21: |
+  23: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -549,7 +588,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: csi-cinder
         capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
+        helm.sh/chart: addons-0.1.1
       name: RELEASE-NAME-csi-cinder-storageclass
     spec:
       bootstrap: true
@@ -570,7 +609,7 @@ templated manifests should match snapshot:
             volumeBindingMode: WaitForFirstConsumer
       releaseName: csi-cinder-storageclass
       targetNamespace: openstack-system
-  22: |
+  24: |
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -637,7 +676,7 @@ templated manifests should match snapshot:
             - name: kubeconfig
               secret:
                 secretName: RELEASE-NAME-kubeconfig
-  23: |
+  25: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -669,7 +708,7 @@ templated manifests should match snapshot:
           - get
           - patch
           - update
-  24: |
+  26: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
@@ -688,7 +727,7 @@ templated manifests should match snapshot:
       - kind: ServiceAccount
         name: RELEASE-NAME-autoscaler
         namespace: NAMESPACE
-  25: |
+  27: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -699,7 +738,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-autoscaler
-  26: |
+  28: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -724,7 +763,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  27: |
+  29: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -754,7 +793,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  28: |
+  30: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -910,7 +949,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.29.2
-  29: |
+  31: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -936,7 +975,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  30: |
+  32: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -960,7 +999,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  31: |
+  33: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -976,7 +1015,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  32: |
+  34: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1066,7 +1105,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  33: |
+  35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1115,7 +1154,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  34: |
+  36: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1143,7 +1182,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  35: |
+  37: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1168,7 +1207,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  36: |
+  38: |
     apiVersion: v1
     kind: Secret
     metadata:
