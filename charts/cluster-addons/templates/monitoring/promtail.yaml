@@ -13,9 +13,9 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
+    serviceMonitor:
+      enabled: true    
     config:
-      serviceMonitor:
-        enabled: true
       # Get promtail to scrape systemd services
       clients:
         {{- $clients := dig "promtail" "release" "values" "config" "clients" nil .Values.monitoring }}
