@@ -118,6 +118,8 @@ Commonly encountered issues (usually visible in the CAPO controller logs) includ
 
 - Network routing issues between the CAPI management cluster and the workload cluster
 
+- If errors are appearing in the server logs, it is likely the kubelet on the nodes has failed to start. A common cause of this is invalid options passed to the kubelet via the KubeADMConfigTemplate
+
 ### Essential Addons
 
 Now that the first control plane node has initialised successfully, we can begin to interact with the workload cluster's API server. At this point, the kubeconfig for the workload cluster will have been written to a Kubernetes `Secret` named `<cluster-name>-kubeconfig` on the CAPI management cluster. The contents of the kubeconfig file can be extracted for use with `kubectl` using the following command:
