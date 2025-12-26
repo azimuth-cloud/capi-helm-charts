@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=values.schema.json
+
 # The schedule for the cronjob (defaults to nightly)
 schedule: "0 0 * * *"
 # Allow the jobs to start up to 12 hours after the configured time
@@ -19,25 +21,51 @@ image:
 imagePullSecrets: []
 
 # Pod-level security context
+# @schema
+# additionalProperties: true
+# @schema
 podSecurityContext:
   runAsNonRoot: true
 
 # Container-level security context
+# @schema
+# additionalProperties: true
+# @schema
 securityContext:
   allowPrivilegeEscalation: false
+  # @schema
+  # additionalProperties: true
+  # @schema
   capabilities:
     drop: [ALL]
   readOnlyRootFilesystem: true
 
 # Resources for the kubectl container
+# @schema
+# additionalProperties: true
+# @schema
 resources: {}
 
 # Scheduling parameters for the kubectl pod
+# @schema
+# additionalProperties: true
+# @schema
 nodeSelector: {}
+
 # Allow the pods to run on control plane nodes if they need to
+# @schema
+# type: array
+# items:
+#   type: object
+#   additionalProperties: true
+# @schema
 tolerations:
   - key: node-role.kubernetes.io/master
     effect: NoSchedule
   - key: node-role.kubernetes.io/control-plane
     effect: NoSchedule
+
+# @schema
+# additionalProperties: true
+# @schema
 affinity: {}
