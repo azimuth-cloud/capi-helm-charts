@@ -45,6 +45,12 @@ inputs:
       One of certified-conformance, conformance-lite, non-disruptive-conformance, quick.
     required: true
     default: quick
+  sonobuoy-level:
+    description: |
+      The log level for the Sonobuoy run.
+      One of panic, fatal, error, warn, info, debug, trace.
+    required: true
+    default: info
   sonobuoy-upload:
     description: Specify "yes" to upload the Sonobuoy run as an artifact
     required: true
@@ -156,7 +162,7 @@ runs:
 
     - name: Run sonobuoy
       shell: bash
-      run: sonobuoy run --mode ${{ inputs.sonobuoy-mode }} --wait
+      run: sonobuoy run --level ${{ inputs.sonobuoy-level }} --mode ${{ inputs.sonobuoy-mode }} --wait
       env:
         KUBECONFIG: ./kubeconfig
 
