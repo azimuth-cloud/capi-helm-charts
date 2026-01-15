@@ -578,3 +578,47 @@ Produces integration for azimuth_authorization_webhook on apiserver
             name: {{ .name }}
           {{- end }}
 {{- end }}
+
+{{/*
+Converts a dict to a list of items
+*/}}
+{{- define "openstack-cluster.dict2items" -}}
+{{- if kindIs "map" . -}}
+{{- $items := list -}}
+{{- range $key, $value := . -}}
+{{- $item := dict "name" $key "value" $value -}}
+{{- $items = append $items $item -}}
+{{- end -}}
+{{ toYaml $items }}
+{{- else -}}
+{{ toYaml . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts a remediationStrategy to a remediation spec
+*/}}
+{{- define "openstack-cluster.convert.remediationStrategy" -}}
+{{- if .Values.controlPlane.remediationStrategy -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts human time to seconds
+*/}}
+{{- define "openstack-cluster.convert.humanTimeToSeconds" -}}
+{{- $seconds := 0 -}}
+{{- if regexMatch "h" . -}}
+{{- $hours := regexFind "[0-9]+h" . | trimSuffix "h" | int }}
+{{- $seconds = add $seconds (mul 60 60 $hours) -}}
+{{- end -}}
+{{- if regexMatch "m" . -}}
+{{- $mins := regexFind "[0-9]+m" . | trimSuffix "m" | int }}
+{{- $seconds = add $seconds (mul 60 $mins) -}}
+{{- end -}}
+{{- if regexMatch "s" . -}}
+{{- $secs := regexFind "[0-9]+s" . | trimSuffix "s" | int }}
+{{- $seconds = add $seconds $secs -}}
+{{- end -}}
+{{ $seconds }}
+{{- end -}}
