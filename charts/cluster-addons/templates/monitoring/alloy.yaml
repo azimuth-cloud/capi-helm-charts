@@ -142,18 +142,18 @@ stringData:
           - name: machine-id
             mountPath: /etc/machine-id
             readOnly: true
-      controller:
-        volumes:
-          extra:
-            - name: journal
-              hostPath:
-                path: /var/log/journal
-            - name: pods
-              hostPath:
-                path: /var/log/pods
-            - name: machine-id
-              hostPath:
-                path: /etc/machine-id
+    controller:
+      volumes:
+        extra:
+          - name: journal
+            hostPath:
+              path: /var/log/journal
+          - name: pods
+            hostPath:
+              path: /var/log/pods
+          - name: machine-id
+            hostPath:
+              path: /etc/machine-id
   overrides: |
     {{- toYaml .Values.monitoring.promtail.release.values | nindent 4 }}
 
