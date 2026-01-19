@@ -3,6 +3,9 @@
 {{- if .Values.monitoring.lokiStack.enabled }}
 {{- fail (printf "Cannot enable both 'lokiStack' and 'promtail' addons simultaneously; please choose one.") }}
 {{- end }}
+{{- if .Values.monitoring.alloy.enabled }}
+{{- fail (printf "Cannot enable both 'promtail' and 'alloy' addons simultaneously; please choose one.") }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
