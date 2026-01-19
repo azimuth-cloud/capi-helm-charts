@@ -22,7 +22,6 @@ stringData:
       configMap:
         create: true
         content: |
-          # Mount journal directory and machine-id file into promtail pods
           discovery.kubernetes "kubernetes_pods" {
             role = "pod"
           }
