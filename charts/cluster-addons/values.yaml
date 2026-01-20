@@ -410,6 +410,77 @@ monitoring:
             size: 10Gi
             # Required to allow resizing of PVC during Helm upgrades
             enableStatefulSetAutoDeletePVC: false
+  loki_v3:
+    enabled: false
+    chart:
+      # The chart repository that contains the chart to use
+      repo: https://grafana.github.io/helm-charts
+      # The name of the chart to use
+      name: loki-v3
+      # The version of the chart to use (must be an exact version)
+      version: 6.49.0
+    # The Helm values to use for the release
+    release:
+      namespace: monitoring-system
+      values:
+        # In case historical logs are required, configure fullnameOverride to
+        # ensure that resource names match the old loki-stack
+        # HelmRelease so that it correctly re-adopts the PVC
+        fullnameOverride: loki-stack
+        loki:
+          compactor:
+            retention_enabled: true
+          limits_config:
+            retention_period: 72h
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 1
+            # If historical logs are required, configure Loki to use same
+            # path inside the data PVC as old loki-stack.
+            path_prefix: /var/loki/loki-v3
+          storage:
+            type: 'filesystem'
+            # If historical logs are required, configure Loki to
+            # store data in /var/loki to match loki-stack
+            filesystem:
+              chunks_directory: /var/loki/loki-v3/chunks
+              rules_directory: /var/loki/loki-v3/rules
+          # If historical logs are required, additional schema configuration
+          # is needed to allow loki to ingest old loki-stack logging data.
+          # For example:
+          schemaConfig:
+            configs:
+                # The "from" date marks from when the old data was written
+              - from: "2020-10-24"
+                index:
+                  period: 24h
+                  prefix: index_
+                object_store: filesystem
+                schema: v11
+                store: boltdb-shipper
+              - from: "2026-01-19"
+                object_store: s3
+                store: tsdb
+                schema: v13
+                index:
+                  prefix: index_
+                  period: 24h
+              #   # The "from" date marks from when the new data is written
+              # - from: "2025-10-17"
+              #   index:
+              #     period: 24h
+              #     prefix: loki_index_
+              #   object_store: filesystem
+              #   schema: v12
+              #   store: boltdb-shipper
+        singleBinary:
+          replicas: 1
+          # Enable persistence by default
+          persistence:
+            enabled: true
+            size: 10Gi
+            # Required to allow resizing of PVC during Helm upgrades
+            enableStatefulSetAutoDeletePVC: false
 
   # Configuration for the blackbox exporter
   blackboxExporter:
