@@ -68,7 +68,13 @@ jobs:
 
           - key: promtail
             path: monitoring.promtail.chart
-            
+          
+          - key: loki-v3
+            path: monitoring.loki_v3.chart
+
+          - key: alloy
+            path: monitoring.alloy.chart
+
           - key: prometheus-blackbox-exporter
             path: monitoring.blackboxExporter.chart
 
