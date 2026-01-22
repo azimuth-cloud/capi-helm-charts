@@ -319,6 +319,16 @@ monitoring:
     release:
       namespace: monitoring-system
       values: {}
+
+  alloy:
+    enabled: false
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: alloy
+      version: 1.5.2
+    release:
+      namespace: monitoring-system
+      values: {}
   # Note(sd109): Loki v2 is the successor to the lokiStack addon since the Helm
   # chart for the latter is no longer maintained upstream.
 
