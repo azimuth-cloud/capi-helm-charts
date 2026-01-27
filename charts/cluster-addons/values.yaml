@@ -438,6 +438,17 @@ nodeProblemDetector:
     namespace: node-problem-detector
     values: {}
 
+# Settings for Longhorn
+longhorn:
+  enabled: false
+  chart:
+    repo: https://charts.longhorn.io
+    name: longhorn
+    version: v1.8.0
+  release:
+    namespace: longhorn-system
+    values: {}
+
 # Settings for any custom addons
 custom: {}
   # # Indexed by the name of the release on the target cluster
