@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Workflow approved
         run: exit 0
+    # skip the approve step, if the PR is from the same repository
+    if: ${{ github.repository != 'azimuth-cloud/ansible-collection-azimuth-ops' }}
 
   mirror_container_images:
     needs: [wait_for_approval]
@@ -37,6 +39,7 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ github.event.pull_request.head.sha }}
+    if: ${{ always() && (needs.wait_for_approval.result == 'success' || github.repository == 'azimuth-cloud/ansible-collection-azimuth-ops') }}
 
   ensure_capi_images:
     needs: [wait_for_approval]
@@ -44,6 +47,7 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ github.event.pull_request.head.sha }}
+    if: ${{ always() && (needs.wait_for_approval.result == 'success' || github.repository == 'azimuth-cloud/ansible-collection-azimuth-ops') }}
 
   publish_charts:
     needs: [wait_for_approval]
@@ -51,6 +55,7 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ github.event.pull_request.head.sha }}
+    if: ${{ always() && (needs.wait_for_approval.result == 'success' || github.repository == 'azimuth-cloud/ansible-collection-azimuth-ops') }}
 
   test:
     needs: [mirror_container_images, ensure_capi_images, publish_charts]
