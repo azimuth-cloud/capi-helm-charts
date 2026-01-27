@@ -99,6 +99,8 @@ Commonly encountered issues at this stage (usually visible in the CAPO controlle
 
 - Incorrect network names, IDs or other filters (e.g. if both an ID and a name are provided simultaneously in network filter config then CAPO might do [unexpected things](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/6560f8882a2aa7ece3d13d47f2f2badbcba348c3/api/v1beta1/types.go#L160)).
 
+If there are no visible errors in the `capo-controller-manager` logs, check to see if `OpenstackMachine` or `Machine` resources have been created. If not, this likely indicates an issue with CAPI components responsible for creating `Machine` resources to be associated with infrastructure to be targetted for KubeADM bootstrap. Sources of logs here include the `capi-kubeadm-bootstrap-system`, `capi-kubeadm-control-plane-system` and `capi-controller-manager` pods. As a sanity check, it may be worth restarting these components.
+
 ### First control plane node
 
 After creating any necessary networking resources, the CAPO controller will create the first control plane node. Once the node has initialised successfully, the output of the `kubeadm init` command should be visible in the server logs (visible e.g. in the OpenStack Horizon dashboard):
@@ -115,6 +117,8 @@ Commonly encountered issues (usually visible in the CAPO controller logs) includ
 - Insufficient quota in the target OpenStack project (for servers, volumes etc.)
 
 - Network routing issues between the CAPI management cluster and the workload cluster
+
+- If errors are appearing in the server logs, it is likely the kubelet on the nodes has failed to start. A common cause of this is invalid options passed to the kubelet via the KubeADMConfigTemplate
 
 ### Essential Addons
 
