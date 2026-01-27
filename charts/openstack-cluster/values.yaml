@@ -1,12 +1,23 @@
 ---
+# yaml-language-server: $schema=values.schema.json
 
 # The name of an existing secret containing a clouds.yaml and optional cacert
+# @schema
+# type: [string, null]
+# @schema
 cloudCredentialsSecretName:
 # OR
 # Content for the clouds.yaml file
 # Having this as a top-level item allows a clouds.yaml file from OpenStack to be used as a values file
+# @schema
+# type: [object,null]
+# @schema
 clouds:
+
 # The PEM-encoded CA certificate for the specified cloud
+# @schema
+# type: [string, null]
+# @schema
 cloudCACert:
 
 # The name of the cloud to use from the specified clouds.yaml
@@ -14,34 +25,63 @@ cloudName: openstack
 
 # The Kubernetes version of the cluster
 # This should match the version of kubelet and kubeadm in the image
+# @schema
+# type: string
+# pattern: 1.[0-9][0-9].[0-9]+
+# @schema
 kubernetesVersion:
 
 # The name of the image to use for cluster machines
+# @schema
+# type: [string, null]
+# @schema
 machineImage:
 # OR
 # The ID of the image to use for cluster machines
+# @schema
+# type: [string, null]
+# @schema
 machineImageId:
 
 # The name of the SSH key to inject into cluster machines
+# @schema
+# type: [string, null]
+# @schema
 machineSSHKeyName:
 
 # Global metadata items to add to each machine
+# @schema
+# additionalProperties: true
+# @schema
 machineMetadata: {}
 
 # The prefix used for project labels and annotations
 projectPrefix: capi.stackhpc.com
 
 # Any extra annotations to add to the cluster
+# @schema
+# type: object
+# patternProperties:
+#   ".*":
+#     type: string
+# @schema
 clusterAnnotations: {}
 
 # Settings for connecting to the cluster using OpenID Connect (OIDC)
-# If not specified, OIDC authentication is not enabled
+# If issuerUrl is not specified, OIDC authentication is not enabled
 oidc:
   # The URL of the OIDC provider (i.e. the discovery URL with the well-known component removed)
   # e.g. if the discovery URL is https://auth.example.com/.well-known/openid-configuration, the
   #      given value should be https://auth.example.com
+  # @schema
+  # type: [string, null]
+  # pattern: https?://
+  # @schema
   issuerUrl:
   # The client ID that tokens are issued for
+  # @schema
+  # type: [string, null]
+  # @schema
   clientId:
   # The claim to extract the username from
   usernameClaim: sub
@@ -74,7 +114,13 @@ kubeNetwork:
 clusterNetworking:
   # Custom nameservers to use for the hosts
   # Deprecated; use `clusterNetworking.internalNetwork.dnsNameservers` instead.
-  # dnsNameservers: []
+  # @schema
+  # deprecated: true
+  # type: array
+  # items:
+  #   format: ipv4
+  # @schema
+  dnsNameservers: []
   # Indicates if security groups should be managed by the cluster
   manageSecurityGroups: true
   # Indicates if the managed security groups should allow all in-cluster traffic
@@ -82,16 +128,33 @@ clusterNetworking:
   allowAllInClusterTraffic: true
   # The ID of the external network to use
   # If not given, the external network will be detected
+  # @schema
+  # type: [string, null]
+  # @schema
   externalNetworkId:
   # Details of the internal network to use
   internalNetwork:
     # Filter to find an existing network for the cluster internal network
     # see Cluster API documentation for details
+    # @schema
+    # properties:
+    #   id:
+    #     type: [string, null]
+    #   name:
+    #     type: [string, null]
+    # @schema
     networkFilter:
       # id: e63ca1a0-f69d-4fbf-b306-310857b1afe5
       # name: tenant-internal-net
     # Filter to find an existing subnet for the cluster internal network
     # See Cluster API documentation for details
+    # @schema
+    # properties:
+    #   id:
+    #     type: [string, null]
+    #   name:
+    #     type: [string, null]
+    # @schema
     subnetFilter:
       # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
       # name: tenant-internal-subnet
@@ -100,12 +163,20 @@ clusterNetworking:
     nodeCidr: 192.168.3.0/24
     # List of nameserver IPs to use when creating a cluster network.
     # This is only used if neither of networkFilter and subnetFilter are given
+    # @schema
+    # type: [array, null]
+    # items:
+    #   format: ipv4
+    # @schema
     dnsNameservers:
 
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
 # upstream registry if the image pull fails
 # By default, use images mirrored to quay.io when possible
+# @schema
+# additionalProperties: true
+# @schema
 registryMirrors:
   # docker.io:
   #   upstream: https://registry-1.docker.io
@@ -124,6 +195,9 @@ registryMirrors:
     - https://quay.io/v2/azimuth/registry.k8s.io
 
 # A map of trusted CAs to add to the system trust on cluster nodes
+# @schema
+# additionalProperties: true
+# @schema
 trustedCAs: {}
   # custom-ca: |
   #   -----BEGIN CERTIFICATE-----
@@ -131,6 +205,11 @@ trustedCAs: {}
   #   -----END CERTIFICATE-----
 
 # List of additional packages to install on cluster nodes
+# @schema
+# type: array
+# items:
+#   type: string
+# @schema
 additionalPackages: []
   # - nfs-common
 
@@ -141,6 +220,9 @@ etcd:
   # This is to avoid etcd complaining about the lost+found directory
   dataDir: /var/lib/etcd
   # Any extra command line arguments to pass to etcd
+  # @schema
+  # additionalProperties: true
+  # @schema
   extraArgs:
     # Set timeouts so that etcd tolerates 'slowness' (network + disks) better
     # This is at the expense of taking longer to detect a leader failure
@@ -157,10 +239,22 @@ etcd:
     # K8s resources to encrypt
     resources:
       - secrets
-    # Encyption provider, see https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/#providers
+    # Encryption provider, see https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/#providers
     provider: secretbox
   # The block device configuration for etcd
   # If not specified, the root device is used
+  # @schema
+  # type: [object, null]
+  # properties:
+  #   size:
+  #     type: integer
+  #   type:
+  #     enum: [Volume, Local]
+  #   volumeType:
+  #     type: [string, null]
+  #   availabilityZone:
+  #     type: [string, null]
+  # @schema
   blockDevice:
     # # The size of the block device
     # size: 20
@@ -180,9 +274,17 @@ apiServer:
   # Indicates whether to deploy a load balancer for the API server
   enableLoadBalancer: true
   # Indicates what loadbalancer provider to use. Default is amphora
+  # @schema
+  # type: [string, null]
+  # @schema
   loadBalancerProvider:
   # Restrict loadbalancer access to select IPs
-  # allowedCidrs
+  # @schema
+  # type: [array, null]
+  # items:
+  #   type: string
+  # @schema
+  allowedCidrs:
   #  - 192.168.0.0/16  # needed for cluster to init
   #  - 10.10.0.0/16  # IPv4 Internal Network
   #  - 123.123.123.123 # some other IPs
@@ -190,11 +292,19 @@ apiServer:
   associateFloatingIP: true
   # The specific floating IP to associate with the API server
   # If not given, a new IP will be allocated if required
+  # @schema
+  # type: [string, null]
+  # format: ipv4
+  # @schema
   floatingIP:
   # The specific fixed IP to associate with the API server
   # If enableLoadBalancer is true, this will become the VIP of the load balancer
   # If enableLoadBalancer and associateFloatingIP are both false, this should be
   # the IP of a pre-allocated port to be used as the VIP
+  # @schema
+  # type: [string, null]
+  # format: ipv4
+  # @schema
   fixedIP:
   # The port to use for the API server
   port: 6443
@@ -208,32 +318,41 @@ apiServer:
   logLevel: 2
   # The configuration for the built-in admission controllers
   # This should be a map of the controller name to the configuration for the controller
+  # @schema
+  # type: [object,null]
+  # additionalProperties: true
+  # @schema
   admissionConfiguration:
-    # PodSecurity:
-    #   apiVersion: pod-security.admission.config.k8s.io/v1
-    #   kind: PodSecurityConfiguration
-    #   defaults:
-    #     enforce: baseline
-    #     enforce-version: latest
-    #     audit: restricted
-    #     audit-version: latest
-    #     warn: restricted
-    #     warn-version: latest
-    #   exemptions:
-    #     usernames: []
-    #     runtimeClasses: []
-    #     namespaces:
-    #       - kube-system
+  #   PodSecurity:
+  #     apiVersion: pod-security.admission.config.k8s.io/v1
+  #     kind: PodSecurityConfiguration
+  #     defaults:
+  #       enforce: baseline
+  #       enforce-version: latest
+  #       audit: restricted
+  #       audit-version: latest
+  #       warn: restricted
+  #       warn-version: latest
+  #     exemptions:
+  #       usernames: []
+  #       runtimeClasses: []
+  #       namespaces:
+  #         - kube-system
 
 # Set osDistro used. ubuntu, flatcar, etc.
 osDistro: ubuntu
-#
+
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
-# possible values: none, k8s-keystone-auth, azimuth-authorization-webhook
+# @schema
+# enum: [none, k8s-keystone-auth, azimuth-authorization-webhook]
+# @schema
 authWebhook: none
 
 azimuthAuthorizationWebhook:
+  # @schema
+  # type: [string, null]
+  # @schema
   server:  # required, e.g https://example.com/authorize
   webhookVersion: v1
   timeout: 10s
@@ -245,12 +364,20 @@ azimuthAuthorizationWebhook:
       name: rbac
   tls:
     enabled: true
+    # @schema
+    # type: [string, null]
+    # @schema
     cert:  # required
   # Should at least include the values provided to .Values.protectedNamespaces in
   # https://github.com/azimuth-cloud/azimuth-authorization-webhook/blob/main/chart/values.yaml
   filteredNamespaces:
   - kube-system
   - openstack-system
+    # @schema
+    # type: array
+    # items:
+    #   type: string
+    # @schema
   extraPreFilters: []
 
 # Settings for the control plane
@@ -258,6 +385,11 @@ controlPlane:
   # The failure domains to use for control plane nodes
   # If given, should be a list of availability zones
   # Only used when omitFailureDomain = false
+  # @schema
+  # type: [array, null]
+  # items:
+  #   type: string
+  # @schema
   failureDomains:
   # Indicates whether the failure domain should be omitted from control plane nodes
   omitFailureDomain: true
@@ -266,37 +398,92 @@ controlPlane:
   # For etcd quorum, it should be odd - usually 3, or 5 for very large clusters
   machineCount: 3
   # The kubernetes version for the control plane
+  # @schema
+  # type: [string, null]
+  # pattern: 1.[0-9][0-9].[0-9]+
+  # @schema
   kubernetesVersion:
   # The image to use for control plane
+  # @schema
+  # type: [string, null]
+  # @schema
   machineImage:
   # The ID of the image to use for the control plane
+  # @schema
+  # type: [string, null]
+  # @schema
   machineImageId:
   # The flavor to use for control plane machines
+  # @schema
+  # type: [string, null]
+  # @schema
   machineFlavor:
   # The ports for control plane nodes
   # If no ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
   machineNetworking:
+    # @schema
+    # type: [object, null]
+    # additionalProperties: true
+    # @schema
     ports:
   # The root volume spec for control plane machines
   machineRootVolume:
     # The size of the disk to use
     # If not given, the ephemeral root disk from the flavor is used
+    # @schema
+    # type: [integer, null]
+    # minimum: 20
+    # @schema
     diskSize:
     # The volume type to use
     # If not specified, the default volume type is used
-    # volumeType:
+    # @schema
+    # type: [string, null]
+    # @schema
+    volumeType:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
-    # availabilityZone:
+    # @schema
+    # type: [string, null]
+    # @schema
+    availabilityZone:
   # Specific metadata for control plane nodes
+  # @schema
+  # additionalProperties: true
+  # @schema
   machineMetadata: {}
   # The ID of the server group to use for control plane machines
+  # @schema
+  # type: [string, null]
+  # @schema
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to control plane machines
+  # @schema
+  # type: [object, null]
+  # patternProperties:
+  #   ".*":
+  #     type: string
+  # @schema
   nodeLabels:
     # my.company.org/label: value
   # Additional block devices for control plane machines
+  # @schema
+  # type: object
+  # additionalProperties: true
+  # patternProperties:
+  #   ".*":
+  #     type: object
+  #     properties:
+  #       size:
+  #         type: integer
+  #       type:
+  #         enum: [Volume, Local]
+  #       volumeType:
+  #         type: [string, null]
+  #       availabilityZone:
+  #         type: [string, null]
+  # @schema
   additionalBlockDevices: {}
     # # The key is the name for the block device in the context of the machine
     # # It is also used to tag the block device, so that the volume can be identified in instance metadata
@@ -337,13 +524,26 @@ controlPlane:
   # The rollout strategy to use for the control plane nodes
   # By default, the strategy allows the control plane to begin provisioning new nodes
   # without first tearing down old ones
+  # @schema
+  # $ref: https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/controlplane.cluster.x-k8s.io/kubeadmcontrolplane_v1beta1.json#/properties/spec/properties/rolloutStrategy
+  # additionalProperties: false
+  # @schema
   rolloutStrategy:
     type: RollingUpdate
     rollingUpdate:
       # For the control plane, this can only be 0 or 1
       maxSurge: 1
+
+  # NOTE(sd109): We can't use the official kubeadmConfigSpec schema from
+  # https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/controlplane.cluster.x-k8s.io/kubeadmcontrolplane_v1beta1.json#/properties/spec/properties/kubeadmConfigSpec
+  # because we've augmented that schema with an additional kubeProxyConfiguration field
+
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
+  # @schema
+  # type: object
+  # additionalProperties: true
+  # @schema
   kubeadmConfigSpec:
     initConfiguration:
       nodeRegistration:
@@ -369,11 +569,14 @@ controlPlane:
     kubeProxyConfiguration:
       metricsBindAddress: 0.0.0.0:10249
   # The machine health check for auto-healing of the control plane
-  # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
+  # See https://cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking
   healthCheck:
     # Indicates if the machine health check should be enabled
     enabled: true
     # The spec for the health check
+    # @schema
+    # additionalProperties: true
+    # @schema
     spec:
       # By default, don't remediate control plane nodes when more than one is unhealthy
       maxUnhealthy: 1
@@ -381,6 +584,12 @@ controlPlane:
       nodeStartupTimeout: 30m0s
       # By default, consider a control plane node that has not been Ready
       # for more than 5 mins unhealthy
+      # @schema
+      # type: array
+      # items:
+      #   type: object
+      #   additionalProperties: true
+      # @schema
       unhealthyConditions:
         - type: Ready
           status: Unknown
@@ -395,14 +604,30 @@ nodeGroupDefaults:
   # Indicates if the node group should be autoscaled
   autoscale: false
   # The failure domain for the node group
+  # @schema
+  # type: [string, null]
+  # @schema
   failureDomain:
   # The flavor to use for machines in the node group
+  # @schema
+  # type: [string, null]
+  # @schema
   machineFlavor:
   # Default image id for nodeGroup hosts
+  # @schema
+  # type: [string, null]
+  # @schema
   machineImage:
   # The ID of the image to use for nodeGroup machines
+  # @schema
+  # type: [string, null]
+  # @schema
   machineImageId:
   # Kubernetes version for nodeGroup machines
+  # @schema
+  # type: [string, null]
+  # pattern: 1.[0-9][0-9].[0-9]+
+  # @schema
   kubernetesVersion:
   # The default networks and ports for worker nodes
   # If neither networks or ports are given, the cluster internal network is used
@@ -410,29 +635,71 @@ nodeGroupDefaults:
   # If no ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
   machineNetworking:
+    # @schema
+    # type: [object, null]
+    # additionalProperties: true
+    # @schema
     ports:
   # The root volume spec for machines in the node group
   machineRootVolume:
     # The size of the disk to use
     # If not given, the ephemeral root disk from the flavor is used
+    # @schema
+    # type: [integer, null]
+    # minimum: 20
+    # @schema
     diskSize:
     # The volume type to use
     # If not specified, the default volume type is used
-    # volumeType:
+    # @schema
+    # type: [string, null]
+    # @schema
+    volumeType:
     # The volume availability zone to use
     # If not specified, the machine availability zone is used
-    # availabilityZone:
+    # @schema
+    # type: [string, null]
+    # @schema
+    availabilityZone:
   # Specific metadata for worker nodes
   # Can also be specified for each node group
+  # @schema
+  # additionalProperties: true
+  # @schema
   machineMetadata: {}
   # The ID of the server group to use for machines in the node group
+  # @schema
+  # type: [string, null]
+  # @schema
   serverGroupId:
   # Labels to apply to the node objects in Kubernetes that correspond to machines in the node group
   # By default, nodes get the label "capi.stackhpc.com/node-group=<node group name>"
+  # @schema
+  # type: [object, null]
+  # patternProperties:
+  #   ".*":
+  #     type: string
+  # @schema
   nodeLabels:
     # my.company.org/label: value
   # Additional block devices for node groups machines
   # Options are the same as for controlPlane.additionalBlockDevices above
+  # @schema
+  # type: object
+  # additionalProperties: true
+  # patternProperties:
+  #   ".*":
+  #     type: object
+  #     properties:
+  #       size:
+  #         type: integer
+  #       type:
+  #         enum: [Volume, Local]
+  #       volumeType:
+  #         type: [string, null]
+  #       availabilityZone:
+  #         type: [string, null]
+  # @schema
   additionalBlockDevices: {}
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
@@ -446,6 +713,10 @@ nodeGroupDefaults:
   # The rollout strategy to use for the node group
   # By default, this is set to do a rolling update within the existing resource envelope
   # of the node group, even if that means the node group temporarily has zero nodes
+  # @schema
+  # $ref: https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cluster.x-k8s.io/machinedeployment_v1beta1.json#/properties/spec/properties/strategy
+  # additionalProperties: false
+  # @schema
   rolloutStrategy:
     type: RollingUpdate
     rollingUpdate:
@@ -461,6 +732,12 @@ nodeGroupDefaults:
   # The default kubeadm config specification for worker nodes
   # This will be merged with any configuration given for specific node groups
   # By default, this uses a simple configuration that enables the external cloud provider
+  # TODO: Can we refer to subsection of external schema instead?
+  # https://github.com/datreeio/CRDs-catalog/blob/main/bootstrap.cluster.x-k8s.io/kubeadmconfigtemplate.json#/properties/spec/template/spec
+  # @schema
+  # $ref: https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/bootstrap.cluster.x-k8s.io/kubeadmconfigtemplate_v1beta1.json#/properties/spec/properties/template/properties/spec
+  # additionalProperties: false
+  # @schema
   kubeadmConfigSpec:
     joinConfiguration:
       nodeRegistration:
@@ -474,15 +751,27 @@ nodeGroupDefaults:
     # Indicates if the machine health check should be enabled
     enabled: true
     # The spec for the health check
+    # @schema
+    # additionalProperties: true
+    # @schema
     spec:
       # We have a control place feature gate enabled which blocks all worker node remediation if
       # control plane is unhealthy, so should be safe to reset worker remediation threshold to
       # 100% without the risk of runaway remediations.
+      # @schema
+      # type: [string, integer]
+      # @schema
       maxUnhealthy: 100%
       # If a node takes longer than 30 mins to startup, remediate it
       nodeStartupTimeout: 30m0s
       # By default, consider a worker node that has not been Ready for
       # more than 5 mins unhealthy
+      # @schema
+      # type: array
+      # items:
+      #   type: object
+      #   additionalProperties: true
+      # @schema
       unhealthyConditions:
         - type: Ready
           status: Unknown
@@ -492,6 +781,13 @@ nodeGroupDefaults:
           timeout: 5m0s
 
 # The worker node groups for the cluster
+# See nodeGroupDefaults schema for details
+# @schema
+# type: array
+# items:
+#   type: object
+#   additionalProperties: true
+# @schema
 nodeGroups:
   -  # The name of the node group
     name: md-0
@@ -508,8 +804,19 @@ autoscaler:
     repository: registry.k8s.io/autoscaling/cluster-autoscaler
     pullPolicy: IfNotPresent
     tag: v1.30.4
+  # @schema
+  # type: array
+  # items:
+  #   type: object
+  #   properties:
+  #     name:
+  #       type: [string, null]
+  # @schema
   imagePullSecrets: []
   # Any extra args for the autoscaler
+  # @schema
+  # additionalProperties: true
+  # @schema
   extraArgs:
     # Make sure logs go to stderr
     logtostderr: true
@@ -528,24 +835,41 @@ autoscaler:
     skip-nodes-with-custom-controller-pods: "false"
 
   # Pod-level security context
+  # @schema
+  # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/podsecuritycontext-v1.json
+  # additionalProperties: false
+  # @schema
   podSecurityContext:
     runAsNonRoot: true
     runAsUser: 1001
   # Container-level security context
+  # @schema
+  # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+  # additionalProperties: false
+  # @schema
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
       drop: [ALL]
     readOnlyRootFilesystem: true
   # Resource requests and limits for pods
+  # @schema
+  # additionalProperties: true
+  # @schema
   resources: {}
   # Node selector for pods
+  # @schema
+  # additionalProperties: true
+  # @schema
   nodeSelector: {}
   # Tolerations for pods
   tolerations: []
   # Topology spread constraints for pods
   topologySpreadConstraints: []
   # Affinity rules for pods
+  # @schema
+  # additionalProperties: true
+  # @schema
   affinity: {}
 
 # Configuration for cluster addons

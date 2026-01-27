@@ -2,8 +2,8 @@
 # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest -u charts/openstack-cluster
 suite: Manifest snapshot tests
 values:
-  - values_base.yaml
-  - values_full.yaml
+  - ../ci/base-values.yaml
+  - ../ci/full-values.yaml
 tests:
   - it: templated manifests should match snapshot
     asserts:

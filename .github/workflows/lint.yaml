@@ -32,11 +32,22 @@ jobs:
             --all \
             --validate-maintainers=false
 
-      - name: Run template validation
-        run: |-
+      - name: Run template validation with base values
+        run: |
+          set -eo pipefail
           helm template foo charts/openstack-cluster \
-            -f charts/openstack-cluster/tests/values_base.yaml \
-            -f charts/openstack-cluster/tests/values_full.yaml \
+            -f charts/openstack-cluster/ci/base-values.yaml \
+            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            --strict --summary \
+            --schema-location default \
+            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+
+      - name: Run template validation with full values
+        run: |
+          set -eo pipefail
+          helm template foo charts/openstack-cluster \
+            -f charts/openstack-cluster/ci/full-values.yaml \
             | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
             --strict --summary \
             --schema-location default \

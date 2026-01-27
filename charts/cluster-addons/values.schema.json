@@ -1,0 +1,2721 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "certManager": {
+      "additionalProperties": false,
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "cert-manager",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://charts.jetstack.io",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "v1.17.0",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "cert-manager",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "properties": {
+                "crds": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "default": true,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "enabled"
+                  ],
+                  "title": "crds",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "crds"
+              ],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "certManager",
+      "type": "object"
+    },
+    "clusterName": {
+      "default": "",
+      "description": "The name of the Cluster API cluster\nif not given, the release name is used",
+      "required": [],
+      "title": "clusterName",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cni": {
+      "additionalProperties": false,
+      "description": "Settings for the CNI addon",
+      "properties": {
+        "calico": {
+          "additionalProperties": false,
+          "description": "Settings for the calico CNI\nSee https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "tigera-operator",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://projectcalico.docs.tigera.io/charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "v3.29.3",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "globalNetworkPolicy": {
+              "additionalProperties": false,
+              "description": "Nova metadata service\nSee https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service",
+              "properties": {
+                "allowEgressCidrs": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "allowEgressCidrs",
+                  "type": "array"
+                },
+                "allowPriority": {
+                  "default": 20,
+                  "required": [],
+                  "title": "allowPriority",
+                  "type": "integer"
+                },
+                "allowv6EgressCidrs": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "allowv6EgressCidrs",
+                  "type": "array"
+                },
+                "denyEgressCidrs": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "denyEgressCidrs",
+                  "type": "array"
+                },
+                "denyNamespaceSelector": {
+                  "default": "kubernetes.io/metadata.name != 'openstack-system'",
+                  "required": [],
+                  "title": "denyNamespaceSelector",
+                  "type": "string"
+                },
+                "denyPriority": {
+                  "default": 10,
+                  "required": [],
+                  "title": "denyPriority",
+                  "type": "integer"
+                },
+                "denyv6EgressCidrs": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "denyv6EgressCidrs",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "denyNamespaceSelector",
+                "allowPriority",
+                "denyPriority",
+                "allowEgressCidrs",
+                "denyEgressCidrs",
+                "allowv6EgressCidrs",
+                "denyv6EgressCidrs"
+              ],
+              "title": "globalNetworkPolicy",
+              "type": "object"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "tigera-operator",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "nodeSelector": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "node-role.kubernetes.io/control-plane": {
+                          "default": "",
+                          "required": [],
+                          "title": "node-role.kubernetes.io/control-plane",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "node-role.kubernetes.io/control-plane"
+                      ],
+                      "title": "nodeSelector",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "nodeSelector"
+                  ],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "chart",
+            "release",
+            "globalNetworkPolicy"
+          ],
+          "title": "calico",
+          "type": "object"
+        },
+        "cilium": {
+          "additionalProperties": false,
+          "description": "Settings for the Cilium CNI\nSee https://docs.cilium.io/en/stable/gettingstarted/k8s-install-helm/ for details",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "cilium",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://helm.cilium.io/",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "1.17.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "kube-system",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "chart",
+            "release"
+          ],
+          "title": "cilium",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if a CNI should be deployed",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "type": {
+          "default": "calico",
+          "description": "The CNI to deploy - supported values are calico or cilium",
+          "enum": [
+            "calico",
+            "cilium"
+          ],
+          "required": [],
+          "title": "type"
+        }
+      },
+      "required": [
+        "enabled",
+        "calico",
+        "cilium"
+      ],
+      "title": "cni",
+      "type": "object"
+    },
+    "csi": {
+      "additionalProperties": false,
+      "description": "Settings for CSI addons",
+      "properties": {
+        "cephfs": {
+          "additionalProperties": false,
+          "description": "Settings for the CephFS CSI",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "ceph-csi-cephfs",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://ceph.github.io/csi-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "3.11.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "csi-ceph-system",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart",
+            "release"
+          ],
+          "title": "cephfs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "cephfs"
+      ],
+      "title": "csi",
+      "type": "object"
+    },
+    "custom": {
+      "additionalProperties": false,
+      "description": "Settings for any custom addons",
+      "patternProperties": {
+        ".*": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "HelmRelease",
+                  "required": []
+                },
+                "spec": {
+                  "properties": {
+                    "chart": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "required": [],
+                          "type": "string"
+                        },
+                        "repo": {
+                          "required": [],
+                          "type": "string"
+                        },
+                        "version": {
+                          "required": [],
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "type": "object"
+                    },
+                    "namespace": {
+                      "required": [],
+                      "type": "string"
+                    },
+                    "values": {
+                      "additionalProperties": true,
+                      "required": [],
+                      "type": "object"
+                    }
+                  },
+                  "required": []
+                }
+              },
+              "required": [],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "Manifests",
+                  "required": []
+                },
+                "spec": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "manifests": {
+                      "patternProperties": {
+                        ".*": {
+                          "required": [],
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "type": "object"
+                    },
+                    "namespace": {
+                      "required": [],
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "type": "object"
+            }
+          ],
+          "required": []
+        }
+      },
+      "required": [],
+      "title": "custom",
+      "type": "object"
+    },
+    "enabled": {
+      "default": true,
+      "description": "Included for schema validation purposes.\nHas no effect unless this chart is used\nas a conditional dependency of the\nopenstack-cluster chart.",
+      "required": [],
+      "title": "enabled",
+      "type": "boolean"
+    },
+    "etcdDefrag": {
+      "additionalProperties": false,
+      "description": "Settings for etcd defragmentation jobs",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "etcd-defrag",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://azimuth-cloud.github.io/capi-helm-charts",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "",
+              "required": [],
+              "title": "version",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "repo",
+            "name"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if the etcd defragmentation job should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "kube-system",
+              "description": "This should be namespace in which the etcd pods are deployed",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "etcdDefrag",
+      "type": "object"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "ingress": {
+      "additionalProperties": false,
+      "description": "Settings for ingress controllers",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Indicates if ingress controllers should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "nginx": {
+          "additionalProperties": false,
+          "description": "Settings for the Nginx ingress controller\nhttps://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "ingress-nginx",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://kubernetes.github.io/ingress-nginx",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "4.13.2",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Indicates if the Nginx ingress controller should be enabled\nThe Nginx ingress controller is enabled by default if ingress controllers are enabled",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "ingress-nginx",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart",
+            "release"
+          ],
+          "title": "nginx",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "nginx"
+      ],
+      "title": "ingress",
+      "type": "object"
+    },
+    "intelDevicePlugin": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "gpuPlugin": {
+          "additionalProperties": false,
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "intel-device-plugins-gpu",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://intel.github.io/helm-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "0.32.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "intel",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "enableMonitoring": {
+                      "default": true,
+                      "required": [],
+                      "title": "enableMonitoring",
+                      "type": "boolean"
+                    },
+                    "logLevel": {
+                      "default": 4,
+                      "required": [],
+                      "title": "logLevel",
+                      "type": "integer"
+                    },
+                    "preferredAllocationPolicy": {
+                      "default": "none",
+                      "required": [],
+                      "title": "preferredAllocationPolicy",
+                      "type": "string"
+                    },
+                    "sharedDevNum": {
+                      "default": 1,
+                      "required": [],
+                      "title": "sharedDevNum",
+                      "type": "integer"
+                    },
+                    "tolerations": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "effect": {
+                                "default": "NoSchedule",
+                                "required": [],
+                                "title": "effect",
+                                "type": "string"
+                              },
+                              "key": {
+                                "default": "gpu.intel.com/i915",
+                                "required": [],
+                                "title": "key",
+                                "type": "string"
+                              },
+                              "operator": {
+                                "default": "Exists",
+                                "required": [],
+                                "title": "operator",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "operator",
+                              "effect"
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "required": []
+                      },
+                      "required": [],
+                      "title": "tolerations",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "sharedDevNum",
+                    "preferredAllocationPolicy",
+                    "logLevel",
+                    "enableMonitoring",
+                    "tolerations"
+                  ],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "chart",
+            "release"
+          ],
+          "title": "gpuPlugin",
+          "type": "object"
+        },
+        "operator": {
+          "additionalProperties": false,
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "intel-device-plugins-operator",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://intel.github.io/helm-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "0.32.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "intel",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "manager": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "devices": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "gpu": {
+                              "default": true,
+                              "required": [],
+                              "title": "gpu",
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "gpu"
+                          ],
+                          "title": "devices",
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "devices"
+                      ],
+                      "title": "manager",
+                      "type": "object"
+                    },
+                    "resources": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "limits": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "cpu": {
+                              "default": "100m",
+                              "required": [],
+                              "title": "cpu",
+                              "type": "string"
+                            },
+                            "memory": {
+                              "default": "200Mi",
+                              "required": [],
+                              "title": "memory",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "cpu",
+                            "memory"
+                          ],
+                          "title": "limits",
+                          "type": "object"
+                        },
+                        "requests": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "cpu": {
+                              "default": "100m",
+                              "required": [],
+                              "title": "cpu",
+                              "type": "string"
+                            },
+                            "memory": {
+                              "default": "160Mi",
+                              "required": [],
+                              "title": "memory",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "cpu",
+                            "memory"
+                          ],
+                          "title": "requests",
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "limits",
+                        "requests"
+                      ],
+                      "title": "resources",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "manager",
+                    "resources"
+                  ],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "chart",
+            "release"
+          ],
+          "title": "operator",
+          "type": "object"
+        },
+        "xpuManagerMonitoring": {
+          "additionalProperties": false,
+          "description": "xpuManagerMonitoring requires Flux CD source\nand kustomization controllers to be installed\non the CAPI management cluster.",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "namespace": {
+              "default": "intel",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "repo": {
+              "additionalProperties": false,
+              "properties": {
+                "tag": {
+                  "default": "V1.2.39",
+                  "required": [],
+                  "title": "tag",
+                  "type": "string"
+                },
+                "url": {
+                  "default": "https://github.com/intel/xpumanager",
+                  "required": [],
+                  "title": "url",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "url",
+                "tag"
+              ],
+              "title": "repo",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "namespace",
+            "repo"
+          ],
+          "title": "xpuManagerMonitoring",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "operator",
+        "gpuPlugin",
+        "xpuManagerMonitoring"
+      ],
+      "title": "intelDevicePlugin",
+      "type": "object"
+    },
+    "kubernetesDashboard": {
+      "additionalProperties": false,
+      "description": "Settings for the Kubernetes dashboard\nhttps://github.com/kubernetes/dashboard/tree/master/charts/helm-chart/kubernetes-dashboard",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "kubernetes-dashboard",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://kubernetes.github.io/dashboard",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "6.0.8",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Indicates if the Kubernetes dashboard should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "kubernetes-dashboard",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "kubernetesDashboard",
+      "type": "object"
+    },
+    "mellanoxNetworkOperator": {
+      "additionalProperties": false,
+      "description": "Settings for the Mellanox network operator",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "network-operator",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://helm.ngc.nvidia.com/nvidia",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "25.1.0",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if the network operator should be enabled\nNote that because it uses node feature discovery to run only on nodes\nwith a Mellanox NIC available, the overhead of enabling this on clusters\nthat do not need it now but may need it in the future is low",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "network-operator",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "mellanoxNetworkOperator",
+      "type": "object"
+    },
+    "metricsServer": {
+      "additionalProperties": false,
+      "description": "Settings for the metrics server\nhttps://github.com/kubernetes-sigs/metrics-server#helm-chart",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "metrics-server",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://kubernetes-sigs.github.io/metrics-server",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "3.12.2",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if the metrics server should be deployed",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "kube-system",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "metricsServer",
+      "type": "object"
+    },
+    "monitoring": {
+      "additionalProperties": false,
+      "description": "Settings for cluster monitoring",
+      "properties": {
+        "blackboxExporter": {
+          "additionalProperties": false,
+          "description": "Configuration for the blackbox exporter",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "prometheus-blackbox-exporter",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://prometheus-community.github.io/helm-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "9.4.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "monitoring-system",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart",
+            "release"
+          ],
+          "title": "blackboxExporter",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Indicates if the cluster monitoring should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "kubePrometheusStack": {
+          "additionalProperties": false,
+          "description": "Config for the kube-prometheus-stack helm chart\nhttps://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "kube-prometheus-stack",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://prometheus-community.github.io/helm-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "79.5.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "monitoring-system",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "alertmanager": {
+                      "additionalProperties": false,
+                      "description": "Enable persistence by default for prometheus and alertmanager",
+                      "properties": {
+                        "alertmanagerSpec": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "retention": {
+                              "default": "168h",
+                              "description": "By default, retain 7 days of data",
+                              "required": [],
+                              "title": "retention",
+                              "type": "string"
+                            },
+                            "storage": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "volumeClaimTemplate": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "spec": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "accessModes": {
+                                          "items": {
+                                            "anyOf": [
+                                              {
+                                                "required": [],
+                                                "type": "string"
+                                              }
+                                            ],
+                                            "required": []
+                                          },
+                                          "required": [],
+                                          "title": "accessModes",
+                                          "type": "array"
+                                        },
+                                        "resources": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "requests": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "storage": {
+                                                  "default": "10Gi",
+                                                  "required": [],
+                                                  "title": "storage",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "storage"
+                                              ],
+                                              "title": "requests",
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "requests"
+                                          ],
+                                          "title": "resources",
+                                          "type": "object"
+                                        }
+                                      },
+                                      "required": [
+                                        "accessModes",
+                                        "resources"
+                                      ],
+                                      "title": "spec",
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "spec"
+                                  ],
+                                  "title": "volumeClaimTemplate",
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "volumeClaimTemplate"
+                              ],
+                              "title": "storage",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "retention",
+                            "storage"
+                          ],
+                          "title": "alertmanagerSpec",
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "alertmanagerSpec"
+                      ],
+                      "title": "alertmanager",
+                      "type": "object"
+                    },
+                    "prometheus": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "prometheusSpec": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "retention": {
+                              "default": "90d",
+                              "description": "The amount of data that is retained will be 90 days or 95% of the size of the\npersistent volume, whichever is reached first",
+                              "required": [],
+                              "title": "retention",
+                              "type": "string"
+                            },
+                            "storageSpec": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "volumeClaimTemplate": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "spec": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "accessModes": {
+                                          "items": {
+                                            "anyOf": [
+                                              {
+                                                "required": [],
+                                                "type": "string"
+                                              }
+                                            ],
+                                            "required": []
+                                          },
+                                          "required": [],
+                                          "title": "accessModes",
+                                          "type": "array"
+                                        },
+                                        "resources": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "requests": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "storage": {
+                                                  "default": "10Gi",
+                                                  "required": [],
+                                                  "title": "storage",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "storage"
+                                              ],
+                                              "title": "requests",
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "requests"
+                                          ],
+                                          "title": "resources",
+                                          "type": "object"
+                                        }
+                                      },
+                                      "required": [
+                                        "accessModes",
+                                        "resources"
+                                      ],
+                                      "title": "spec",
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "spec"
+                                  ],
+                                  "title": "volumeClaimTemplate",
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "volumeClaimTemplate"
+                              ],
+                              "title": "storageSpec",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "retention",
+                            "storageSpec"
+                          ],
+                          "title": "prometheusSpec",
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "prometheusSpec"
+                      ],
+                      "title": "prometheus",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "alertmanager",
+                    "prometheus"
+                  ],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "chart",
+            "release"
+          ],
+          "title": "kubePrometheusStack",
+          "type": "object"
+        },
+        "lokiStack": {
+          "additionalProperties": false,
+          "deprecated": true,
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "loki-stack",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://grafana.github.io/helm-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "2.10.2",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "monitoring-system",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "loki": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "config": {
+                          "additionalProperties": false,
+                          "description": "Enable retention and configure a default retention period of 31 days",
+                          "properties": {
+                            "compactor": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "retention_enabled": {
+                                  "default": true,
+                                  "required": [],
+                                  "title": "retention_enabled",
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "retention_enabled"
+                              ],
+                              "title": "compactor",
+                              "type": "object"
+                            },
+                            "limits_config": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "retention_period": {
+                                  "default": "72h",
+                                  "required": [],
+                                  "title": "retention_period",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "retention_period"
+                              ],
+                              "title": "limits_config",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "compactor",
+                            "limits_config"
+                          ],
+                          "title": "config",
+                          "type": "object"
+                        },
+                        "persistence": {
+                          "additionalProperties": false,
+                          "description": "Enable persistence by default",
+                          "properties": {
+                            "enabled": {
+                              "default": true,
+                              "required": [],
+                              "title": "enabled",
+                              "type": "boolean"
+                            },
+                            "size": {
+                              "default": "10Gi",
+                              "required": [],
+                              "title": "size",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "size"
+                          ],
+                          "title": "persistence",
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "config",
+                        "persistence"
+                      ],
+                      "title": "loki",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "loki"
+                  ],
+                  "title": "values"
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart",
+            "release"
+          ],
+          "title": "lokiStack"
+        }
+      },
+      "required": [
+        "enabled",
+        "kubePrometheusStack",
+        "blackboxExporter"
+      ],
+      "title": "monitoring",
+      "type": "object"
+    },
+    "nodeFeatureDiscovery": {
+      "additionalProperties": false,
+      "description": "Settings for node feature discovery\nhttps://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "node-feature-discovery",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://kubernetes-sigs.github.io/node-feature-discovery/charts",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "0.17.3",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if node feature discovery should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "node-feature-discovery",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "nodeFeatureDiscovery",
+      "type": "object"
+    },
+    "nodeProblemDetector": {
+      "additionalProperties": false,
+      "description": "Settings for the node problem detector",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "node-problem-detector",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://charts.deliveryhero.io",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "2.3.14",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if the node problem detector should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "node-problem-detector",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "nodeProblemDetector",
+      "type": "object"
+    },
+    "nvidiaGPUOperator": {
+      "additionalProperties": false,
+      "description": "Settings for the NVIDIA GPU operator",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "gpu-operator",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://helm.ngc.nvidia.com/nvidia",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "v25.10.0",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Indicates if the NVIDIA GPU operator should be enabled\nNote that because it uses node feature discovery to run only on nodes\nwith an NVIDIA GPU available, the overhead of enabling this on clusters\nthat do not need it now but may need it in the future is low",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "gpu-operator",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "properties": {
+                "dcgmExporter": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "serviceMonitor": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "default": true,
+                          "required": [],
+                          "title": "enabled",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "enabled"
+                      ],
+                      "title": "serviceMonitor",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "serviceMonitor"
+                  ],
+                  "title": "dcgmExporter",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "dcgmExporter"
+              ],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "nvidiaGPUOperator",
+      "type": "object"
+    },
+    "openstack": {
+      "additionalProperties": false,
+      "description": "Settings for the OpenStack integrations",
+      "properties": {
+        "ccm": {
+          "additionalProperties": false,
+          "description": "Settings for the Cloud Controller Manager (CCM)",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "openstack-cloud-controller-manager",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://kubernetes.github.io/cloud-provider-openstack",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "2.32.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Indicates if the OpenStack CCM should be enabled\nBy default, the CCM is enabled if the OpenStack integrations are enabled\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/openstack-cloud-controller-manager/values.yaml",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart"
+          ],
+          "title": "ccm",
+          "type": "object"
+        },
+        "cloudConfig": {
+          "additionalProperties": false,
+          "description": "cloud-config options for the OpenStack integrations\nThe [Global] section is configured to use the target cloud\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager\nand https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage",
+          "properties": {
+            "BlockStorage": {
+              "additionalProperties": false,
+              "description": "By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ",
+              "properties": {
+                "ignore-volume-az": {
+                  "default": true,
+                  "required": [],
+                  "title": "ignore-volume-az",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "ignore-volume-az"
+              ],
+              "title": "BlockStorage",
+              "type": "object"
+            }
+          },
+          "required": [
+            "BlockStorage"
+          ],
+          "title": "cloudConfig",
+          "type": "object"
+        },
+        "csiCinder": {
+          "additionalProperties": false,
+          "description": "Settings for the Cinder CSI plugin",
+          "properties": {
+            "additionalStorageClasses": {
+              "description": "Additional storage classes to create for the Cinder CSI\nFor each item, the properties from the default storage class are supported (except enabled and isClusterDefault)",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "additionalStorageClasses",
+              "type": "array"
+            },
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "openstack-cinder-csi",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://kubernetes.github.io/cloud-provider-openstack",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "2.32.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "defaultStorageClass": {
+              "additionalProperties": false,
+              "description": "Definition of the default storage class for Cinder CSI",
+              "properties": {
+                "allowVolumeExpansion": {
+                  "default": true,
+                  "description": "Indicates if volume expansion is allowed",
+                  "required": [],
+                  "title": "allowVolumeExpansion",
+                  "type": "boolean"
+                },
+                "allowedTopologies": {
+                  "additionalProperties": true,
+                  "default": "",
+                  "description": "The allowed topologies for the storage class",
+                  "required": [],
+                  "title": "allowedTopologies",
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                },
+                "availabilityZone": {
+                  "default": "nova",
+                  "description": "The Cinder availability zone to use for volumes provisioned by the storage class",
+                  "required": [],
+                  "title": "availabilityZone",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": true,
+                  "description": "Indicates if the storage class should be enabled",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "fstype": {
+                  "default": "",
+                  "description": "Filesystem type to use for volumes provisioned with the storage class\nIf not given, the default filesystem type will be used",
+                  "required": [],
+                  "title": "fstype",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isClusterDefault": {
+                  "default": true,
+                  "description": "Indicates if the Cinder default storage class is the cluster default storage class",
+                  "required": [],
+                  "title": "isClusterDefault",
+                  "type": "boolean"
+                },
+                "name": {
+                  "default": "csi-cinder",
+                  "description": "The name of the storage class",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "reclaimPolicy": {
+                  "default": "Delete",
+                  "description": "The reclaim policy for the storage class",
+                  "required": [],
+                  "title": "reclaimPolicy",
+                  "type": "string"
+                },
+                "volumeBindingMode": {
+                  "default": "WaitForFirstConsumer",
+                  "description": "Controls when volume binding and dynamic provisioning should occur",
+                  "required": [],
+                  "title": "volumeBindingMode",
+                  "type": "string"
+                },
+                "volumeType": {
+                  "default": "",
+                  "description": "The Cinder volume type to use for volumes provisioned by the storage class\nIf not given, the default volume type will be used",
+                  "required": [],
+                  "title": "volumeType",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "enabled",
+                "name",
+                "isClusterDefault",
+                "reclaimPolicy",
+                "allowVolumeExpansion",
+                "volumeBindingMode",
+                "availabilityZone"
+              ],
+              "title": "defaultStorageClass",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Indicates if the Cinder CSI should be enabled\nBy default, it is enabled if the OpenStack integrations are enabled\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/cinder-csi-plugin/values.yaml",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "values": {
+              "additionalProperties": true,
+              "properties": {
+                "csi": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "plugin": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "controllerPlugin": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "nodeSelector": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "node-role.kubernetes.io/control-plane": {
+                                  "default": "",
+                                  "required": [],
+                                  "title": "node-role.kubernetes.io/control-plane",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "node-role.kubernetes.io/control-plane"
+                              ],
+                              "title": "nodeSelector",
+                              "type": "object"
+                            },
+                            "tolerations": {
+                              "items": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "effect": {
+                                        "default": "NoSchedule",
+                                        "required": [],
+                                        "title": "effect",
+                                        "type": "string"
+                                      },
+                                      "key": {
+                                        "default": "node-role.kubernetes.io/control-plane",
+                                        "required": [],
+                                        "title": "key",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "key",
+                                      "effect"
+                                    ],
+                                    "type": "object"
+                                  }
+                                ],
+                                "required": []
+                              },
+                              "required": [],
+                              "title": "tolerations",
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "nodeSelector",
+                            "tolerations"
+                          ],
+                          "title": "controllerPlugin",
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "controllerPlugin"
+                      ],
+                      "title": "plugin",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "plugin"
+                  ],
+                  "title": "csi",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "csi"
+              ],
+              "title": "values"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart",
+            "defaultStorageClass",
+            "additionalStorageClasses"
+          ],
+          "title": "csiCinder",
+          "type": "object"
+        },
+        "csiManila": {
+          "additionalProperties": false,
+          "description": "Settings for the Manila CSI plugin",
+          "properties": {
+            "additionalStorageClasses": {
+              "description": "Additional storage classes to create for the Manila CSI\nFor each item, the properties from the default storage class are supported (except for \"enabled\")",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "additionalStorageClasses",
+              "type": "array"
+            },
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "openstack-manila-csi",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://kubernetes.github.io/cloud-provider-openstack",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "2.30.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "defaultStorageClass": {
+              "additionalProperties": false,
+              "description": "Definition of the default storage class for the Manila CSI",
+              "properties": {
+                "allowVolumeExpansion": {
+                  "default": true,
+                  "description": "Indicates if volume expansion is allowed",
+                  "required": [],
+                  "title": "allowVolumeExpansion",
+                  "type": "boolean"
+                },
+                "allowedTopologies": {
+                  "default": "",
+                  "description": "The allowed topologies for the storage class",
+                  "required": [],
+                  "title": "allowedTopologies",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "enabled": {
+                  "default": true,
+                  "description": "Indicates if the storage class should be enabled",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "isClusterDefault": {
+                  "default": false,
+                  "description": "Indicates if the Manila default storage class is the cluster default storage class",
+                  "required": [],
+                  "title": "isClusterDefault",
+                  "type": "boolean"
+                },
+                "name": {
+                  "default": "csi-manila",
+                  "description": "The name of the storage class",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "parameters": {
+                  "additionalProperties": true,
+                  "description": "The parameters for the storage class\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters",
+                  "properties": {
+                    "type": {
+                      "default": "",
+                      "description": "The Manila share type to use\nIf not given and the Ceph CSI plugin is installed, cephfs is used",
+                      "required": [],
+                      "title": "type",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "title": "parameters"
+                },
+                "provisioner": {
+                  "default": "",
+                  "description": "The provisioner for the storage class\nIf not given and the Ceph CSI plugin is installed, cephfs.manila.csi.openstack.org is used",
+                  "required": [],
+                  "title": "provisioner",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "reclaimPolicy": {
+                  "default": "Delete",
+                  "description": "The reclaim policy for the storage class",
+                  "required": [],
+                  "title": "reclaimPolicy",
+                  "type": "string"
+                },
+                "volumeBindingMode": {
+                  "default": "WaitForFirstConsumer",
+                  "description": "Controls when volume binding and dynamic provisioning should occur",
+                  "required": [],
+                  "title": "volumeBindingMode",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "name",
+                "isClusterDefault",
+                "reclaimPolicy",
+                "allowVolumeExpansion",
+                "volumeBindingMode"
+              ],
+              "title": "defaultStorageClass",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Indicates if the Manila CSI should be enabled\nBy default, it is disabled as Manila is not commonly available\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/manila-csi-plugin/values.yaml",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "values": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "values"
+            }
+          },
+          "required": [
+            "enabled",
+            "chart",
+            "defaultStorageClass",
+            "additionalStorageClasses"
+          ],
+          "title": "csiManila",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Indicates if the OpenStack integrations should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "k8sKeystoneAuth": {
+          "additionalProperties": false,
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "k8s-keystone-auth",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://catalyst-cloud.github.io/capi-plugin-helm-charts",
+                  "required": [],
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "1.4.0",
+                  "required": [],
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "repo",
+                "name",
+                "version"
+              ],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "targetNamespace": {
+              "default": "kube-system",
+              "required": [],
+              "title": "targetNamespace",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "targetNamespace",
+            "chart"
+          ],
+          "title": "k8sKeystoneAuth",
+          "type": "object"
+        },
+        "targetNamespace": {
+          "default": "openstack-system",
+          "description": "The target namespace for the OpenStack integrations",
+          "required": [],
+          "title": "targetNamespace",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "targetNamespace",
+        "cloudConfig",
+        "ccm",
+        "csiCinder",
+        "csiManila",
+        "k8sKeystoneAuth"
+      ],
+      "title": "openstack",
+      "type": "object"
+    },
+    "reloader": {
+      "additionalProperties": false,
+      "description": "Setting for Reloader used to restart workloads on Secret/ConfigMap changes",
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "reloader",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://stakater.github.io/stakater-charts",
+              "required": [],
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "2.2.3",
+              "required": [],
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repo",
+            "name",
+            "version"
+          ],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Indicates if Reloader should be enabled",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "openstack-system",
+              "description": "Deploy to the same namespace as OpenStack services",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": true,
+              "properties": {
+                "reloader": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "watchGlobally": {
+                      "default": false,
+                      "description": "Restrict scope to namespace",
+                      "required": [],
+                      "title": "watchGlobally",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "watchGlobally"
+                  ],
+                  "title": "reloader",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "reloader"
+              ],
+              "title": "values"
+            }
+          },
+          "required": [
+            "namespace"
+          ],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "chart",
+        "release"
+      ],
+      "title": "reloader",
+      "type": "object"
+    }
+  },
+  "required": [
+    "enabled",
+    "cni",
+    "csi",
+    "openstack",
+    "reloader",
+    "etcdDefrag",
+    "metricsServer",
+    "kubernetesDashboard",
+    "ingress",
+    "monitoring",
+    "nodeFeatureDiscovery",
+    "nvidiaGPUOperator",
+    "intelDevicePlugin",
+    "certManager",
+    "mellanoxNetworkOperator",
+    "nodeProblemDetector"
+  ],
+  "type": "object"
+}

@@ -1,7 +1,17 @@
 ---
+# yaml-language-server: $schema=values.schema.json
+
+# Included for schema validation purposes.
+# Has no effect unless this chart is used
+# as a conditional dependency of the
+# openstack-cluster chart.
+enabled: true
 
 # The name of the Cluster API cluster
 # if not given, the release name is used
+# @schema
+# type: [string, null]
+# @schema
 clusterName:
 
 # Settings for the CNI addon
@@ -9,6 +19,9 @@ cni:
   # Indicates if a CNI should be deployed
   enabled: true
   # The CNI to deploy - supported values are calico or cilium
+  # @schema
+  # enum: [calico, cilium]
+  # @schema
   type: calico
   # Settings for the calico CNI
   # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
@@ -19,6 +32,9 @@ cni:
       version: v3.29.3
     release:
       namespace: tigera-operator
+      # @schema
+      # additionalProperties: true
+      # @schema
       values:
         nodeSelector:
           node-role.kubernetes.io/control-plane: ""
@@ -45,6 +61,9 @@ cni:
       version: 1.17.0
     release:
       namespace: kube-system
+      # @schema
+      # additionalProperties: true
+      # @schema
       values: {}
 
 # Settings for CSI addons
@@ -58,6 +77,9 @@ csi:
       version: 3.11.0
     release:
       namespace: csi-ceph-system
+      # @schema
+      # additionalProperties: true
+      # @schema
       values: {}
 
 # Settings for the OpenStack integrations
@@ -84,6 +106,9 @@ openstack:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
       version: 2.32.0
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
@@ -95,6 +120,9 @@ openstack:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
       version: 2.32.0
+    # @schema
+    # additionalProperties: true
+    # @schema
     values:
       csi:
         plugin:
@@ -119,14 +147,24 @@ openstack:
       # Controls when volume binding and dynamic provisioning should occur
       volumeBindingMode: WaitForFirstConsumer
       # The allowed topologies for the storage class
+      # @schema
+      # type: [object, null]
+      # additionalProperties: true
+      # @schema
       allowedTopologies:
       # Filesystem type to use for volumes provisioned with the storage class
       # If not given, the default filesystem type will be used
+      # @schema
+      # type: [string, null]
+      # @schema
       fstype:
       # The Cinder availability zone to use for volumes provisioned by the storage class
       availabilityZone: nova
       # The Cinder volume type to use for volumes provisioned by the storage class
       # If not given, the default volume type will be used
+      # @schema
+      # type: [string, null]
+      # @schema
       volumeType:
     # Additional storage classes to create for the Cinder CSI
     # For each item, the properties from the default storage class are supported (except enabled and isClusterDefault)
@@ -141,6 +179,9 @@ openstack:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-manila-csi
       version: 2.30.0
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
     # Definition of the default storage class for the Manila CSI
     defaultStorageClass:
@@ -152,6 +193,9 @@ openstack:
       isClusterDefault: false
       # The provisioner for the storage class
       # If not given and the Ceph CSI plugin is installed, cephfs.manila.csi.openstack.org is used
+      # @schema
+      # type: [string, null]
+      # @schema
       provisioner:
       # The reclaim policy for the storage class
       reclaimPolicy: Delete
@@ -160,12 +204,21 @@ openstack:
       # Controls when volume binding and dynamic provisioning should occur
       volumeBindingMode: WaitForFirstConsumer
       # The allowed topologies for the storage class
+      # @schema
+      # type: [string, null]
+      # @schema
       allowedTopologies:
       # The parameters for the storage class
       # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters
+      # @schema
+      # additionalProperties: true
+      # @schema
       parameters:
         # The Manila share type to use
         # If not given and the Ceph CSI plugin is installed, cephfs is used
+        # @schema
+        # type: [string, null]
+        # @schema
         type:
     # Additional storage classes to create for the Manila CSI
     # For each item, the properties from the default storage class are supported (except for "enabled")
@@ -189,6 +242,9 @@ reloader:
   release:
     # Deploy to the same namespace as OpenStack services
     namespace: openstack-system
+    # @schema
+    # additionalProperties: true
+    # @schema
     values:
       reloader:
         # Restrict scope to namespace
@@ -201,10 +257,16 @@ etcdDefrag:
   chart:
     repo: https://azimuth-cloud.github.io/capi-helm-charts
     name: etcd-defrag
+    # @schema
+    # type: [string, null]
+    # @schema
     version:  # Defaults to the same version as this chart
   release:
     # This should be namespace in which the etcd pods are deployed
     namespace: kube-system
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for the metrics server
@@ -218,6 +280,9 @@ metricsServer:
     version: 3.12.2
   release:
     namespace: kube-system
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for the Kubernetes dashboard
@@ -231,6 +296,9 @@ kubernetesDashboard:
     version: 6.0.8
   release:
     namespace: kubernetes-dashboard
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for ingress controllers
@@ -249,6 +317,9 @@ ingress:
       version: 4.14.1
     release:
       namespace: ingress-nginx
+      # @schema
+      # additionalProperties: true
+      # @schema
       values: {}
 
 # Settings for cluster monitoring
@@ -264,6 +335,9 @@ monitoring:
       version: 80.14.4
     release:
       namespace: monitoring-system
+      # @schema
+      # additionalProperties: true
+      # @schema
       values:
         # Enable persistence by default for prometheus and alertmanager
         alertmanager:
@@ -289,6 +363,10 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+
+  # @schema
+  # deprecated: true
+  # @schema
   lokiStack:
     enabled: true
     chart:
@@ -297,6 +375,9 @@ monitoring:
       version: 2.10.2
     release:
       namespace: monitoring-system
+      # @schema
+      # additionalProperties: true
+      # @schema
       values:
         loki:
           # Enable retention and configure a default retention period of 31 days
@@ -318,6 +399,9 @@ monitoring:
       version: 9.4.0
     release:
       namespace: monitoring-system
+      # @schema
+      # additionalProperties: true
+      # @schema
       values: {}
         # Example of adding additional scrape targets
         # serviceMonitor:
@@ -336,6 +420,9 @@ nodeFeatureDiscovery:
     version: 0.17.3
   release:
     namespace: node-feature-discovery
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for the NVIDIA GPU operator
@@ -351,6 +438,9 @@ nvidiaGPUOperator:
     version: v25.10.1
   release:
     namespace: gpu-operator
+    # @schema
+    # additionalProperties: true
+    # @schema
     values:
       dcgmExporter:
         serviceMonitor:
@@ -365,6 +455,9 @@ intelDevicePlugin:
       version: 0.32.0
     release:
       namespace: intel
+      # @schema
+      # additionalProperties: true
+      # @schema
       values:
         manager:
           devices:
@@ -383,6 +476,9 @@ intelDevicePlugin:
       version: 0.32.0
     release:
       namespace: intel
+      # @schema
+      # additionalProperties: true
+      # @schema
       values:
         sharedDevNum: 1
         preferredAllocationPolicy: none
@@ -392,6 +488,9 @@ intelDevicePlugin:
           - key: "gpu.intel.com/i915"
             operator: "Exists"
             effect: "NoSchedule"
+  # xpuManagerMonitoring requires Flux CD source
+  # and kustomization controllers to be installed
+  # on the CAPI management cluster.
   xpuManagerMonitoring:
     enabled: true
     namespace: intel
@@ -407,6 +506,9 @@ certManager:
     version: v1.17.0
   release:
     namespace: cert-manager
+    # @schema
+    # additionalProperties: true
+    # @schema
     values:
       crds:
         enabled: true
@@ -424,6 +526,9 @@ mellanoxNetworkOperator:
     version: 25.1.0
   release:
     namespace: network-operator
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for the node problem detector
@@ -436,9 +541,56 @@ nodeProblemDetector:
     version: 2.3.14
   release:
     namespace: node-problem-detector
+    # @schema
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for any custom addons
+# @schema
+# type: object
+# patternProperties:
+#   ".*":
+#     oneOf:
+#       - type: object
+#         additionalProperties: false
+#         properties:
+#           kind:
+#             const: HelmRelease
+#           spec:
+#             properties:
+#               namespace:
+#                 type: string
+#               chart:
+#                 type: object
+#                 additionalProperties: false
+#                 properties:
+#                   repo:
+#                     type: string
+#                   name:
+#                     type: string
+#                   version:
+#                     type: string
+#               values:
+#                 type: object
+#                 additionalProperties: true
+#       - type: object
+#         additionalProperties: false
+#         properties:
+#           kind:
+#             const: Manifests
+#           spec:
+#             type: object
+#             additionalProperties: false
+#             properties:
+#               namespace:
+#                 type: string
+#               manifests:
+#                 type: object
+#                 patternProperties:
+#                   ".*":
+#                     type: string
+# @schema
 custom: {}
   # # Indexed by the name of the release on the target cluster
   # my-custom-helm-release:
