@@ -160,6 +160,12 @@ runs:
         KUBECONFIG: ./kubeconfig
       if: "${{ inputs.skip-workload-status != 'yes' }}"
 
+    - name: Get cluster nodes and wait until they are all scheduleable
+      shell: bash
+      run: kubectl get nodes -o wide && while kubectl get node | grep -q SchedulingDisabled; do sleep 5 ; done
+      env:
+        KUBECONFIG: ./kubeconfig
+
     - name: Run sonobuoy
       shell: bash
       run: sonobuoy run --level ${{ inputs.sonobuoy-level }} --mode ${{ inputs.sonobuoy-mode }} --wait
