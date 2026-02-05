@@ -59,7 +59,7 @@ runs:
           --namespace cert-manager \
           --create-namespace  \
           --install \
-          --set installCRDs=true \
+          --set crds.enabled=true \
           --wait \
           --timeout 10m
 
