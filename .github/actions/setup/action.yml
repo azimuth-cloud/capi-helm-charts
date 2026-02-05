@@ -21,6 +21,7 @@ runs:
         echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cert-manager=$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "helm=$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "openstack-resource-controller=$(jq -r '.["openstack-resource-controller"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "sonobuoy=$(jq -r '.["sonobuoy"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
       env:
         DEPENDENCIES_PATH: ${{ inputs.dependencies-path }}
@@ -58,7 +59,7 @@ runs:
           --namespace cert-manager \
           --create-namespace  \
           --install \
-          --set installCRDs=true \
+          --set crds.enabled=true \
           --wait \
           --timeout 10m
 
@@ -89,6 +90,16 @@ runs:
       env:
         CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
         CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
+
+    - name: Install openstack-resource-controller
+      shell: bash
+      run: |
+        ORC_URL=https://github.com/k-orc/openstack-resource-controller/releases/download/${ORC_VERSION}/install.yaml
+        if ! kubectl apply --server-side -f ${ORC_URL}; then
+          kubectl apply --server-side --force-conflicts -f ${ORC_URL}
+        fi
+      env:
+        ORC_VERSION: ${{ steps.deps.outputs.openstack-resource-controller }}
 
     - name: Install Cluster API add-on provider
       shell: bash

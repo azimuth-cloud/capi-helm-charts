@@ -48,8 +48,8 @@ templates for more details.
 
 First, you must set up a
 [Cluster API management cluster](https://cluster-api.sigs.k8s.io/user/concepts.html#management-cluster)
-with the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
-installed.
+with both the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
+and [OpenStack Resource Controller](https://github.com/k-orc/openstack-resource-controller) installed.
 
 Addons are managed by the
 [Cluster API Addon Provider](https://github.com/azimuth-cloud/cluster-api-addon-provider),
