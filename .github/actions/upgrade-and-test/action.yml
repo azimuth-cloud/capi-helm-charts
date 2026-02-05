@@ -89,10 +89,8 @@ runs:
         
         if [[ "$cluster_api_version" =~ v1beta1$ ]]; then
           echo "cluster-ready-condition-name=ready" >> $GITHUB_OUTPUT
-          echo "machinedeployment-ready-condition-name=machinesetready" >> $GITHUB_OUTPUT
         else
           echo "cluster-ready-condition-name=available" >> $GITHUB_OUTPUT
-          echo "machinedeployment-ready-condition-name=machinesready" >> $GITHUB_OUTPUT
         fi
 
     # Wait for any upgrade to start before checking if it is complete
@@ -122,8 +120,28 @@ runs:
       run: |-
         kubectl wait machinedeployments \
           --all \
-          --for=condition=${{ steps.check-ready-condition.outputs.machinedeployment-ready-condition-name }} \
+          --for=jsonpath='{.status.phase}'=Running \
           --timeout 30m
+
+    - name: Wait for control-plane and worker machines to be up-to-date and ready (v1beta2)
+      shell: bash
+      run: |-
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=ControlPlaneMachinesUpToDate \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=ControlPlaneMachinesReady \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=WorkerMachinesUpToDate \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=WorkerMachinesReady \
+          --timeout 30m
+      if: ${{ steps.check-ready-condition.outputs.cluster-ready-condition-name == 'available' }}
 
     - name: Wait for addons to deploy
       shell: bash
