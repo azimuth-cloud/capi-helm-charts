@@ -127,6 +127,10 @@ runs:
       shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=RollingOut=false \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
           --for=condition=ControlPlaneMachinesUpToDate \
           --timeout 30m \
         && \
