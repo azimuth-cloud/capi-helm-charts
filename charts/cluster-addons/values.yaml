@@ -220,36 +220,9 @@ metricsServer:
     namespace: kube-system
     values: {}
 
-# Settings for the Kubernetes dashboard
-# https://github.com/kubernetes-retired/dashboard/tree/master/charts/kubernetes-dashboard
-kubernetesDashboard:
-  # Indicates if the Kubernetes dashboard should be enabled
-  enabled: false
-  chart:
-    repo: https://kubernetes-retired.github.io/dashboard
-    name: kubernetes-dashboard
-    version: 6.0.8
-  release:
-    namespace: kubernetes-dashboard
-    values: {}
+# NOTE: kubernetes dashboard support has now been removed
 
-# Settings for ingress controllers
-ingress:
-  # Indicates if ingress controllers should be enabled
-  enabled: false
-  # Settings for the Nginx ingress controller
-  # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
-  nginx:
-    # Indicates if the Nginx ingress controller should be enabled
-    # The Nginx ingress controller is enabled by default if ingress controllers are enabled
-    enabled: true
-    chart:
-      repo: https://kubernetes.github.io/ingress-nginx
-      name: ingress-nginx
-      version: 4.14.3
-    release:
-      namespace: ingress-nginx
-      values: {}
+# NOTE: nginx-ingress support has now been removed
 
 # Settings for cluster monitoring
 monitoring:

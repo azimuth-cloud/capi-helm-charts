@@ -306,8 +306,8 @@ and the configuration of those addons by specifying values for the addons Helm c
 
 ```yaml
 addons:
-  # Enable the Nginx ingress controller
-  ingress:
+  # Enable kube prometheus stack based monitoring
+  monitoring:
     enabled: true
 ```
 

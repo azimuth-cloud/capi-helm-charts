@@ -200,29 +200,8 @@ openstack:
 
 ## Ingress controllers
 
-Running an
-[Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)
-on your Kubernetes cluster enables the use of
-[Ingress resource](https://kubernetes.io/docs/concepts/services-networking/ingress/)
-to manage HTTP(S) traffic flowing in and out of the cluster. This allows your web applications
-to take advantage of load-balancing, name-based virtual hosting, path-based routing and
-TLS termination using the same declarative approach as other Kubernetes resources.
-When combined with a cert-manager issuer (see above) this provides an almost frictionless way
-to secure your web services.
-
-It is possible to install multiple Ingress Controllers and select the preferred one for a
-particular Ingress resource using
-[Ingress Classes](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
-
-This chart can install the [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)
-onto the target cluster.
-
-The Nginx Ingress Controller is disabled by default. To enable it, use the following Helm values:
-
-```yaml
-ingress:
-  enabled: true
-```
+Support for ngnix-ingress has been removed,
+given the project has been retired.
 
 ## Metrics server
 
