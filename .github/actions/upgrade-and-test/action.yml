@@ -184,9 +184,9 @@ runs:
         KUBECONFIG: ./kubeconfig
       if: "${{ inputs.skip-workload-status != 'yes' }}"
 
-    - name: Get cluster nodes and wait until they are all scheduleable
+    - name: Get cluster nodes
       shell: bash
-      run: kubectl get nodes -o wide && while kubectl get node | grep -q SchedulingDisabled; do sleep 5 ; done
+      run: kubectl get nodes -o wide
       env:
         KUBECONFIG: ./kubeconfig
 
