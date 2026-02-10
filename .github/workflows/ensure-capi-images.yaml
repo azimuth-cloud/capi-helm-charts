@@ -19,12 +19,14 @@ on:
         value: ${{ jobs.produce_outputs.outputs.kube-1-34-image }}
       kube-1-34-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-34-version }}
-
+      max-kubernetes-version:
+        value: ${{ jobs.image_manifest.outputs.max-kubernetes-version }}
 jobs:
   image_manifest:
     runs-on: ubuntu-latest
     outputs:
       manifest: ${{ steps.images.outputs.manifest }}
+      max-kubernetes-version: ${{ steps.images.outputs.max-kubernetes-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,6 +39,7 @@ jobs:
           VN="$(jq -r '.["azimuth-images"]' ./dependencies.json)"
           MANIFEST="$(curl -fsSL "https://github.com/azimuth-cloud/azimuth-images/releases/download/${VN}/manifest.json")"
           echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
+          echo "max-kubernetes-version=$(jq -r '[.[].kubernetes_version] | sort | reverse | .[0]' <<< "$MANIFEST")" >> $GITHUB_OUTPUT
 
   ensure_image:
     runs-on: ubuntu-latest
@@ -99,7 +102,7 @@ jobs:
 
   produce_outputs:
     runs-on: ubuntu-latest
-    needs: [ensure_image]
+    needs: [ensure_image, image_manifest]
     outputs:
       kube-1-32-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-32 }}
       kube-1-32-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-32 }}

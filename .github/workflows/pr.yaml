@@ -61,6 +61,8 @@ jobs:
       images: ${{ toJSON(needs.ensure_capi_images.outputs) }}
       # Pass the chart version to test
       chart-version: ${{ needs.publish_charts.outputs.chart-version }}
+      # Pass the Kubernetes version to install with Kind
+      kind-image-tag: ${{ needs.ensure_capi_images.max-kubernetes-version }}
       # We want to test the code in the PR
       ref: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
