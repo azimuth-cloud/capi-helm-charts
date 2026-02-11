@@ -131,7 +131,8 @@ Outputs the node registration object for setting node labels.
 {{- define "openstack-cluster.nodeRegistration.nodeLabels" -}}
 nodeRegistration:
   kubeletExtraArgs:
-    node-labels: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
+    - name: "node-labels"
+      value: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
 {{- end }}
 
 {{/*
@@ -272,7 +273,7 @@ files:
 {{- range $registry, $registrySpec := . }}
   - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
     content: |
-      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | nindent 6 }}
+      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | indent 6 }}
     owner: root:root
     permissions: "0644"
 {{- end }}
@@ -414,7 +415,8 @@ webhooks and policies for audit logging can be added here.
   clusterConfiguration:
     apiServer:
       extraArgs:
-        v: {{ $ctx.Values.apiServer.logLevel | quote }}
+        - name: "v"
+          value: {{ $ctx.Values.apiServer.logLevel | quote }}
 {{- if ne $authWebhook "none" }}
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
@@ -576,3 +578,47 @@ Produces integration for azimuth_authorization_webhook on apiserver
             name: {{ .name }}
           {{- end }}
 {{- end }}
+
+{{/*
+Converts a dict to a list of items
+*/}}
+{{- define "openstack-cluster.dict2items" -}}
+{{- if kindIs "map" . -}}
+{{- $items := list -}}
+{{- range $key, $value := . -}}
+{{- $item := dict "name" $key "value" $value -}}
+{{- $items = append $items $item -}}
+{{- end -}}
+{{ toYaml $items }}
+{{- else -}}
+{{ toYaml . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts a remediationStrategy to a remediation spec
+*/}}
+{{- define "openstack-cluster.convert.remediationStrategy" -}}
+{{- if .Values.controlPlane.remediationStrategy -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts human time to seconds
+*/}}
+{{- define "openstack-cluster.convert.humanTimeToSeconds" -}}
+{{- $seconds := 0 -}}
+{{- if regexMatch "h" . -}}
+{{- $hours := regexFind "[0-9]+h" . | trimSuffix "h" | int }}
+{{- $seconds = add $seconds (mul 60 60 $hours) -}}
+{{- end -}}
+{{- if regexMatch "m" . -}}
+{{- $mins := regexFind "[0-9]+m" . | trimSuffix "m" | int }}
+{{- $seconds = add $seconds (mul 60 $mins) -}}
+{{- end -}}
+{{- if regexMatch "s" . -}}
+{{- $secs := regexFind "[0-9]+s" . | trimSuffix "s" | int }}
+{{- $seconds = add $seconds $secs -}}
+{{- end -}}
+{{ $seconds }}
+{{- end -}}

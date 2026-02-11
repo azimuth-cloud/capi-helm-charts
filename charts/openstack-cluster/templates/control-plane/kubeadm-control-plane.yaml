@@ -31,13 +31,20 @@ preKubeadmCommands:
 clusterConfiguration:
   apiServer:
     extraArgs:
-      oidc-issuer-url: {{ quote .issuerUrl }}
-      oidc-client-id: {{ required "clientId is required for OIDC" .clientId | quote }}
-      oidc-username-claim: {{ quote .usernameClaim }}
-      oidc-username-prefix: {{ quote .usernamePrefix }}
-      oidc-groups-claim: {{ quote .groupsClaim }}
-      oidc-groups-prefix: {{ quote .groupsPrefix }}
-      oidc-signing-algs: {{ quote .signingAlgs }}
+      - name: "oidc-issuer-url"
+        value: "{{ quote .issuerUrl }}"
+      - name: "oidc-client-id"
+        value: "{{ required "clientId is required for OIDC" .clientId | quote }}"
+      - name: "oidc-username-claim"
+        value: "{{ quote .usernameClaim }}"
+      - name: "oidc-username-prefix"
+        value: "{{ quote .usernamePrefix }}"
+      - name: "oidc-groups-claim"
+        value: "{{ quote .groupsClaim }}"
+      - name: "oidc-groups-prefix"
+        value: "{{ quote .groupsPrefix }}"
+      - name: "oidc-signing-algs"
+        value: "{{ quote .signingAlgs }}"
 {{- end }}
 {{- end }}
 {{- end }}
@@ -150,7 +157,8 @@ files:
 clusterConfiguration:
   apiServer:
     extraArgs:
-      admission-control-config-file: /etc/kubernetes/admission/configuration.yaml
+      - name: "admission-control-config-file"
+        value: "/etc/kubernetes/admission/configuration.yaml"
     extraVolumes:
       - name: admission-configuration
         hostPath: /etc/kubernetes/admission
@@ -160,7 +168,7 @@ clusterConfiguration:
 {{- end }}
 
 ---
-apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
 kind: KubeadmControlPlane
 metadata:
   name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
@@ -177,19 +185,20 @@ spec:
       trimPrefix "v"
   }}
   replicas: {{ .Values.controlPlane.machineCount }}
-  remediationStrategy: {{ toYaml .Values.controlPlane.remediationStrategy | nindent 4 }}
-  rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
+  remediation: {{ toYaml .Values.controlPlane.remediation | nindent 4 }}
+  rollout: {{ toYaml .Values.controlPlane.rollout | nindent 6 }}
   machineTemplate:
     metadata:
       labels: {{ include "openstack-cluster.componentSelectorLabels" (list . "control-plane") | nindent 8 }}
-    infrastructureRef:
-      kind: OpenStackMachineTemplate
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-      name: {{ include "openstack-cluster.controlplane.mt.name" . }}
-      namespace: {{ .Release.Namespace }}
-    nodeDrainTimeout: {{ .Values.controlPlane.nodeDrainTimeout }}
-    nodeVolumeDetachTimeout: {{ .Values.controlPlane.nodeVolumeDetachTimeout }}
-    nodeDeletionTimeout: {{ .Values.controlPlane.nodeDeletionTimeout }}
+    spec:
+      infrastructureRef:
+        kind: OpenStackMachineTemplate
+        apiGroup: infrastructure.cluster.x-k8s.io
+        name: {{ include "openstack-cluster.controlplane.mt.name" . }}
+      deletion:
+        nodeDrainTimeoutSeconds: {{ .Values.controlPlane.nodeDrainTimeoutSeconds }}
+        nodeVolumeDetachTimeoutSeconds: {{ .Values.controlPlane.nodeVolumeDetachTimeoutSeconds }}
+        nodeDeletionTimeoutSeconds: {{ .Values.controlPlane.nodeDeletionTimeoutSeconds }}
   kubeadmConfigSpec: {{
     omit
       (

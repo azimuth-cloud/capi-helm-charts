@@ -1,6 +1,6 @@
 {{- if .Values.controlPlane.healthCheck.enabled }}
 ---
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineHealthCheck
 metadata:
   name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}

@@ -101,6 +101,9 @@ clusterNetworking:
     # List of nameserver IPs to use when creating a cluster network.
     # This is only used if neither of networkFilter and subnetFilter are given
     dnsNameservers:
+    # The MTU to use if creating a cluster network
+    # This is only used if neither of networkFilter and subnetFilter are given
+    networkMTU:
 
 # Settings for registry mirrors
 # When a mirror is set, it will be tried for images but will fall back to the
@@ -145,12 +148,16 @@ etcd:
     # Set timeouts so that etcd tolerates 'slowness' (network + disks) better
     # This is at the expense of taking longer to detect a leader failure
     # https://etcd.io/docs/v3.5/tuning/#time-parameters
-    heartbeat-interval: "500"  # defaults to 100ms in etcd 3.5
-    election-timeout: "5000"   # defaults to 1000ms in etcd 3.5
+    - name: "heartbeat-interval"
+      value: "500"  # defaults to 100ms in etcd 3.5
+    - name: "election-timeout"
+      value: "5000"   # defaults to 1000ms in etcd 3.5
     # Set a slightly larger space quota than the default (default is 2GB)
-    quota-backend-bytes: "4294967296"
+    - name: "quota-backend-bytes"
+      value: "4294967296"
     # Listen for metrics on 0.0.0.0 so Prometheus can collect them
-    listen-metrics-urls: http://0.0.0.0:2381
+    - name: "listen-metrics-urls"
+      value: "http://0.0.0.0:2381"
   # At-rest encryption settings
   encryption:
     enabled: false
@@ -317,31 +324,32 @@ controlPlane:
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
-  nodeDrainTimeout: 5m0s
+  nodeDrainTimeoutSeconds: 300
   # The time to wait for a node to detach all volumes before it can be removed
-  nodeVolumeDetachTimeout: 5m0s
+  nodeVolumeDetachTimeoutSeconds: 300
   # The time to wait for the node resource to be deleted in Kubernetes when a
   # machine is marked for deletion
-  nodeDeletionTimeout: 5m0s
+  nodeDeletionTimeoutSeconds: 300
   # The remediation strategy for the control plane nodes
   # We set these so that we don't keep remediating an unhealthy control plane forever
-  remediationStrategy:
+  remediation:
     # The maximum number of times that a remediation will be retried
     maxRetry: 3
     # The amount of time that a node created as a remediation has to become healthy
     # before the remediation is retried
-    retryPeriod: 20m
+    retryPeriodSeconds: 1200
     # The length of time that a node must be healthy before any future problems are
     # considered unrelated to the previous ones (i.e. the retry count is reset)
-    minHealthyPeriod: 1h
+    minHealthyPeriodSeconds: 3600
   # The rollout strategy to use for the control plane nodes
   # By default, the strategy allows the control plane to begin provisioning new nodes
   # without first tearing down old ones
-  rolloutStrategy:
-    type: RollingUpdate
-    rollingUpdate:
-      # For the control plane, this can only be 0 or 1
-      maxSurge: 1
+  rollout:
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        # For the control plane, this can only be 0 or 1
+        maxSurge: 1
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
@@ -349,23 +357,28 @@ controlPlane:
       nodeRegistration:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
-          cloud-provider: external
+          - name: "cloud-provider"
+            value: "external"
     # As well as enabling an external cloud provider, we set the bind addresses for the
     # controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus can reach
     # them to collect metrics
     clusterConfiguration:
       controllerManager:
         extraArgs:
-          cloud-provider: external
-          bind-address: 0.0.0.0
+          - name: "cloud-provider"
+            value: "external"
+          - name: "bind-address"
+            value: 0.0.0.0
       scheduler:
         extraArgs:
-          bind-address: 0.0.0.0
+          - name: "bind-address"
+            value: 0.0.0.0
     joinConfiguration:
       nodeRegistration:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
-          cloud-provider: external
+          - name: "cloud-provider"
+            value: "external"
     kubeProxyConfiguration:
       metricsBindAddress: 0.0.0.0:10249
   # The machine health check for auto-healing of the control plane
@@ -375,19 +388,22 @@ controlPlane:
     enabled: true
     # The spec for the health check
     spec:
-      # By default, don't remediate control plane nodes when more than one is unhealthy
-      maxUnhealthy: 1
-      # If a node takes longer than 30 mins to startup, remediate it
-      nodeStartupTimeout: 30m0s
-      # By default, consider a control plane node that has not been Ready
-      # for more than 5 mins unhealthy
-      unhealthyConditions:
-        - type: Ready
-          status: Unknown
-          timeout: 5m0s
-        - type: Ready
-          status: "False"
-          timeout: 5m0s
+      checks:
+        # If a node takes longer than 30 mins to startup, remediate it
+        nodeStartupTimeoutSeconds: 1800
+        # By default, consider a control plane node that has not been Ready
+        # for more than 5 mins unhealthy
+        unhealthyNodeConditions:
+          - type: Ready
+            status: Unknown
+            timeoutSeconds: 300
+          - type: Ready
+            status: "False"
+            timeoutSeconds: 300
+      remediation:
+        triggerIf:
+          # By default, don't remediate control plane nodes when more than one is unhealthy
+          unhealthyLessThanOrEqualTo: 1
 
 # Defaults for node groups
 # Each of these can be overridden in the specification for an individual node group
@@ -437,27 +453,29 @@ nodeGroupDefaults:
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # The time to wait for a node to finish draining before it can be removed
-  nodeDrainTimeout: 5m0s
+  nodeDrainTimeoutSeconds: 300
   # The time to wait for a node to detach all volumes before it can be removed
-  nodeVolumeDetachTimeout: 5m0s
+  nodeVolumeDetachTimeoutSeconds: 300
   # The time to wait for the node resource to be deleted in Kubernetes when a
   # machine is marked for deletion
-  nodeDeletionTimeout: 5m0s
+  nodeDeletionTimeoutSeconds: 300
   # The rollout strategy to use for the node group
   # By default, this is set to do a rolling update within the existing resource envelope
   # of the node group, even if that means the node group temporarily has zero nodes
-  rolloutStrategy:
-    type: RollingUpdate
-    rollingUpdate:
-      # The maximum number of node group machines that can be unavailable during the update
-      # Can be an absolute number or a percentage of the desired count
-      maxUnavailable: 1
-      # The maximum number of machines that can be scheduled above the desired count for
-      # the group during an update
-      # Can be an absolute number or a percentage of the desired count
-      maxSurge: 0
-      # One of Random, Newest, Oldest
-      deletePolicy: Random
+  rollout:
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        # The maximum number of node group machines that can be unavailable during the update
+        # Can be an absolute number or a percentage of the desired count
+        maxUnavailable: 1
+        # The maximum number of machines that can be scheduled above the desired count for
+        # the group during an update
+        # Can be an absolute number or a percentage of the desired count
+        maxSurge: 0
+  deletion:
+    # One of Random, Newest, Oldest
+    order: Random
   # The default kubeadm config specification for worker nodes
   # This will be merged with any configuration given for specific node groups
   # By default, this uses a simple configuration that enables the external cloud provider
@@ -466,7 +484,8 @@ nodeGroupDefaults:
       nodeRegistration:
         name: '{{ local_hostname }}'
         kubeletExtraArgs:
-          cloud-provider: external
+          - name: "cloud-provider"
+            value: "external"
   # The default machine health check for worker nodes
   # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
   # Note that maxUnhealthy or unhealthRange are evaluated per node group
@@ -475,21 +494,24 @@ nodeGroupDefaults:
     enabled: true
     # The spec for the health check
     spec:
-      # We have a control place feature gate enabled which blocks all worker node remediation if
-      # control plane is unhealthy, so should be safe to reset worker remediation threshold to
-      # 100% without the risk of runaway remediations.
-      maxUnhealthy: 100%
-      # If a node takes longer than 30 mins to startup, remediate it
-      nodeStartupTimeout: 30m0s
-      # By default, consider a worker node that has not been Ready for
-      # more than 5 mins unhealthy
-      unhealthyConditions:
-        - type: Ready
-          status: Unknown
-          timeout: 5m0s
-        - type: Ready
-          status: "False"
-          timeout: 5m0s
+      checks:
+        # If a node takes longer than 30 mins to startup, remediate it
+        nodeStartupTimeoutSeconds: 1800
+        # By default, consider a control plane node that has not been Ready
+        # for more than 5 mins unhealthy
+        unhealthyNodeConditions:
+          - type: Ready
+            status: Unknown
+            timeoutSeconds: 300
+          - type: Ready
+            status: "False"
+            timeoutSeconds: 300
+      remediation:
+        triggerIf:
+          # We have a control place feature gate enabled which blocks all worker node remediation if
+          # control plane is unhealthy, so should be safe to reset worker remediation threshold to
+          # 100% without the risk of runaway remediations.
+          unhealthyLessThanOrEqualTo: 100%
 
 # The worker node groups for the cluster
 nodeGroups:

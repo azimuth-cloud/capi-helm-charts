@@ -725,7 +725,7 @@ templated manifests should match snapshot:
       managedSubnets:
         - cidr: 192.168.3.0/24
   27: |
-    apiVersion: cluster.x-k8s.io/v1beta1
+    apiVersion: cluster.x-k8s.io/v1beta2
     kind: Cluster
     metadata:
       annotations: {}
@@ -745,17 +745,15 @@ templated manifests should match snapshot:
           cidrBlocks:
             - 172.24.0.0/13
       controlPlaneRef:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        apiGroup: controlplane.cluster.x-k8s.io
         kind: KubeadmControlPlane
         name: RELEASE-NAME-control-plane
-        namespace: NAMESPACE
       infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: OpenStackCluster
         name: RELEASE-NAME
-        namespace: NAMESPACE
   28: |
-    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta2
     kind: KubeadmControlPlane
     metadata:
       annotations:
@@ -772,8 +770,10 @@ templated manifests should match snapshot:
         clusterConfiguration:
           apiServer:
             extraArgs:
-              admission-control-config-file: /etc/kubernetes/admission/configuration.yaml
-              v: "2"
+              - name: admission-control-config-file
+                value: /etc/kubernetes/admission/configuration.yaml
+              - name: v
+                value: "2"
             extraVolumes:
               - hostPath: /etc/kubernetes/admission
                 mountPath: /etc/kubernetes/admission
@@ -782,19 +782,26 @@ templated manifests should match snapshot:
                 readOnly: true
           controllerManager:
             extraArgs:
-              bind-address: 0.0.0.0
-              cloud-provider: external
+              - name: cloud-provider
+                value: external
+              - name: bind-address
+                value: 0.0.0.0
           etcd:
             local:
               dataDir: /var/lib/etcd
               extraArgs:
-                election-timeout: "5000"
-                heartbeat-interval: "500"
-                listen-metrics-urls: http://0.0.0.0:2381
-                quota-backend-bytes: "4294967296"
+                - name: heartbeat-interval
+                  value: "500"
+                - name: election-timeout
+                  value: "5000"
+                - name: quota-backend-bytes
+                  value: "4294967296"
+                - name: listen-metrics-urls
+                  value: http://0.0.0.0:2381
           scheduler:
             extraArgs:
-              bind-address: 0.0.0.0
+              - name: bind-address
+                value: 0.0.0.0
         files:
           - contentFrom:
               secret:
@@ -869,12 +876,14 @@ templated manifests should match snapshot:
         initConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
-              cloud-provider: external
+              - name: cloud-provider
+                value: external
             name: '{{ local_hostname }}'
         joinConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
-              cloud-provider: external
+              - name: cloud-provider
+                value: external
             name: '{{ local_hostname }}'
         preKubeadmCommands:
           - |-
@@ -888,30 +897,32 @@ templated manifests should match snapshot:
             EOF
           - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
       machineTemplate:
-        infrastructureRef:
-          apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-          kind: OpenStackMachineTemplate
-          name: RELEASE-NAME-control-plane-e39a716c
-          namespace: NAMESPACE
         metadata:
           labels:
             capi.stackhpc.com/cluster: RELEASE-NAME
             capi.stackhpc.com/component: control-plane
-        nodeDeletionTimeout: 5m0s
-        nodeDrainTimeout: 5m0s
-        nodeVolumeDetachTimeout: 5m0s
-      remediationStrategy:
+        spec:
+          deletion:
+            nodeDeletionTimeoutSeconds: 300
+            nodeDrainTimeoutSeconds: 300
+            nodeVolumeDetachTimeoutSeconds: 300
+          infrastructureRef:
+            apiGroup: infrastructure.cluster.x-k8s.io
+            kind: OpenStackMachineTemplate
+            name: RELEASE-NAME-control-plane-e39a716c
+      remediation:
         maxRetry: 3
-        minHealthyPeriod: 1h
-        retryPeriod: 20m
+        minHealthyPeriodSeconds: 3600
+        retryPeriodSeconds: 1200
       replicas: 3
-      rolloutStrategy:
-        rollingUpdate:
-          maxSurge: 1
-        type: RollingUpdate
+      rollout:
+        strategy:
+          rollingUpdate:
+            maxSurge: 1
+          type: RollingUpdate
       version: v1.29.2
   29: |
-    apiVersion: cluster.x-k8s.io/v1beta1
+    apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineHealthCheck
     metadata:
       labels:
@@ -922,20 +933,23 @@ templated manifests should match snapshot:
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-control-plane
     spec:
+      checks:
+        nodeStartupTimeoutSeconds: 1800
+        unhealthyNodeConditions:
+          - status: Unknown
+            timeoutSeconds: 300
+            type: Ready
+          - status: "False"
+            timeoutSeconds: 300
+            type: Ready
       clusterName: RELEASE-NAME
-      maxUnhealthy: 1
-      nodeStartupTimeout: 30m0s
+      remediation:
+        triggerIf:
+          unhealthyLessThanOrEqualTo: 1
       selector:
         matchLabels:
           capi.stackhpc.com/cluster: RELEASE-NAME
           capi.stackhpc.com/component: control-plane
-      unhealthyConditions:
-        - status: Unknown
-          timeout: 5m0s
-          type: Ready
-        - status: "False"
-          timeout: 5m0s
-          type: Ready
   30: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
@@ -977,11 +991,11 @@ templated manifests should match snapshot:
         kind: AdmissionConfiguration
         plugins: []
   32: |
-    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+    apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: d43bd1bb079c9f949f46b9f6bf89e1e1027a45756426801398f5ab1199a331c4
+        capi.stackhpc.com/template-checksum: c8e20309a264ffa642f909594d0726d6155cef467f05e575d96e2d4b40f5618b
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -990,7 +1004,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-d43bd1bb
+      name: RELEASE-NAME-group-1-c8e20309
     spec:
       template:
         spec:
@@ -1053,8 +1067,10 @@ templated manifests should match snapshot:
           joinConfiguration:
             nodeRegistration:
               kubeletExtraArgs:
-                cloud-provider: external
-                node-labels: capi.stackhpc.com/node-group=group-1
+                - name: node-labels
+                  value: capi.stackhpc.com/node-group=group-1
+                - name: cloud-provider
+                  value: external
               name: '{{ local_hostname }}'
           preKubeadmCommands:
             - |-
@@ -1067,7 +1083,7 @@ templated manifests should match snapshot:
               systemctl restart containerd
               EOF
   33: |
-    apiVersion: cluster.x-k8s.io/v1beta1
+    apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineDeployment
     metadata:
       annotations: null
@@ -1081,19 +1097,21 @@ templated manifests should match snapshot:
       name: RELEASE-NAME-group-1
     spec:
       clusterName: RELEASE-NAME
+      deletion:
+        order: Random
       replicas: 1
+      rollout:
+        strategy:
+          rollingUpdate:
+            maxSurge: 0
+            maxUnavailable: 1
+          type: RollingUpdate
       selector:
         matchLabels:
           capi.stackhpc.com/cluster: RELEASE-NAME
           capi.stackhpc.com/component: worker
           capi.stackhpc.com/node-group: group-1
           cluster.x-k8s.io/cluster-name: RELEASE-NAME
-      strategy:
-        rollingUpdate:
-          deletePolicy: Random
-          maxSurge: 0
-          maxUnavailable: 1
-        type: RollingUpdate
       template:
         metadata:
           labels:
@@ -1103,20 +1121,21 @@ templated manifests should match snapshot:
         spec:
           bootstrap:
             configRef:
-              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+              apiGroup: bootstrap.cluster.x-k8s.io
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-d43bd1bb
+              name: RELEASE-NAME-group-1-c8e20309
           clusterName: RELEASE-NAME
+          deletion:
+            nodeDeletionTimeoutSeconds: 300
+            nodeDrainTimeoutSeconds: 300
+            nodeVolumeDetachTimeoutSeconds: 300
           infrastructureRef:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            apiGroup: infrastructure.cluster.x-k8s.io
             kind: OpenStackMachineTemplate
             name: RELEASE-NAME-group-1-974c4cfd
-          nodeDeletionTimeout: 5m0s
-          nodeDrainTimeout: 5m0s
-          nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
   34: |
-    apiVersion: cluster.x-k8s.io/v1beta1
+    apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineHealthCheck
     metadata:
       labels:
@@ -1128,21 +1147,24 @@ templated manifests should match snapshot:
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-group-1
     spec:
+      checks:
+        nodeStartupTimeoutSeconds: 1800
+        unhealthyNodeConditions:
+          - status: Unknown
+            timeoutSeconds: 300
+            type: Ready
+          - status: "False"
+            timeoutSeconds: 300
+            type: Ready
       clusterName: RELEASE-NAME
-      maxUnhealthy: 100%
-      nodeStartupTimeout: 30m0s
+      remediation:
+        triggerIf:
+          unhealthyLessThanOrEqualTo: 100%
       selector:
         matchLabels:
           capi.stackhpc.com/cluster: RELEASE-NAME
           capi.stackhpc.com/component: worker
           capi.stackhpc.com/node-group: group-1
-      unhealthyConditions:
-        - status: Unknown
-          timeout: 5m0s
-          type: Ready
-        - status: "False"
-          timeout: 5m0s
-          type: Ready
   35: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
