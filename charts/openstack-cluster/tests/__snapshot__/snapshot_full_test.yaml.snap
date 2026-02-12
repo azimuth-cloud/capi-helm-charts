@@ -86,7 +86,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.29.3
+        version: v3.31.3
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -883,7 +883,7 @@ templated manifests should match snapshot:
       chart:
         name: prometheus-blackbox-exporter
         repo: https://prometheus-community.github.io/helm-charts
-        version: 9.4.0
+        version: 11.8.0
       clusterName: RELEASE-NAME
       releaseName: prometheus-blackbox-exporter
       targetNamespace: monitoring-system

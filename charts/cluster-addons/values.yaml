@@ -16,7 +16,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.29.3
+      version: v3.31.3
     release:
       namespace: tigera-operator
       values:
@@ -42,7 +42,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.17.0
+      version: 1.19.0
     release:
       namespace: kube-system
       values: {}
@@ -302,7 +302,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: prometheus-blackbox-exporter
-      version: 9.4.0
+      version: 11.8.0
     release:
       namespace: monitoring-system
       values: {}
