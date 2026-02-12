@@ -60,9 +60,15 @@ jobs:
           - key: kube-prometheus-stack
             path: monitoring.kubePrometheusStack.chart
 
+          - key: loki
+            path: monitoring.loki_v2.chart
+
           - key: loki-stack
             path: monitoring.lokiStack.chart
 
+          - key: promtail
+            path: monitoring.promtail.chart
+            
           - key: prometheus-blackbox-exporter
             path: monitoring.blackboxExporter.chart
 
