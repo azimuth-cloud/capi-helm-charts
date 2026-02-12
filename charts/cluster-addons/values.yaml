@@ -16,7 +16,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.31.3
+      version: v3.29.3
     release:
       namespace: tigera-operator
       values:
@@ -42,7 +42,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.19.0
+      version: 1.17.0
     release:
       namespace: kube-system
       values: {}
@@ -309,7 +309,21 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-
+  # Configuration for the blackbox exporter
+  blackboxExporter:
+    enabled: true
+    chart:
+      repo: https://prometheus-community.github.io/helm-charts
+      name: prometheus-blackbox-exporter
+      version: 9.4.0
+    release:
+      namespace: monitoring-system
+      values: {}
+        # Example of adding additional scrape targets
+        # serviceMonitor:
+        #   targets:
+        #     - name: example
+        #       url: http://example.com/healthz
   promtail:
     enabled: false
     chart:
@@ -319,6 +333,7 @@ monitoring:
     release:
       namespace: monitoring-system
       values: {}
+
   alloy:
     enabled: false
     chart:
@@ -327,7 +342,14 @@ monitoring:
       version: 1.5.2
     release:
       namespace: monitoring-system
-      values: {}
+      values: 
+        crds:
+          create: false
+        controller:
+          type: 'daemonset'
+          tolerations:
+            - operator: Exists
+            
   # Note(sd109): Loki v2 is the successor to the lokiStack addon since the Helm
   # chart for the latter is no longer maintained upstream.
 
@@ -416,55 +438,96 @@ monitoring:
       # The chart repository that contains the chart to use
       repo: https://grafana.github.io/helm-charts
       # The name of the chart to use
-      name: loki-v3
+      name: loki
       # The version of the chart to use (must be an exact version)
-      version: 6.49.0
+      version: 6.52.0
     # The Helm values to use for the release
     release:
       namespace: monitoring-system
       values:
+        deploymentMode: SingleBinary
+        backend:
+          replicas: 0
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+        ingester:
+          replicas: 0
+        querier:
+          replicas: 0
+        queryFrontend:
+          replicas: 0
+        queryScheduler:
+          replicas: 0
+        distributor:
+          replicas: 0
+        compactor:
+          replicas: 0
+        indexGateway:
+          replicas: 0
+        bloomCompactor:
+          replicas: 0
+        bloomGateway:
+          replicas: 0
         # In case historical logs are required, configure fullnameOverride to
         # ensure that resource names match the old loki-stack
         # HelmRelease so that it correctly re-adopts the PVC
-        fullnameOverride: loki-stack
+        #fullnameOverride: loki-stack
         loki:
+          schemaConfig:
+            configs:
+              - from: "2024-04-01"
+                store: tsdb
+                object_store: filesystem
+                schema: v13
+                index:
+                  prefix: loki_index_
+                  period: 24h
+          storage:
+            type: 'filesystem'          
           compactor:
             retention_enabled: true
-          limits_config:
-            retention_period: 72h
+            delete_request_store: filesystem
           auth_enabled: false
           commonConfig:
             replication_factor: 1
+          limits_config:
+            allow_structured_metadata: true
+            volume_enabled: true
+            retention_period: 72h
+          ruler:
+            enable_api: true
             # If historical logs are required, configure Loki to use same
             # path inside the data PVC as old loki-stack.
-            path_prefix: /var/loki/loki-v3
-          storage:
-            type: 'filesystem'
+           # path_prefix: /var/loki/loki-v3
+          # storage:
+          #   type: 'filesystem'
             # If historical logs are required, configure Loki to
             # store data in /var/loki to match loki-stack
-            filesystem:
-              chunks_directory: /var/loki/loki-v3/chunks
-              rules_directory: /var/loki/loki-v3/rules
+            # filesystem:
+            #   chunks_directory: /var/loki/loki-v3/chunks
+            #   rules_directory: /var/loki/loki-v3/rules
           # If historical logs are required, additional schema configuration
           # is needed to allow loki to ingest old loki-stack logging data.
           # For example:
-          schemaConfig:
-            configs:
-                # The "from" date marks from when the old data was written
-              - from: "2020-10-24"
-                index:
-                  period: 24h
-                  prefix: index_
-                object_store: filesystem
-                schema: v11
-                store: boltdb-shipper
-              - from: "2026-01-19"
-                object_store: s3
-                store: tsdb
-                schema: v13
-                index:
-                  prefix: index_
-                  period: 24h
+          # schemaConfig:
+          #   configs:
+          #       # The "from" date marks from when the old data was written
+          #     - from: "2020-10-24"
+          #       index:
+          #         period: 24h
+          #         prefix: index_
+          #       object_store: filesystem
+          #       schema: v11
+          #       store: boltdb-shipper
+          #     - from: "2026-01-19"
+          #       object_store: s3
+          #       store: tsdb
+          #       schema: v13
+          #       index:
+          #         prefix: index_
+          #         period: 24h
               #   # The "from" date marks from when the new data is written
               # - from: "2025-10-17"
               #   index:
@@ -481,22 +544,6 @@ monitoring:
             size: 10Gi
             # Required to allow resizing of PVC during Helm upgrades
             enableStatefulSetAutoDeletePVC: false
-
-  # Configuration for the blackbox exporter
-  blackboxExporter:
-    enabled: true
-    chart:
-      repo: https://prometheus-community.github.io/helm-charts
-      name: prometheus-blackbox-exporter
-      version: 11.8.0
-    release:
-      namespace: monitoring-system
-      values: {}
-        # Example of adding additional scrape targets
-        # serviceMonitor:
-        #   targets:
-        #     - name: example
-        #       url: http://example.com/healthz
 
 # Settings for node feature discovery
 # https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
