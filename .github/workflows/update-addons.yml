@@ -69,7 +69,7 @@ jobs:
           - key: promtail
             path: monitoring.promtail.chart
           
-          - key: loki-v3
+          - key: loki
             path: monitoring.loki_v3.chart
 
           - key: alloy
