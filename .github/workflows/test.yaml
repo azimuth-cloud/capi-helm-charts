@@ -8,6 +8,9 @@ on:
       chart-version:
         type: string
         description: The version of the charts to test
+      kind-image-tag:
+        type: string
+        description: The image tag to use for Kind
       ref:
         type: string
         description: The Git ref under test.
@@ -32,7 +35,9 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.8.0
+        uses: helm/kind-action@v1.13.0
+        with:
+          node_image: docker.io/kindest/node:${{ inputs.kind-image-tag }}
 
       - name: Set up test environment
         uses: ./.github/actions/setup
@@ -106,7 +111,9 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.8.0
+        uses: helm/kind-action@v1.13.0
+        with:
+          node_image: docker.io/kindest/node:${{ inputs.kind-image-tag }}
 
       - name: Set up test environment
         uses: ./.github/actions/setup
@@ -180,7 +187,9 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.8.0
+        uses: helm/kind-action@v1.13.0
+        with:
+          node_image: docker.io/kindest/node:${{ inputs.kind-image-tag }}
 
       - name: Set up test environment
         uses: ./.github/actions/setup
@@ -254,7 +263,9 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.8.0
+        uses: helm/kind-action@v1.13.0
+        with:
+          node_image: docker.io/kindest/node:${{ inputs.kind-image-tag }}
 
       - name: Set up test environment
         uses: ./.github/actions/setup
@@ -370,7 +381,9 @@ jobs:
           OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.8.0
+        uses: helm/kind-action@v1.13.0
+        with:
+          node_image: docker.io/kindest/node:${{ inputs.kind-image-tag }}
 
       # For the setup, we use a merged dependencies file in case new dependencies
       # are added by the code under test, ensuring that the older dependencies are
