@@ -328,7 +328,7 @@ monitoring:
       version: 1.5.2
     release:
       namespace: monitoring-system
-      values: 
+      values:
         crds:
           create: false
         controller:
@@ -472,7 +472,7 @@ monitoring:
                   prefix: loki_index_
                   period: 24h
           storage:
-            type: 'filesystem'          
+            type: 'filesystem'
           compactor:
             retention_enabled: true
             delete_request_store: filesystem
