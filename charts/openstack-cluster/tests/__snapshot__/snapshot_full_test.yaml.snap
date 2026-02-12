@@ -733,49 +733,6 @@ templated manifests should match snapshot:
       labels:
         addons.stackhpc.com/watch: ""
         capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: kubernetes-dashboard
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-kubernetes-dashboard-config
-    stringData:
-      defaults: |
-        metricsScraper:
-          enabled: true
-      overrides: |
-        {}
-  28: |
-    apiVersion: addons.stackhpc.com/v1alpha1
-    kind: HelmRelease
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: kubernetes-dashboard
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-kubernetes-dashboard
-    spec:
-      bootstrap: true
-      chart:
-        name: kubernetes-dashboard
-        repo: https://kubernetes-retired.github.io/dashboard
-        version: 6.0.8
-      clusterName: RELEASE-NAME
-      releaseName: kubernetes-dashboard
-      targetNamespace: kubernetes-dashboard
-      valuesSources:
-        - secret:
-            key: defaults
-            name: RELEASE-NAME-kubernetes-dashboard-config
-        - secret:
-            key: overrides
-            name: RELEASE-NAME-kubernetes-dashboard-config
-  29: |
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      labels:
-        addons.stackhpc.com/watch: ""
-        capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: mellanox-network-operator
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: addons-0.1.0
@@ -813,7 +770,7 @@ templated manifests should match snapshot:
           deploy: false
       overrides: |
         {}
-  30: |
+  28: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -839,7 +796,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-mellanox-network-operator-config
-  31: |
+  29: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -860,7 +817,7 @@ templated manifests should match snapshot:
           maxUnavailable: 1
       overrides: |
         {}
-  32: |
+  30: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -886,7 +843,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-metrics-server-config
-  33: |
+  31: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -911,7 +868,7 @@ templated manifests should match snapshot:
           {% endif %}
       overrides: |
         {}
-  34: |
+  32: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -937,7 +894,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-blackbox-exporter-config
-  35: |
+  33: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -954,7 +911,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: blackbox-exporter-dashboards\n  labels:\n    grafana_dashboard: \"1\"\ndata:\n  blackbox-exporter-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"datasource\",\n              \"uid\": \"grafana\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Blackbox exporter HTTP prober dashboard\",\n      \"editable\": true,\n      \"fiscalYearStartMonth\": 0,\n      \"gnetId\": 13659,\n      \"graphTooltip\": 0,\n      \"id\": 34,\n      \"links\": [],\n      \"liveNow\": false,\n      \"panels\": [\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"description\": \"\",\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"thresholds\"\n              },\n              \"custom\": {\n                \"align\": \"left\",\n                \"cellOptions\": {\n                  \"type\": \"auto\"\n                },\n                \"filterable\": true,\n                \"inspect\": false\n              },\n              \"mappings\": [],\n              \"min\": 0,\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  }\n                ]\n              }\n            },\n            \"overrides\": [\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"SSL Cert Expiry (days)\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"decimals\",\n                    \"value\": 0\n                  },\n                  {\n                    \"id\": \"thresholds\",\n                    \"value\": {\n                      \"mode\": \"absolute\",\n                      \"steps\": [\n                        {\n                          \"color\": \"rgba(0, 0, 0, 0)\",\n                          \"value\": null\n                        },\n                        {\n                          \"color\": \"red\",\n                          \"value\": 0\n                        },\n                        {\n                          \"color\": \"orange\",\n                          \"value\": 7\n                        },\n                        {\n                          \"color\": \"green\",\n                          \"value\": 30\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    \"id\": \"custom.cellOptions\",\n                    \"value\": {\n                      \"mode\": \"basic\",\n                      \"type\": \"gauge\"\n                    }\n                  },\n                  {\n                    \"id\": \"min\",\n                    \"value\": 0\n                  },\n                  {\n                    \"id\": \"max\",\n                    \"value\": 365\n                  },\n                  {\n                    \"id\": \"custom.filterable\",\n                    \"value\": false\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"Status\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"mappings\",\n                    \"value\": [\n                      {\n                        \"options\": {\n                          \"0\": {\n                            \"text\": \"DOWN\"\n                          },\n                          \"1\": {\n                            \"text\": \"UP\"\n                          }\n                        },\n                        \"type\": \"value\"\n                      }\n                    ]\n                  },\n                  {\n                    \"id\": \"thresholds\",\n                    \"value\": {\n                      \"mode\": \"absolute\",\n                      \"steps\": [\n                        {\n                          \"color\": \"red\",\n                          \"value\": null\n                        },\n                        {\n                          \"color\": \"green\",\n                          \"value\": 1\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    \"id\": \"custom.cellOptions\",\n                    \"value\": {\n                      \"mode\": \"gradient\",\n                      \"type\": \"color-background\"\n                    }\n                  },\n                  {\n                    \"id\": \"custom.width\",\n                    \"value\": 76\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"Code\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"thresholds\",\n                    \"value\": {\n                      \"mode\": \"absolute\",\n                      \"steps\": [\n                        {\n                          \"color\": \"rgba(0, 0, 0, 0)\",\n                          \"value\": null\n                        },\n                        {\n                          \"color\": \"green\",\n                          \"value\": 200\n                        },\n                        {\n                          \"color\": \"orange\",\n                          \"value\": 300\n                        },\n                        {\n                          \"color\": \"red\",\n                          \"value\": 500\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    \"id\": \"custom.cellOptions\",\n                    \"value\": {\n                      \"mode\": \"gradient\",\n                      \"type\": \"color-background\"\n                    }\n                  },\n                  {\n                    \"id\": \"mappings\",\n                    \"value\": [\n                      {\n                        \"options\": {\n                          \"0\": {\n                            \"text\": \"\"\n                          }\n                        },\n                        \"type\": \"value\"\n                      }\n                    ]\n                  },\n                  {\n                    \"id\": \"custom.width\",\n                    \"value\": 78\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"SSL\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"mappings\",\n                    \"value\": [\n                      {\n                        \"options\": {\n                          \"0\": {\n                            \"text\": \"NO\"\n                          },\n                          \"1\": {\n                            \"text\": \"OK\"\n                          }\n                        },\n                        \"type\": \"value\"\n                      }\n                    ]\n                  },\n                  {\n                    \"id\": \"thresholds\",\n                    \"value\": {\n                      \"mode\": \"absolute\",\n                      \"steps\": [\n                        {\n                          \"color\": \"rgba(3, 3, 3, 0)\",\n                          \"value\": null\n                        },\n                        {\n                          \"color\": \"red\",\n                          \"value\": 0\n                        },\n                        {\n                          \"color\": \"green\",\n                          \"value\": 1\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    \"id\": \"custom.cellOptions\",\n                    \"value\": {\n                      \"mode\": \"gradient\",\n                      \"type\": \"color-background\"\n                    }\n                  },\n                  {\n                    \"id\": \"custom.width\",\n                    \"value\": 77\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"Probe Duration (s)\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"thresholds\",\n                    \"value\": {\n                      \"mode\": \"absolute\",\n                      \"steps\": [\n                        {\n                          \"color\": \"green\",\n                          \"value\": null\n                        },\n                        {\n                          \"color\": \"orange\",\n                          \"value\": 0.8\n                        },\n                        {\n                          \"color\": \"red\",\n                          \"value\": 2\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    \"id\": \"custom.cellOptions\",\n                    \"value\": {\n                      \"mode\": \"basic\",\n                      \"type\": \"gauge\"\n                    }\n                  },\n                  {\n                    \"id\": \"custom.filterable\",\n                    \"value\": false\n                  },\n                  {\n                    \"id\": \"decimals\",\n                    \"value\": 2\n                  },\n                  {\n                    \"id\": \"max\",\n                    \"value\": 3\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"DNS Lookup Duration (s)\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"thresholds\",\n                    \"value\": {\n                      \"mode\": \"absolute\",\n                      \"steps\": [\n                        {\n                          \"color\": \"green\",\n                          \"value\": null\n                        },\n                        {\n                          \"color\": \"orange\",\n                          \"value\": 0.1\n                        },\n                        {\n                          \"color\": \"red\",\n                          \"value\": 0.2\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    \"id\": \"max\",\n                    \"value\": 0.3\n                  },\n                  {\n                    \"id\": \"custom.cellOptions\",\n                    \"value\": {\n                      \"mode\": \"basic\",\n                      \"type\": \"gauge\"\n                    }\n                  },\n                  {\n                    \"id\": \"custom.filterable\",\n                    \"value\": false\n                  },\n                  {\n                    \"id\": \"decimals\",\n                    \"value\": 3\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"Target\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"links\",\n                    \"value\": [\n                      {\n                        \"targetBlank\": true,\n                        \"title\": \"${__data.fields.Target}\",\n                        \"url\": \"${__data.fields.Instance}\"\n                      }\n                    ]\n                  },\n                  {\n                    \"id\": \"custom.width\",\n                    \"value\": 276\n                  }\n                ]\n              },\n              {\n                \"matcher\": {\n                  \"id\": \"byName\",\n                  \"options\": \"TLS Version\"\n                },\n                \"properties\": [\n                  {\n                    \"id\": \"custom.width\",\n                    \"value\": 117\n                  }\n                ]\n              }\n            ]\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 2,\n          \"options\": {\n            \"cellHeight\": \"sm\",\n            \"footer\": {\n              \"countRows\": false,\n              \"fields\": \"\",\n              \"reducer\": [\n                \"sum\"\n              ],\n              \"show\": false\n            },\n            \"showHeader\": true,\n            \"sortBy\": [\n              {\n                \"desc\": false,\n                \"displayName\": \"SSL Cert Expiry (days)\"\n              }\n            ]\n          },\n          \"pluginVersion\": \"10.2.3\",\n          \"repeatDirection\": \"h\",\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"probe_success{target=~\\\"$target\\\"}\",\n              \"format\": \"table\",\n              \"instant\": true,\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"A\"\n            },\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"probe_http_ssl{target=~\\\"$target\\\"} > 0\",\n              \"format\": \"table\",\n              \"instant\": true,\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"B\"\n            },\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"(probe_ssl_earliest_cert_expiry{target=~\\\"$target\\\"} - time()) / 3600 / 24\",\n              \"format\": \"table\",\n              \"instant\": true,\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"C\"\n            },\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"probe_http_status_code{target=~\\\"$target\\\"} > 0\",\n              \"format\": \"table\",\n              \"instant\": true,\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"D\"\n            },\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"avg_over_time(probe_duration_seconds{target=~\\\"$target\\\"}[1m])\",\n              \"format\": \"table\",\n              \"hide\": false,\n              \"instant\": false,\n              \"interval\": \"\",\n              \"intervalFactor\": 1,\n              \"legendFormat\": \"\",\n              \"refId\": \"E\"\n            },\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"probe_tls_version_info{target=~\\\"$target\\\"}\",\n              \"format\": \"table\",\n              \"instant\": true,\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"F\"\n            },\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"avg_over_time(probe_dns_lookup_time_seconds{target=~\\\"$target\\\"}[1m])\",\n              \"format\": \"table\",\n              \"instant\": true,\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"G\"\n            }\n          ],\n          \"title\": \"HTTP Probe Overview\",\n          \"transformations\": [\n            {\n              \"id\": \"seriesToColumns\",\n              \"options\": {\n                \"byField\": \"target\"\n              }\n            },\n            {\n              \"id\": \"organize\",\n              \"options\": {\n                \"excludeByName\": {\n                  \"Time\": true,\n                  \"Time 1\": true,\n                  \"Time 2\": true,\n                  \"Time 3\": true,\n                  \"Time 4\": true,\n                  \"Time 5\": true,\n                  \"Time 6\": true,\n                  \"Time 7\": true,\n                  \"Time 8\": true,\n                  \"Value\": false,\n                  \"Value #A\": false,\n                  \"Value #B\": false,\n                  \"Value #F\": true,\n                  \"__name__\": true,\n                  \"__name__ 1\": true,\n                  \"__name__ 2\": true,\n                  \"__name__ 3\": true,\n                  \"__name__ 4\": true,\n                  \"__name__ 5\": true,\n                  \"__name__ 6\": true,\n                  \"__name__ 7\": true,\n                  \"container 1\": true,\n                  \"container 2\": true,\n                  \"container 3\": true,\n                  \"container 4\": true,\n                  \"container 5\": true,\n                  \"container 6\": true,\n                  \"container 7\": true,\n                  \"endpoint 1\": true,\n                  \"endpoint 2\": true,\n                  \"endpoint 3\": true,\n                  \"endpoint 4\": true,\n                  \"endpoint 5\": true,\n                  \"endpoint 6\": true,\n                  \"endpoint 7\": true,\n                  \"instance 1\": true,\n                  \"instance 2\": true,\n                  \"instance 3\": true,\n                  \"instance 4\": true,\n                  \"instance 5\": true,\n                  \"instance 6\": true,\n                  \"instance 7\": true,\n                  \"job\": true,\n                  \"job 1\": true,\n                  \"job 2\": true,\n                  \"job 3\": true,\n                  \"job 4\": true,\n                  \"job 5\": true,\n                  \"job 6\": true,\n                  \"job 7\": true,\n                  \"job 8\": true,\n                  \"namespace 1\": true,\n                  \"namespace 2\": true,\n                  \"namespace 3\": true,\n                  \"namespace 4\": true,\n                  \"namespace 5\": true,\n                  \"namespace 6\": true,\n                  \"namespace 7\": true,\n                  \"phase\": true,\n                  \"pod 1\": true,\n                  \"pod 2\": true,\n                  \"pod 3\": true,\n                  \"pod 4\": true,\n                  \"pod 5\": true,\n                  \"pod 6\": true,\n                  \"pod 7\": true,\n                  \"service 1\": true,\n                  \"service 2\": true,\n                  \"service 3\": true,\n                  \"service 4\": true,\n                  \"service 5\": true,\n                  \"service 6\": true,\n                  \"service 7\": true,\n                  \"type\": true,\n                  \"type 1\": true,\n                  \"type 2\": true,\n                  \"type 3\": true,\n                  \"type 4\": true,\n                  \"type 5\": true,\n                  \"type 6\": true,\n                  \"type 7\": true,\n                  \"type 8\": true,\n                  \"version\": false\n                },\n                \"includeByName\": {},\n                \"indexByName\": {\n                  \"Time 1\": 9,\n                  \"Time 2\": 13,\n                  \"Time 3\": 17,\n                  \"Time 4\": 20,\n                  \"Time 5\": 24,\n                  \"Time 6\": 28,\n                  \"Time 7\": 32,\n                  \"Value #A\": 1,\n                  \"Value #B\": 3,\n                  \"Value #C\": 5,\n                  \"Value #D\": 2,\n                  \"Value #E\": 6,\n                  \"Value #F\": 8,\n                  \"Value #G\": 7,\n                  \"__name__ 1\": 10,\n                  \"__name__ 2\": 14,\n                  \"__name__ 3\": 21,\n                  \"__name__ 4\": 25,\n                  \"__name__ 5\": 29,\n                  \"instance\": 1,\n                  \"job 1\": 11,\n                  \"job 2\": 15,\n                  \"job 3\": 18,\n                  \"job 4\": 22,\n                  \"job 5\": 26,\n                  \"job 6\": 30,\n                  \"target\": 0,\n                  \"type 1\": 12,\n                  \"type 2\": 16,\n                  \"type 3\": 19,\n                  \"type 4\": 23,\n                  \"type 5\": 27,\n                  \"type 6\": 31,\n                  \"version\": 4\n                },\n                \"renameByName\": {\n                  \"Value\": \"Up\",\n                  \"Value #A\": \"Status\",\n                  \"Value #B\": \"SSL\",\n                  \"Value #C\": \"SSL Cert Expiry (days)\",\n                  \"Value #D\": \"Code\",\n                  \"Value #E\": \"Probe Duration (s)\",\n                  \"Value #F\": \"\",\n                  \"Value #G\": \"DNS Lookup Duration (s)\",\n                  \"Value #H\": \"Probe IP\",\n                  \"instance\": \"URL\",\n                  \"target\": \"Target\",\n                  \"type 6\": \"\",\n                  \"version\": \"TLS Version\"\n                }\n              }\n            }\n          ],\n          \"transparent\": true,\n          \"type\": \"table\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"axisSoftMax\": 599,\n                \"barAlignment\": 0,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"smooth\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"auto\",\n                \"spanNulls\": true,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"dashed+area\"\n                }\n              },\n              \"mappings\": [],\n              \"max\": 600,\n              \"min\": 0,\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"#EAB839\",\n                    \"value\": 300\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 500\n                  }\n                ]\n              },\n              \"unit\": \"none\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 9,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 8\n          },\n          \"id\": 5,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"editorMode\": \"code\",\n              \"exemplar\": true,\n              \"expr\": \"sum(probe_http_status_code{target=~\\\"$target\\\"}) by(target)\",\n              \"instant\": false,\n              \"legendFormat\": \"{{target}}\",\n              \"range\": true,\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"HTTP Status Code\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 0,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"smooth\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"auto\",\n                \"spanNulls\": true,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"s\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 9,\n            \"w\": 12,\n            \"x\": 12,\n            \"y\": 8\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"desc\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"editorMode\": \"code\",\n              \"exemplar\": true,\n              \"expr\": \"sum(probe_duration_seconds{target=~\\\"$target\\\"}) by(target)\",\n              \"hide\": false,\n              \"instant\": false,\n              \"legendFormat\": \"{{target}}\",\n              \"range\": true,\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"HTTP Probe Duration\",\n          \"transformations\": [],\n          \"type\": \"timeseries\"\n        }\n      ],\n      \"refresh\": \"1m\",\n      \"schemaVersion\": 39,\n      \"tags\": [\n        \"blackbox\",\n        \"prometheus\"\n      ],\n      \"templating\": {\n        \"list\": [\n          {\n            \"current\": {\n              \"selected\": false,\n              \"text\": [\n                \"All\"\n              ],\n              \"value\": [\n                \"$__all\"\n              ]\n            },\n            \"datasource\": {\n              \"type\": \"prometheus\",\n              \"uid\": \"prometheus\"\n            },\n            \"definition\": \"label_values(probe_success, target)\",\n            \"hide\": 0,\n            \"includeAll\": true,\n            \"multi\": true,\n            \"name\": \"target\",\n            \"options\": [],\n            \"query\": {\n              \"query\": \"label_values(probe_success, target)\",\n              \"refId\": \"StandardVariableQuery\"\n            },\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          }\n        ]\n      },\n      \"time\": {\n        \"from\": \"now-6h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {},\n      \"timezone\": \"\",\n      \"title\": \"Blackbox Exporter (HTTP prober)\",\n      \"uid\": \"NEzutrbMk\",\n      \"version\": 10,\n      \"weekStart\": \"\"\n    }\n    \n    {% endraw %}\n"
       releaseName: blackbox-exporter-dashboards
       targetNamespace: monitoring-system
-  36: |
+  34: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -1029,7 +986,7 @@ templated manifests should match snapshot:
             {% endraw %}
       releaseName: blackbox-exporter-alerts
       targetNamespace: monitoring-system
-  37: |
+  35: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1092,7 +1049,7 @@ templated manifests should match snapshot:
                   resources:
                     requests:
                       storage: 10Gi
-  38: |
+  36: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1153,7 +1110,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-kube-prometheus-stack-config
-  39: |
+  37: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -1170,7 +1127,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: additional-grafana-dashboards\n  labels:\n    grafana_dashboard: \"1\"\ndata:\n  nvidia-dcgm-exporter-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"$$hashKey\": \"object:192\",\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"datasource\",\n              \"uid\": \"grafana\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"target\": {\n              \"limit\": 100,\n              \"matchAny\": false,\n              \"tags\": [],\n              \"type\": \"dashboard\"\n            },\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"This dashboard is to display the metrics from DCGM Exporter on a Kubernetes (1.13+) cluster\",\n      \"editable\": true,\n      \"fiscalYearStartMonth\": 0,\n      \"gnetId\": 12239,\n      \"graphTooltip\": 0,\n      \"id\": 2,\n      \"links\": [],\n      \"liveNow\": false,\n      \"panels\": [\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 2,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"links\": [],\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"celsius\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 18,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 12,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"lastNotNull\",\n                \"max\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"pluginVersion\": \"9.3.1\",\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"DCGM_FI_DEV_GPU_TEMP{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"}\",\n              \"instant\": false,\n              \"interval\": \"\",\n              \"legendFormat\": \"GPU {{gpu}}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU Temperature\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"thresholds\"\n              },\n              \"mappings\": [],\n              \"max\": 100,\n              \"min\": 0,\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"#EAB839\",\n                    \"value\": 83\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 87\n                  }\n                ]\n              },\n              \"unit\": \"celsius\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 6,\n            \"x\": 18,\n            \"y\": 0\n          },\n          \"id\": 14,\n          \"options\": {\n            \"minVizHeight\": 75,\n            \"minVizWidth\": 75,\n            \"orientation\": \"auto\",\n            \"reduceOptions\": {\n              \"calcs\": [\n                \"mean\"\n              ],\n              \"fields\": \"\",\n              \"values\": false\n            },\n            \"showThresholdLabels\": false,\n            \"showThresholdMarkers\": true,\n            \"sizing\": \"auto\"\n          },\n          \"pluginVersion\": \"11.2.2+security-01\",\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"avg(DCGM_FI_DEV_GPU_TEMP{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"})\",\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU Avg. Temp\",\n          \"type\": \"gauge\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 2,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"links\": [],\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"watt\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 18,\n            \"x\": 0,\n            \"y\": 8\n          },\n          \"id\": 10,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"lastNotNull\",\n                \"max\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"pluginVersion\": \"9.3.1\",\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"DCGM_FI_DEV_POWER_USAGE{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"}\",\n              \"interval\": \"\",\n              \"legendFormat\": \"GPU {{gpu}}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU Power Usage\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"thresholds\"\n              },\n              \"mappings\": [],\n              \"max\": 2400,\n              \"min\": 0,\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"#EAB839\",\n                    \"value\": 1800\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 2200\n                  }\n                ]\n              },\n              \"unit\": \"watt\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 6,\n            \"x\": 18,\n            \"y\": 8\n          },\n          \"id\": 16,\n          \"options\": {\n            \"minVizHeight\": 75,\n            \"minVizWidth\": 75,\n            \"orientation\": \"horizontal\",\n            \"reduceOptions\": {\n              \"calcs\": [\n                \"sum\"\n              ],\n              \"fields\": \"\",\n              \"values\": false\n            },\n            \"showThresholdLabels\": false,\n            \"showThresholdMarkers\": true,\n            \"sizing\": \"auto\"\n          },\n          \"pluginVersion\": \"11.2.2+security-01\",\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"sum(DCGM_FI_DEV_POWER_USAGE{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"})\",\n              \"interval\": \"\",\n              \"legendFormat\": \"\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU Power Total\",\n          \"type\": \"gauge\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 2,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"links\": [],\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"hertz\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 16\n          },\n          \"id\": 2,\n          \"interval\": \"\",\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"lastNotNull\",\n                \"max\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"pluginVersion\": \"9.3.1\",\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"DCGM_FI_DEV_SM_CLOCK{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"} * 1000000\",\n              \"format\": \"time_series\",\n              \"interval\": \"\",\n              \"intervalFactor\": 1,\n              \"legendFormat\": \"GPU {{gpu}}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU SM Clocks\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 2,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"max\": 100,\n              \"min\": 0,\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"percent\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 24\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"lastNotNull\",\n                \"max\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"DCGM_FI_DEV_GPU_UTIL{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"}\",\n              \"interval\": \"\",\n              \"legendFormat\": \"GPU {{gpu}}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU Utilization\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 2,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"max\": 1,\n              \"min\": 0,\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"percentunit\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 32\n          },\n          \"id\": 4,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"lastNotNull\",\n                \"max\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"}\",\n              \"interval\": \"\",\n              \"legendFormat\": \"GPU {{gpu}}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Tensor Core Utilization\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 2,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"decmbytes\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 40\n          },\n          \"id\": 18,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"max\"\n              ],\n              \"displayMode\": \"list\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"DCGM_FI_DEV_FB_USED{instance=~\\\"${instance}\\\", gpu=~\\\"${gpu}\\\"}\",\n              \"interval\": \"\",\n              \"legendFormat\": \"GPU {{gpu}}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"GPU Framebuffer Mem Used\",\n          \"type\": \"timeseries\"\n        }\n      ],\n      \"refresh\": false,\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": [\n          {\n            \"current\": {\n              \"isNone\": true,\n              \"selected\": false,\n              \"text\": \"None\",\n              \"value\": \"\"\n            },\n            \"datasource\": {\n              \"type\": \"prometheus\",\n              \"uid\": \"prometheus\"\n            },\n            \"definition\": \"label_values(DCGM_FI_DEV_GPU_TEMP, instance)\",\n            \"hide\": 0,\n            \"includeAll\": false,\n            \"multi\": true,\n            \"name\": \"instance\",\n            \"options\": [],\n            \"query\": {\n              \"query\": \"label_values(DCGM_FI_DEV_GPU_TEMP, instance)\",\n              \"refId\": \"Prometheus-instance-Variable-Query\"\n            },\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"current\": {\n              \"selected\": false,\n              \"text\": \"All\",\n              \"value\": \"$__all\"\n            },\n            \"datasource\": {\n              \"type\": \"prometheus\",\n              \"uid\": \"prometheus\"\n            },\n            \"definition\": \"label_values(gpu)\",\n            \"hide\": 0,\n            \"includeAll\": true,\n            \"multi\": true,\n            \"name\": \"gpu\",\n            \"options\": [],\n            \"query\": {\n              \"query\": \"label_values(gpu)\",\n              \"refId\": \"Prometheus-gpu-Variable-Query\"\n            },\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 1,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          }\n        ]\n      },\n      \"time\": {\n        \"from\": \"now-15m\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"NVIDIA DCGM Exporter Dashboard\",\n      \"uid\": \"Oxed_c6Wz\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    \n    {% endraw %}\n"
       releaseName: kube-prometheus-stack-dashboards
       targetNamespace: monitoring-system
-  40: |
+  38: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1235,7 +1192,7 @@ templated manifests should match snapshot:
           persistence:
             enabled: true
             size: 10Gi
-  41: |
+  39: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1279,7 +1236,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-loki-stack-config
-  42: |
+  40: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -1313,7 +1270,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: loki-stack-grafana-dashboards\n  labels:\n    grafana_dashboard: \"1\"\ndata:\n  loki-pod-logs-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"grafana\",\n              \"uid\": \"-- Grafana --\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Search pod logs stored in Loki\",\n      \"editable\": false,\n      \"fiscalYearStartMonth\": 0,\n      \"graphTooltip\": 0,\n      \"id\": 31,\n      \"links\": [],\n      \"panels\": [\n        {\n          \"datasource\": \"Loki\",\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"hidden\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"bars\",\n                \"fillOpacity\": 100,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 3,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": false\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"sum(count_over_time({namespace=\\\"$namespace\\\", pod=~\\\"$pod\\\"} |~ \\\"$search\\\"[$__interval]))\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": \"Loki\",\n          \"gridPos\": {\n            \"h\": 25,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 3\n          },\n          \"id\": 2,\n          \"maxDataPoints\": \"\",\n          \"options\": {\n            \"dedupStrategy\": \"none\",\n            \"enableLogDetails\": true,\n            \"prettifyLogMessage\": false,\n            \"showCommonLabels\": false,\n            \"showLabels\": false,\n            \"showTime\": true,\n            \"sortOrder\": \"Descending\",\n            \"wrapLogMessage\": true\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"{namespace=\\\"$namespace\\\", pod=~\\\"$pod\\\"} |~ \\\"$search\\\"\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Logs Panel\",\n          \"type\": \"logs\"\n        }\n      ],\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": [\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": true,\n              \"text\": \"ingress-nginx\",\n              \"value\": \"ingress-nginx\"\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values(namespace)\",\n            \"hide\": 0,\n            \"includeAll\": false,\n            \"multi\": false,\n            \"name\": \"namespace\",\n            \"options\": [],\n            \"query\": \"label_values(namespace)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": false,\n              \"text\": \"All\",\n              \"value\": \"$__all\"\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values({namespace=~\\\"$namespace\\\"}, pod)\",\n            \"hide\": 0,\n            \"includeAll\": true,\n            \"multi\": true,\n            \"name\": \"pod\",\n            \"options\": [],\n            \"query\": \"label_values({namespace=~\\\"$namespace\\\"}, pod)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"current\": {},\n            \"hide\": 0,\n            \"name\": \"search\",\n            \"options\": [],\n            \"query\": \"\",\n            \"skipUrlSync\": false,\n            \"type\": \"textbox\"\n          }\n        ]\n      },\n      \"time\": {\n        \"from\": \"now-6h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"Loki / Pod Logs\",\n      \"uid\": \"209fd89b771c318dd442225414a50b59\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    \n    {% endraw %}\n  loki-systemd-logs-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"grafana\",\n              \"uid\": \"-- Grafana --\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Search systemd logs stored in Loki\",\n      \"editable\": false,\n      \"fiscalYearStartMonth\": 0,\n      \"graphTooltip\": 0,\n      \"id\": 33,\n      \"links\": [],\n      \"panels\": [\n        {\n          \"datasource\": \"Loki\",\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"hidden\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"bars\",\n                \"fillOpacity\": 100,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 3,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": false\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"sum(count_over_time({unit=~\\\"$unit\\\", hostname=~\\\"$hostname\\\"} |~ \\\"$search\\\"[$__interval]))\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": \"Loki\",\n          \"gridPos\": {\n            \"h\": 25,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 3\n          },\n          \"id\": 2,\n          \"maxDataPoints\": \"\",\n          \"options\": {\n            \"dedupStrategy\": \"none\",\n            \"enableLogDetails\": true,\n            \"prettifyLogMessage\": false,\n            \"showCommonLabels\": false,\n            \"showLabels\": false,\n            \"showTime\": true,\n            \"sortOrder\": \"Descending\",\n            \"wrapLogMessage\": true\n          },\n          \"targets\": [\n            {\n              \"datasource\": \"Loki\",\n              \"expr\": \"{unit=~\\\"$unit\\\", hostname=~\\\"$hostname\\\"} |~ \\\"$search\\\"\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Logs Panel\",\n          \"type\": \"logs\"\n        }\n      ],\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": [\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": true,\n              \"text\": \"ansible-init.service\",\n              \"value\": \"ansible-init.service\"\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values(unit)\",\n            \"hide\": 0,\n            \"includeAll\": false,\n            \"multi\": false,\n            \"name\": \"unit\",\n            \"options\": [],\n            \"query\": \"label_values(unit)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"allValue\": \".+\",\n            \"current\": {\n              \"selected\": true,\n              \"text\": [\n                \"All\"\n              ],\n              \"value\": [\n                \"$__all\"\n              ]\n            },\n            \"datasource\": \"Loki\",\n            \"definition\": \"label_values({unit=~\\\"$unit\\\"}, hostname)\",\n            \"hide\": 0,\n            \"includeAll\": true,\n            \"multi\": true,\n            \"name\": \"hostname\",\n            \"options\": [],\n            \"query\": \"label_values({unit=~\\\"$unit\\\"}, hostname)\",\n            \"refresh\": 1,\n            \"regex\": \"\",\n            \"skipUrlSync\": false,\n            \"sort\": 0,\n            \"tagValuesQuery\": \"\",\n            \"tagsQuery\": \"\",\n            \"type\": \"query\",\n            \"useTags\": false\n          },\n          {\n            \"current\": {},\n            \"hide\": 0,\n            \"name\": \"search\",\n            \"options\": [],\n            \"query\": \"\",\n            \"skipUrlSync\": false,\n            \"type\": \"textbox\"\n          }\n        ]\n      },\n      \"time\": {\n        \"from\": \"now-3h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"Loki / Systemd Logs\",\n      \"uid\": \"fa1bd43aed803111be9cc923cada9811\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    \n    {% endraw %}\n  loki-metrics-dashboard.json: |\n    {% raw %}\n    {\n      \"annotations\": {\n        \"list\": [\n          {\n            \"builtIn\": 1,\n            \"datasource\": {\n              \"type\": \"datasource\",\n              \"uid\": \"grafana\"\n            },\n            \"enable\": true,\n            \"hide\": true,\n            \"iconColor\": \"rgba(0, 211, 255, 1)\",\n            \"name\": \"Annotations & Alerts\",\n            \"type\": \"dashboard\"\n          }\n        ]\n      },\n      \"description\": \"Loki and Promtail metrics.\",\n      \"editable\": true,\n      \"fiscalYearStartMonth\": 0,\n      \"gnetId\": 10880,\n      \"graphTooltip\": 0,\n      \"id\": 32,\n      \"links\": [],\n      \"panels\": [\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 0,\n            \"y\": 0\n          },\n          \"id\": 8,\n          \"interval\": \"\",\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": false\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"avg_over_time(loki_ingester_chunk_entries_count[5m])\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Loki's stored chunk entries\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 12,\n            \"x\": 12,\n            \"y\": 0\n          },\n          \"id\": 2,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"list\",\n              \"placement\": \"bottom\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"rate (loki_distributor_ingester_appends_total[1m])\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Average batch appends sent to ingesters (Loki)\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"default\": true,\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 8\n          },\n          \"id\": 6,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [\n                \"mean\",\n                \"min\",\n                \"sum\"\n              ],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"editorMode\": \"code\",\n              \"expr\": \"sum(promtail_file_bytes_total{pod=~\\\".*\\\"}) by (pod)\",\n              \"legendFormat\": \"{{pod}}\",\n              \"range\": true,\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Number of bytes total by promtail\",\n          \"type\": \"timeseries\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"fieldConfig\": {\n            \"defaults\": {\n              \"color\": {\n                \"mode\": \"palette-classic\"\n              },\n              \"custom\": {\n                \"axisBorderShow\": false,\n                \"axisCenteredZero\": false,\n                \"axisColorMode\": \"text\",\n                \"axisLabel\": \"\",\n                \"axisPlacement\": \"auto\",\n                \"barAlignment\": 0,\n                \"barWidthFactor\": 0.6,\n                \"drawStyle\": \"line\",\n                \"fillOpacity\": 10,\n                \"gradientMode\": \"none\",\n                \"hideFrom\": {\n                  \"legend\": false,\n                  \"tooltip\": false,\n                  \"viz\": false\n                },\n                \"insertNulls\": false,\n                \"lineInterpolation\": \"linear\",\n                \"lineWidth\": 1,\n                \"pointSize\": 5,\n                \"scaleDistribution\": {\n                  \"type\": \"linear\"\n                },\n                \"showPoints\": \"never\",\n                \"spanNulls\": false,\n                \"stacking\": {\n                  \"group\": \"A\",\n                  \"mode\": \"none\"\n                },\n                \"thresholdsStyle\": {\n                  \"mode\": \"off\"\n                }\n              },\n              \"mappings\": [],\n              \"thresholds\": {\n                \"mode\": \"absolute\",\n                \"steps\": [\n                  {\n                    \"color\": \"green\",\n                    \"value\": null\n                  },\n                  {\n                    \"color\": \"red\",\n                    \"value\": 80\n                  }\n                ]\n              },\n              \"unit\": \"short\"\n            },\n            \"overrides\": []\n          },\n          \"gridPos\": {\n            \"h\": 8,\n            \"w\": 24,\n            \"x\": 0,\n            \"y\": 16\n          },\n          \"id\": 4,\n          \"options\": {\n            \"legend\": {\n              \"calcs\": [],\n              \"displayMode\": \"table\",\n              \"placement\": \"right\",\n              \"showLegend\": true\n            },\n            \"tooltip\": {\n              \"mode\": \"multi\",\n              \"sort\": \"none\"\n            }\n          },\n          \"targets\": [\n            {\n              \"datasource\": {\n                \"type\": \"prometheus\",\n                \"uid\": \"prometheus\"\n              },\n              \"expr\": \"sum (promtail_encoded_bytes_total{pod=~'.*'}) by (pod)\",\n              \"format\": \"time_series\",\n              \"instant\": false,\n              \"legendFormat\": \"{{ pod }}\",\n              \"refId\": \"A\"\n            }\n          ],\n          \"title\": \"Number of bytes encoded and ready to send by Promtail\",\n          \"type\": \"timeseries\"\n        }\n      ],\n      \"schemaVersion\": 39,\n      \"tags\": [],\n      \"templating\": {\n        \"list\": []\n      },\n      \"time\": {\n        \"from\": \"now-6h\",\n        \"to\": \"now\"\n      },\n      \"timepicker\": {\n        \"refresh_intervals\": [\n          \"5s\",\n          \"10s\",\n          \"30s\",\n          \"1m\",\n          \"5m\",\n          \"15m\",\n          \"30m\",\n          \"1h\",\n          \"2h\",\n          \"1d\"\n        ]\n      },\n      \"timezone\": \"\",\n      \"title\": \"Loki / Metrics\",\n      \"uid\": \"MQHVDmtWk\",\n      \"version\": 1,\n      \"weekStart\": \"\"\n    }\n    {% endraw %}\n"
       releaseName: loki-stack-dashboards
       targetNamespace: monitoring-system
-  43: |
+  41: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1352,7 +1309,7 @@ templated manifests should match snapshot:
                   - vendor
       overrides: |
         {}
-  44: |
+  42: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1378,7 +1335,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-feature-discovery-config
-  45: |
+  43: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1401,7 +1358,7 @@ templated manifests should match snapshot:
             enabled: true
       overrides: |
         {}
-  46: |
+  44: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1427,7 +1384,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-problem-detector-config
-  47: |
+  45: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1462,7 +1419,7 @@ templated manifests should match snapshot:
         dcgmExporter:
           serviceMonitor:
             enabled: true
-  48: |
+  46: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1488,7 +1445,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-nvidia-gpu-operator-config
-  49: |
+  47: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1521,7 +1478,7 @@ templated manifests should match snapshot:
           secret.reloader.stakater.com/reload: cloud-config
       overrides: |
         {}
-  50: |
+  48: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1547,7 +1504,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-ccm-openstack-config
-  51: |
+  49: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -1564,7 +1521,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
       releaseName: cloud-config
       targetNamespace: openstack-system
-  52: |
+  50: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1610,7 +1567,7 @@ templated manifests should match snapshot:
               tolerations:
               - effect: NoSchedule
                 key: node-role.kubernetes.io/control-plane
-  53: |
+  51: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1636,7 +1593,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-csi-cinder-config
-  54: |
+  52: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -1665,7 +1622,7 @@ templated manifests should match snapshot:
             volumeBindingMode: WaitForFirstConsumer
       releaseName: csi-cinder-storageclass
       targetNamespace: openstack-system
-  55: |
+  53: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1695,7 +1652,7 @@ templated manifests should match snapshot:
               effect: NoSchedule
       overrides: |
         {}
-  56: |
+  54: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1721,7 +1678,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-csi-manila-config
-  57: |
+  55: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -1814,7 +1771,7 @@ templated manifests should match snapshot:
             volumeBindingMode: WaitForFirstConsumer
       releaseName: csi-manila-storageclass
       targetNamespace: openstack-system
-  58: |
+  56: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1828,7 +1785,7 @@ templated manifests should match snapshot:
     stringData:
       overrides: |
         null
-  59: |
+  57: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1851,7 +1808,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-k8s-keystone-auth-config
-  60: |
+  58: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1865,7 +1822,7 @@ templated manifests should match snapshot:
       values: |
         reloader:
           watchGlobally: false
-  61: |
+  59: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -1890,7 +1847,7 @@ templated manifests should match snapshot:
         - secret:
             key: values
             name: RELEASE-NAME-reloader-cfg
-  62: |
+  60: |
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -1957,7 +1914,7 @@ templated manifests should match snapshot:
             - name: kubeconfig
               secret:
                 secretName: RELEASE-NAME-kubeconfig
-  63: |
+  61: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -1989,7 +1946,7 @@ templated manifests should match snapshot:
           - get
           - patch
           - update
-  64: |
+  62: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
@@ -2008,7 +1965,7 @@ templated manifests should match snapshot:
       - kind: ServiceAccount
         name: RELEASE-NAME-autoscaler
         namespace: NAMESPACE
-  65: |
+  63: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -2019,7 +1976,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-autoscaler
-  66: |
+  64: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -2044,7 +2001,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  67: |
+  65: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -2074,7 +2031,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  68: |
+  66: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -2230,7 +2187,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.29.2
-  69: |
+  67: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -2256,7 +2213,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  70: |
+  68: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -2280,7 +2237,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  71: |
+  69: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -2296,7 +2253,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  72: |
+  70: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -2386,7 +2343,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  73: |
+  71: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -2476,7 +2433,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  74: |
+  72: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -2525,7 +2482,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  75: |
+  73: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -2575,7 +2532,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  76: |
+  74: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -2603,7 +2560,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  77: |
+  75: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -2631,7 +2588,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  78: |
+  76: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -2656,7 +2613,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  79: |
+  77: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -2681,7 +2638,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  80: |
+  78: |
     apiVersion: v1
     kind: Secret
     metadata:

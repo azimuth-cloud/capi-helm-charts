@@ -220,19 +220,6 @@ metricsServer:
     namespace: kube-system
     values: {}
 
-# Settings for the Kubernetes dashboard
-# https://github.com/kubernetes-retired/dashboard/tree/master/charts/kubernetes-dashboard
-kubernetesDashboard:
-  # Indicates if the Kubernetes dashboard should be enabled
-  enabled: false
-  chart:
-    repo: https://kubernetes-retired.github.io/dashboard
-    name: kubernetes-dashboard
-    version: 6.0.8
-  release:
-    namespace: kubernetes-dashboard
-    values: {}
-
 # Settings for ingress controllers
 ingress:
   # Indicates if ingress controllers should be enabled

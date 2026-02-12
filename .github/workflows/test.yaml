@@ -95,7 +95,7 @@ jobs:
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
         if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}
 
-  # This job tests a deployment against the latest version with the dashboard, monitoring and ingress enabled
+  # This job tests a deployment against the latest version with the monitoring and ingress enabled
   latest-addons:
     runs-on: ubuntu-latest
     if: ${{ inputs.tests-full }}
