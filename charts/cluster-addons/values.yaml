@@ -309,21 +309,7 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
-  # Configuration for the blackbox exporter
-  blackboxExporter:
-    enabled: true
-    chart:
-      repo: https://prometheus-community.github.io/helm-charts
-      name: prometheus-blackbox-exporter
-      version: 9.4.0
-    release:
-      namespace: monitoring-system
-      values: {}
-        # Example of adding additional scrape targets
-        # serviceMonitor:
-        #   targets:
-        #     - name: example
-        #       url: http://example.com/healthz
+
   promtail:
     enabled: false
     chart:
@@ -349,7 +335,7 @@ monitoring:
           type: 'daemonset'
           tolerations:
             - operator: Exists
-            
+
   # Note(sd109): Loki v2 is the successor to the lokiStack addon since the Helm
   # chart for the latter is no longer maintained upstream.
 
@@ -432,6 +418,7 @@ monitoring:
             size: 10Gi
             # Required to allow resizing of PVC during Helm upgrades
             enableStatefulSetAutoDeletePVC: false
+
   loki_v3:
     enabled: false
     chart:
@@ -473,7 +460,7 @@ monitoring:
         # In case historical logs are required, configure fullnameOverride to
         # ensure that resource names match the old loki-stack
         # HelmRelease so that it correctly re-adopts the PVC
-        #fullnameOverride: loki-stack
+        # fullnameOverride: loki-stack
         loki:
           schemaConfig:
             configs:
@@ -544,6 +531,22 @@ monitoring:
             size: 10Gi
             # Required to allow resizing of PVC during Helm upgrades
             enableStatefulSetAutoDeletePVC: false
+
+  # Configuration for the blackbox exporter
+  blackboxExporter:
+    enabled: true
+    chart:
+      repo: https://prometheus-community.github.io/helm-charts
+      name: prometheus-blackbox-exporter
+      version: 9.4.0
+    release:
+      namespace: monitoring-system
+      values: {}
+        # Example of adding additional scrape targets
+        # serviceMonitor:
+        #   targets:
+        #     - name: example
+        #       url: http://example.com/healthz
 
 # Settings for node feature discovery
 # https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
