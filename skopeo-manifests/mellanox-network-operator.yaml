@@ -1,8 +1,6 @@
-ghcr.io:
-  images:
-    mellanox/network-operator-init-container:
-    - v0.0.3
 nvcr.io:
   images:
     nvidia/cloud-native/network-operator:
-    - v25.1.0
+    - v25.10.0
+    nvidia/mellanox/network-operator-init-container:
+    - network-operator-v25.10.0
