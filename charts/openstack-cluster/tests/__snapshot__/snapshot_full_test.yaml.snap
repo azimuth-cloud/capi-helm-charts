@@ -1207,7 +1207,7 @@ templated manifests should match snapshot:
       chart:
         name: loki-stack
         repo: https://grafana.github.io/helm-charts
-        version: 2.10.2
+        version: 2.10.3
       clusterName: RELEASE-NAME
       lifecycleHooks:
         preUpgrade:
