@@ -185,7 +185,7 @@ reloader:
   chart:
     repo: https://stakater.github.io/stakater-charts
     name: reloader
-    version: 2.2.7
+    version: 2.2.8
   release:
     # Deploy to the same namespace as OpenStack services
     namespace: openstack-system
