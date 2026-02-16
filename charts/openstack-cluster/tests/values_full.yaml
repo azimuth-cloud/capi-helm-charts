@@ -28,8 +28,6 @@ addons:
     enabled: true
   metricsServer:
     enabled: true
-  kubernetesDashboard:
-    enabled: true
   ingress:
     enabled: true
   monitoring:
