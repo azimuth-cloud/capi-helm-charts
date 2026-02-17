@@ -571,6 +571,27 @@ templated manifests should match snapshot:
       releaseName: csi-cinder-storageclass
       targetNamespace: openstack-system
   22: |
+    raw: |
+      DEPRECATION NOTICE:
+
+        .Values.addons.ingress.enabled=true is deprecated, therefore using capi-helm-charts to
+        install an Ingress controller as an addon is deprecated.
+
+        If required, users should migrate to deploying an Ingress controller of their choice,
+        using tooling outside of capi-helm-charts to manage its deployment.
+
+        For safety and security reasons, Ingress NGINX was retired in
+        March 2026 [https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/]. As Ingress
+        NGINX is the only Ingress controller addon supported by capi-helm-charts,
+        capi-helm-charts can no longer deploy an Ingress controller as an addon.
+
+        - capi-helm-charts retains the ability to **enable** Ingress NGINX as a cluster addon for
+          backwards compatibility with other tooling.
+        - The deployment of Ingress NGINX will no longer be tested as part of the release
+          process for capi-helm-charts.
+        - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
+          a functioning NGINX Ingress controller.
+  23: |
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -637,7 +658,7 @@ templated manifests should match snapshot:
             - name: kubeconfig
               secret:
                 secretName: RELEASE-NAME-kubeconfig
-  23: |
+  24: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -669,7 +690,7 @@ templated manifests should match snapshot:
           - get
           - patch
           - update
-  24: |
+  25: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
@@ -688,7 +709,7 @@ templated manifests should match snapshot:
       - kind: ServiceAccount
         name: RELEASE-NAME-autoscaler
         namespace: NAMESPACE
-  25: |
+  26: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -699,7 +720,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-autoscaler
-  26: |
+  27: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -724,7 +745,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  27: |
+  28: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -754,7 +775,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  28: |
+  29: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -910,7 +931,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.29.2
-  29: |
+  30: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -936,7 +957,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  30: |
+  31: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -960,7 +981,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  31: |
+  32: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -976,7 +997,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  32: |
+  33: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1066,7 +1087,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  33: |
+  34: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1115,7 +1136,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  34: |
+  35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1143,7 +1164,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  35: |
+  36: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1168,7 +1189,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  36: |
+  37: |
     apiVersion: v1
     kind: Secret
     metadata:
