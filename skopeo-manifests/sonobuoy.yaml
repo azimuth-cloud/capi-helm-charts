@@ -1,0 +1,6 @@
+docker.io:
+  images:
+    sonobuoy/sonobuoy:
+    - v0.57.3
+    sonobuoy/systemd-logs:
+    - v0.4
