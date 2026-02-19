@@ -46,14 +46,6 @@ jobs:
           - key: metrics-server
             path: metricsServer.chart
 
-          - key: kubernetes-dashboard
-            path: kubernetesDashboard.chart
-            # v7 introduces substantial changes that break Azimuth integration
-            constraints: '<7.0.0'
-            values: |
-              metricsScraper:
-                enabled: true
-
           - key: ingress-nginx
             path: ingress.nginx.chart
 

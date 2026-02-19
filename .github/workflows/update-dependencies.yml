@@ -94,6 +94,15 @@ jobs:
             helmunittest/helm-unittest -u \
             charts/openstack-cluster
 
+      - name: Write Skopeo manifest
+        if: ${{ matrix.key == 'sonobuoy' }}
+        uses: azimuth-cloud/github-actions/skopeo-manifest@master
+        with:
+          manifest-file: ./skopeo-manifests/${{ matrix.key }}.yaml
+          images: |
+            sonobuoy/sonobuoy:${{ steps.next.outputs.version }}
+            sonobuoy/systemd-logs:v0.4
+
       - name: Generate app token for PR
         uses: azimuth-cloud/github-actions/generate-app-token@master
         id: generate-app-token

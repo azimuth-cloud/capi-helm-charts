@@ -29,7 +29,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.29.3
+      version: v3.31.3
     release:
       namespace: tigera-operator
       # @schema
@@ -58,7 +58,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.17.0
+      version: 1.19.0
     release:
       namespace: kube-system
       # @schema
@@ -238,7 +238,7 @@ reloader:
   chart:
     repo: https://stakater.github.io/stakater-charts
     name: reloader
-    version: 2.2.3
+    version: 2.2.7
   release:
     # Deploy to the same namespace as OpenStack services
     namespace: openstack-system
@@ -277,25 +277,9 @@ metricsServer:
   chart:
     repo: https://kubernetes-sigs.github.io/metrics-server
     name: metrics-server
-    version: 3.12.2
+    version: 3.13.0
   release:
     namespace: kube-system
-    # @schema
-    # additionalProperties: true
-    # @schema
-    values: {}
-
-# Settings for the Kubernetes dashboard
-# https://github.com/kubernetes/dashboard/tree/master/charts/helm-chart/kubernetes-dashboard
-kubernetesDashboard:
-  # Indicates if the Kubernetes dashboard should be enabled
-  enabled: false
-  chart:
-    repo: https://kubernetes.github.io/dashboard
-    name: kubernetes-dashboard
-    version: 6.0.8
-  release:
-    namespace: kubernetes-dashboard
     # @schema
     # additionalProperties: true
     # @schema
@@ -314,7 +298,7 @@ ingress:
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.13.2
+      version: 4.14.3
     release:
       namespace: ingress-nginx
       # @schema
@@ -332,7 +316,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 79.5.0
+      version: 80.14.4
     release:
       namespace: monitoring-system
       # @schema
@@ -396,7 +380,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: prometheus-blackbox-exporter
-      version: 9.4.0
+      version: 11.8.0
     release:
       namespace: monitoring-system
       # @schema
@@ -417,7 +401,7 @@ nodeFeatureDiscovery:
   chart:
     repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     name: node-feature-discovery
-    version: 0.17.3
+    version: 0.18.3
   release:
     namespace: node-feature-discovery
     # @schema
