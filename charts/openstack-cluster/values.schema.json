@@ -941,67 +941,6 @@
           "title": "intelDevicePlugin",
           "type": "object"
         },
-        "kubernetesDashboard": {
-          "additionalProperties": false,
-          "description": "Settings for the Kubernetes dashboard\nhttps://github.com/kubernetes/dashboard/tree/master/charts/helm-chart/kubernetes-dashboard",
-          "properties": {
-            "chart": {
-              "additionalProperties": false,
-              "properties": {
-                "name": {
-                  "default": "kubernetes-dashboard",
-                  "required": [],
-                  "title": "name",
-                  "type": "string"
-                },
-                "repo": {
-                  "default": "https://kubernetes.github.io/dashboard",
-                  "required": [],
-                  "title": "repo",
-                  "type": "string"
-                },
-                "version": {
-                  "default": "6.0.8",
-                  "required": [],
-                  "title": "version",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "chart",
-              "type": "object"
-            },
-            "enabled": {
-              "default": false,
-              "description": "Indicates if the Kubernetes dashboard should be enabled",
-              "required": [],
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "release": {
-              "additionalProperties": false,
-              "properties": {
-                "namespace": {
-                  "default": "kubernetes-dashboard",
-                  "required": [],
-                  "title": "namespace",
-                  "type": "string"
-                },
-                "values": {
-                  "additionalProperties": true,
-                  "required": [],
-                  "title": "values"
-                }
-              },
-              "required": [],
-              "title": "release",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "kubernetesDashboard",
-          "type": "object"
-        },
         "mellanoxNetworkOperator": {
           "additionalProperties": false,
           "description": "Settings for the Mellanox network operator",

@@ -930,7 +930,7 @@ templated manifests should match snapshot:
         rollingUpdate:
           maxSurge: 1
         type: RollingUpdate
-      version: v1.29.2
+      version: v1.00.0
   30: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
@@ -980,7 +980,7 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-jammy-kube-v1.29.2
+              name: ubuntu-jammy-kube-v1.00.0
   32: |
     apiVersion: v1
     kind: Secret
@@ -1135,7 +1135,7 @@ templated manifests should match snapshot:
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
-          version: v1.29.2
+          version: v1.00.0
   35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
@@ -1188,7 +1188,7 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-jammy-kube-v1.29.2
+              name: ubuntu-jammy-kube-v1.00.0
   37: |
     apiVersion: v1
     kind: Secret
