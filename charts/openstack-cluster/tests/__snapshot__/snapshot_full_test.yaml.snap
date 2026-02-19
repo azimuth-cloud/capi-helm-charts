@@ -733,49 +733,6 @@ templated manifests should match snapshot:
       labels:
         addons.stackhpc.com/watch: ""
         capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: kubernetes-dashboard
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-kubernetes-dashboard-config
-    stringData:
-      defaults: |
-        metricsScraper:
-          enabled: true
-      overrides: |
-        {}
-  28: |
-    apiVersion: addons.stackhpc.com/v1alpha1
-    kind: HelmRelease
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: kubernetes-dashboard
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-kubernetes-dashboard
-    spec:
-      bootstrap: true
-      chart:
-        name: kubernetes-dashboard
-        repo: https://kubernetes-retired.github.io/dashboard
-        version: 6.0.8
-      clusterName: RELEASE-NAME
-      releaseName: kubernetes-dashboard
-      targetNamespace: kubernetes-dashboard
-      valuesSources:
-        - secret:
-            key: defaults
-            name: RELEASE-NAME-kubernetes-dashboard-config
-        - secret:
-            key: overrides
-            name: RELEASE-NAME-kubernetes-dashboard-config
-  29: |
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      labels:
-        addons.stackhpc.com/watch: ""
-        capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: mellanox-network-operator
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: addons-0.1.0
@@ -1081,6 +1038,8 @@ templated manifests should match snapshot:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          prune: true
         prometheus:
           prometheusSpec:
             retention: 90d
