@@ -289,6 +289,8 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          prune: true
   lokiStack:
     enabled: true
     chart:
@@ -318,7 +320,6 @@ monitoring:
     release:
       namespace: monitoring-system
       values:
-      values:
         controller:
           tolerations:
             - operator: Exists
@@ -334,7 +335,7 @@ monitoring:
   # For use cases requiring historical log retention, it is the chart consumers's
   # responsibility to research, test and implement a viable upgrade path which works
   # for them. Covering all possible upgrade paths with default chart config is not
-  # possible. 
+  # possible.
   loki_v3:
     enabled: false
     chart:
