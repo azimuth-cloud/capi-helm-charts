@@ -104,7 +104,7 @@ spec:
               - name: Loki
                 type: loki
                 {{- with .Values.monitoring.loki_v3 }}
-                url: http://{{ .release.values.fullnameOverride | default .chart.name }}.{{ .release.namespace }}:3100
+                url: http://{{ .chart.name }}.{{ .release.namespace }}:3100
                 {{- end }}
                 access: proxy
                 version: 1

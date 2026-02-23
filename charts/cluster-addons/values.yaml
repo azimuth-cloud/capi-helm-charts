@@ -220,19 +220,6 @@ metricsServer:
     namespace: kube-system
     values: {}
 
-# Settings for the Kubernetes dashboard
-# https://github.com/kubernetes-retired/dashboard/tree/master/charts/kubernetes-dashboard
-kubernetesDashboard:
-  # Indicates if the Kubernetes dashboard should be enabled
-  enabled: false
-  chart:
-    repo: https://kubernetes-retired.github.io/dashboard
-    name: kubernetes-dashboard
-    version: 6.0.8
-  release:
-    namespace: kubernetes-dashboard
-    values: {}
-
 # Settings for ingress controllers
 ingress:
   # Indicates if ingress controllers should be enabled
@@ -323,19 +310,18 @@ monitoring:
         controller:
           tolerations:
             - operator: Exists
-  # Note(sd109): Loki v3 is the successor to the lokiStack addon since the Helm
+  # Loki v3 is the successor to the lokiStack addon since the Helm
   # chart for the latter is no longer maintained upstream.
 
   # No backwards compatibility promises are made between the old lokiStack addon and
   # the newer Loki v3 addon. For existing clusters with lokiStack enabled, switching
   # to Loki v3 with the default config values will result in the storage volume
-  # containing historical logging data being deleted. A new volume will be
-  # provisioned in its place for the new Loki v3 addon.
+  # containing historical logging data being retained as backup. A new volume will
+  # be provisioned in its place for the new Loki v3 addon.
 
   # For use cases requiring historical log retention, it is the chart consumers's
   # responsibility to research, test and implement a viable upgrade path which works
-  # for them. Covering all possible upgrade paths with default chart config is not
-  # possible.
+  # for them.
   loki_v3:
     enabled: false
     chart:
