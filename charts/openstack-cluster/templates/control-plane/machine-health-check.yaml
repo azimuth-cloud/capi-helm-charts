@@ -9,5 +9,5 @@ spec:
   clusterName: {{ include "openstack-cluster.clusterName" . }}
   selector:
     matchLabels: {{ include "openstack-cluster.componentSelectorLabels" (list . "control-plane") | nindent 6 }}
-  {{- toYaml .Values.controlPlane.healthCheck.spec | nindent 2 }}
+  {{- include "openstack-cluster.convert.healthCheck" .Values.controlPlane.healthCheck.spec | nindent 2 }}
 {{- end }}

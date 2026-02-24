@@ -685,6 +685,30 @@ Convert nodeDeletionTimeout to nodeDeletionTimeoutSeconds
 Convert healthCheck to v1beta2
 */}}
 {{- define "openstack-cluster.convert.healthCheck" -}}
+{{- if hasKey . "checks" -}}
+{{- . | toYaml -}}
+{{- else -}}
+{{- $healthcheck := dict -}}
+{{- $healthcheckchecks := dict -}}
+{{- $healthcheckremediation := dict -}}
+{{- if hasKey . "nodeStartupTimeout" -}}
+{{- $_ := set $healthcheckchecks "nodeStartupTimeoutSeconds" (include "openstack-cluster.convert.humanTimeToSeconds" .nodeStartupTimeout | int) -}}
+{{- end -}}
+{{- if hasKey . "unhealthyConditions" -}}
+{{- $cond := list -}}
+{{- range $conditions := .unhealthyConditions -}}
+{{- $condition := dict "type" $conditions.type "status" $conditions.status "timeoutSeconds" (include "openstack-cluster.convert.humanTimeToSeconds" $conditions.timeout | int) -}}
+{{- $cond = append $cond $condition -}}
+{{- $_ := set $healthcheckchecks "unhealthyNodeConditions" $cond -}}
+{{- end -}}
+{{- if hasKey . "maxUnhealthy" -}}
+{{- $_ := set $healthcheckremediation "triggerIf" (dict "unhealthyLessThanOrEqualTo" .maxUnhealthy) -}}
+{{- end -}}
+{{- $_ := set $healthcheck "checks" $healthcheckchecks -}}
+{{- $_ := set $healthcheck "remediation" $healthcheckremediation -}}
+{{- end -}}
+{{- $healthcheck | toYaml -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
