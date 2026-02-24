@@ -35,10 +35,9 @@ spec:
   {{- if not $nodeGroup.autoscale }}
   replicas: {{ $nodeGroup.machineCount | required (printf "no machine count specified for node group '%s'" $nodeGroup.name) }}
   {{- end }}
-  rollout:
-    strategy: {{ toYaml $nodeGroup.rollout.strategy | nindent 6 }}
+  rollout: {{ include "openstack-cluster.convert.rolloutStrategy" $nodeGroup | nindent 4 }}
   deletion:
-    order: {{ $nodeGroup.deletion.order }}
+    order: {{ include "openstack-cluster.convert.deletePolicy" $nodeGroup }}
   selector:
     matchLabels:
       {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 6 }}
@@ -70,7 +69,7 @@ spec:
         kind: OpenStackMachineTemplate
         name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
       deletion:
-        nodeDrainTimeoutSeconds: {{ $nodeGroup.nodeDrainTimeoutSeconds }}
-        nodeVolumeDetachTimeoutSeconds: {{ $nodeGroup.nodeVolumeDetachTimeoutSeconds }}
-        nodeDeletionTimeoutSeconds: {{ $nodeGroup.nodeDeletionTimeoutSeconds }}
+        nodeDrainTimeoutSeconds: {{ include "openstack-cluster.convert.nodeDrainTimeout" $nodeGroup }}
+        nodeVolumeDetachTimeoutSeconds: {{ include "openstack-cluster.convert.volumeDetachTimeout" $nodeGroup }}
+        nodeDeletionTimeoutSeconds: {{ include "openstack-cluster.convert.nodeDeletionTimeout" $nodeGroup }}
 {{- end }}

@@ -596,17 +596,104 @@ Converts a dict to a list of items
 {{- end -}}
 
 {{/*
-Converts a remediationStrategy to a remediation spec
+Converts rolloutStrategy to rollout.strategy for v1beta2
+*/}}
+{{- define "openstack-cluster.convert.rolloutStrategy" -}}
+{{- if hasKey . "rolloutStrategy" -}}
+{{- $rollout := dict -}}
+{{- $rolloutStrategy := deepCopy .rolloutStrategy -}}
+{{- range $k, $v := $rolloutStrategy -}}
+{{- if kindIs "map" $v -}}
+{{- $k := unset $v "deletePolicy" -}}
+{{- end -}}
+{{- end -}}
+{{- $_ := set $rollout "strategy" $rolloutStrategy }}
+{{- $rollout | toYaml -}}
+{{- else -}}
+{{- .rollout | toYaml -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts rolloutStrategy.<strategy>.deletePolicy to deletion.order for v1beta2
+*/}}
+{{- define "openstack-cluster.convert.deletePolicy" -}}
+{{- if hasKey . "rolloutStrategy" -}}
+{{- range $k, $v := .rolloutStrategy -}}
+{{- if kindIs "map" $v -}}
+{{- get $v "deletePolicy" -}}
+{{- end -}}
+{{- end -}}
+{{- else -}}
+{{- .deletion.order -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts remediationStrategy to remediation for v1beta2
 */}}
 {{- define "openstack-cluster.convert.remediationStrategy" -}}
-{{- if .Values.controlPlane.remediationStrategy -}}
+{{- if hasKey . "remediationStrategy" -}}
+{{- $remediation := dict }}
+{{- range $k, $v := .remediationStrategy -}}
+{{- if eq $k "maxRetry" }}
+{{- $remediation := set $remediation $k $v -}}
+{{- else -}}
+{{- $remediation := set $remediation (printf "%sSeconds" $k) (include "openstack-cluster.convert.humanTimeToSeconds" $v | int ) -}}
 {{- end -}}
+{{- end -}}
+{{- $remediation | toYaml -}}
+{{- else -}}
+{{- .remediation | toYaml -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert nodeDrainTimeout to nodeDrainTimeoutSeconds
+*/}}
+{{- define "openstack-cluster.convert.nodeDrainTimeout" -}}
+{{- if hasKey . "nodeDrainTimeout" -}}
+{{- include "openstack-cluster.convert.humanTimeToSeconds" .nodeDrainTimeout -}}
+{{- else -}}
+{{- .nodeDrainTimeoutSeconds -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert nodeVolumeDetachTimeout to volumeDetachTimeoutSeconds
+*/}}
+{{- define "openstack-cluster.convert.volumeDetachTimeout" -}}
+{{- if hasKey . "nodeVolumeDetachTimeout" -}}
+{{- include "openstack-cluster.convert.humanTimeToSeconds" .nodeVolumeDetachTimeout -}}
+{{- else -}}
+{{- .nodeVolumeDetachTimeoutSeconds -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert nodeDeletionTimeout to nodeDeletionTimeoutSeconds
+*/}}
+{{- define "openstack-cluster.convert.nodeDeletionTimeout" -}}
+{{- if hasKey . "nodeDeletionTimeout" -}}
+{{- include "openstack-cluster.convert.humanTimeToSeconds" .nodeDeletionTimeout -}}
+{{- else -}}
+{{- .nodeDeletionTimeoutSeconds -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert healthCheck to v1beta2
+*/}}
+{{- define "openstack-cluster.convert.healthCheck" -}}
 {{- end -}}
 
 {{/*
 Converts human time to seconds
 */}}
 {{- define "openstack-cluster.convert.humanTimeToSeconds" -}}
+{{- if kindIs "int" . -}}
+{{ . }}
+{{- else -}}
 {{- $seconds := 0 -}}
 {{- if regexMatch "h" . -}}
 {{- $hours := regexFind "[0-9]+h" . | trimSuffix "h" | int }}
@@ -621,4 +708,5 @@ Converts human time to seconds
 {{- $seconds = add $seconds $secs -}}
 {{- end -}}
 {{ $seconds }}
+{{- end -}}
 {{- end -}}
