@@ -169,6 +169,7 @@ clusterConfiguration:
 {{- end }}
 
 ---
+{{- include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs" .Values.controlPlane.kubeadmConfigSpec }}
 apiVersion: controlplane.cluster.x-k8s.io/v1beta2
 kind: KubeadmControlPlane
 metadata:

@@ -22,6 +22,7 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $n
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
 {{- $ctx := index . 0 }}
 {{- $nodeGroup := index . 1 }}
+{{- include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs" $nodeGroup.kubeadmConfigSpec -}}
 {{-
   list
     (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)

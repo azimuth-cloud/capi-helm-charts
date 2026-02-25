@@ -332,6 +332,44 @@ preKubeadmCommands:
 {{- end }}
 
 {{/*
+Converts kubeadmConfigSpec.extraArgs kubeadmConfigSpec.kubeletExtraArgs to v1beta2 style
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" -}}
+{{- $name := index . 0 }}
+{{- $extraArgs := index . 1 }}
+{{ $name }}: {{ include "openstack-cluster.dict2items" $extraArgs | nindent 2 }}
+{{- end -}}
+
+
+{{/*
+Converts kubeadmConfigSpec.extraArgs kubeadmConfigSpec.kubeletExtraArgs to v1beta2 style
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec.convert.extraArgs" -}}
+{{- if hasKey . "initConfiguration" -}}
+{{- with .initConfiguration.nodeRegistration -}}
+{{- $kubeletExtraArgs := deepCopy .kubeletExtraArgs -}}
+{{- $_ := mergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "kubeletExtraArgs" $kubeletExtraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- end -}}
+{{- if hasKey . "joinConfiguration" -}}
+{{- with .joinConfiguration.nodeRegistration -}}
+{{- $kubeletExtraArgs := deepCopy .kubeletExtraArgs -}}
+{{- $_ := mustMergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "kubeletExtraArgs" $kubeletExtraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- end -}}
+{{- if hasKey . "clusterConfiguration" -}}
+{{- with .clusterConfiguration.controllerManager -}}
+{{- $extraArgs := deepCopy .extraArgs -}}
+{{- $_ := mustMergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "extraArgs" $extraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- with .clusterConfiguration.scheduler -}}
+{{- $extraArgs := deepCopy .extraArgs -}}
+{{- $_ := mustMergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "extraArgs" $extraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Produces the spec for a KubeadmConfig object.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec" -}}
