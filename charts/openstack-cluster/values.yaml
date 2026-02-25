@@ -151,16 +151,16 @@ etcd:
     # Set timeouts so that etcd tolerates 'slowness' (network + disks) better
     # This is at the expense of taking longer to detect a leader failure
     # https://etcd.io/docs/v3.5/tuning/#time-parameters
-    - name: "heartbeat-interval"
-      value: "500"  # defaults to 100ms in etcd 3.5
     - name: "election-timeout"
       value: "5000"   # defaults to 1000ms in etcd 3.5
-    # Set a slightly larger space quota than the default (default is 2GB)
-    - name: "quota-backend-bytes"
-      value: "4294967296"
+    - name: "heartbeat-interval"
+      value: "500"  # defaults to 100ms in etcd 3.5
     # Listen for metrics on 0.0.0.0 so Prometheus can collect them
     - name: "listen-metrics-urls"
       value: "http://0.0.0.0:2381"
+    # Set a slightly larger space quota than the default (default is 2GB)
+    - name: "quota-backend-bytes"
+      value: "4294967296"
   # At-rest encryption settings
   encryption:
     enabled: false
@@ -368,10 +368,10 @@ controlPlane:
     clusterConfiguration:
       controllerManager:
         extraArgs:
-          - name: "cloud-provider"
-            value: "external"
           - name: "bind-address"
             value: 0.0.0.0
+          - name: "cloud-provider"
+            value: "external"
       scheduler:
         extraArgs:
           - name: "bind-address"

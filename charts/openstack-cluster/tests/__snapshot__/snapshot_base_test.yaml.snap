@@ -803,22 +803,22 @@ templated manifests should match snapshot:
                 readOnly: true
           controllerManager:
             extraArgs:
-              - name: cloud-provider
-                value: external
               - name: bind-address
                 value: 0.0.0.0
+              - name: cloud-provider
+                value: external
           etcd:
             local:
               dataDir: /var/lib/etcd
               extraArgs:
-                - name: heartbeat-interval
-                  value: "500"
                 - name: election-timeout
                   value: "5000"
-                - name: quota-backend-bytes
-                  value: "4294967296"
+                - name: heartbeat-interval
+                  value: "500"
                 - name: listen-metrics-urls
                   value: http://0.0.0.0:2381
+                - name: quota-backend-bytes
+                  value: "4294967296"
           scheduler:
             extraArgs:
               - name: bind-address

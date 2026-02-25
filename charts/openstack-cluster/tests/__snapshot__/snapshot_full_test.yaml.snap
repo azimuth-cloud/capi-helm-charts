@@ -2019,7 +2019,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  62: |
+  66: |
     apiVersion: cluster.x-k8s.io/v1beta2
     kind: Cluster
     metadata:
@@ -2047,7 +2047,7 @@ templated manifests should match snapshot:
         apiGroup: infrastructure.cluster.x-k8s.io
         kind: OpenStackCluster
         name: RELEASE-NAME
-  63: |
+  67: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta2
     kind: KubeadmControlPlane
     metadata:
@@ -2077,22 +2077,22 @@ templated manifests should match snapshot:
                 readOnly: true
           controllerManager:
             extraArgs:
-              - name: cloud-provider
-                value: external
               - name: bind-address
                 value: 0.0.0.0
+              - name: cloud-provider
+                value: external
           etcd:
             local:
               dataDir: /var/lib/etcd
               extraArgs:
-                - name: heartbeat-interval
-                  value: "500"
                 - name: election-timeout
                   value: "5000"
-                - name: quota-backend-bytes
-                  value: "4294967296"
+                - name: heartbeat-interval
+                  value: "500"
                 - name: listen-metrics-urls
                   value: http://0.0.0.0:2381
+                - name: quota-backend-bytes
+                  value: "4294967296"
           scheduler:
             extraArgs:
               - name: bind-address
@@ -2216,7 +2216,7 @@ templated manifests should match snapshot:
             maxSurge: 1
           type: RollingUpdate
       version: v1.29.2
-  64: |
+  68: |
     apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineHealthCheck
     metadata:
@@ -2245,7 +2245,7 @@ templated manifests should match snapshot:
         matchLabels:
           capi.stackhpc.com/cluster: RELEASE-NAME
           capi.stackhpc.com/component: control-plane
-  65: |
+  69: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -2285,7 +2285,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  67: |
+  71: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
     kind: KubeadmConfigTemplate
     metadata:
@@ -2377,7 +2377,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  68: |
+  72: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
     kind: KubeadmConfigTemplate
     metadata:
@@ -2469,7 +2469,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  69: |
+  73: |
     apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineDeployment
     metadata:
@@ -2521,7 +2521,7 @@ templated manifests should match snapshot:
             kind: OpenStackMachineTemplate
             name: RELEASE-NAME-group-1-974c4cfd
           version: v1.29.2
-  70: |
+  74: |
     apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineDeployment
     metadata:
@@ -2574,7 +2574,7 @@ templated manifests should match snapshot:
             kind: OpenStackMachineTemplate
             name: RELEASE-NAME-group-2-26685203
           version: v1.29.2
-  71: |
+  75: |
     apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineHealthCheck
     metadata:
@@ -2605,7 +2605,7 @@ templated manifests should match snapshot:
           capi.stackhpc.com/cluster: RELEASE-NAME
           capi.stackhpc.com/component: worker
           capi.stackhpc.com/node-group: group-1
-  72: |
+  76: |
     apiVersion: cluster.x-k8s.io/v1beta2
     kind: MachineHealthCheck
     metadata:
@@ -2636,7 +2636,7 @@ templated manifests should match snapshot:
           capi.stackhpc.com/cluster: RELEASE-NAME
           capi.stackhpc.com/component: worker
           capi.stackhpc.com/node-group: group-2
-  73: |
+  77: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
