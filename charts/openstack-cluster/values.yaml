@@ -75,6 +75,9 @@ clusterNetworking:
   # Custom nameservers to use for the hosts
   # Deprecated; use `clusterNetworking.internalNetwork.dnsNameservers` instead.
   # dnsNameservers: []
+  # Indicates whether or not to attempt to connect the cluster to an external
+  # network.
+  disableExternalNetwork: false
   # Indicates if security groups should be managed by the cluster
   manageSecurityGroups: true
   # Indicates if the managed security groups should allow all in-cluster traffic
