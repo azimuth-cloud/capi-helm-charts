@@ -468,7 +468,7 @@ templated manifests should match snapshot:
       bootstrap: true
       clusterName: RELEASE-NAME
       manifestSources:
-        - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
+        - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n  {%- if \"externalNetwork\" in infra_cluster.status %}\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n  {%- endif %}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
       releaseName: cloud-config
       targetNamespace: openstack-system
   19: |
