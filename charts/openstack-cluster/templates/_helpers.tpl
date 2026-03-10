@@ -656,14 +656,19 @@ Converts rolloutStrategy to rollout.strategy for v1beta2
 Converts rolloutStrategy.<strategy>.deletePolicy to deletion.order for v1beta2
 */}}
 {{- define "openstack-cluster.convert.deletePolicy" -}}
+{{- $nodeGroup := . -}}
 {{- if hasKey . "rolloutStrategy" -}}
 {{- range $k, $v := .rolloutStrategy -}}
 {{- if kindIs "map" $v -}}
+{{- if hasKey $v "deletePolicy" -}}
 {{- get $v "deletePolicy" -}}
+{{- else -}}
+{{ $nodeGroup.deletion.order }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- else -}}
-{{- .deletion.order -}}
+{{- $nodeGroup.deletion.order -}}
 {{- end -}}
 {{- end -}}
 
