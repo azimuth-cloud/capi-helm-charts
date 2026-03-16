@@ -1,22 +1,22 @@
 docker.io:
   images:
     calico/apiserver:
-    - v3.31.3
+    - v3.31.4
     calico/cni:
-    - v3.31.3
+    - v3.31.4
     calico/csi:
-    - v3.31.3
+    - v3.31.4
     calico/kube-controllers:
-    - v3.31.3
+    - v3.31.4
     calico/node:
-    - v3.31.3
+    - v3.31.4
     calico/node-driver-registrar:
-    - v3.31.3
+    - v3.31.4
     calico/pod2daemon-flexvol:
-    - v3.31.3
+    - v3.31.4
     calico/typha:
-    - v3.31.3
+    - v3.31.4
 quay.io:
   images:
     tigera/operator:
-    - v1.40.3
+    - v1.40.7
