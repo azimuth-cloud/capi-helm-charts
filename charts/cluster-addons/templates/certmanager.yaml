@@ -2,6 +2,7 @@
   if or
     .Values.intelDevicePlugin.enabled
     .Values.certManager.enabled
+    .Values.amdGPUOperator.enabled
 }}
 ---
 apiVersion: v1

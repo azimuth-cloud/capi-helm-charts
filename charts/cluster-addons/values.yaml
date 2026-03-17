@@ -343,6 +343,16 @@ nvidiaGPUOperator:
         serviceMonitor:
           enabled: true
 
+amdGPUOperator:
+  enabled: false
+  chart:
+    repo: https://rocm.github.io/gpu-operator
+    name: gpu-operator-charts
+    version: v1.4.1
+  release:
+    namespace: kube-amd-gpu
+    values: {}
+
 intelDevicePlugin:
   enabled: false
   operator:

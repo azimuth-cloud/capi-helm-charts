@@ -1,0 +1,36 @@
+{{- if .Values.amdGPUOperator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "amd-gpu-operator") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "amd-gpu-operator") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    # Use NFD addon instead
+    node-feature-discovery:
+      enabled: false
+  overrides: |
+    {{- toYaml .Values.amdGPUOperator.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "amd-gpu-operator") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "amd-gpu-operator") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.amdGPUOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.amdGPUOperator.release.namespace }}
+  releaseName: amd-gpu-operator
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "amd-gpu-operator") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "amd-gpu-operator") }}-config
+        key: overrides
+{{- end }}
