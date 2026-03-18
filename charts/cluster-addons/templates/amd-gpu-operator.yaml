@@ -12,6 +12,12 @@ stringData:
     # Use NFD addon instead
     node-feature-discovery:
       enabled: false
+    deviceConfig:
+      spec:
+        metricsExporter:
+          prometheus:
+            serviceMonitor:
+              enable: {{ .Values.monitoring.enabled }}
   overrides: |
     {{- toYaml .Values.amdGPUOperator.release.values | nindent 4 }}
 ---
@@ -33,4 +39,40 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "amd-gpu-operator") }}-config
         key: overrides
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "amd-gpu-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "amd-gpu-dashboards") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.amdGPUOperator.release.namespace }}
+  releaseName: amd-gpu-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: amd-gpu-grafana-dashboards
+          labels:
+            grafana_dashboard: "1"
+        data:
+          amd-gpu.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/amd-gpu.json" | nindent 12 }}
+            {% endraw %}
+          amd-job.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/amd-job.json" | nindent 12 }}
+            {% endraw %}
+          amd-node.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/amd-node.json" | nindent 12 }}
+            {% endraw %}
+          amd-overview.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/amd-overview.json" | nindent 12 }}
+            {% endraw %}
 {{- end }}
