@@ -75,6 +75,16 @@ jobs:
               nfd:
                 enabled: false
 
+          - key: amd-gpu-operator
+            path: amdGPUOperator
+            values: |
+              node-feature-discovery:
+                enabled: false
+            additional-images: |-
+              docker.io/rocm/k8s-device-plugin:{0}
+              docker.io/rocm/device-metrics-exporter:{0}
+              docker.io/library/busybox:{0}
+
           - key: mellanox-network-operator
             path: mellanoxNetworkOperator.chart
             values: |
