@@ -671,7 +671,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 25.1.0
+        version: 26.1.0
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -1379,7 +1379,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.32.0
+        version: 2.35.0
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
@@ -1686,7 +1686,7 @@ templated manifests should match snapshot:
       chart:
         name: k8s-keystone-auth
         repo: https://catalyst-cloud.github.io/capi-plugin-helm-charts
-        version: 1.4.0
+        version: 1.5.1
       clusterName: RELEASE-NAME
       releaseName: k8s-keystone-auth
       targetNamespace: kube-system

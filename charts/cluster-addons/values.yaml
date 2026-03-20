@@ -83,7 +83,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
-      version: 2.32.0
+      version: 2.35.0
     values: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
@@ -176,7 +176,7 @@ openstack:
     chart:
       repo: https://catalyst-cloud.github.io/capi-plugin-helm-charts
       name: k8s-keystone-auth
-      version: 1.4.0
+      version: 1.5.1
 
 # Setting for Reloader used to restart workloads on Secret/ConfigMap changes
 reloader:
@@ -408,7 +408,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 25.1.0
+    version: 26.1.0
   release:
     namespace: network-operator
     values: {}
