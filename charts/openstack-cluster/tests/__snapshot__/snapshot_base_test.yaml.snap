@@ -46,7 +46,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.31.3
+        version: v3.31.4
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -170,7 +170,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 25.1.0
+        version: 26.1.0
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -443,7 +443,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.32.0
+        version: 2.35.0
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
@@ -530,7 +530,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.32.0
+        version: 2.35.0
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system

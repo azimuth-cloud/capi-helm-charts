@@ -1,0 +1,115 @@
+{{- if and .Values.ingress.enabled .Values.ingress.traefik.enabled }}
+{{- if .Values.ingress.nginx.enabled }}
+{{- fail (printf "Cannot enable both ingress.nginx and ingress.traefik addons simultaneously; please choose one") }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "traefik") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "traefik") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    {{- if .Values.monitoring.enabled }}
+    metrics:
+      prometheus:
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+    {{- else }}
+    {}
+    {{- end }}
+  overrides: |
+    {{- toYaml .Values.ingress.traefik.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "traefik") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "traefik") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.ingress.traefik.chart | nindent 4 }}
+  targetNamespace: {{ .Values.ingress.traefik.release.namespace }}
+  releaseName: traefik
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "traefik") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "traefik") }}-config
+        key: overrides
+{{- if .Values.monitoring.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "traefik-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "traefik-dashboards") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.ingress.traefik.release.namespace }}
+  releaseName: traefik-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: traefik-dashboards
+          labels:
+            grafana_dashboard: "1"
+        data:
+          traefik-ingress-dashboard.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/traefik-kubernetes.json" | nindent 12 }}
+            {% endraw %}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "traefik-alerts") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "traefik-alerts") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.ingress.traefik.release.namespace }}
+  releaseName: traefik-alerts
+  manifestSources:
+    - template: |
+        {% raw %}
+        apiVersion: monitoring.coreos.com/v1
+        kind: PrometheusRule
+        metadata:
+          name: traefik-alerts
+        spec:
+          groups:
+          - name: ingress_traefik.rules
+            rules:
+              - alert: TraefikTLSCertificatesExpiring
+                annotations:
+                  message: |
+                    The minimum number of days until a Traefik-served certificate expires is {{ "{{" }} printf "%.0f" $value {{ "}}" }} days on {{ "{{" }} $labels.sans {{ "}}" }} which is below the critical threshold of 7.
+                  summary: A Traefik-served TLS certificate will expire very soon.
+                expr: |
+                  max by (instance, sans) ((last_over_time(traefik_tls_certs_not_after{}[5m]) - time()) / 86400) < 7
+                for: 5m
+                labels:
+                  severity: critical
+              - alert: TraefikTLSCertificatesExpiringSoon
+                annotations:
+                  message: |
+                    The minimum number of days until a Traefik-served certificate expires is {{ "{{" }} printf "%.0f" $value {{ "}}" }} days on {{ "{{" }} $labels.sans {{ "}}" }} which is less than 14 but greater than 7.
+                  summary: A Traefik-served TLS certificate will expire soon.
+                expr: |
+                  max by (instance, sans) ((last_over_time(traefik_tls_certs_not_after{}[5m]) - time()) / 86400) < 14 > 7
+                for: 5m
+                labels:
+                  severity: warning
+        {% endraw %}
+{{- end }}
+{{- end }}

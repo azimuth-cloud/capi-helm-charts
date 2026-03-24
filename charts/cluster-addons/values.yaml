@@ -16,7 +16,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.31.3
+      version: v3.31.4
     release:
       namespace: tigera-operator
       values:
@@ -42,7 +42,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.19.0
+      version: 1.19.1
     release:
       namespace: kube-system
       values: {}
@@ -83,7 +83,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
-      version: 2.32.0
+      version: 2.35.0
     values: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
@@ -94,7 +94,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
-      version: 2.32.0
+      version: 2.35.0
     values:
       csi:
         plugin:
@@ -176,7 +176,7 @@ openstack:
     chart:
       repo: https://catalyst-cloud.github.io/capi-plugin-helm-charts
       name: k8s-keystone-auth
-      version: 1.4.0
+      version: 1.5.1
 
 # Setting for Reloader used to restart workloads on Secret/ConfigMap changes
 reloader:
@@ -185,7 +185,7 @@ reloader:
   chart:
     repo: https://stakater.github.io/stakater-charts
     name: reloader
-    version: 2.2.7
+    version: 2.2.9
   release:
     # Deploy to the same namespace as OpenStack services
     namespace: openstack-system
@@ -228,14 +228,26 @@ ingress:
   # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
   nginx:
     # Indicates if the Nginx ingress controller should be enabled
-    # The Nginx ingress controller is enabled by default if ingress controllers are enabled
     enabled: true
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
-      version: 4.14.3
+      version: 4.15.0
     release:
       namespace: ingress-nginx
+      values: {}
+  # Settings for the Traefik ingress controller
+  # https://github.com/traefik/traefik-helm-chart/blob/master/EXAMPLES.md
+  traefik:
+    # Indicates if the Traefik ingress controller should be enabled
+    # The Traefik ingress controller is enabled by default if ingress controllers are enabled
+    enabled: false
+    chart:
+      repo: https://traefik.github.io/charts
+      name: traefik
+      version: v39.0.5
+    release:
+      namespace: traefik
       values: {}
 
 # Settings for cluster monitoring
@@ -248,7 +260,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 80.14.4
+      version: 82.11.0
     release:
       namespace: monitoring-system
       values:
@@ -302,7 +314,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: prometheus-blackbox-exporter
-      version: 11.8.0
+      version: 11.9.0
     release:
       namespace: monitoring-system
       values: {}
@@ -408,7 +420,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 25.1.0
+    version: 26.1.0
   release:
     namespace: network-operator
     values: {}

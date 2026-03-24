@@ -36,6 +36,12 @@ addons:
     enabled: true
   intelDevicePlugin:
     enabled: true
+  ingress:
+    enabled: true
+    nginx:
+      enabled: false
+    traefik:
+      enabled: true
   certManager:
     enabled: true
   mellanoxNetworkOperator:
