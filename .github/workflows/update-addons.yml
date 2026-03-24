@@ -49,6 +49,9 @@ jobs:
           - key: ingress-nginx
             path: ingress.nginx.chart
 
+          - key: traefik
+            path: ingress.traefik.chart
+
           - key: kube-prometheus-stack
             path: monitoring.kubePrometheusStack.chart
 
