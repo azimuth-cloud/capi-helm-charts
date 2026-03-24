@@ -16,6 +16,9 @@ spec:
   controlPlaneEndpoint: {{ toYaml . | nindent 4 }}
   {{- end }}
   {{- with .Values.clusterNetworking }}
+  {{- if .disableExternalNetwork }}
+  disableExternalNetwork: {{ .disableExternalNetwork }}
+  {{- end }}
   {{- if .manageSecurityGroups }}
   managedSecurityGroups:
     allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
