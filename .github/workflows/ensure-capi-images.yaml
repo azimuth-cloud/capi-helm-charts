@@ -27,7 +27,7 @@ jobs:
       manifest: ${{ steps.images.outputs.manifest }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
 
@@ -56,7 +56,7 @@ jobs:
             skip: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
         if: ${{ !matrix.skip }}
@@ -68,7 +68,7 @@ jobs:
           OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
         if: ${{ !matrix.skip }}
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
           check-latest: true
