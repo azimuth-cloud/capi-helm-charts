@@ -89,6 +89,7 @@ runs:
       env:
         CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
         CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
+        GOPROXY: off
 
     - name: Install Cluster API add-on provider
       shell: bash
