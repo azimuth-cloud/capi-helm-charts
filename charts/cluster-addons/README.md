@@ -214,14 +214,50 @@ It is possible to install multiple Ingress Controllers and select the preferred 
 particular Ingress resource using
 [Ingress Classes](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
 
-This chart can install the [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)
-onto the target cluster.
+This chart supports two ingress controllers:
 
-The Nginx Ingress Controller is disabled by default. To enable it, use the following Helm values:
+- **[Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)** — the default choice
+- **[Traefik](https://traefik.io/traefik/)** — an alternative using Traefik's native CRDs
+
+Both are disabled by default. To enable **Nginx**, use:
 
 ```yaml
 ingress:
   enabled: true
+```
+
+To enable **Traefik** instead of Nginx, use:
+
+```yaml
+ingress:
+  enabled: true
+  nginx:
+    enabled: false
+  traefik:
+    enabled: true
+```
+
+> **Note:** Nginx and Traefik are mutually exclusive. Enabling both simultaneously will cause the
+> Helm chart to fail with an explicit error.
+
+To customise the chart version or release values for either controller, use the nested
+`chart` and `release` keys. For example, to pin a specific Traefik version and set a
+`LoadBalancer` source IP:
+
+```yaml
+ingress:
+  enabled: true
+  nginx:
+    enabled: false
+  traefik:
+    enabled: true
+    chart:
+      version: v39.0.5
+    release:
+      values:
+        service:
+          spec:
+            loadBalancerIP: "1.2.3.4"
 ```
 
 ## Metrics server
