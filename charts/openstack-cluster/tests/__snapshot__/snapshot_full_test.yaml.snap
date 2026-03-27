@@ -1852,7 +1852,7 @@ templated manifests should match snapshot:
         install Ingress NGINX controller as an addon is deprecated.
 
         .Values.addons.ingress.traefik.enabled=true is set by default. The supported cluster addon for
-        ingress controller and GatewayAPI is Traefik.
+        ingress controller and GatewayAPI is Traefik. This means that setting .Values.addons.ingress.enabled=true will now default to installing Traefik and removing Ingress NGINX if it is installed.
 
         For safety and security reasons, Ingress NGINX was retired in
         March 2026 [https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/]. As Ingress
