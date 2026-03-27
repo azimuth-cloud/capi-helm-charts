@@ -89,6 +89,9 @@ runs:
       env:
         CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
         CAPO_VERSION: ${{ steps.deps.outputs.cluster-api-provider-openstack }}
+        # Needed to prevent clusterctl trying to pull metadata from
+        # unreleased tags kubernetes-sigs/cluster-api#7889
+        GOPROXY: off
 
     - name: Install Cluster API add-on provider
       shell: bash
