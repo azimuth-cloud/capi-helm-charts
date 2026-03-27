@@ -1864,7 +1864,7 @@ templated manifests should match snapshot:
         - The deployment of Ingress NGINX will no longer be tested as part of the release
           process for capi-helm-charts.
         - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
-          a functioning NGINX Ingress controller
+          a functioning NGINX Ingress controller.
   61: |
     apiVersion: apps/v1
     kind: Deployment
