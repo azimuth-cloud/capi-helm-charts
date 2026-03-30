@@ -769,7 +769,7 @@ templated manifests should match snapshot:
       chart:
         name: prometheus-blackbox-exporter
         repo: https://prometheus-community.github.io/helm-charts
-        version: 11.9.0
+        version: 11.9.1
       clusterName: RELEASE-NAME
       releaseName: prometheus-blackbox-exporter
       targetNamespace: monitoring-system
