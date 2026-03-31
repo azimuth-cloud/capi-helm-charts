@@ -1,11 +1,11 @@
 docker.io:
   images:
     grafana/grafana:
-    - 12.4.1
+    - 12.4.2
 ghcr.io:
   images:
     jkroepke/kube-webhook-certgen:
-    - 1.7.8
+    - 1.8.0
 quay.io:
   images:
     kiwigrid/k8s-sidecar:
