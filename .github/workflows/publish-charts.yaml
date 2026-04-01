@@ -18,7 +18,7 @@ jobs:
       chart-version: ${{ steps.semver.outputs.version }}
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ inputs.ref }}
           # This is important for the semver action to work correctly
