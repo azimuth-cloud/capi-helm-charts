@@ -574,11 +574,11 @@ templated manifests should match snapshot:
     raw: |
       DEPRECATION NOTICE:
 
-        .Values.addons.ingress.enabled=true is deprecated, therefore using capi-helm-charts to
-        install an Ingress controller as an addon is deprecated.
+        .Values.addons.ingress.nginx.enabled=true is deprecated, therefore using capi-helm-charts to
+        install Ingress NGINX controller as an addon is deprecated.
 
-        If required, users should migrate to deploying an Ingress controller of their choice,
-        using tooling outside of capi-helm-charts to manage its deployment.
+        .Values.addons.ingress.traefik.enabled=true is set by default. The supported cluster addon for
+        ingress controller and GatewayAPI is Traefik. This means that setting .Values.addons.ingress.enabled=true will now default to installing Traefik and removing Ingress NGINX if it is installed.
 
         For safety and security reasons, Ingress NGINX was retired in
         March 2026 [https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/]. As Ingress

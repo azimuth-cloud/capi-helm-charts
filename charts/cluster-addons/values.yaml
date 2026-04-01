@@ -228,7 +228,7 @@ ingress:
   # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
   nginx:
     # Indicates if the Nginx ingress controller should be enabled
-    enabled: true
+    enabled: false
     chart:
       repo: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
@@ -241,7 +241,7 @@ ingress:
   traefik:
     # Indicates if the Traefik ingress controller should be enabled
     # The Traefik ingress controller is enabled by default if ingress controllers are enabled
-    enabled: false
+    enabled: true
     chart:
       repo: https://traefik.github.io/charts
       name: traefik
