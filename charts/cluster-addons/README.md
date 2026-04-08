@@ -216,25 +216,25 @@ particular Ingress resource using
 
 This chart supports two ingress controllers:
 
-- **[Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)** — the default choice
-- **[Traefik](https://traefik.io/traefik/)** — an alternative using Traefik's native CRDs
+- **[Traefik](https://traefik.io/traefik/)** — the default when `ingress.enabled=true`
+- **[Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)** — Now deprecated and scheduled for removal
 
-Both are disabled by default. To enable **Nginx**, use:
+Both are disabled by default. To enable **Traefik**, use:
 
 ```yaml
 ingress:
   enabled: true
 ```
 
-To enable **Traefik** instead of Nginx, use:
+To enable **Nginx** instead of Traefik, use:
 
 ```yaml
 ingress:
   enabled: true
   nginx:
-    enabled: false
-  traefik:
     enabled: true
+  traefik:
+    enabled: false
 ```
 
 > **Note:** Nginx and Traefik are mutually exclusive. Enabling both simultaneously will cause the
