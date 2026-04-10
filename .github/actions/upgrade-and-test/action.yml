@@ -45,6 +45,12 @@ inputs:
       One of certified-conformance, conformance-lite, non-disruptive-conformance, quick.
     required: true
     default: quick
+  sonobuoy-level:
+    description: |
+      The log level for the Sonobuoy run.
+      One of panic, fatal, error, warn, info, debug, trace.
+    required: true
+    default: info
   sonobuoy-upload:
     description: Specify "yes" to upload the Sonobuoy run as an artifact
     required: true
@@ -71,6 +77,22 @@ runs:
           --set kubernetesVersion=${{ inputs.kubernetes-version }} \
           --set machineImageId=${{ inputs.image-id }}
 
+    - name: Check for cluster deployment ready condition name
+      id: check-ready-condition
+      shell: bash
+      run: |-
+        cluster_api_version=$(kubectl api-resources \
+                                --api-group=cluster.x-k8s.io \
+                                --no-headers=true |\
+                                 grep ^clusters |\
+                                 awk '{print $3}')
+        
+        if [[ "$cluster_api_version" =~ v1beta1$ ]]; then
+          echo "cluster-ready-condition-name=ready" >> $GITHUB_OUTPUT
+        else
+          echo "cluster-ready-condition-name=available" >> $GITHUB_OUTPUT
+        fi
+
     # Wait for any upgrade to start before checking if it is complete
     # This is to make sure the controller has actioned the update before
     # progressing to wait for ready
@@ -82,7 +104,7 @@ runs:
       shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
-          --for=condition=ready=false \
+          --for=condition=${{ steps.check-ready-condition.outputs.cluster-ready-condition-name }}=false \
           --timeout 2m
       continue-on-error: true
 
@@ -90,7 +112,7 @@ runs:
       shell: bash
       run: |-
         kubectl wait clusters/${{ inputs.name }} \
-          --for=condition=ready \
+          --for=condition=${{ steps.check-ready-condition.outputs.cluster-ready-condition-name }} \
           --timeout 30m
 
     - name: Wait for machine deployments to be running
@@ -100,6 +122,30 @@ runs:
           --all \
           --for=jsonpath='{.status.phase}'=Running \
           --timeout 30m
+
+    - name: Wait for control-plane and worker machines to be up-to-date and ready (v1beta2)
+      shell: bash
+      run: |-
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=RollingOut=false \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=ControlPlaneMachinesUpToDate \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=ControlPlaneMachinesReady \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=WorkerMachinesUpToDate \
+          --timeout 30m \
+        && \
+        kubectl wait clusters/${{ inputs.name }} \
+          --for=condition=WorkerMachinesReady \
+          --timeout 30m
+      if: ${{ steps.check-ready-condition.outputs.cluster-ready-condition-name == 'available' }}
 
     - name: Wait for addons to deploy
       shell: bash
@@ -138,9 +184,15 @@ runs:
         KUBECONFIG: ./kubeconfig
       if: "${{ inputs.skip-workload-status != 'yes' }}"
 
+    - name: Get cluster nodes
+      shell: bash
+      run: kubectl get nodes -o wide
+      env:
+        KUBECONFIG: ./kubeconfig
+
     - name: Run sonobuoy
       shell: bash
-      run: sonobuoy run --mode ${{ inputs.sonobuoy-mode }} --wait
+      run: sonobuoy run --level ${{ inputs.sonobuoy-level }} --mode ${{ inputs.sonobuoy-mode }} --wait
       env:
         KUBECONFIG: ./kubeconfig
 

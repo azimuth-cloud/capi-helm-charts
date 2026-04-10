@@ -32,7 +32,7 @@ jobs:
             --all \
             --validate-maintainers=false
 
-      - name: Run template validation
+      - name: Run template validation (current values)
         run: |-
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
@@ -45,5 +45,32 @@ jobs:
 
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
-      - name: Run manifest snapshot test
+      - name: Run manifest snapshot test (current values)
+        run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
+      - name: Get latest tag
+        id: latest-tag
+        run: |
+          set -eo pipefail
+          TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
+          echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+      - name: Checkout default values from latest tag
+        run: |
+          git checkout $LATEST_TAG -- charts/openstack-cluster/values.yaml
+        env:
+          LATEST_TAG: ${{ steps.latest-tag.outputs.tag-name }}
+
+      - name: Run template validation (values from latest tag)
+        run: |-
+          helm template foo charts/openstack-cluster \
+            -f charts/openstack-cluster/tests/values_base.yaml \
+            -f charts/openstack-cluster/tests/values_full.yaml \
+            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            --strict --summary \
+            --schema-location default \
+            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+
+      # NOTE: Run the following command locally to generate updated snapshots:
+      # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
+      - name: Run manifest snapshot test (values from latest tag)
         run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
