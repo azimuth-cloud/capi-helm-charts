@@ -8,6 +8,9 @@ on:
 
 jobs:
   propose_update_pr:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
