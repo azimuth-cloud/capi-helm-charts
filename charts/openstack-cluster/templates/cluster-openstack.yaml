@@ -52,9 +52,9 @@ spec:
     {{- if .loadBalancerProvider }}
     provider: {{ .loadBalancerProvider }}
     {{- end }}
-    {{- if .allowedCidrs }}
-    allowedCidrs:
-      {{- range .allowedCidrs }}
+    {{- if .allowedCIDRs }}
+    allowedCIDRs:
+      {{- range .allowedCIDRs }}
       - {{ . }}
       {{- end}}
     {{- end }}
