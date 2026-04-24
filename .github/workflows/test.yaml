@@ -281,18 +281,7 @@ jobs:
         # So wait a maximum of 3 hours to acquire the lock, leaving 3 hours for other tasks in the workflow
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
-
-      - name: Create cluster at Kubernetes 1.32
-        uses: ./.github/actions/upgrade-and-test
-        with:
-          name: ci-${{ github.run_id }}-${{ github.job }}
-          os-cloud: ${{ vars.TARGET_CLOUD }}
-          chart-version: ${{ inputs.chart-version }}
-          kubernetes-version: ${{ fromJson(inputs.images).kube-1-32-version }}
-          image-id: ${{ fromJson(inputs.images).kube-1-32-image }}
-          defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/kube-upgrade.yaml
-   
+ 
       - name: Upgrade to Kubernetes 1.33
         uses: ./.github/actions/upgrade-and-test
         with:
