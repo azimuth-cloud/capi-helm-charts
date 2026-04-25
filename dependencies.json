@@ -1,10 +1,11 @@
 {
     "addon-provider": "0.11.0",
     "azimuth-images": "0.26.0",
-    "cluster-api": "v1.10.4",
+    "cluster-api": "v1.12.2",
     "cluster-api-janitor-openstack": "0.11.0",
-    "cluster-api-provider-openstack": "v0.11.3",
+    "cluster-api-provider-openstack": "v0.14.1",
     "cert-manager": "v1.20.1",
     "helm": "v3.17.3",
+    "openstack-resource-controller": "v2.4.0",
     "sonobuoy": "v0.57.3"
 }

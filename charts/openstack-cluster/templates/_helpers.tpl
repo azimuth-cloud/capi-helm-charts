@@ -131,7 +131,8 @@ Outputs the node registration object for setting node labels.
 {{- define "openstack-cluster.nodeRegistration.nodeLabels" -}}
 nodeRegistration:
   kubeletExtraArgs:
-    node-labels: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
+    - name: "node-labels"
+      value: "{{ range $i, $k := (keys . | sortAlpha) }}{{ if ne $i 0 }},{{ end }}{{ $k }}={{ index $ $k }}{{ end }}"
 {{- end }}
 
 {{/*
@@ -272,7 +273,7 @@ files:
 {{- range $registry, $registrySpec := . }}
   - path: /etc/containerd/certs.d/{{ $registry }}/hosts.toml
     content: |
-      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | nindent 6 }}
+      {{- include "openstack-cluster.registryFile" (list $registry $registrySpec) | indent 6 }}
     owner: root:root
     permissions: "0644"
 {{- end }}
@@ -329,6 +330,44 @@ preKubeadmCommands:
   - apt install -y {{ join " " . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Converts kubeadmConfigSpec.extraArgs kubeadmConfigSpec.kubeletExtraArgs to v1beta2 style
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" -}}
+{{- $name := index . 0 }}
+{{- $extraArgs := index . 1 }}
+{{ $name }}: {{ include "openstack-cluster.dict2items" $extraArgs | nindent 2 }}
+{{- end -}}
+
+
+{{/*
+Converts kubeadmConfigSpec.extraArgs kubeadmConfigSpec.kubeletExtraArgs to v1beta2 style
+*/}}
+{{- define "openstack-cluster.kubeadmConfigSpec.convert.extraArgs" -}}
+{{- if hasKey . "initConfiguration" -}}
+{{- with .initConfiguration.nodeRegistration -}}
+{{- $kubeletExtraArgs := deepCopy .kubeletExtraArgs -}}
+{{- $_ := mergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "kubeletExtraArgs" $kubeletExtraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- end -}}
+{{- if hasKey . "joinConfiguration" -}}
+{{- with .joinConfiguration.nodeRegistration -}}
+{{- $kubeletExtraArgs := deepCopy .kubeletExtraArgs -}}
+{{- $_ := mustMergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "kubeletExtraArgs" $kubeletExtraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- end -}}
+{{- if hasKey . "clusterConfiguration" -}}
+{{- with .clusterConfiguration.controllerManager -}}
+{{- $extraArgs := deepCopy .extraArgs -}}
+{{- $_ := mustMergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "extraArgs" $extraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- with .clusterConfiguration.scheduler -}}
+{{- $extraArgs := deepCopy .extraArgs -}}
+{{- $_ := mustMergeOverwrite . (include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs.helper" (list "extraArgs" $extraArgs) | fromYaml ) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Produces the spec for a KubeadmConfig object.
@@ -414,7 +453,8 @@ webhooks and policies for audit logging can be added here.
   clusterConfiguration:
     apiServer:
       extraArgs:
-        v: {{ $ctx.Values.apiServer.logLevel | quote }}
+        - name: "v"
+          value: {{ $ctx.Values.apiServer.logLevel | quote }}
 {{- if ne $authWebhook "none" }}
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
@@ -576,3 +616,164 @@ Produces integration for azimuth_authorization_webhook on apiserver
             name: {{ .name }}
           {{- end }}
 {{- end }}
+
+{{/*
+Converts a dict to a list of items
+*/}}
+{{- define "openstack-cluster.dict2items" -}}
+{{- if kindIs "map" . -}}
+{{- $items := list -}}
+{{- range $key, $value := . -}}
+{{- $item := dict "name" $key "value" $value -}}
+{{- $items = append $items $item -}}
+{{- end -}}
+{{ toYaml $items }}
+{{- else -}}
+{{ toYaml . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts rolloutStrategy to rollout.strategy for v1beta2
+*/}}
+{{- define "openstack-cluster.convert.rolloutStrategy" -}}
+{{- if hasKey . "rolloutStrategy" -}}
+{{- $rollout := dict -}}
+{{- $rolloutStrategy := deepCopy .rolloutStrategy -}}
+{{- range $k, $v := $rolloutStrategy -}}
+{{- if kindIs "map" $v -}}
+{{- $k := unset $v "deletePolicy" -}}
+{{- end -}}
+{{- end -}}
+{{- $_ := set $rollout "strategy" $rolloutStrategy }}
+{{- $rollout | toYaml -}}
+{{- else -}}
+{{- .rollout | toYaml -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts rolloutStrategy.<strategy>.deletePolicy to deletion.order for v1beta2
+*/}}
+{{- define "openstack-cluster.convert.deletePolicy" -}}
+{{- $nodeGroup := . -}}
+{{- if hasKey . "rolloutStrategy" -}}
+{{- range $k, $v := .rolloutStrategy -}}
+{{- if kindIs "map" $v -}}
+{{- if hasKey $v "deletePolicy" -}}
+{{- get $v "deletePolicy" -}}
+{{- else -}}
+{{ $nodeGroup.deletion.order }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- else -}}
+{{- $nodeGroup.deletion.order -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts remediationStrategy to remediation for v1beta2
+*/}}
+{{- define "openstack-cluster.convert.remediationStrategy" -}}
+{{- if hasKey . "remediationStrategy" -}}
+{{- $remediation := dict }}
+{{- range $k, $v := .remediationStrategy -}}
+{{- if eq $k "maxRetry" }}
+{{- $remediation := set $remediation $k $v -}}
+{{- else -}}
+{{- $remediation := set $remediation (printf "%sSeconds" $k) (include "openstack-cluster.convert.humanTimeToSeconds" $v | int ) -}}
+{{- end -}}
+{{- end -}}
+{{- $remediation | toYaml -}}
+{{- else -}}
+{{- .remediation | toYaml -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert nodeDrainTimeout to nodeDrainTimeoutSeconds
+*/}}
+{{- define "openstack-cluster.convert.nodeDrainTimeout" -}}
+{{- if hasKey . "nodeDrainTimeout" -}}
+{{- include "openstack-cluster.convert.humanTimeToSeconds" .nodeDrainTimeout -}}
+{{- else -}}
+{{- .nodeDrainTimeoutSeconds -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert nodeVolumeDetachTimeout to volumeDetachTimeoutSeconds
+*/}}
+{{- define "openstack-cluster.convert.volumeDetachTimeout" -}}
+{{- if hasKey . "nodeVolumeDetachTimeout" -}}
+{{- include "openstack-cluster.convert.humanTimeToSeconds" .nodeVolumeDetachTimeout -}}
+{{- else -}}
+{{- .nodeVolumeDetachTimeoutSeconds -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert nodeDeletionTimeout to nodeDeletionTimeoutSeconds
+*/}}
+{{- define "openstack-cluster.convert.nodeDeletionTimeout" -}}
+{{- if hasKey . "nodeDeletionTimeout" -}}
+{{- include "openstack-cluster.convert.humanTimeToSeconds" .nodeDeletionTimeout -}}
+{{- else -}}
+{{- .nodeDeletionTimeoutSeconds -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Convert healthCheck to v1beta2
+*/}}
+{{- define "openstack-cluster.convert.healthCheck" -}}
+{{- if hasKey . "checks" -}}
+{{- . | toYaml -}}
+{{- else -}}
+{{- $healthcheck := dict -}}
+{{- $healthcheckchecks := dict -}}
+{{- $healthcheckremediation := dict -}}
+{{- if hasKey . "nodeStartupTimeout" -}}
+{{- $_ := set $healthcheckchecks "nodeStartupTimeoutSeconds" (include "openstack-cluster.convert.humanTimeToSeconds" .nodeStartupTimeout | int) -}}
+{{- end -}}
+{{- if hasKey . "unhealthyConditions" -}}
+{{- $cond := list -}}
+{{- range $conditions := .unhealthyConditions -}}
+{{- $condition := dict "type" $conditions.type "status" $conditions.status "timeoutSeconds" (include "openstack-cluster.convert.humanTimeToSeconds" $conditions.timeout | int) -}}
+{{- $cond = append $cond $condition -}}
+{{- $_ := set $healthcheckchecks "unhealthyNodeConditions" $cond -}}
+{{- end -}}
+{{- if hasKey . "maxUnhealthy" -}}
+{{- $_ := set $healthcheckremediation "triggerIf" (dict "unhealthyLessThanOrEqualTo" .maxUnhealthy) -}}
+{{- end -}}
+{{- $_ := set $healthcheck "checks" $healthcheckchecks -}}
+{{- $_ := set $healthcheck "remediation" $healthcheckremediation -}}
+{{- end -}}
+{{- $healthcheck | toYaml -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Converts human time to seconds
+*/}}
+{{- define "openstack-cluster.convert.humanTimeToSeconds" -}}
+{{- if kindIs "int" . -}}
+{{ . }}
+{{- else -}}
+{{- $seconds := 0 -}}
+{{- if regexMatch "h" . -}}
+{{- $hours := regexFind "[0-9]+h" . | trimSuffix "h" | int }}
+{{- $seconds = add $seconds (mul 60 60 $hours) -}}
+{{- end -}}
+{{- if regexMatch "m" . -}}
+{{- $mins := regexFind "[0-9]+m" . | trimSuffix "m" | int }}
+{{- $seconds = add $seconds (mul 60 $mins) -}}
+{{- end -}}
+{{- if regexMatch "s" . -}}
+{{- $secs := regexFind "[0-9]+s" . | trimSuffix "s" | int }}
+{{- $seconds = add $seconds $secs -}}
+{{- end -}}
+{{ $seconds }}
+{{- end -}}
+{{- end -}}
