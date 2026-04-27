@@ -46,7 +46,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.31.4
+        version: v3.31.5
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
