@@ -46,7 +46,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.31.4
+        version: v3.31.5
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -386,7 +386,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v25.10.1
+        version: v26.3.1
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
