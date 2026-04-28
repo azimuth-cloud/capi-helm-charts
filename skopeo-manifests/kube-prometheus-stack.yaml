@@ -17,7 +17,7 @@ quay.io:
     prometheus/node-exporter:
     - v1.11.1
     prometheus/prometheus:
-    - v3.11.2
+    - v3.11.3
 registry.k8s.io:
   images:
     kube-state-metrics/kube-state-metrics:
