@@ -1,26 +1,24 @@
 nvcr.io:
   images:
     nvidia/cloud-native/dcgm:
-    - 4.4.2-1-ubuntu22.04
+    - 4.5.2-1-ubuntu22.04
     nvidia/cloud-native/k8s-cc-manager:
-    - v0.1.1
+    - v0.4.0
     nvidia/cloud-native/k8s-driver-manager:
-    - v0.9.1
-    nvidia/cloud-native/k8s-kata-manager:
-    - v0.2.3
+    - v0.10.0
     nvidia/cloud-native/k8s-mig-manager:
-    - v0.13.1
+    - v0.14.0
+    nvidia/cloud-native/nvidia-sandbox-device-plugin:
+    - v0.0.3
     nvidia/cloud-native/vgpu-device-manager:
-    - v0.4.1
-    nvidia/cuda:
-    - 13.0.1-base-ubi9
+    - v0.4.2
     nvidia/gpu-operator:
-    - v25.10.1
+    - v26.3.1
     nvidia/k8s-device-plugin:
-    - v0.18.1
+    - v0.19.0
     nvidia/k8s/container-toolkit:
-    - v1.18.1
+    - v1.19.0
     nvidia/k8s/dcgm-exporter:
-    - 4.4.2-4.7.0-distroless
+    - 4.5.1-4.8.0-distroless
     nvidia/kubevirt-gpu-device-plugin:
-    - v1.4.0
+    - v1.5.0

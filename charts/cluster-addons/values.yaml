@@ -16,7 +16,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.31.4
+      version: v3.31.5
     release:
       namespace: tigera-operator
       values:
@@ -185,7 +185,7 @@ reloader:
   chart:
     repo: https://stakater.github.io/stakater-charts
     name: reloader
-    version: 2.2.9
+    version: 2.2.11
   release:
     # Deploy to the same namespace as OpenStack services
     namespace: openstack-system
@@ -245,7 +245,7 @@ ingress:
     chart:
       repo: https://traefik.github.io/charts
       name: traefik
-      version: v39.0.5
+      version: 39.0.8
     release:
       namespace: traefik
       values: {}
@@ -260,7 +260,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 82.15.1
+      version: 84.3.0
     release:
       namespace: monitoring-system
       values:
@@ -347,7 +347,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v25.10.1
+    version: v26.3.1
   release:
     namespace: gpu-operator
     values:
@@ -420,7 +420,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 26.1.0
+    version: 26.1.1
   release:
     namespace: network-operator
     values: {}
