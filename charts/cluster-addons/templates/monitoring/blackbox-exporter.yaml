@@ -8,17 +8,7 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  defaults: |
-    serviceMonitor:
-      enabled: true
-      {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
-      {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
-      targets:
-        {% for name, config in clouds_data.clouds.items() %}
-        - name: {{ "{{" }} name {{ "}}" }}-auth-url
-          url: {{ "{{" }} config.auth.auth_url.strip("/").removesuffix("/v3") {{ "}}" }}/v3
-        {% endfor %}
-      {% endif %}
+  defaults: {}
   overrides: |
     {{- toYaml .Values.monitoring.blackboxExporter.release.values | nindent 4 }}
 ---
