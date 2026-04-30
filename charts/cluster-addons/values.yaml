@@ -323,6 +323,9 @@ monitoring:
         #   targets:
         #     - name: example
         #       url: http://example.com/healthz
+    # Indicates if a blackbox target for the cloud's auth endpoint should be created
+    openstackAuthUrlTarget:
+      enabled: true
 
 # Settings for node feature discovery
 # https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
