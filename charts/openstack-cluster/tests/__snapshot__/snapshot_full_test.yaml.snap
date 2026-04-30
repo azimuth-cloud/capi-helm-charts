@@ -744,7 +744,7 @@ templated manifests should match snapshot:
       defaults: |
         serviceMonitor:
           enabled: true
-          {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
+          {% if .Values.monitoring.blackboxExporter.openstackAuthUrlTarget.enabled and cloud_identity and "clouds.yaml" in cloud_identity.data %}
           {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
           targets:
             {% for name, config in clouds_data.clouds.items() %}
