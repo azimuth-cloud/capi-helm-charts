@@ -12,6 +12,8 @@ jobs:
       ref: ${{ github.sha }}
 
   publish_charts:
+    permissions:
+      contents: write
     uses: ./.github/workflows/publish-charts.yaml
     secrets: inherit
     with:
@@ -25,7 +27,18 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Publish manifest to release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
-        with:
-          files: dependencies.json
+      - name: Publish release with manifest
+        run: |          
+          # Fail if release already exists
+          if gh release view "$TAG_NAME" > /dev/null 2>&1; then
+            echo "Release for $TAG_NAME already exists. Releases are immutable."
+            exit 1
+          else
+            echo "Creating release for $TAG_NAME"
+            gh release create "$TAG_NAME" \
+              --title "$TAG_NAME" \
+              --generate-notes \
+              dependencies.json
+          fi
+        env:
+          TAG_NAME: ${{ github.ref_name }}  
