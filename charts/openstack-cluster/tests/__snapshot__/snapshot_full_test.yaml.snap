@@ -86,7 +86,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.31.4
+        version: v3.31.5
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -671,7 +671,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 26.1.0
+        version: 26.1.1
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -950,7 +950,7 @@ templated manifests should match snapshot:
       chart:
         name: kube-prometheus-stack
         repo: https://prometheus-community.github.io/helm-charts
-        version: 82.15.1
+        version: 84.3.0
       clusterName: RELEASE-NAME
       lifecycleHooks:
         postDelete:
@@ -1320,7 +1320,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v25.10.1
+        version: v26.3.1
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
@@ -1725,7 +1725,7 @@ templated manifests should match snapshot:
       chart:
         name: reloader
         repo: https://stakater.github.io/stakater-charts
-        version: 2.2.9
+        version: 2.2.11
       clusterName: RELEASE-NAME
       releaseName: reloader
       targetNamespace: openstack-system
@@ -1769,7 +1769,7 @@ templated manifests should match snapshot:
       chart:
         name: traefik
         repo: https://traefik.github.io/charts
-        version: v39.0.5
+        version: 39.0.8
       clusterName: RELEASE-NAME
       releaseName: traefik
       targetNamespace: traefik

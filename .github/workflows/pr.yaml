@@ -46,6 +46,8 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
 
   publish_charts:
+    permissions:
+      contents: write
     needs: [wait_for_approval]
     uses: ./.github/workflows/publish-charts.yaml
     secrets: inherit

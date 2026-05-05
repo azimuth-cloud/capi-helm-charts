@@ -8,6 +8,7 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
+  {{- if .Values.monitoring.blackboxExporter.openstackAuthUrlTarget.enabled }}
   defaults: |
     serviceMonitor:
       enabled: true
@@ -19,6 +20,9 @@ stringData:
           url: {{ "{{" }} config.auth.auth_url.strip("/").removesuffix("/v3") {{ "}}" }}/v3
         {% endfor %}
       {% endif %}
+  {{- else }}
+  defaults: {}
+  {{- end }}
   overrides: |
     {{- toYaml .Values.monitoring.blackboxExporter.release.values | nindent 4 }}
 ---
