@@ -13,7 +13,7 @@ quay.io:
     prometheus-operator/prometheus-operator:
     - v0.90.1
     prometheus/alertmanager:
-    - v0.32.0
+    - v0.32.1
     prometheus/node-exporter:
     - v1.11.1
     prometheus/prometheus:
