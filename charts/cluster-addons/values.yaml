@@ -245,7 +245,7 @@ ingress:
     chart:
       repo: https://traefik.github.io/charts
       name: traefik
-      version: 40.0.0
+      version: 40.1.0
     release:
       namespace: traefik
       values: {}
