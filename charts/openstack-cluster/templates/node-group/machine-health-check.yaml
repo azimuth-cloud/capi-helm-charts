@@ -2,7 +2,7 @@
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 {{- if $nodeGroup.healthCheck.enabled }}
 ---
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineHealthCheck
 metadata:
   name: {{ include "openstack-cluster.componentName" (list $ $nodeGroup.name) }}
@@ -15,6 +15,6 @@ spec:
     matchLabels:
       {{- include "openstack-cluster.componentSelectorLabels" (list $ "worker") | nindent 6 }}
       {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
-  {{- toYaml $nodeGroup.healthCheck.spec | nindent 2 }}
+  {{- include "openstack-cluster.convert.healthCheck" $nodeGroup.healthCheck.spec | nindent 2 }}
 {{- end }}
 {{- end }}
