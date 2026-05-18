@@ -3521,7 +3521,7 @@
       "properties": {
         "additionalBlockDevices": {
           "additionalProperties": true,
-          "description": "my.company.org/label: value\nAdditional block devices for node groups machines\nOptions are the same as for controlPlane.additionalBlockDevices above",
+          "description": "- key: my.company.org/reserved\n  value: \"true\"\n  effect: NoSchedule\nAdditional block devices for node groups machines\nOptions are the same as for controlPlane.additionalBlockDevices above",
           "patternProperties": {
             ".*": {
               "properties": {
@@ -3766,6 +3766,35 @@
             "object",
             "null"
           ]
+        },
+        "nodeTaints": {
+          "description": "my.company.org/label: value\nTaints to apply to the node objects in Kubernetes that correspond to machines in the node group\nEach entry must have a key and an effect (NoSchedule, PreferNoSchedule or NoExecute); value is optional\nTaints given here are combined with any taints in kubeadmConfigSpec.joinConfiguration.nodeRegistration.taints,\nwith the entry from here winning when both specify the same key and effect",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "effect": {
+                "enum": [
+                  "NoSchedule",
+                  "PreferNoSchedule",
+                  "NoExecute"
+                ],
+                "required": []
+              },
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "effect"
+            ],
+            "type": "object"
+          },
+          "title": "nodeTaints",
+          "type": "array"
         },
         "nodeVolumeDetachTimeout": {
           "default": "5m0s",

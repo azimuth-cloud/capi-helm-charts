@@ -1,5 +1,10 @@
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
-{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
+{{- /* mustMerge mutates its destination, so merge a copy of the overrides to keep .Values.nodeGroups pristine */}}
+{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge (deepCopy $nodeGroupOverrides) }}
+{{- /* mustMerge treats an empty list as unset, so restore an explicit nodeTaints to give it replace semantics */}}
+{{- if hasKey $nodeGroupOverrides "nodeTaints" }}
+{{- $nodeGroup = set $nodeGroup "nodeTaints" $nodeGroupOverrides.nodeTaints }}
+{{- end }}
 {{- if not (regexMatch "^[a-z][a-z0-9\\-]+[a-z0-9]$" $nodeGroup.name) }}
 {{- fail (printf "Node group name must be at least three characters long and must contain only lower-case alphanumeric characters and dashes (found name: %s)" $nodeGroup.name) }}
 {{- end }}

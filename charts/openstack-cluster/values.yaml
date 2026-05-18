@@ -977,6 +977,28 @@ nodeGroupDefaults:
   # @schema
   nodeLabels:
     # my.company.org/label: value
+  # Taints to apply to the node objects in Kubernetes that correspond to machines in the node group
+  # Each entry must have a key and an effect (NoSchedule, PreferNoSchedule or NoExecute); value is optional
+  # Taints given here are combined with any taints in kubeadmConfigSpec.joinConfiguration.nodeRegistration.taints,
+  # with the entry from here winning when both specify the same key and effect
+  # @schema
+  # type: array
+  # items:
+  #   type: object
+  #   additionalProperties: false
+  #   properties:
+  #     key:
+  #       type: string
+  #     value:
+  #       type: string
+  #     effect:
+  #       enum: [NoSchedule, PreferNoSchedule, NoExecute]
+  #   required: [key, effect]
+  # @schema
+  nodeTaints: []
+    # - key: my.company.org/reserved
+    #   value: "true"
+    #   effect: NoSchedule
   # Additional block devices for node groups machines
   # Options are the same as for controlPlane.additionalBlockDevices above
   # @schema
@@ -1142,6 +1164,14 @@ nodeGroups:
     # The minimum and maximum number of machines in the node group if autoscale is true
     # machineCountMin: 3
     # machineCountMax: 3
+    # Optional Kubernetes node labels for machines in this group, merged over nodeGroupDefaults.nodeLabels
+    # nodeLabels:
+    #   my.company.org/workload: gpu
+    # Optional Kubernetes node taints for machines in this group, replacing nodeGroupDefaults.nodeTaints
+    # nodeTaints:
+    #   - key: my.company.org/reserved
+    #     value: "true"
+    #     effect: NoSchedule
 
 # @schema
 # type: object
