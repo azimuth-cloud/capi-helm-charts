@@ -1,0 +1,68 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.alloy.enabled .Values.monitoring.loki_v3.enabled}}
+# TODO: Update this to include Loki v3 once the new addon is available
+{{- if .Values.monitoring.lokiStack.enabled }}
+{{- fail (printf "Cannot enable both 'lokiStack' and 'alloy' addons simultaneously; please choose one.") }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "alloy") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "alloy") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    serviceMonitor:
+      enabled: true
+    alloy:
+      configMap:
+        create: true
+        content: |
+        {{ tpl (.Files.Get "files/config.alloy") . | nindent 12 }}
+      mounts:
+        extra:
+          - name: journal
+            mountPath: /var/log/journal
+            readOnly: true
+          - name: pods
+            mountPath: /var/log/pods
+            readOnly: true
+          - name: machine-id
+            mountPath: /etc/machine-id
+            readOnly: true
+    controller:
+      volumes:
+        extra:
+          - name: journal
+            hostPath:
+              path: /var/log/journal
+          - name: pods
+            hostPath:
+              path: /var/log/pods
+          - name: machine-id
+            hostPath:
+              path: /etc/machine-id
+  overrides: |
+    {{- toYaml .Values.monitoring.alloy.release.values | nindent 4 }}
+
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "alloy") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "alloy") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.monitoring.alloy.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.alloy.release.namespace }}
+  releaseName: alloy
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "alloy") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "alloy") }}-config
+        key: overrides
+{{- end }}

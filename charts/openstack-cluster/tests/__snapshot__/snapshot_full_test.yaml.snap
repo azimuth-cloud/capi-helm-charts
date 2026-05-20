@@ -924,6 +924,8 @@ templated manifests should match snapshot:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          prune: true
         prometheus:
           prometheusSpec:
             retention: 90d
