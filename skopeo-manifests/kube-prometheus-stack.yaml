@@ -1,7 +1,7 @@
 docker.io:
   images:
     grafana/grafana:
-    - 13.0.1
+    - 13.0.1-security-01
 ghcr.io:
   images:
     jkroepke/kube-webhook-certgen:
