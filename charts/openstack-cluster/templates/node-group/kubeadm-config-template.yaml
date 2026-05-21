@@ -19,12 +19,21 @@
 joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $nodeLabels | nindent 2 }}
 {{- end }}
 
+{{- define "openstack-cluster.nodegroup.kct.spec.nodeTaints" -}}
+{{- $nodeGroup := index . 1 }}
+{{- $nodeTaints := dig "nodeTaints" list $nodeGroup }}
+{{- if $nodeTaints }}
+joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeTaints" $nodeTaints | nindent 2 }}
+{{- end }}
+{{- end }}
+
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
 {{- $ctx := index . 0 }}
 {{- $nodeGroup := index . 1 }}
 {{-
   list
     (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)
+    (include "openstack-cluster.nodegroup.kct.spec.nodeTaints" (list $ctx $nodeGroup) | fromYaml)
     (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml)
     (omit (include "openstack-cluster.osDistroKubeadmConfigSpec" (list $ctx) | fromYaml) "initConfiguration")
     (pick (include "openstack-cluster.patchConfigSpec" (list $ctx ) | fromYaml) "preKubeadmCommands") |
