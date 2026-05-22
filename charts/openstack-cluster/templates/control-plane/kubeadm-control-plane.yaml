@@ -31,13 +31,20 @@ preKubeadmCommands:
 clusterConfiguration:
   apiServer:
     extraArgs:
-      oidc-issuer-url: {{ quote .issuerUrl }}
-      oidc-client-id: {{ required "clientId is required for OIDC" .clientId | quote }}
-      oidc-username-claim: {{ quote .usernameClaim }}
-      oidc-username-prefix: {{ quote .usernamePrefix }}
-      oidc-groups-claim: {{ quote .groupsClaim }}
-      oidc-groups-prefix: {{ quote .groupsPrefix }}
-      oidc-signing-algs: {{ quote .signingAlgs }}
+      - name: "oidc-issuer-url"
+        value: "{{ quote .issuerUrl }}"
+      - name: "oidc-client-id"
+        value: "{{ required "clientId is required for OIDC" .clientId | quote }}"
+      - name: "oidc-username-claim"
+        value: "{{ quote .usernameClaim }}"
+      - name: "oidc-username-prefix"
+        value: "{{ quote .usernamePrefix }}"
+      - name: "oidc-groups-claim"
+        value: "{{ quote .groupsClaim }}"
+      - name: "oidc-groups-prefix"
+        value: "{{ quote .groupsPrefix }}"
+      - name: "oidc-signing-algs"
+        value: "{{ quote .signingAlgs }}"
 {{- end }}
 {{- end }}
 {{- end }}
@@ -47,7 +54,7 @@ clusterConfiguration:
   etcd:
     local:
       dataDir: {{ .Values.etcd.dataDir }}
-      extraArgs: {{ toYaml .Values.etcd.extraArgs | nindent 8 }}
+      extraArgs: {{ include "openstack-cluster.dict2items" .Values.etcd.extraArgs | nindent 8 }}
 {{- if .Values.etcd.blockDevice }}
 # Tell kubeadm to ignore the fact that the etcd datadir contains lost+found
 initConfiguration:
@@ -83,7 +90,8 @@ joinConfiguration:
 clusterConfiguration:
   apiServer:
     extraArgs:
-      encryption-provider-config: /etc/kubernetes/enc/enc.yaml
+      - name: encryption-provider-config
+        value: /etc/kubernetes/enc/enc.yaml
 files:
   - path: /etc/kubernetes/patches/kube-apiserver1+strategic.yaml
     permissions: "0644"
@@ -150,7 +158,8 @@ files:
 clusterConfiguration:
   apiServer:
     extraArgs:
-      admission-control-config-file: /etc/kubernetes/admission/configuration.yaml
+      - name: "admission-control-config-file"
+        value: "/etc/kubernetes/admission/configuration.yaml"
     extraVolumes:
       - name: admission-configuration
         hostPath: /etc/kubernetes/admission
@@ -160,7 +169,8 @@ clusterConfiguration:
 {{- end }}
 
 ---
-apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+{{- include "openstack-cluster.kubeadmConfigSpec.convert.extraArgs" .Values.controlPlane.kubeadmConfigSpec }}
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
 kind: KubeadmControlPlane
 metadata:
   name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
@@ -177,19 +187,20 @@ spec:
       trimPrefix "v"
   }}
   replicas: {{ .Values.controlPlane.machineCount }}
-  remediationStrategy: {{ toYaml .Values.controlPlane.remediationStrategy | nindent 4 }}
-  rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
+  remediation: {{ include "openstack-cluster.convert.remediationStrategy" .Values.controlPlane | nindent 4 }}
+  rollout: {{ include "openstack-cluster.convert.rolloutStrategy" .Values.controlPlane | nindent 4 }}
   machineTemplate:
     metadata:
       labels: {{ include "openstack-cluster.componentSelectorLabels" (list . "control-plane") | nindent 8 }}
-    infrastructureRef:
-      kind: OpenStackMachineTemplate
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-      name: {{ include "openstack-cluster.controlplane.mt.name" . }}
-      namespace: {{ .Release.Namespace }}
-    nodeDrainTimeout: {{ .Values.controlPlane.nodeDrainTimeout }}
-    nodeVolumeDetachTimeout: {{ .Values.controlPlane.nodeVolumeDetachTimeout }}
-    nodeDeletionTimeout: {{ .Values.controlPlane.nodeDeletionTimeout }}
+    spec:
+      infrastructureRef:
+        kind: OpenStackMachineTemplate
+        apiGroup: infrastructure.cluster.x-k8s.io
+        name: {{ include "openstack-cluster.controlplane.mt.name" . }}
+      deletion:
+        nodeDrainTimeoutSeconds: {{ include "openstack-cluster.convert.nodeDrainTimeout" .Values.controlPlane }}
+        nodeVolumeDetachTimeoutSeconds: {{ include "openstack-cluster.convert.volumeDetachTimeout" .Values.controlPlane }}
+        nodeDeletionTimeoutSeconds: {{ include "openstack-cluster.convert.nodeDeletionTimeout" .Values.controlPlane }}
   kubeadmConfigSpec: {{
     omit
       (
