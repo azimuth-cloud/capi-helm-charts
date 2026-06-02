@@ -18,7 +18,7 @@ metadata:
         required (printf "no minimum machine count specified for node group '%s'" $nodeGroup.name)
     }}
     {{- if lt $machineCountMin 0.0 }}
-    {{- fail "autoscaling node groups require a minimum macchine count of 0" }}
+    {{- fail "autoscaling node groups require a minimum machine count of 0" }}
     {{- end }}
     {{-
       $machineCountMax := $nodeGroup.machineCountMax |
