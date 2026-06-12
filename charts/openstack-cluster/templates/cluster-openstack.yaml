@@ -22,22 +22,11 @@ spec:
   {{- if .manageSecurityGroups }}
   managedSecurityGroups:
     allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
-    {{- if eq $.Values.apiServer.loadBalancerProvider "ovn" }}
-    workerNodesSecurityGroupRules:
-      - name: Worker nodePort TCP
-        remoteIPPrefix: 0.0.0.0/0
-        protocol: tcp
-        direction: ingress
-        etherType: IPv4
-        portRangeMin: 30000
-        portRangeMax: 32767
-      - name: Worker nodePort UDP
-        protocol: udp
-        remoteIPPrefix: 0.0.0.0/0
-        direction: ingress
-        etherType: IPv4
-        portRangeMin: 30000
-        portRangeMax: 32767
+    {{- if or (eq $.Values.apiServer.loadBalancerProvider "ovn") .workerNodeSecurityGroupRules }}
+    workerNodeSecurityGroupRules: {{ include "openstack-cluster.workerNodesSecurityGroupRules" ( list . (eq $.Values.apiServer.loadBalancerProvider "ovn")) | nindent 6 }}
+    {{- end }}
+    {{- if .controlPlaneNodesSecurityGroupRules }}
+    controlPlaneNodesSecurityGroupRules: {{ .controlPlaneNodesSecurityGroupRules | nindent 6 }}
     {{- end }}
   {{- end }}
   {{- with .externalNetworkId }}
