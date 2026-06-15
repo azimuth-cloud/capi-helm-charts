@@ -20,6 +20,11 @@ on:
       kube-1-35-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-35-version }}
 
+# Temporarily allow the node20 action while I work on replacing the
+# cloudposse action.
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   image_manifest:
     runs-on: ubuntu-latest
@@ -88,7 +93,7 @@ jobs:
         if: ${{ !matrix.skip }}
 
       - name: Write matrix outputs
-        uses: cloudposse/github-action-matrix-outputs-write@ed06cf3a6bf23b8dce36d1cf0d63123885bb8375 # v1
+        uses: cloudposse/github-action-matrix-outputs-write@ed06cf3a6bf23b8dce36d1cf0d63123885bb8375 # v1.0.0
         with:
           matrix-step-name: ${{ github.job }}
           matrix-key: ${{ matrix.name }}
@@ -110,6 +115,6 @@ jobs:
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
-        uses: cloudposse/github-action-matrix-outputs-read@33cac12fa9282a7230a418d859b93fdbc4f27b5a # v1
+        uses: cloudposse/github-action-matrix-outputs-read@33cac12fa9282a7230a418d859b93fdbc4f27b5a # 1.0.0
         with:
           matrix-step-name: ensure_image
