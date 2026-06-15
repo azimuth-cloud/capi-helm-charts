@@ -20,6 +20,11 @@ on:
       kube-1-35-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-35-version }}
 
+# Temporarily allow the node20 action while I work on replacing the
+# cloudposse action.
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   image_manifest:
     runs-on: ubuntu-latest
