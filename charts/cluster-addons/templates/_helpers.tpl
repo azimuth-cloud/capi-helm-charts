@@ -44,3 +44,11 @@ helm.sh/chart: {{ index . 0 | include "cluster-addons.chart" }}
 capi.stackhpc.com/managed-by: {{ (index . 0).Release.Service }}
 {{ include "cluster-addons.componentSelectorLabels" . }}
 {{- end -}}
+
+{{/*
+Create a list of system namespaces.
+*/}}
+{{- define "cluster-addons.systemNamespaces" -}}
+{{- $namespaces := list "calico-apiserver" "calico-system" "default" "gpu-operator" "kube-node-lease" "kube-public" "kube-system" "kyverno" "network-operator" "node-feature-discovery" "node-problem-detector" "openstack-system" "tigera-operator" -}}
+{{- $namespaces | join " " -}}
+{{- end -}}
