@@ -576,3 +576,39 @@ Produces integration for azimuth_authorization_webhook on apiserver
             name: {{ .name }}
           {{- end }}
 {{- end }}
+
+{{/*
+Return a list of security groups to apply to worker nodes when
+OVN is the apiserver loadbalancer provider
+*/}}
+{{- define "openstack-cluster.workerNodesSecurityGroupRulesOVN" }}
+workerNodeSecurityGroupRules:
+  - name: Worker nodePort TCP
+    remoteIPPrefix: 0.0.0.0/0
+    protocol: tcp
+    direction: ingress
+    etherType: IPv4
+    portRangeMin: 30000
+    portRangeMax: 32767
+  - name: Worker nodePort UDP
+    protocol: udp
+    remoteIPPrefix: 0.0.0.0/0
+    direction: ingress
+    etherType: IPv4
+    portRangeMin: 30000
+    portRangeMax: 32767
+{{- end }}
+
+{{/*
+Creates a list of security group rules to apply to worker nodes
+*/}}
+{{- define "openstack-cluster.workerNodesSecurityGroupRules" }}
+{{- $msecgroups := index . 0 }}
+{{- $ovnapiserver := index . 1 }}
+{{- if $ovnapiserver }}
+{{- $ovn := include "openstack-cluster.workerNodesSecurityGroupRulesOVN" $ovnapiserver | fromYaml }}
+{{- concat $msecgroups.workerNodeSecurityGroupRules $ovn.workerNodeSecurityGroupRules | uniq | toYaml }}
+{{- else }}
+{{- toYaml $msecgroups.workerNodeSecurityGroupRules }}
+{{- end }}
+{{- end }}

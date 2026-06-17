@@ -1,0 +1,35 @@
+---
+apiServer:
+  loadBalancerProvider: ovn
+
+clusterNetworking:
+  workerNodeSecurityGroupRules:
+  - name: Worker nodePort TCP
+    remoteIPPrefix: 0.0.0.0/0
+    protocol: tcp
+    direction: ingress
+    etherType: IPv4
+    portRangeMin: 30000
+    portRangeMax: 32767
+  - name: Worker nodePort TCP2
+    remoteIPPrefix: 0.0.0.0/0
+    protocol: tcp
+    direction: ingress
+    etherType: IPv4
+    portRangeMin: 30001
+    portRangeMax: 32767
+
+nodeGroups:
+  - name: group-1
+    machineFlavor: vm.small
+    machineCount: 1
+  - name: group-2
+    machineFlavor: vm.large
+    machineCountMin: 1
+    machineCountMax: 3
+    autoscale: true
+  - name: group-3
+    machineFlavor: vm.large
+    machineCountMin: 0
+    machineCountMax: 5
+    autoscale: true
