@@ -2,6 +2,14 @@ nodeGroups:
   - name: group-1
     machineFlavor: vm.small
     machineCount: 1
+    nodeLabels:
+      my.company.org/workload: gpu
+    nodeTaints:
+      - key: my.company.org/reserved
+        value: "true"
+        effect: NoSchedule
+      - key: my.company.org/dedicated
+        effect: NoExecute
   - name: group-2
     machineFlavor: vm.large
     machineCountMin: 1

@@ -2276,7 +2276,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: d43bd1bb079c9f949f46b9f6bf89e1e1027a45756426801398f5ab1199a331c4
+        capi.stackhpc.com/template-checksum: 68d0346559690593e135091432340fd977bac620fefb5d2c52310adcf98079d3
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -2285,7 +2285,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-d43bd1bb
+      name: RELEASE-NAME-group-1-68d03465
     spec:
       template:
         spec:
@@ -2349,8 +2349,14 @@ templated manifests should match snapshot:
             nodeRegistration:
               kubeletExtraArgs:
                 cloud-provider: external
-                node-labels: capi.stackhpc.com/node-group=group-1
+                node-labels: capi.stackhpc.com/node-group=group-1,my.company.org/workload=gpu
               name: '{{ local_hostname }}'
+              taints:
+                - effect: NoSchedule
+                  key: my.company.org/reserved
+                  value: "true"
+                - effect: NoExecute
+                  key: my.company.org/dedicated
           preKubeadmCommands:
             - |-
               /usr/bin/bash -s <<EOF
@@ -2580,7 +2586,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-d43bd1bb
+              name: RELEASE-NAME-group-1-68d03465
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1

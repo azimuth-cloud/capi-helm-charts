@@ -135,6 +135,16 @@ nodeRegistration:
 {{- end }}
 
 {{/*
+Outputs the node registration object for setting node taints.
+Expects a list of {key, value, effect} dicts. value may be omitted.
+*/}}
+{{- define "openstack-cluster.nodeRegistration.nodeTaints" -}}
+nodeRegistration:
+  taints:
+{{ toYaml . | indent 4 }}
+{{- end }}
+
+{{/*
 Converts the tags in a Neutron filter when required.
 */}}
 {{- define "openstack-cluster.convert.tags" -}}
