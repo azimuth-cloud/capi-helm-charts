@@ -419,7 +419,7 @@ webhooks and policies for audit logging can be added here.
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
-Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
+Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging)
 in future
 */}}
 {{- end }}
@@ -611,4 +611,22 @@ Creates a list of security group rules to apply to worker nodes
 {{- else }}
 {{- toYaml $msecgroups.workerNodeSecurityGroupRules }}
 {{- end }}
+{{- end }}
+
+{{/*
+Returns "true" if the node group defaults have autoscaling enabled
+or if any single node group has autoscaling enabled.
+*/}}
+{{- define "openstack-cluster.autoscalingEnabled" }}
+{{- $autoscalingEnabled := false }}
+{{- if .Values.nodeGroupDefaults.autoscale }}
+  {{- $autoscalingEnabled = true }}
+{{- else }}
+  {{- range .Values.nodeGroups }}
+    {{- if and (hasKey . "autoscale") (eq (index . "autoscale") true) }}
+      {{- $autoscalingEnabled = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- $autoscalingEnabled }}
 {{- end }}
