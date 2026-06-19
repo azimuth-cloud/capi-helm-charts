@@ -898,15 +898,6 @@ templated manifests should match snapshot:
               cloud-provider: external
             name: '{{ local_hostname }}'
         preKubeadmCommands:
-          - |-
-            /usr/bin/bash -s <<EOF
-            grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-            cat <<CONTENT >> /etc/containerd/config.toml
-            [plugins."io.containerd.grpc.v1.cri".registry]
-              config_path = "/etc/containerd/certs.d"
-            CONTENT
-            systemctl restart containerd
-            EOF
           - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
       machineTemplate:
         infrastructureRef:
@@ -1002,7 +993,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: d43bd1bb079c9f949f46b9f6bf89e1e1027a45756426801398f5ab1199a331c4
+        capi.stackhpc.com/template-checksum: 721aba62a4906c6fd142189ad849887a2390deedb803945e2ba659c626d6e562
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1011,7 +1002,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-d43bd1bb
+      name: RELEASE-NAME-group-1-721aba62
     spec:
       template:
         spec:
@@ -1077,16 +1068,6 @@ templated manifests should match snapshot:
                 cloud-provider: external
                 node-labels: capi.stackhpc.com/node-group=group-1
               name: '{{ local_hostname }}'
-          preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
   34: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
@@ -1126,7 +1107,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-d43bd1bb
+              name: RELEASE-NAME-group-1-721aba62
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
