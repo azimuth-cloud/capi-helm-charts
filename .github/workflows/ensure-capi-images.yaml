@@ -88,13 +88,27 @@ jobs:
         if: ${{ !matrix.skip }}
 
       - name: Write matrix outputs
-        uses: cloudposse/github-action-matrix-outputs-write@ed06cf3a6bf23b8dce36d1cf0d63123885bb8375 # v1
+        run: |
+          mkdir -p matrix-outputs
+          jq -n \
+            --arg key "$MATRIX_NAME" \
+            --arg image_id "$IMAGE_ID" \
+            --arg kube_version "$KUBE_VERSION" \
+            '{
+              "image-id": {($key): $image_id},
+              "kube-version": {($key): $kube_version}
+            }' > "matrix-outputs/${MATRIX_NAME}.json"
+        env:
+          IMAGE_ID: ${{ steps.ensure-image.outputs.image-id }}
+          KUBE_VERSION: ${{ matrix.image.kubernetes_version }}
+          MATRIX_NAME: ${{ matrix.name }}
+        if: ${{ !matrix.skip }}
+
+      - name: Upload matrix outputs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          matrix-step-name: ${{ github.job }}
-          matrix-key: ${{ matrix.name }}
-          outputs: |-
-            image-id: ${{ steps.ensure-image.outputs.image-id }}
-            kube-version: ${{ matrix.image.kubernetes_version }}
+          name: matrix-outputs-${{ matrix.name }}
+          path: matrix-outputs/${{ matrix.name }}.json
         if: ${{ !matrix.skip }}
 
   produce_outputs:
@@ -108,8 +122,14 @@ jobs:
       kube-1-35-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-35 }}
       kube-1-35-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-35 }}
     steps:
-      - name: Read matrix outputs
-        id: matrix-outputs
-        uses: cloudposse/github-action-matrix-outputs-read@33cac12fa9282a7230a418d859b93fdbc4f27b5a # v1
+      - name: Download matrix outputs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          matrix-step-name: ensure_image
+          pattern: matrix-outputs-*
+          merge-multiple: true
+          path: matrix-outputs
+
+      - name: Combine matrix outputs
+        id: matrix-outputs
+        run: |
+          echo "result=$(jq -sc 'reduce .[] as $x ({}; . * $x)' matrix-outputs/*.json)" >> $GITHUB_OUTPUT
