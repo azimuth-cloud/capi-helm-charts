@@ -19,6 +19,10 @@ on:
         value: ${{ jobs.produce_outputs.outputs.kube-1-35-image }}
       kube-1-35-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-35-version }}
+      kube-1-36-image:
+        value: ${{ jobs.produce_outputs.outputs.kube-1-36-image }}
+      kube-1-36-version:
+        value: ${{ jobs.produce_outputs.outputs.kube-1-36-version }}
 
 # Temporarily allow the node20 action while I work on replacing the
 # cloudposse action.
@@ -58,6 +62,9 @@ jobs:
             skip: false
           - name: kube-1-35
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-35-jammy }}
+            skip: false
+          - name: kube-1-36
+            image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-36-jammy }}
             skip: false
     steps:
       - name: Checkout
@@ -112,6 +119,8 @@ jobs:
       kube-1-34-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-34 }}
       kube-1-35-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-35 }}
       kube-1-35-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-35 }}
+      kube-1-36-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-36 }}
+      kube-1-36-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-36 }}
     steps:
       - name: Read matrix outputs
         id: matrix-outputs
