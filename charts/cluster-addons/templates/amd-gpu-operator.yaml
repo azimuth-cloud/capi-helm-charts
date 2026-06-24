@@ -64,17 +64,9 @@ spec:
             {% raw %}
             {{- .Files.Get "grafana-dashboards/amd-gpu.json" | nindent 12 }}
             {% endraw %}
-          amd-job.json: |
-            {% raw %}
-            {{- .Files.Get "grafana-dashboards/amd-job.json" | nindent 12 }}
-            {% endraw %}
           amd-node.json: |
             {% raw %}
             {{- .Files.Get "grafana-dashboards/amd-node.json" | nindent 12 }}
-            {% endraw %}
-          amd-overview.json: |
-            {% raw %}
-            {{- .Files.Get "grafana-dashboards/amd-overview.json" | nindent 12 }}
             {% endraw %}
 {{- end }}
 {{- end }}
