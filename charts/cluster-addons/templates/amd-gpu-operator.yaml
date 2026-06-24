@@ -15,6 +15,7 @@ stringData:
     # Unnescessary as using in-box drivers
     kmm:
       enabled: false
+      watch: false
     deviceConfig:
       spec:
         metricsExporter:
