@@ -86,6 +86,8 @@ jobs:
             values: |
               node-feature-discovery:
                 enabled: false
+              kmm:
+                enabled: false
             additional-images: |-
               docker.io/rocm/k8s-device-plugin:{0}
               docker.io/rocm/device-metrics-exporter:{0}

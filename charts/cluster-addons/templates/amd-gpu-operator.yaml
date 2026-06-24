@@ -12,6 +12,9 @@ stringData:
     # Use NFD addon instead
     node-feature-discovery:
       enabled: false
+    # Unnescessary as using in-box drivers
+    kmm:
+      enabled: false
     deviceConfig:
       spec:
         metricsExporter:
