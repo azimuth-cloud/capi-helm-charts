@@ -39,6 +39,7 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "amd-gpu-operator") }}-config
         key: overrides
+{{- if .Values.monitoring.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: Manifests
@@ -75,4 +76,5 @@ spec:
             {% raw %}
             {{- .Files.Get "grafana-dashboards/amd-overview.json" | nindent 12 }}
             {% endraw %}
+{{- end }}
 {{- end }}
