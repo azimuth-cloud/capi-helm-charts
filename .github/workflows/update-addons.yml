@@ -88,9 +88,6 @@ jobs:
                 enabled: false
               kmm:
                 enabled: false
-            additional-images: |-
-              docker.io/rocm/k8s-device-plugin:latest
-              docker.io/rocm/k8s-device-plugin:labeller-latest
 
           - key: mellanox-network-operator
             path: mellanoxNetworkOperator.chart
