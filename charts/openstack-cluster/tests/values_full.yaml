@@ -37,6 +37,8 @@ addons:
     enabled: true
   nvidiaGPUOperator:
     enabled: true
+  amdGPUOperator:
+    enabled: true
   nodeFeatureDiscovery:
     enabled: true
   intelDevicePlugin:
