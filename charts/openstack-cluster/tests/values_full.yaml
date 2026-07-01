@@ -57,6 +57,8 @@ addons:
     enabled: true
   reloader:
     enabled: true
+  headlamp:
+    enabled: true
   custom:
     my-custom-helm-release:
       kind: HelmRelease
