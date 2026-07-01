@@ -4,6 +4,7 @@
     .Values.nvidiaGPUOperator.enabled
     .Values.mellanoxNetworkOperator.enabled
     .Values.intelDevicePlugin.enabled
+    .Values.amdGPUOperator.enabled
 }}
 ---
 apiVersion: v1
@@ -23,6 +24,12 @@ stringData:
       tolerations:
         - effect: "NoSchedule"
           operator: "Exists"
+        {{- if .Values.amdGPUOperator.enabled }}
+        - key: "amd-dcm"
+          operator: "Equal"
+          value: "up"
+          effect: "NoExecute"
+        {{- end }}
       # We want to be able to identify nodes with high-performance hardware
       # So the whitelisted device classes are:
       #   02   - Network Controllers (e.g. Ethernet, Infiniband)

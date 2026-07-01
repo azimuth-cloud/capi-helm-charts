@@ -81,6 +81,14 @@ jobs:
               nfd:
                 enabled: false
 
+          - key: amd-gpu-operator
+            path: amdGPUOperator
+            values: |
+              node-feature-discovery:
+                enabled: false
+              kmm:
+                enabled: false
+
           - key: mellanox-network-operator
             path: mellanoxNetworkOperator.chart
             values: |
