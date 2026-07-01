@@ -450,6 +450,17 @@ nodeProblemDetector:
     namespace: node-problem-detector
     values: {}
 
+# Settings for headlamp dashboard
+headlamp:
+  enabled: false
+  chart:
+    repo: https://kubernetes-sigs.github.io/headlamp
+    name: headlamp
+    version: 0.43.0
+  release:
+    namespace: headlamp
+    values: {}
+
 # Settings for any custom addons
 custom: {}
   # # Indexed by the name of the release on the target cluster

@@ -116,6 +116,9 @@ jobs:
           - key: reloader
             path: reloader.chart
 
+          - key: headlamp
+            path: headlamp.chart
+
     name: ${{ matrix.key }}
     steps:
       - name: Checkout
