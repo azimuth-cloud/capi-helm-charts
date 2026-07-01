@@ -349,6 +349,10 @@ controlPlane:
     rollingUpdate:
       # For the control plane, this can only be 0 or 1
       maxSurge: 1
+  # Roll out control plane machines before their certificates expire.
+  # If unset, Cluster API does not trigger rollouts based on certificate expiry.
+  # See https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/
+  certificatesExpiryDays:
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
   kubeadmConfigSpec:
