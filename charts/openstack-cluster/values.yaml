@@ -84,7 +84,7 @@ clusterNetworking:
   # The default CNI installed by the addons is Cilium, so this is true by default
   allowAllInClusterTraffic: true
   # Defines the rules that should be applied to worker nodes.
-  workerNodeSecurityGroupRules: []
+  workerNodesSecurityGroupRules: []
   # Defines the rules that should be applied to control plane nodes.
   controlPlaneNodesSecurityGroupRules: []
   # The ID of the external network to use

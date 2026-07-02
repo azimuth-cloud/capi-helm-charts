@@ -744,7 +744,7 @@ templated manifests should match snapshot:
         name: RELEASE-NAME-cloud-credentials
       managedSecurityGroups:
         allowAllInClusterTraffic: true
-        workerNodeSecurityGroupRules:
+        workerNodesSecurityGroupRules:
           - direction: ingress
             etherType: IPv4
             name: Worker nodePort TCP
