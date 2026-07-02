@@ -22,8 +22,8 @@ spec:
   {{- if .manageSecurityGroups }}
   managedSecurityGroups:
     allowAllInClusterTraffic: {{ .allowAllInClusterTraffic }}
-    {{- if or (eq $.Values.apiServer.loadBalancerProvider "ovn") .workerNodeSecurityGroupRules }}
-    workerNodeSecurityGroupRules: {{ include "openstack-cluster.workerNodesSecurityGroupRules" ( list . (eq $.Values.apiServer.loadBalancerProvider "ovn")) | nindent 6 }}
+    {{- if or (eq $.Values.apiServer.loadBalancerProvider "ovn") .workerNodesSecurityGroupRules }}
+    workerNodesSecurityGroupRules: {{ include "openstack-cluster.workerNodesSecurityGroupRules" ( list . (eq $.Values.apiServer.loadBalancerProvider "ovn")) | nindent 6 }}
     {{- end }}
     {{- if .controlPlaneNodesSecurityGroupRules }}
     controlPlaneNodesSecurityGroupRules: {{ .controlPlaneNodesSecurityGroupRules | nindent 6 }}
