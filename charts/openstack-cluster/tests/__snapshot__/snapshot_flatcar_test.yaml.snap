@@ -925,22 +925,17 @@ templated manifests should match snapshot:
         initConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
-              - name: cloud-provider
-                value: external
-              - name: provider-id
-                value: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
+              cloud-provider: external
+              provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
             name: ${COREOS_OPENSTACK_HOSTNAME}
         joinConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
-              - name: cloud-provider
-                value: external
-              - name: provider-id
-                value: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
+              cloud-provider: external
+              provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
             name: ${COREOS_OPENSTACK_HOSTNAME}
         preKubeadmCommands:
           - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
-          - export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}
           - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
           - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
           - cat /etc/kube-proxy-configuration.yaml >> /etc/kubeadm.yml
@@ -948,7 +943,7 @@ templated manifests should match snapshot:
         infrastructureRef:
           apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
           kind: OpenStackMachineTemplate
-          name: RELEASE-NAME-control-plane-017345cb
+          name: RELEASE-NAME-control-plane-40c52ad6
           namespace: NAMESPACE
         metadata:
           labels:
@@ -998,7 +993,7 @@ templated manifests should match snapshot:
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 017345cbf6014f1fd13655c1f942f53b001a2a545caed867e140d5bba94c28ea
+        capi.stackhpc.com/template-checksum: 40c52ad60b10c631adf7372b43f08c6a497cf1c3c6d3fd647690a3240acd38bb
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1006,7 +1001,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/infrastructure-provider: openstack
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-control-plane-017345cb
+      name: RELEASE-NAME-control-plane-40c52ad6
     spec:
       template:
         spec:
@@ -1015,7 +1010,8 @@ templated manifests should match snapshot:
             cloudName: openstack
             name: RELEASE-NAME-cloud-credentials
           image:
-            id: flatcar-stable-3975-2-0
+            filter:
+              name: flatcar-stable-3975-2-0
   32: |
     apiVersion: v1
     kind: Secret
@@ -1037,7 +1033,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 011920721d4fd7eeb59fb206bf8e860e30e0eab071aba23ddd2eeebb3265b609
+        capi.stackhpc.com/template-checksum: 7569a551e5f94cb481f84276758c28b274d14f1cd79aad5d6655dd866b155707
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1046,7 +1042,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-01192072
+      name: RELEASE-NAME-group-1-7569a551
     spec:
       template:
         spec:
@@ -1144,14 +1140,12 @@ templated manifests should match snapshot:
           joinConfiguration:
             nodeRegistration:
               kubeletExtraArgs:
-                - name: cloud-provider
-                  value: external
-                - name: provider-id
-                  value: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
+                cloud-provider: external
+                node-labels: capi.stackhpc.com/node-group=group-1
+                provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
               name: ${COREOS_OPENSTACK_HOSTNAME}
           preKubeadmCommands:
             - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
-            - export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}
             - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
             - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
   34: |
@@ -1193,12 +1187,12 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-01192072
+              name: RELEASE-NAME-group-1-7569a551
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-1-34b08764
+            name: RELEASE-NAME-group-1-c64e8ea0
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
@@ -1236,7 +1230,7 @@ templated manifests should match snapshot:
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 34b08764ae7ee0c9f743e179076fb580ce3027cf266c1d1931f6129f23f2a34f
+        capi.stackhpc.com/template-checksum: c64e8ea03205a629b5e927db13c0ed429060ace7a4aa2a6f2c22ef526e906718
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1245,7 +1239,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-34b08764
+      name: RELEASE-NAME-group-1-c64e8ea0
     spec:
       template:
         spec:
@@ -1254,7 +1248,8 @@ templated manifests should match snapshot:
             cloudName: openstack
             name: RELEASE-NAME-cloud-credentials
           image:
-            id: flatcar-stable-3975-2-0
+            filter:
+              name: flatcar-stable-3975-2-0
   37: |
     apiVersion: v1
     kind: Secret

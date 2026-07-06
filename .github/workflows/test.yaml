@@ -497,7 +497,7 @@ jobs:
 
       - name: Write Flatcar override values
         run: |-
-          cat > /tmp/flatcar-overrides.yaml <<EOF
+          cat > /tmp/flatcar-overrides.yaml <<'EOF'
           osDistro: flatcar
           flatcar:
             sysextRegistry: "${{ vars.FLATCAR_SYSEXT_REGISTRY }}"

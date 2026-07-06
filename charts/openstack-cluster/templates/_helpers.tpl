@@ -305,6 +305,7 @@ Produces the kubeadmConfigSpec required to configure additional trusted CAs for 
 e.g. for private registries.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.trustedCAs" -}}
+{{- if ne .Values.osDistro "flatcar" }}
 {{- with .Values.trustedCAs }}
 files:
   {{- range $name, $certificate := . }}
@@ -318,15 +319,18 @@ preKubeadmCommands:
   - update-ca-certificates
 {{- end }}
 {{- end }}
+{{- end }}
 
 {{/*
 Produces the kubeadmConfigSpec required to install additional packages.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.additionalPackages" -}}
+{{- if ne .Values.osDistro "flatcar" }}
 {{- with .Values.additionalPackages }}
 preKubeadmCommands:
   - apt update -y
   - apt install -y {{ join " " . }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -359,21 +363,16 @@ initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
     kubeletExtraArgs:
-      - name: cloud-provider
-        value: external
-      - name: provider-id
-        value: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
+      cloud-provider: external
+      provider-id: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
 joinConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
     kubeletExtraArgs:
-      - name: cloud-provider
-        value: external
-      - name: provider-id
-        value: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
+      cloud-provider: external
+      provider-id: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
 preKubeadmCommands:
   - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
-  - export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}
   - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
   - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
 format: ignition
@@ -382,13 +381,13 @@ ignition:
     additionalConfig: |
       storage:
         files:
-          - path: /opt/extensions/kubernetes/{{ .Values.flatcar.sysextKubernetesTag }}.raw
+          - path: /opt/extensions/kubernetes/{{ required "flatcar.sysextKubernetesTag must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesTag }}.raw
             contents:
-              source: "https://{{ .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ .Values.flatcar.sysextKubernetesDigest }}"
+              source: "https://{{ required "flatcar.sysextRegistry must be set when osDistro=flatcar" .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ required "flatcar.sysextKubernetesDigest must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesDigest }}"
             mode: 0644
-          - path: /opt/extensions/containerd/{{ .Values.flatcar.sysextContainerdTag }}.raw
+          - path: /opt/extensions/containerd/{{ required "flatcar.sysextContainerdTag must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdTag }}.raw
             contents:
-              source: "https://{{ .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ .Values.flatcar.sysextContainerdDigest }}"
+              source: "https://{{ .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ required "flatcar.sysextContainerdDigest must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdDigest }}"
             mode: 0644
         links:
           - target: /opt/extensions/kubernetes/{{ .Values.flatcar.sysextKubernetesTag }}.raw
