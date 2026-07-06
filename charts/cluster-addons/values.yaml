@@ -194,6 +194,18 @@ reloader:
         # Restrict scope to namespace
         watchGlobally: false
 
+# Settings for kured, the Kubernetes Reboot Daemon
+kured:
+  # Indicates if kured should be enabled
+  enabled: false
+  chart:
+    repo: https://kubereboot.github.io/charts
+    name: kured
+    version: 6.1.0
+  release:
+    namespace: kube-system
+    values: {}
+
 # Settings for etcd defragmentation jobs
 etcdDefrag:
   # Indicates if the etcd defragmentation job should be enabled

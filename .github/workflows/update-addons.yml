@@ -116,6 +116,9 @@ jobs:
           - key: reloader
             path: reloader.chart
 
+          - key: kured
+            path: kured.chart
+
     name: ${{ matrix.key }}
     steps:
       - name: Checkout
