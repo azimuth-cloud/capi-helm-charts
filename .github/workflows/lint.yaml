@@ -43,6 +43,17 @@ jobs:
             --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
 
+      - name: Run template validation (Flatcar values)
+        run: |-
+          helm template foo charts/openstack-cluster \
+            -f charts/openstack-cluster/tests/values_base.yaml \
+            -f charts/openstack-cluster/tests/values_flatcar.yaml \
+            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            --strict --summary \
+            --schema-location default \
+            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
       - name: Run manifest snapshot test (current values)
