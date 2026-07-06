@@ -348,22 +348,55 @@ Produces the spec for a KubeadmConfig object.
 
 {{/*
 Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
+Ignition downloads the sysexts declared in storage.files synchronously before any systemd service starts,
+so the extensions are already in place when systemd-sysext activates them during normal boot.
+${COREOS_OPENSTACK_HOSTNAME} and ${COREOS_OPENSTACK_INSTANCE_UUID} are set by coreos-metadata
+(EnvironmentFile=/run/metadata/flatcar), exported in preKubeadmCommands, then substituted into
+/etc/kubeadm.yml by envsubst before kubeadm runs.
 */}}
 {{- define "openstack-cluster.flatcarKubeadmConfigSpec" -}}
 initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
+    kubeletExtraArgs:
+      - name: cloud-provider
+        value: external
+      - name: provider-id
+        value: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
 joinConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
+    kubeletExtraArgs:
+      - name: cloud-provider
+        value: external
+      - name: provider-id
+        value: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
 preKubeadmCommands:
   - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+  - export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}
   - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
   - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
 format: ignition
 ignition:
   containerLinuxConfig:
     additionalConfig: |
+      storage:
+        files:
+          - path: /opt/extensions/kubernetes/{{ .Values.flatcar.sysextKubernetesTag }}.raw
+            contents:
+              source: "https://{{ .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ .Values.flatcar.sysextKubernetesDigest }}"
+            mode: 0644
+          - path: /opt/extensions/containerd/{{ .Values.flatcar.sysextContainerdTag }}.raw
+            contents:
+              source: "https://{{ .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ .Values.flatcar.sysextContainerdDigest }}"
+            mode: 0644
+        links:
+          - target: /opt/extensions/kubernetes/{{ .Values.flatcar.sysextKubernetesTag }}.raw
+            path: /etc/extensions/kubernetes.raw
+            hard: false
+          - target: /opt/extensions/containerd/{{ .Values.flatcar.sysextContainerdTag }}.raw
+            path: /etc/extensions/containerd.raw
+            hard: false
       systemd:
         units:
         - name: coreos-metadata-sshkeys@.service
