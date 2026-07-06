@@ -68,7 +68,7 @@ jobs:
             --strict --summary \
             --schema-location default \
             --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --skip HelmRelease,Manifests
 
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
