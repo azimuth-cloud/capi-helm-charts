@@ -1,5 +1,5 @@
 osDistro: flatcar
-machineImageId: flatcar-stable-3975-2-0
+machineImage: flatcar-stable-3975-2-0
 
 flatcar:
   sysextRegistry: harbor.example.com
