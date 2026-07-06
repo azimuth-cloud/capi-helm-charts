@@ -1,0 +1,9 @@
+osDistro: flatcar
+machineImageId: flatcar-stable-3975-2-0
+
+flatcar:
+  sysextRegistry: harbor.example.com
+  sysextKubernetesTag: kubernetes-v1.35.6-x86-64
+  sysextKubernetesDigest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  sysextContainerdTag: containerd-1.7.27-x86-64
+  sysextContainerdDigest: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
