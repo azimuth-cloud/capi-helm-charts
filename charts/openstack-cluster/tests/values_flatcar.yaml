@@ -2,8 +2,7 @@ osDistro: flatcar
 machineImage: flatcar-stable-3975-2-0
 
 flatcar:
-  sysextRegistry: harbor.example.com
-  sysextKubernetesTag: kubernetes-v1.36.2-x86-64
-  sysextKubernetesDigest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-  sysextContainerdTag: containerd-2.3.2-x86-64
-  sysextContainerdDigest: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  sysextKubernetesUrl: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+  sysextKubernetesChecksum: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  sysextContainerdUrl: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+  sysextContainerdChecksum: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
