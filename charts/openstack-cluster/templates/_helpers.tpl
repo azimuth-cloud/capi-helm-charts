@@ -381,23 +381,36 @@ ignition:
     additionalConfig: |
       storage:
         files:
-          - path: /opt/extensions/kubernetes/{{ required "flatcar.sysextKubernetesTag must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesTag }}.raw
+          - path: /opt/extensions/kubernetes/kubernetes.raw
             contents:
-              source: "https://{{ required "flatcar.sysextRegistry must be set when osDistro=flatcar" .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ required "flatcar.sysextKubernetesDigest must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesDigest }}"
+              source: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesUrl }}"
+              verification:
+                hash: "{{ required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesChecksum }}"
             mode: 0644
-          - path: /opt/extensions/containerd/{{ required "flatcar.sysextContainerdTag must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdTag }}.raw
+          - path: /opt/extensions/containerd/containerd.raw
             contents:
-              source: "https://{{ .Values.flatcar.sysextRegistry }}/v2/flatcar/sysexts/blobs/{{ required "flatcar.sysextContainerdDigest must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdDigest }}"
+              source: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdUrl }}"
+              verification:
+                hash: "{{ required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdChecksum }}"
             mode: 0644
         links:
-          - target: /opt/extensions/kubernetes/{{ .Values.flatcar.sysextKubernetesTag }}.raw
+          - target: /opt/extensions/kubernetes/kubernetes.raw
             path: /etc/extensions/kubernetes.raw
             hard: false
-          - target: /opt/extensions/containerd/{{ .Values.flatcar.sysextContainerdTag }}.raw
+          - target: /opt/extensions/containerd/containerd.raw
             path: /etc/extensions/containerd.raw
             hard: false
       systemd:
         units:
+        # Disabling auto-update
+        - name: update-engine.service
+          mask: true
+        - name: locksmithd.service
+          mask: true
+        - name: systemd-sysupdate.timer
+          enabled: false
+
+        # Kubernetes-focused units
         - name: coreos-metadata-sshkeys@.service
           enabled: true
         - name: kubeadm.service

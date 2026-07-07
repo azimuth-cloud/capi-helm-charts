@@ -237,17 +237,14 @@ osDistro: ubuntu
 
 # Flatcar Linux sysext configuration (only used when osDistro: flatcar)
 flatcar:
-  # Harbor (or any OCI registry) serving sysexts as public OCI artifacts
-  # e.g. harbor.example.com
-  sysextRegistry: ""
-  # Tag for the Kubernetes sysext, e.g. kubernetes-v1.35.6-x86-64
-  sysextKubernetesTag: ""
-  # Blob digest for the Kubernetes sysext (sha256:...), obtained from `oras manifest fetch`
-  sysextKubernetesDigest: ""
-  # Tag for the containerd sysext, e.g. containerd-1.7.27-x86-64
-  sysextContainerdTag: ""
-  # Blob digest for the containerd sysext (sha256:...)
-  sysextContainerdDigest: ""
+  # S3 public URL for the Kubernetes sysext .raw file
+  sysextKubernetesUrl: ""
+  # SHA256 checksum of the Kubernetes sysext in Ignition format (sha256-...)
+  sysextKubernetesChecksum: ""
+  # S3 public URL for the containerd sysext .raw file
+  sysextContainerdUrl: ""
+  # SHA256 checksum of the containerd sysext in Ignition format (sha256-...)
+  sysextContainerdChecksum: ""
 #
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
