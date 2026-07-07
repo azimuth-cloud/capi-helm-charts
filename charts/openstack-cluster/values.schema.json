@@ -13,6 +13,61 @@
     "addons": {
       "description": "Helm chart that deploys cluster addons for a CAPI cluster.",
       "properties": {
+        "amdGPUOperator": {
+          "additionalProperties": false,
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "gpu-operator-charts",
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://rocm.github.io/gpu-operator",
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "v1.5.0",
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "kube-amd-gpu",
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": false,
+                  "required": [],
+                  "title": "values",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "amdGPUOperator",
+          "type": "object"
+        },
         "certManager": {
           "additionalProperties": false,
           "properties": {
@@ -53,7 +108,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "crds": {
                       "additionalProperties": false,
@@ -70,8 +125,7 @@
                     }
                   },
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -86,8 +140,12 @@
         "clusterName": {
           "default": "",
           "description": "The name of the Cluster API cluster\nif not given, the release name is used",
+          "required": [],
           "title": "clusterName",
-          "type": "null"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "cni": {
           "additionalProperties": false,
@@ -201,7 +259,7 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "nodeSelector": {
                           "additionalProperties": false,
@@ -218,8 +276,7 @@
                         }
                       },
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -267,10 +324,9 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -291,8 +347,12 @@
             "type": {
               "default": "calico",
               "description": "The CNI to deploy - supported values are calico or cilium",
-              "title": "type",
-              "type": "string"
+              "enum": [
+                "calico",
+                "cilium"
+              ],
+              "required": [],
+              "title": "type"
             }
           },
           "required": [],
@@ -344,10 +404,9 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -365,14 +424,92 @@
           "type": "object"
         },
         "custom": {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "description": "Settings for any custom addons",
+          "patternProperties": {
+            ".*": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "HelmRelease",
+                      "required": []
+                    },
+                    "spec": {
+                      "properties": {
+                        "chart": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "repo": {
+                              "type": "string"
+                            },
+                            "version": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [],
+                          "type": "object"
+                        },
+                        "namespace": {
+                          "type": "string"
+                        },
+                        "values": {
+                          "additionalProperties": true,
+                          "required": [],
+                          "type": "object"
+                        }
+                      },
+                      "required": []
+                    }
+                  },
+                  "required": [],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "Manifests",
+                      "required": []
+                    },
+                    "spec": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "manifests": {
+                          "patternProperties": {
+                            ".*": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [],
+                          "type": "object"
+                        },
+                        "namespace": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "type": "object"
+                    }
+                  },
+                  "required": [],
+                  "type": "object"
+                }
+              ],
+              "required": []
+            }
+          },
           "required": [],
           "title": "custom",
           "type": "object"
         },
         "enabled": {
-          "description": "Conditional property used in parent chart",
+          "default": true,
+          "description": "Included for schema validation purposes.\nHas no effect unless this chart is used\nas a conditional dependency of the\nopenstack-cluster chart.",
           "title": "enabled",
           "type": "boolean"
         },
@@ -395,8 +532,12 @@
                 },
                 "version": {
                   "default": "",
+                  "required": [],
                   "title": "version",
-                  "type": "null"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "required": [],
@@ -419,10 +560,9 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -492,10 +632,9 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -612,7 +751,7 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "enableMonitoring": {
                           "default": true,
@@ -667,8 +806,7 @@
                         }
                       },
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -715,7 +853,7 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "manager": {
                           "additionalProperties": false,
@@ -784,8 +922,7 @@
                         }
                       },
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -799,6 +936,7 @@
             },
             "xpuManagerMonitoring": {
               "additionalProperties": false,
+              "description": "xpuManagerMonitoring requires Flux CD source\nand kustomization controllers to be installed\non the CAPI management cluster.",
               "properties": {
                 "enabled": {
                   "default": true,
@@ -880,10 +1018,9 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -937,10 +1074,9 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -990,7 +1126,7 @@
                 },
                 "openstackAuthUrlTarget": {
                   "additionalProperties": false,
-                  "description": "Indicates if a blackbox target for the cloud's auth endpoint should be created",
+                  "description": "Example of adding additional scrape targets\nserviceMonitor:\n  targets:\n    - name: example\n      url: http://example.com/healthz\nIndicates if a blackbox target for the cloud's auth endpoint should be created",
                   "properties": {
                     "enabled": {
                       "default": true,
@@ -1011,10 +1147,9 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -1068,7 +1203,7 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "alertmanager": {
                           "additionalProperties": false,
@@ -1231,8 +1366,7 @@
                         }
                       },
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -1246,6 +1380,7 @@
             },
             "lokiStack": {
               "additionalProperties": false,
+              "deprecated": true,
               "properties": {
                 "chart": {
                   "additionalProperties": false,
@@ -1284,7 +1419,7 @@
                       "type": "string"
                     },
                     "values": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "loki": {
                           "additionalProperties": false,
@@ -1350,8 +1485,7 @@
                         }
                       },
                       "required": [],
-                      "title": "values",
-                      "type": "object"
+                      "title": "values"
                     }
                   },
                   "required": [],
@@ -1360,8 +1494,7 @@
                 }
               },
               "required": [],
-              "title": "lokiStack",
-              "type": "object"
+              "title": "lokiStack"
             }
           },
           "required": [],
@@ -1410,10 +1543,9 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -1467,10 +1599,9 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -1524,7 +1655,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "dcgmExporter": {
                       "additionalProperties": false,
@@ -1549,8 +1680,7 @@
                     }
                   },
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -1600,10 +1730,9 @@
                   "type": "boolean"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -1679,10 +1808,15 @@
                       "type": "boolean"
                     },
                     "allowedTopologies": {
+                      "additionalProperties": true,
                       "default": "",
                       "description": "The allowed topologies for the storage class",
+                      "required": [],
                       "title": "allowedTopologies",
-                      "type": "null"
+                      "type": [
+                        "object",
+                        "null"
+                      ]
                     },
                     "availabilityZone": {
                       "default": "nova",
@@ -1699,8 +1833,12 @@
                     "fstype": {
                       "default": "",
                       "description": "Filesystem type to use for volumes provisioned with the storage class\nIf not given, the default filesystem type will be used",
+                      "required": [],
                       "title": "fstype",
-                      "type": "null"
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "isClusterDefault": {
                       "default": true,
@@ -1729,6 +1867,7 @@
                     "volumeType": {
                       "default": "",
                       "description": "The Cinder volume type to use for volumes provisioned by the storage class\nIf not given, the default volume type will be used",
+                      "required": [],
                       "title": "volumeType",
                       "type": [
                         "string",
@@ -1747,7 +1886,7 @@
                   "type": "boolean"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "csi": {
                       "additionalProperties": false,
@@ -1814,8 +1953,7 @@
                     }
                   },
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -1870,8 +2008,12 @@
                     "allowedTopologies": {
                       "default": "",
                       "description": "The allowed topologies for the storage class",
+                      "required": [],
                       "title": "allowedTopologies",
-                      "type": "null"
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "enabled": {
                       "default": true,
@@ -1892,25 +2034,32 @@
                       "type": "string"
                     },
                     "parameters": {
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "description": "The parameters for the storage class\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters",
                       "properties": {
                         "type": {
                           "default": "",
                           "description": "The Manila share type to use\nIf not given and the Ceph CSI plugin is installed, cephfs is used",
+                          "required": [],
                           "title": "type",
-                          "type": "null"
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [],
-                      "title": "parameters",
-                      "type": "object"
+                      "title": "parameters"
                     },
                     "provisioner": {
                       "default": "",
                       "description": "The provisioner for the storage class\nIf not given and the Ceph CSI plugin is installed, cephfs.manila.csi.openstack.org is used",
+                      "required": [],
                       "title": "provisioner",
-                      "type": "null"
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "reclaimPolicy": {
                       "default": "Delete",
@@ -1936,10 +2085,9 @@
                   "type": "boolean"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -2047,7 +2195,7 @@
                   "type": "string"
                 },
                 "values": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "reloader": {
                       "additionalProperties": false,
@@ -2065,8 +2213,7 @@
                     }
                   },
                   "required": [],
-                  "title": "values",
-                  "type": "object"
+                  "title": "values"
                 }
               },
               "required": [],
@@ -2099,26 +2246,18 @@
           ]
         },
         "allowedCIDRs": {
-          "default": [],
-          "description": "Restrict loadbalancer access to select IPs",
-          "required": [],
-          "title": "allowedCIDRs",
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "associateFloatingIP": {
-          "default": "true",
-          "description": "Restrict loadbalancer access to select IPs\nallowedCidrs:\n - 192.168.0.0/16  # needed for cluster to init\n - 10.10.0.0/16  # IPv4 Internal Network\n - 123.123.123.123 # some other IPs\nIndicates whether to associate a floating IP with the API server",
+          "description": "Restrict loadbalancer access to select IPs\nallowedCidrs:\n - 192.168.0.0/16  # needed for cluster to init\n - 10.10.0.0/16  # IPv4 Internal Network\n - 123.123.123.123 # some other IPs",
           "items": {
             "type": "string"
           },
-          "required": [],
+          "title": "allowedCIDRs",
+          "type": "array"
+        },
+        "associateFloatingIP": {
+          "default": true,
+          "description": "Indicates whether to associate a floating IP with the API server",
           "title": "associateFloatingIP",
-          "type": [
-            "boolean"
-          ]
+          "type": "boolean"
         },
         "enableLoadBalancer": {
           "default": true,
@@ -2519,17 +2658,19 @@
           "title": "allowAllInClusterTraffic",
           "type": "boolean"
         },
+        "controlPlaneNodesSecurityGroupRules": {
+          "description": "Defines the rules that should be applied to control plane nodes.",
+          "items": {
+            "required": []
+          },
+          "title": "controlPlaneNodesSecurityGroupRules",
+          "type": "array"
+        },
         "disableExternalNetwork": {
           "default": false,
           "description": "Custom nameservers to use for the hosts\nDeprecated; use `clusterNetworking.internalNetwork.dnsNameservers` instead.\ndnsNameservers: []\nIndicates whether or not to attempt to connect the cluster to an external\nnetwork.",
           "title": "disableExternalNetwork",
           "type": "boolean"
-        },
-        "controlPlaneNodesSecurityGroupRules": {
-          "default": [],
-          "description": "A list of security groups to apply to worker nodes when OVN is the apiserver loadbalancer provider",
-          "title": "controlPlaneNodesSecurityGroupRules",
-          "type": "array"
         },
         "externalNetworkId": {
           "default": "",
@@ -2620,10 +2761,12 @@
           "title": "manageSecurityGroups",
           "type": "boolean"
         },
-        "workerNodeSecurityGroupRules": {
-          "default": [],
-          "description": "A list of security groups to apply to worker nodes when OVN is the apiserver loadbalancer provider",
-          "title": "workerNodeSecurityGroupRules",
+        "workerNodesSecurityGroupRules": {
+          "description": "Defines the rules that should be applied to worker nodes.",
+          "items": {
+            "required": []
+          },
+          "title": "workerNodesSecurityGroupRules",
           "type": "array"
         }
       },

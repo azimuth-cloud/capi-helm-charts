@@ -29,7 +29,7 @@ cloudName: openstack
 # The Kubernetes version of the cluster
 # This should match the version of kubelet and kubeadm in the image
 # @schema
-# type: string
+# type: [string, null]
 # pattern: 1.[0-9][0-9].[0-9]+
 # @schema
 kubernetesVersion:
@@ -177,8 +177,14 @@ clusterNetworking:
   # Indicates if the managed security groups should allow all in-cluster traffic
   # The default CNI installed by the addons is Cilium, so this is true by default
   allowAllInClusterTraffic: true
+  # @schema
+  # type: array
+  # @schema
   # Defines the rules that should be applied to worker nodes.
   workerNodesSecurityGroupRules: []
+  # @schema
+  # type: array
+  # @schema
   # Defines the rules that should be applied to control plane nodes.
   controlPlaneNodesSecurityGroupRules: []
   # The ID of the external network to use
@@ -392,9 +398,9 @@ apiServer:
   loadBalancerProvider:
   # Restrict loadbalancer access to select IPs
   # @schema
-  # type: boolean
+  # type: array
   # items:
-  #   type: [array, null]
+  #   type: [string]
   # @schema
   # allowedCidrs:
   #  - 192.168.0.0/16  # needed for cluster to init

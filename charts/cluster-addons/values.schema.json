@@ -2,6 +2,61 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
+    "amdGPUOperator": {
+      "additionalProperties": false,
+      "properties": {
+        "chart": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "gpu-operator-charts",
+              "title": "name",
+              "type": "string"
+            },
+            "repo": {
+              "default": "https://rocm.github.io/gpu-operator",
+              "title": "repo",
+              "type": "string"
+            },
+            "version": {
+              "default": "v1.5.0",
+              "title": "version",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "chart",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "release": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "kube-amd-gpu",
+              "title": "namespace",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": false,
+              "required": [],
+              "title": "values",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "release",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "amdGPUOperator",
+      "type": "object"
+    },
     "certManager": {
       "additionalProperties": false,
       "properties": {
@@ -1549,63 +1604,6 @@
       },
       "required": [],
       "title": "nodeProblemDetector",
-      "type": "object"
-    },
-    "amdGPUOperator": {
-      "additionalProperties": false,
-      "description": "Settings for the AMD GPU operator",
-      "properties": {
-        "chart": {
-          "additionalProperties": false,
-          "properties": {
-            "name": {
-              "default": "gpu-operator-charts",
-              "title": "name",
-              "type": "string"
-            },
-            "repo": {
-              "default": "https://rocm.github.io/gpu-operator",
-              "title": "repo",
-              "type": "string"
-            },
-            "version": {
-              "default": "v1.4.1",
-              "title": "version",
-              "type": "string"
-            }
-          },
-          "required": [],
-          "title": "chart",
-          "type": "object"
-        },
-        "enabled": {
-          "default": true,
-          "description": "Indicates if the AMD GPU operator should be enabled\nNote that because it uses node feature discovery to run only on nodes\nwith an AMD GPU available, the overhead of enabling this on clusters\nthat do not need it now but may need it in the future is low",
-          "title": "enabled",
-          "type": "boolean"
-        },
-        "release": {
-          "additionalProperties": false,
-          "properties": {
-            "namespace": {
-              "default": "kube-amd-gpu",
-              "title": "namespace",
-              "type": "string"
-            },
-            "values": {
-              "additionalProperties": true,
-              "properties": {},
-              "required": [],
-              "title": "values"
-            }
-          },
-          "required": [],
-          "title": "release",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "amdGPUOperator",
       "type": "object"
     },
     "nvidiaGPUOperator": {
