@@ -893,23 +893,36 @@ templated manifests should match snapshot:
             additionalConfig: |-
               storage:
                 files:
-                  - path: /opt/extensions/kubernetes/kubernetes-v1.36.2-x86-64.raw
+                  - path: /opt/extensions/kubernetes/kubernetes.raw
                     contents:
-                      source: "https://harbor.example.com/v2/flatcar/sysexts/blobs/sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      source: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                      verification:
+                        hash: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     mode: 0644
-                  - path: /opt/extensions/containerd/containerd-2.3.2-x86-64.raw
+                  - path: /opt/extensions/containerd/containerd.raw
                     contents:
-                      source: "https://harbor.example.com/v2/flatcar/sysexts/blobs/sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                      source: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                      verification:
+                        hash: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
                     mode: 0644
                 links:
-                  - target: /opt/extensions/kubernetes/kubernetes-v1.36.2-x86-64.raw
+                  - target: /opt/extensions/kubernetes/kubernetes.raw
                     path: /etc/extensions/kubernetes.raw
                     hard: false
-                  - target: /opt/extensions/containerd/containerd-2.3.2-x86-64.raw
+                  - target: /opt/extensions/containerd/containerd.raw
                     path: /etc/extensions/containerd.raw
                     hard: false
               systemd:
                 units:
+                # Disabling auto-update
+                - name: update-engine.service
+                  mask: true
+                - name: locksmithd.service
+                  mask: true
+                - name: systemd-sysupdate.timer
+                  enabled: false
+
+                # Kubernetes-focused units
                 - name: coreos-metadata-sshkeys@.service
                   enabled: true
                 - name: kubeadm.service
@@ -1033,7 +1046,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 9c73ba82e4e28d64ca6332f694fbe59ee7ded6252537cdce4093a899259e4630
+        capi.stackhpc.com/template-checksum: 171e6028c79e06904c235c7204b03c3add48ad4a379c5f70c943d956f0934324
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1042,7 +1055,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-9c73ba82
+      name: RELEASE-NAME-group-1-171e6028
     spec:
       template:
         spec:
@@ -1108,23 +1121,36 @@ templated manifests should match snapshot:
               additionalConfig: |-
                 storage:
                   files:
-                    - path: /opt/extensions/kubernetes/kubernetes-v1.36.2-x86-64.raw
+                    - path: /opt/extensions/kubernetes/kubernetes.raw
                       contents:
-                        source: "https://harbor.example.com/v2/flatcar/sysexts/blobs/sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        source: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                        verification:
+                          hash: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                       mode: 0644
-                    - path: /opt/extensions/containerd/containerd-2.3.2-x86-64.raw
+                    - path: /opt/extensions/containerd/containerd.raw
                       contents:
-                        source: "https://harbor.example.com/v2/flatcar/sysexts/blobs/sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                        source: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                        verification:
+                          hash: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
                       mode: 0644
                   links:
-                    - target: /opt/extensions/kubernetes/kubernetes-v1.36.2-x86-64.raw
+                    - target: /opt/extensions/kubernetes/kubernetes.raw
                       path: /etc/extensions/kubernetes.raw
                       hard: false
-                    - target: /opt/extensions/containerd/containerd-2.3.2-x86-64.raw
+                    - target: /opt/extensions/containerd/containerd.raw
                       path: /etc/extensions/containerd.raw
                       hard: false
                 systemd:
                   units:
+                  # Disabling auto-update
+                  - name: update-engine.service
+                    mask: true
+                  - name: locksmithd.service
+                    mask: true
+                  - name: systemd-sysupdate.timer
+                    enabled: false
+
+                  # Kubernetes-focused units
                   - name: coreos-metadata-sshkeys@.service
                     enabled: true
                   - name: kubeadm.service
@@ -1187,7 +1213,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-9c73ba82
+              name: RELEASE-NAME-group-1-171e6028
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
