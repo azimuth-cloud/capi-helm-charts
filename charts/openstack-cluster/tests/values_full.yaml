@@ -29,7 +29,7 @@ addons:
       enabled: true
     k8sKeystoneAuth:
       enabled: true
-  etcDefrag:
+  etcdDefrag:
     enabled: true
   metricsServer:
     enabled: true
