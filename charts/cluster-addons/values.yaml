@@ -3,6 +3,7 @@
 
 # @schema
 # type: boolean
+# required: true
 # @schema
 # Included for schema validation purposes.
 # Has no effect unless this chart is used
@@ -19,6 +20,7 @@ clusterName:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for the CNI addon
 cni:
@@ -149,6 +151,7 @@ cni:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for CSI addons
 csi:
@@ -192,6 +195,7 @@ csi:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for the OpenStack integrations
 openstack:
@@ -503,6 +507,7 @@ openstack:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Setting for Reloader used to restart workloads on Secret/ConfigMap changes
 reloader:
@@ -552,6 +557,7 @@ reloader:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for etcd defragmentation jobs
 etcdDefrag:
@@ -592,6 +598,7 @@ etcdDefrag:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for the metrics server
 # https://github.com/kubernetes-sigs/metrics-server#helm-chart
@@ -632,6 +639,7 @@ metricsServer:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for ingress controllers
 ingress:
@@ -722,6 +730,7 @@ ingress:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for cluster monitoring
 monitoring:
@@ -977,6 +986,7 @@ monitoring:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for node feature discovery
 # https://github.com/kubernetes-sigs/node-feature-discovery/tree/master/deployment/helm/node-feature-discovery
@@ -1017,6 +1027,7 @@ nodeFeatureDiscovery:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for the NVIDIA GPU operator
 nvidiaGPUOperator:
@@ -1071,6 +1082,7 @@ nvidiaGPUOperator:
 
 # @schema
 # type: object
+# required: true
 # @schema
 amdGPUOperator:
   # @schema
@@ -1108,6 +1120,7 @@ amdGPUOperator:
 
 # @schema
 # type: object
+# required: true
 # @schema
 intelDevicePlugin:
   # @schema
@@ -1271,6 +1284,7 @@ intelDevicePlugin:
 
 # @schema
 # type: object
+# required: true
 # @schema
 certManager:
   # @schema
@@ -1316,6 +1330,7 @@ certManager:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for the Mellanox network operator
 mellanoxNetworkOperator:
@@ -1358,6 +1373,7 @@ mellanoxNetworkOperator:
 
 # @schema
 # type: object
+# required: true
 # @schema
 # Settings for the node problem detector
 nodeProblemDetector:
@@ -1396,19 +1412,49 @@ nodeProblemDetector:
     values: {}
 
 # Settings for headlamp dashboard
+# @schema
+# type: object
+# required: true
+# @schema
 headlamp:
+  # @schema
+  # type: boolean
+  # @schema
   enabled: false
+  # @schema
+  # type: object
+  # @schema
   chart:
+    # @schema
+    # type: string
+    # @schema
     repo: https://kubernetes-sigs.github.io/headlamp
+    # @schema
+    # type: string
+    # @schema
     name: headlamp
+    # @schema
+    # type: string
+    # @schema
     version: 0.43.0
+  # @schema
+  # type: object
+  # @schema
   release:
+    # @schema
+    # type: string
+    # @schema
     namespace: headlamp
+    # @schema
+    # type: object
+    # additionalProperties: true
+    # @schema
     values: {}
 
 # Settings for any custom addons
 # @schema
 # type: object
+# required: true
 # patternProperties:
 #   ".*":
 #     oneOf:
