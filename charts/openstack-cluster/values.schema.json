@@ -3266,6 +3266,16 @@
           "additionalProperties": false,
           "required": []
         },
+        "certificatesExpiryDays": {
+          "description": "Roll out control plane Machines before their kubeadm-managed certificates expire. If unset, certificate-expiry based rollout is disabled.",
+          "minimum": 7,
+          "required": [],
+          "title": "certificatesExpiryDays",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "serverGroupId": {
           "default": "",
           "description": "The ID of the server group to use for control plane machines",

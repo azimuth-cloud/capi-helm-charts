@@ -741,6 +741,10 @@ controlPlane:
   # https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/controlplane.cluster.x-k8s.io/kubeadmcontrolplane_v1beta1.json#/properties/spec/properties/kubeadmConfigSpec
   # because we've augmented that schema with an additional kubeProxyConfiguration field
 
+  # Roll out control plane machines before their certificates expire.
+  # If unset, Cluster API does not trigger rollouts based on certificate expiry.
+  # See https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/
+  certificatesExpiryDays:
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
   # @schema
