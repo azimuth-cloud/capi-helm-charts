@@ -580,6 +580,62 @@
           "title": "global",
           "type": "object"
         },
+        "headlamp": {
+          "additionalProperties": false,
+          "description": "Settings for headlamp dashboard",
+          "properties": {
+            "chart": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "headlamp",
+                  "title": "name",
+                  "type": "string"
+                },
+                "repo": {
+                  "default": "https://kubernetes-sigs.github.io/headlamp",
+                  "title": "repo",
+                  "type": "string"
+                },
+                "version": {
+                  "default": "0.43.0",
+                  "title": "version",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "chart",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "release": {
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "default": "headlamp",
+                  "title": "namespace",
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "values",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "release",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "headlamp",
+          "type": "object"
+        },
         "ingress": {
           "additionalProperties": false,
           "description": "Settings for ingress controllers",
@@ -3415,6 +3471,7 @@
       "default": "",
       "description": "The Kubernetes version of the cluster\nThis should match the version of kubelet and kubeadm in the image",
       "pattern": "1.[0-9][0-9].[0-9]+",
+      "required": [],
       "title": "kubernetesVersion",
       "type": [
         "string",
