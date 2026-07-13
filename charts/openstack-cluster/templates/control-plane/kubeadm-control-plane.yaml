@@ -179,6 +179,10 @@ spec:
   replicas: {{ .Values.controlPlane.machineCount }}
   remediationStrategy: {{ toYaml .Values.controlPlane.remediationStrategy | nindent 4 }}
   rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
+   {{- if gt (.Values.controlPlane.certificatesExpiryDays | int) 0 }}
+  rolloutBefore:
+    certificatesExpiryDays: {{ .Values.controlPlane.certificatesExpiryDays | int }}
+  {{- end }}
   machineTemplate:
     metadata:
       labels: {{ include "openstack-cluster.componentSelectorLabels" (list . "control-plane") | nindent 8 }}

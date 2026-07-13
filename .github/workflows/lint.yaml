@@ -33,7 +33,8 @@ jobs:
             --validate-maintainers=false
 
       - name: Run template validation (current values)
-        run: |-
+        run: |
+          set -eo pipefail
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
@@ -71,7 +72,8 @@ jobs:
           LATEST_TAG: ${{ steps.latest-tag.outputs.tag-name }}
 
       - name: Run template validation (values from latest tag)
-        run: |-
+        run: |
+          set -eo pipefail
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
