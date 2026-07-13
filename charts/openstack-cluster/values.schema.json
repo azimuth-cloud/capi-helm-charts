@@ -3406,6 +3406,44 @@
       "title": "etcd",
       "type": "object"
     },
+    "flatcar": {
+      "additionalProperties": false,
+      "description": "Flatcar Linux sysext configuration (only used when osDistro: flatcar)",
+      "properties": {
+        "sysextContainerdChecksum": {
+          "default": "",
+          "description": "SHA256 checksum of the containerd sysext in Ignition format (sha256-...)",
+          "title": "sysextContainerdChecksum",
+          "type": "string"
+        },
+        "sysextContainerdUrl": {
+          "default": "",
+          "description": "S3 public URL for the containerd sysext .raw file",
+          "title": "sysextContainerdUrl",
+          "type": "string"
+        },
+        "sysextKubernetesChecksum": {
+          "default": "",
+          "description": "SHA256 checksum of the Kubernetes sysext in Ignition format (sha256-...)",
+          "title": "sysextKubernetesChecksum",
+          "type": "string"
+        },
+        "sysextKubernetesUrl": {
+          "default": "",
+          "description": "S3 public URL for the Kubernetes sysext .raw file",
+          "title": "sysextKubernetesUrl",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sysextKubernetesUrl",
+        "sysextKubernetesChecksum",
+        "sysextContainerdUrl",
+        "sysextContainerdChecksum"
+      ],
+      "title": "flatcar",
+      "type": "object"
+    },
     "global": {
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
       "required": [],
@@ -3950,6 +3988,8 @@
       "title": "trustedCAs"
     }
   },
-  "required": [],
+  "required": [
+    "flatcar"
+  ],
   "type": "object"
 }
