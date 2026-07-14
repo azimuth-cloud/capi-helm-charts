@@ -1,0 +1,35 @@
+{-if .Values.longhorn.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "longhorn") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "longhorn") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  overrides: |
+    {{- toYaml .Values.longhorn.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "longhorn") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "longhorn") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart:
+    repo: {{ .Values.longhorn.chart.repo }}
+    name: {{ .Values.longhorn.chart.name }}
+    version: {{ default .Chart.Version .Values.longhorn.chart.version }}
+  targetNamespace: {{ .Values.longhorn.release.namespace }}
+  releaseName: longhorn
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "longhorn") }}-config
+        key: overrides
+{{- end }}
