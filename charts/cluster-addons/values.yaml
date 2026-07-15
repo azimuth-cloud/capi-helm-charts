@@ -1451,6 +1451,30 @@ headlamp:
     # @schema
     values: {}
 
+# Settings for the Kyverno policy engine
+kyverno:
+  # Indicates if Kyverno should be enabled
+  enabled: true
+  chart:
+    repo: https://kyverno.github.io/kyverno/
+    name: kyverno
+    version: 3.3.3
+  release:
+    namespace: kyverno
+    values: {}
+
+# Kyverno pod security standards
+kyvernoPolicies:
+  # Indicates if Kyverno Policies should be installed
+  enabled: true
+  chart:
+    repo: https://kyverno.github.io/kyverno/
+    name: kyverno-policies
+    version: 3.3.1
+  release:
+    namespace: kyverno
+    values: {}
+
 # Settings for any custom addons
 # @schema
 # type: object
