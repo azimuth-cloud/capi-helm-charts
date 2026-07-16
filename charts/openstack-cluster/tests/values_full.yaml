@@ -29,13 +29,15 @@ addons:
       enabled: true
     k8sKeystoneAuth:
       enabled: true
-  etcDefrag:
+  etcdDefrag:
     enabled: true
   metricsServer:
     enabled: true
   monitoring:
     enabled: true
   nvidiaGPUOperator:
+    enabled: true
+  amdGPUOperator:
     enabled: true
   nodeFeatureDiscovery:
     enabled: true
@@ -54,6 +56,8 @@ addons:
   nodeProblemDetector:
     enabled: true
   reloader:
+    enabled: true
+  headlamp:
     enabled: true
   custom:
     my-custom-helm-release:

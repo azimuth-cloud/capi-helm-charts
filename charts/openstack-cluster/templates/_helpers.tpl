@@ -570,7 +570,7 @@ Return a list of security groups to apply to worker nodes when
 OVN is the apiserver loadbalancer provider
 */}}
 {{- define "openstack-cluster.workerNodesSecurityGroupRulesOVN" }}
-workerNodeSecurityGroupRules:
+workerNodesSecurityGroupRules:
   - name: Worker nodePort TCP
     remoteIPPrefix: 0.0.0.0/0
     protocol: tcp
@@ -595,8 +595,8 @@ Creates a list of security group rules to apply to worker nodes
 {{- $ovnapiserver := index . 1 }}
 {{- if $ovnapiserver }}
 {{- $ovn := include "openstack-cluster.workerNodesSecurityGroupRulesOVN" $ovnapiserver | fromYaml }}
-{{- concat $msecgroups.workerNodeSecurityGroupRules $ovn.workerNodeSecurityGroupRules | uniq | toYaml }}
+{{- concat $msecgroups.workerNodesSecurityGroupRules $ovn.workerNodesSecurityGroupRules | uniq | toYaml }}
 {{- else }}
-{{- toYaml $msecgroups.workerNodeSecurityGroupRules }}
+{{- toYaml $msecgroups.workerNodesSecurityGroupRules }}
 {{- end }}
 {{- end }}

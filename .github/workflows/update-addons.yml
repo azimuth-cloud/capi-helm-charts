@@ -81,6 +81,14 @@ jobs:
               nfd:
                 enabled: false
 
+          - key: amd-gpu-operator
+            path: amdGPUOperator
+            values: |
+              node-feature-discovery:
+                enabled: false
+              kmm:
+                enabled: false
+
           - key: mellanox-network-operator
             path: mellanoxNetworkOperator.chart
             values: |
@@ -107,6 +115,9 @@ jobs:
 
           - key: reloader
             path: reloader.chart
+
+          - key: headlamp
+            path: headlamp.chart
 
     name: ${{ matrix.key }}
     steps:
@@ -172,10 +183,11 @@ jobs:
       - name: Update manifest snapshots
         run: |-
           helm dependency update charts/openstack-cluster && \
-            docker run -i --rm --user $(id -u) \
+            docker run -i --rm \
             -v $(pwd):/apps \
             helmunittest/helm-unittest -u \
-            charts/openstack-cluster
+            charts/openstack-cluster && \
+            chown -R ${USER}:${USER} charts
 
       - name: Generate app token for PR
         uses: azimuth-cloud/github-actions/generate-app-token@master
