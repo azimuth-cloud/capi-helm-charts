@@ -508,8 +508,8 @@ openstack:
     # @schema
     # additionalProperties: true
     # @schema
-    values: {}  
-  
+    values: {}
+
   k8sKeystoneAuth:
     # @schema
     # type: boolean

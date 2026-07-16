@@ -2156,6 +2156,49 @@
               "title": "enabled",
               "type": "boolean"
             },
+            "csiNfs": {
+              "additionalProperties": false,
+              "description": "Settings for the NFS CSI driver",
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "description": "Indicates if the NFS CSI driver should be enabled",
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "chart": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "default": "csi-driver-nfs",
+                      "title": "name",
+                      "type": "string"
+                    },
+                    "repo": {
+                      "default": "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
+                      "title": "repo",
+                      "type": "string"
+                    },
+                    "version": {
+                      "default": "4.13.4",
+                      "title": "version",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "chart",
+                  "type": "object"
+                },
+                "values": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "values"
+                }
+              },
+              "required": [],
+              "title": "csiNfs",
+              "type": "object"
+            },
             "k8sKeystoneAuth": {
               "additionalProperties": false,
               "properties": {
