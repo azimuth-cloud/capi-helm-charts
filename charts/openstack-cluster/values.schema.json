@@ -2873,6 +2873,17 @@
           "title": "additionalBlockDevices",
           "type": "object"
         },
+        "certificatesExpiryDays": {
+          "default": "",
+          "description": "Roll out control plane machines before their certificates expire.\nIf unset, Cluster API does not trigger rollouts based on certificate expiry.\nSee https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/",
+          "minimum": 7,
+          "required": [],
+          "title": "certificatesExpiryDays",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "failureDomains": {
           "default": "",
           "description": "The failure domains to use for control plane nodes\nIf given, should be a list of availability zones\nOnly used when omitFailureDomain = false",
@@ -3266,16 +3277,6 @@
           "additionalProperties": false,
           "required": []
         },
-        "certificatesExpiryDays": {
-          "description": "Roll out control plane Machines before their kubeadm-managed certificates expire. If unset, certificate-expiry based rollout is disabled.",
-          "minimum": 7,
-          "required": [],
-          "title": "certificatesExpiryDays",
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
         "serverGroupId": {
           "default": "",
           "description": "The ID of the server group to use for control plane machines",
@@ -3520,7 +3521,7 @@
       "properties": {
         "additionalBlockDevices": {
           "additionalProperties": true,
-          "description": "my.company.org/label: value\nAdditional block devices for node groups machines\nOptions are the same as for controlPlane.additionalBlockDevices above",
+          "description": "- key: my.company.org/reserved\n  value: \"true\"\n  effect: NoSchedule\nAdditional block devices for node groups machines\nOptions are the same as for controlPlane.additionalBlockDevices above",
           "patternProperties": {
             ".*": {
               "properties": {
@@ -3765,6 +3766,35 @@
             "object",
             "null"
           ]
+        },
+        "nodeTaints": {
+          "description": "my.company.org/label: value\nTaints to apply to the node objects in Kubernetes that correspond to machines in the node group\nEach entry must have a key and an effect (NoSchedule, PreferNoSchedule or NoExecute); value is optional\nTaints given here are combined with any taints in kubeadmConfigSpec.joinConfiguration.nodeRegistration.taints,\nwith the entry from here winning when both specify the same key and effect",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "effect": {
+                "enum": [
+                  "NoSchedule",
+                  "PreferNoSchedule",
+                  "NoExecute"
+                ],
+                "required": []
+              },
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "effect"
+            ],
+            "type": "object"
+          },
+          "title": "nodeTaints",
+          "type": "array"
         },
         "nodeVolumeDetachTimeout": {
           "default": "5m0s",

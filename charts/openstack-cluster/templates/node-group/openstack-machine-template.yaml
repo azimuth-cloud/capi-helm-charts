@@ -95,7 +95,8 @@ template:
 {{- end }}
 
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
-{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
+{{- /* mustMerge mutates its destination, so merge a copy of the overrides to keep .Values.nodeGroups pristine */}}
+{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge (deepCopy $nodeGroupOverrides) }}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
