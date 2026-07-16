@@ -96,11 +96,10 @@ jobs:
       - name: Update manifest snapshots
         run: |-
           helm dependency update charts/openstack-cluster && \
-            docker run -i --rm \
+            docker run -i --rm --user $(id -u) \
             -v $(pwd):/apps \
             helmunittest/helm-unittest -u \
-            charts/openstack-cluster && \
-            chown -R ${USER}:${USER} charts
+            charts/openstack-cluster
 
       - name: Write Skopeo manifest
         if: ${{ matrix.key == 'sonobuoy' }}
