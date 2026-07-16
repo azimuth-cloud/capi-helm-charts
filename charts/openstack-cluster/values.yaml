@@ -744,6 +744,10 @@ controlPlane:
   # Roll out control plane machines before their certificates expire.
   # If unset, Cluster API does not trigger rollouts based on certificate expiry.
   # See https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/
+  # @schema
+  # type: [integer, null]
+  # minimum: 7
+  # @schema
   certificatesExpiryDays:
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider

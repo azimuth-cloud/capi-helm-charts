@@ -2873,6 +2873,17 @@
           "title": "additionalBlockDevices",
           "type": "object"
         },
+        "certificatesExpiryDays": {
+          "default": "",
+          "description": "Roll out control plane machines before their certificates expire.\nIf unset, Cluster API does not trigger rollouts based on certificate expiry.\nSee https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/",
+          "minimum": 7,
+          "required": [],
+          "title": "certificatesExpiryDays",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "failureDomains": {
           "default": "",
           "description": "The failure domains to use for control plane nodes\nIf given, should be a list of availability zones\nOnly used when omitFailureDomain = false",
@@ -3265,16 +3276,6 @@
           "$ref": "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/controlplane.cluster.x-k8s.io/kubeadmcontrolplane_v1beta1.json#/properties/spec/properties/rolloutStrategy",
           "additionalProperties": false,
           "required": []
-        },
-        "certificatesExpiryDays": {
-          "description": "Roll out control plane Machines before their kubeadm-managed certificates expire. If unset, certificate-expiry based rollout is disabled.",
-          "minimum": 7,
-          "required": [],
-          "title": "certificatesExpiryDays",
-          "type": [
-            "integer",
-            "null"
-          ]
         },
         "serverGroupId": {
           "default": "",
