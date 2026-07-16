@@ -82,7 +82,7 @@ jobs:
                 enabled: false
 
           - key: amd-gpu-operator
-            path: amdGPUOperator
+            path: amdGPUOperator.chart
             values: |
               node-feature-discovery:
                 enabled: false
