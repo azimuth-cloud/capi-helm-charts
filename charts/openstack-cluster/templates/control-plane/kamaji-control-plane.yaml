@@ -1,0 +1,219 @@
+{{/*
+  Base KamajiControlPlane .spec: version, replicas, datastore and network.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.base" -}}
+{{- $kamaji := .Values.controlPlane.kamaji }}
+version: v{{
+  .Values.controlPlane.kubernetesVersion |
+    default .Values.kubernetesVersion |
+    required "One of .Values.controlPlane.kubernetesVersion or .Values.kubernetesVersion is required" |
+    trimPrefix "v"
+}}
+replicas: {{ .Values.controlPlane.machineCount }}
+dataStoreName: {{ $kamaji.dataStoreName | default "default" | quote }}
+network:
+  serviceType: {{ $kamaji.serviceType | default "LoadBalancer" | quote }}
+  {{- with $kamaji.serviceAddress }}
+  serviceAddress: {{ . | quote }}
+  {{- end }}
+  {{- with $kamaji.serviceAnnotations }}
+  serviceAnnotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $kamaji.certSANs }}
+  certSANs: {{ toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{/*
+  Optional Kamaji addons (coreDNS, kubeProxy, konnectivity).
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.addons" -}}
+{{- with .Values.controlPlane.kamaji.addons }}
+{{- $addons := dict }}
+{{- if not (kindIs "invalid" .coreDNS) }}{{ $addons = set $addons "coreDNS" (default dict .coreDNS) }}{{ end }}
+{{- if not (kindIs "invalid" .kubeProxy) }}{{ $addons = set $addons "kubeProxy" (default dict .kubeProxy) }}{{ end }}
+{{- if not (kindIs "invalid" .konnectivity) }}{{ $addons = set $addons "konnectivity" (default dict .konnectivity) }}{{ end }}
+{{- with $addons }}
+addons: {{ toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+  API server resource requests/limits.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.apiServerResources" -}}
+{{- with .Values.controlPlane.kamaji.apiServerResources }}
+apiServer:
+  resources: {{ toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+
+{{/*
+  API server log level.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.logLevel" -}}
+{{- with .Values.apiServer.logLevel }}
+apiServer:
+  extraArgs:
+    - --v={{ . }}
+{{- end }}
+{{- end }}
+
+{{/*
+  OIDC configuration, API server flags.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.oidc" -}}
+{{- with .Values.oidc }}
+{{- if .issuerUrl }}
+apiServer:
+  extraArgs:
+    - {{ printf "--oidc-issuer-url=%s" .issuerUrl | quote }}
+    - {{ printf "--oidc-client-id=%s" (required "oidc.clientId is required when oidc.issuerUrl is set" .clientId) | quote }}
+    - {{ printf "--oidc-username-claim=%s" .usernameClaim | quote }}
+    - {{ printf "--oidc-username-prefix=%s" .usernamePrefix | quote }}
+    - {{ printf "--oidc-groups-claim=%s" .groupsClaim | quote }}
+    - {{ printf "--oidc-groups-prefix=%s" .groupsPrefix | quote }}
+    - {{ printf "--oidc-signing-algs=%s" .signingAlgs | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+  Admission configuration mounted from a secret into the API server.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.admissionConfiguration" -}}
+{{- if .Values.apiServer.admissionConfiguration }}
+{{- $secretName := include "openstack-cluster.componentName" (list . "admission-configuration") }}
+{{- $mountPath := "/etc/kubernetes/admission" }}
+apiServer:
+  extraArgs:
+    - --admission-control-config-file={{ $mountPath }}/admission-configuration.yaml
+  extraVolumeMounts:
+    - name: admission-configuration
+      mountPath: {{ $mountPath }}
+      readOnly: true
+deployment:
+  extraVolumes:
+    - name: admission-configuration
+      secret:
+        secretName: {{ $secretName }}
+{{- end }}
+{{- end }}
+
+{{/*
+  k8s-keystone-auth runs as a sidecar reached by the API server over localhost,
+  mirroring the kubeadm hostNetwork pod. Config comes from secret-auth-webhook.yaml.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.keystoneAuth" -}}
+{{- if eq .Values.authWebhook "k8s-keystone-auth" }}
+{{- $keystoneAuth := .Values.controlPlane.kamaji.keystoneAuth }}
+{{- $webhookDir := "/etc/kubernetes/webhooks" }}
+{{- $keystoneDir := "/etc/kubernetes/keystone-auth" }}
+{{- $sidecarArgs := list
+      "./bin/k8s-keystone-auth"
+      "--listen=127.0.0.1:8443"
+      (printf "--tls-cert-file=%s/tls.crt" $keystoneDir)
+      (printf "--tls-private-key-file=%s/tls.key" $keystoneDir)
+      (printf "--keystone-url=%s" (required "controlPlane.kamaji.keystoneAuth.authUrl is required when authWebhook is k8s-keystone-auth" $keystoneAuth.authUrl))
+}}
+{{- if $keystoneAuth.caCert }}
+{{- $sidecarArgs = append $sidecarArgs (printf "--keystone-ca-file=%s/ca.pem" $keystoneDir) }}
+{{- end }}
+{{- if $keystoneAuth.policy }}
+{{- $sidecarArgs = append $sidecarArgs (printf "--keystone-policy-file=%s/policy.json" $keystoneDir) }}
+{{- end }}
+{{- $sidecarArgs = concat $sidecarArgs ($keystoneAuth.extraArgs | default list) }}
+{{- /*
+  Default the image so rendering does not fail when only part of keystoneAuth is
+  provided (e.g. an old values.yaml without controlPlane.kamaji defaults).
+*/}}
+{{- $image := $keystoneAuth.image | default dict }}
+{{- $imageRepo := $image.repository | default "registry.k8s.io/provider-os/k8s-keystone-auth" }}
+{{- $imageTag := $image.tag | default "v1.32.0" }}
+{{- $sidecar := dict
+      "name" "k8s-keystone-auth"
+      "image" (printf "%s:%s" $imageRepo $imageTag)
+      "args" $sidecarArgs
+      "volumeMounts" (list (dict "name" "keystone-auth" "mountPath" $keystoneDir "readOnly" true))
+}}
+{{- with $keystoneAuth.resources }}
+{{- $sidecar = set $sidecar "resources" . }}
+{{- end }}
+apiServer:
+  extraArgs:
+    - --authentication-token-webhook-config-file={{ $webhookDir }}/keystone_webhook_config.yaml
+    - --authorization-webhook-config-file={{ $webhookDir }}/keystone_webhook_config.yaml
+    - --authorization-mode=Node,RBAC,Webhook
+  extraVolumeMounts:
+    - name: auth-webhook
+      mountPath: {{ $webhookDir }}
+      readOnly: true
+deployment:
+  extraContainers: {{ list $sidecar | toYaml | nindent 4 }}
+  extraVolumes:
+    - name: auth-webhook
+      secret:
+        secretName: {{ include "openstack-cluster.componentName" (list . "auth-webhook") }}
+    - name: keystone-auth
+      secret:
+        secretName: {{ include "openstack-cluster.componentName" (list . "keystone-auth") }}
+{{- end }}
+{{- end }}
+
+{{/*
+  azimuth-authorization-webhook uses the structured --authorization-config.
+*/}}
+{{- define "openstack-cluster.controlplane.kamaji.azimuthAuth" -}}
+{{- if eq .Values.authWebhook "azimuth-authorization-webhook" }}
+{{- $authzDir := "/etc/kubernetes/authz" }}
+apiServer:
+  extraArgs:
+    - --authorization-config={{ $authzDir }}/authorization_config.yaml
+  extraVolumeMounts:
+    - name: auth-webhook
+      mountPath: {{ $authzDir }}
+      readOnly: true
+deployment:
+  extraVolumes:
+    - name: auth-webhook
+      secret:
+        secretName: {{ include "openstack-cluster.componentName" (list . "auth-webhook") }}
+{{- end }}
+{{- end }}
+
+{{- if eq (include "openstack-cluster.controlplane.isKamaji" .) "true" }}
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+kind: KamajiControlPlane
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec: {{
+  omit
+    (
+      merge
+        (deepCopy (.Values.controlPlane.kamaji.extraSpec | default dict))
+        (
+          include "openstack-cluster.mergeConcatMany"
+            (
+              list
+                (include "openstack-cluster.controlplane.kamaji.base" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.addons" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.apiServerResources" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.logLevel" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.oidc" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.admissionConfiguration" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.keystoneAuth" . | fromYaml)
+                (include "openstack-cluster.controlplane.kamaji.azimuthAuth" . | fromYaml)
+            ) |
+          fromYaml
+        )
+    )
+    "_empty" |
+  toYaml |
+  nindent 2
+}}
+{{- end }}

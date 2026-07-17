@@ -223,8 +223,8 @@ clusterNetworking:
     # @schema
     # type: string
     # @schema
-      # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
-      # name: tenant-internal-subnet
+    # id: e63ca1a0-f69d-4fbf-b306-31089s1j38d8
+    # name: tenant-internal-subnet
     # The CIDR to use if creating a cluster network
     # This is only used if neither of networkFilter and subnetFilter are given
     nodeCidr: 192.168.3.0/24
@@ -473,8 +473,10 @@ apiServer:
 # Set osDistro used. ubuntu, flatcar, etc.
 osDistro: ubuntu
 
-# API server authentication/authorization webhook. Set this to
-# integrate into KubeadmControlPlane and KubeadmConfigTemplate
+# API server authentication/authorization webhook.
+# With controlPlane.type = kamaji, k8s-keystone-auth runs as a sidecar in the
+# hosted control plane pods (see controlPlane.kamaji.keystoneAuth), and
+# azimuth-authorization-webhook mounts its config into those pods.
 # @schema
 # enum: [none, k8s-keystone-auth, azimuth-authorization-webhook]
 # @schema
@@ -526,13 +528,13 @@ azimuthAuthorizationWebhook:
   # Should at least include the values provided to .Values.protectedNamespaces in
   # https://github.com/azimuth-cloud/azimuth-authorization-webhook/blob/main/chart/values.yaml
   filteredNamespaces:
-  - kube-system
-  - openstack-system
-    # @schema
-    # type: array
-    # items:
-    #   type: string
-    # @schema
+    - kube-system
+    - openstack-system
+      # @schema
+      # type: array
+      # items:
+      #   type: string
+      # @schema
   extraPreFilters: []
 
 # @schema
@@ -540,6 +542,16 @@ azimuthAuthorizationWebhook:
 # @schema
 # Settings for the control plane
 controlPlane:
+  # The type of control plane to deploy
+  #   kubeadm - control plane machines running on OpenStack VMs (the default)
+  #   kamaji  - a hosted control plane running as pods on the management cluster
+  # Using kamaji requires the Kamaji operator and its CAPI control plane provider
+  # to be installed on the management cluster
+  # @schema
+  # type: string
+  # enum: [kubeadm, kamaji]
+  # @schema
+  type: kubeadm
   # The failure domains to use for control plane nodes
   # If given, should be a list of availability zones
   # Only used when omitFailureDomain = false
@@ -658,22 +670,22 @@ controlPlane:
   # @schema
   # type: boolean
   # @schema
-    # # The key is the name for the block device in the context of the machine
-    # # It is also used to tag the block device, so that the volume can be identified in instance metadata
-    # scratch:
-    #   # The size of the block device
-    #   size: 20
-    #   # The type of the block device
-    #   # If set to "Volume", which is the default, then a Cinder volume is used to back the block device
-    #   # If set to "Local", local ephemeral storage is used to back the block device
-    #   # In both cases, the lifecycle of the device is the same as the machine
-    #   type: Volume
-    #   # The volume type to use
-    #   # If not specified, the default volume type is used
-    #   volumeType:
-    #   # The volume availability zone to use
-    #   # If not specified, the machine availability zone is used
-    #   availabilityZone:
+  # # The key is the name for the block device in the context of the machine
+  # # It is also used to tag the block device, so that the volume can be identified in instance metadata
+  # scratch:
+  #   # The size of the block device
+  #   size: 20
+  #   # The type of the block device
+  #   # If set to "Volume", which is the default, then a Cinder volume is used to back the block device
+  #   # If set to "Local", local ephemeral storage is used to back the block device
+  #   # In both cases, the lifecycle of the device is the same as the machine
+  #   type: Volume
+  #   # The volume type to use
+  #   # If not specified, the default volume type is used
+  #   volumeType:
+  #   # The volume availability zone to use
+  #   # If not specified, the machine availability zone is used
+  #   availabilityZone:
   # Indicates whether control plane machines should use config drive or not
   machineConfigDrive: false
   # @schema
@@ -744,6 +756,10 @@ controlPlane:
   # Roll out control plane machines before their certificates expire.
   # If unset, Cluster API does not trigger rollouts based on certificate expiry.
   # See https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/
+  # @schema
+  # type: [integer, null]
+  # minimum: 7
+  # @schema
   certificatesExpiryDays:
   # The kubeadm config specification for the control plane
   # By default, this uses a simple configuration that enables the external cloud provider
@@ -876,6 +892,165 @@ controlPlane:
         - type: Ready
           status: "False"
           timeout: 5m0s
+
+  # Settings for a Kamaji hosted control plane
+  # Only used when controlPlane.type = kamaji
+  # As the control plane runs as pods on the management cluster, the machine,
+  # healthCheck, failureDomain, remediation and rollout settings above do not apply
+  # @schema
+  # required: false
+  # @schema
+  kamaji:
+    # The Kamaji DataStore that holds this control plane's etcd data
+    # @schema
+    # type: string
+    # @schema
+    dataStoreName: default
+    # How the API server is exposed from the management cluster
+    #   LoadBalancer - a Service of type LoadBalancer (the default)
+    #   NodePort     - a Service of type NodePort
+    #   ClusterIP    - a Service of type ClusterIP (requires ingress/gateway)
+    # @schema
+    # type: string
+    # enum: [LoadBalancer, NodePort, ClusterIP]
+    # @schema
+    serviceType: LoadBalancer
+    # Annotations for the Service that exposes the API server
+    # @schema
+    # type: object
+    # additionalProperties:
+    #   type: string
+    # @schema
+    serviceAnnotations: {}
+    # A pre-assigned address (e.g. a VIP) for the API server
+    # Mainly useful when serviceType is NodePort
+    # @schema
+    # type: [string, null]
+    # @schema
+    serviceAddress:
+    # Extra Subject Alternative Names for the API server certificate
+    # @schema
+    # type: array
+    # items:
+    #   type: string
+    # @schema
+    certSANs: []
+    # Control plane addons managed by Kamaji
+    # Set an addon to an object (possibly empty) to enable it, or null to disable it
+    #   coreDNS and kubeProxy are off by default - this chart already deploys them
+    #   as cluster addons, so enabling them here would conflict
+    #   konnectivity is on by default - it tunnels API-server-initiated traffic
+    #   (kubectl exec/logs/port-forward, aggregated APIs, webhooks) back to the
+    #   nodes, which the management cluster otherwise cannot reach. Only disable it
+    #   if the management cluster can route directly to the tenant pod/node network
+    # @schema
+    # type: object
+    # additionalProperties: true
+    # @schema
+    addons:
+      # @schema
+      # type: [object, null]
+      # additionalProperties: true
+      # @schema
+      coreDNS:
+      # @schema
+      # type: [object, null]
+      # additionalProperties: true
+      # @schema
+      konnectivity: {}
+      # @schema
+      # type: [object, null]
+      # additionalProperties: true
+      # @schema
+      kubeProxy:
+    # Resources for the API server container
+    # @schema
+    # type: [object, null]
+    # additionalProperties: true
+    # @schema
+    apiServerResources:
+    # Settings for the k8s-keystone-auth webhook (only used when
+    # authWebhook = k8s-keystone-auth). It runs as a sidecar in the hosted control
+    # plane pods, reached over localhost, mirroring the kubeadm hostNetwork setup.
+    # The addons.openstack.k8sKeystoneAuth addon must NOT be enabled alongside this.
+    # @schema
+    # type: object
+    # @schema
+    keystoneAuth:
+      # The Keystone URL, e.g. https://keystone.my.cloud:5000/v3
+      # Required when authWebhook = k8s-keystone-auth
+      # Note that it must be reachable from the management cluster
+      # @schema
+      # type: [string, null]
+      # @schema
+      authUrl:
+      # A PEM-encoded CA bundle used to verify the Keystone server (optional)
+      # @schema
+      # type: [string, null]
+      # @schema
+      caCert:
+      # The Keystone authorization policy for the webhook, as documented in
+      # https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/k8s-keystone-auth/using-keystone-webhook-authenticator-and-authorizer.md
+      # Equivalent to the rbacPolicies value of the workload-cluster
+      # k8s-keystone-auth addon used with kubeadm. The API server runs with
+      # --authorization-mode=Node,RBAC,Webhook, so if empty, authorization falls
+      # through to RBAC and only Keystone authentication is used.
+      # @schema
+      # type: array
+      # items:
+      #   type: object
+      #   additionalProperties: true
+      # @schema
+      policy: []
+      # The image for the webhook sidecar container
+      # @schema
+      # type: object
+      # @schema
+      image:
+        # @schema
+        # type: string
+        # @schema
+        repository: registry.k8s.io/provider-os/k8s-keystone-auth
+        # @schema
+        # type: string
+        # @schema
+        tag: v1.32.0
+      # Resources for the webhook sidecar container
+      # @schema
+      # type: object
+      # additionalProperties: true
+      # @schema
+      resources: {}
+      # Extra arguments for the webhook sidecar container
+      # @schema
+      # type: array
+      # items:
+      #   type: string
+      # @schema
+      extraArgs: []
+      # The TLS certificate and private key for the webhook server
+      # If not given, a self-signed certificate is generated on each deploy
+      # (the API server accesses the webhook over localhost and does not verify
+      # the certificate, but the webhook API requires TLS)
+      # @schema
+      # type: object
+      # @schema
+      tls:
+        # @schema
+        # type: [string, null]
+        # @schema
+        cert:
+        # @schema
+        # type: [string, null]
+        # @schema
+        key:
+    # Extra spec merged into the KamajiControlPlane spec
+    # Use this for any field not exposed above (deployment, kubelet, etc.)
+    # @schema
+    # type: object
+    # additionalProperties: true
+    # @schema
+    extraSpec: {}
 
 # @schema
 # type: object
@@ -1287,6 +1462,13 @@ addons:
   # @schema
   # Indicates if cluster addons should be deployed
   enabled: true
+  # @schema
+  # type: boolean
+  # @schema
+  # Set to true when the control plane is hosted off-cluster (controlPlane.type = kamaji)
+  # so that addons are not pinned to control plane nodes that do not exist
+  # This chart validates that it matches controlPlane.type, so it is normally left alone
+  hostedControlPlane: false
   # @schema
   # type: object
   # @schema

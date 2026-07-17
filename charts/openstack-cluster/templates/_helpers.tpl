@@ -82,6 +82,54 @@ Name of the secret containing the cloud credentials.
 {{- end -}}
 
 {{/*
+The control plane type, either "kubeadm" or "kamaji" (defaults to kubeadm).
+*/}}
+{{- define "openstack-cluster.controlplane.type" -}}
+{{- $type := .Values.controlPlane.type | default "kubeadm" -}}
+{{- if not (has $type (list "kubeadm" "kamaji")) -}}
+{{- fail (printf "controlPlane.type must be one of 'kubeadm' or 'kamaji', got '%s'" $type) -}}
+{{- end -}}
+{{- $type -}}
+{{- end -}}
+
+{{/*
+True when the control plane is a Kamaji hosted control plane.
+*/}}
+{{- define "openstack-cluster.controlplane.isKamaji" -}}
+{{- eq (include "openstack-cluster.controlplane.type" .) "kamaji" -}}
+{{- end -}}
+
+{{/*
+Validates that addons.hostedControlPlane matches the control plane type, and that
+Kamaji is not combined with node-level features it cannot support.
+*/}}
+{{- define "openstack-cluster.controlplane.validateAddons" -}}
+{{- $isKamaji := eq (include "openstack-cluster.controlplane.isKamaji" .) "true" -}}
+{{- with .Values.addons -}}
+{{- if .enabled -}}
+{{- $hostedControlPlane := .hostedControlPlane | default false -}}
+{{- if ne $hostedControlPlane $isKamaji -}}
+{{- fail (printf "addons.hostedControlPlane (%v) must match controlPlane.type (set it to %v for type '%s')" $hostedControlPlane $isKamaji (include "openstack-cluster.controlplane.type" $)) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if $isKamaji -}}
+{{- if .Values.controlPlane.nodeLabels -}}
+{{- fail "controlPlane.nodeLabels is not supported with controlPlane.type 'kamaji' as there are no control plane nodes to label" -}}
+{{- end -}}
+{{- end -}}
+{{- if and $isKamaji (eq .Values.authWebhook "k8s-keystone-auth") -}}
+{{- with .Values.addons -}}
+{{- if .enabled -}}
+{{- if (index .openstack "k8sKeystoneAuth" | default dict) | dig "enabled" false -}}
+{{- fail "addons.openstack.k8sKeystoneAuth.enabled cannot be true alongside authWebhook 'k8s-keystone-auth' with controlPlane.type 'kamaji': the webhook runs as a sidecar in the hosted control plane pods instead of on the workload cluster" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Template that merges two variables with the latter taking precedence and outputs the result as YAML.
 Lists are merged by concatenating them rather than overwriting.
 */}}
@@ -419,7 +467,7 @@ webhooks and policies for audit logging can be added here.
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
-Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
+Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging)
 in future
 */}}
 {{- end }}
@@ -464,6 +512,30 @@ Create and mount a directory for webhooks
 {{- end }}
 
 {{/*
+Webhook kubeconfig the API server uses to reach k8s-keystone-auth over localhost.
+Shared by the kubeadm and Kamaji integrations (server at https://127.0.0.1:8443/webhook).
+*/}}
+{{- define "openstack-cluster.keystoneWebhookKubeconfig" -}}
+---
+apiVersion: v1
+kind: Config
+preferences: {}
+clusters:
+  - cluster:
+      insecure-skip-tls-verify: true
+      server: https://127.0.0.1:8443/webhook
+    name: webhook
+users:
+  - name: webhook
+contexts:
+  - context:
+      cluster: webhook
+      user: webhook
+    name: webhook
+current-context: webhook
+{{- end }}
+
+{{/*
 Produces integration for k8s-keystone-auth webhook on apiserver
 */}}
 {{- define "openstack-cluster.k8sKeystoneAuthWebhook" }}
@@ -490,91 +562,101 @@ Produces integration for k8s-keystone-auth webhook on apiserver
             kind: Pod
     - path: /etc/kubernetes/webhooks/keystone_webhook_config.yaml
       content: |
-        ---
-        apiVersion: v1
-        kind: Config
-        preferences: {}
-        clusters:
-          - cluster:
-              insecure-skip-tls-verify: true
-              server: https://127.0.0.1:8443/webhook
-            name: webhook
-        users:
-          - name: webhook
-        contexts:
-          - context:
-              cluster: webhook
-              user: webhook
-            name: webhook
-        current-context: webhook
+        {{- include "openstack-cluster.keystoneWebhookKubeconfig" . | nindent 8 }}
       owner: root:root
       permissions: "0644"
+{{- end }}
+
+{{/*
+Webhook kubeconfig the API server uses to reach the external azimuth authorization
+webhook. The caller passes the mount directory holding the CA file, as it differs
+between kubeadm and Kamaji.
+Usage: include "openstack-cluster.azimuthWebhookKubeconfig" (list $ctx $dir)
+*/}}
+{{- define "openstack-cluster.azimuthWebhookKubeconfig" -}}
+{{- $ctx := index . 0 -}}
+{{- $dir := index . 1 -}}
+{{- $azimuth := $ctx.Values.azimuthAuthorizationWebhook -}}
+---
+apiVersion: v1
+kind: Config
+preferences: {}
+clusters:
+  - cluster:
+      {{- if $azimuth.tls.enabled }}
+      certificate-authority: {{ $dir }}/ca.pem
+      {{- else }}
+      insecure-skip-tls-verify: true
+      {{- end }}
+      server: {{ $azimuth.server }}
+    name: webhook
+users:
+  - name: webhook
+contexts:
+  - context:
+      cluster: webhook
+      user: webhook
+    name: webhook
+current-context: webhook
+{{- end }}
+
+{{/*
+The structured AuthorizationConfiguration for the azimuth authorization webhook,
+shared by the kubeadm and Kamaji integrations. The caller passes the mount
+directory holding the referenced webhook kubeconfig, as it differs between the two.
+*/}}
+{{- define "openstack-cluster.azimuthAuthorizationConfig" -}}
+{{- $ctx := index . 0 -}}
+{{- $dir := index . 1 -}}
+{{- $azimuth := $ctx.Values.azimuthAuthorizationWebhook -}}
+---
+apiVersion: apiserver.config.k8s.io/v1
+kind: AuthorizationConfiguration
+authorizers:
+  - type: Webhook
+    name: webhook
+    webhook:
+      timeout: {{ $azimuth.timeout }}
+      subjectAccessReviewVersion: {{ $azimuth.webhookVersion }}
+      matchConditionSubjectAccessReviewVersion: {{ $azimuth.webhookVersion }}
+      failurePolicy: {{ $azimuth.failurePolicy }}
+      connectionInfo:
+        type: KubeConfigFile
+        kubeConfigFile: {{ $dir }}/azimuth_authorization_webhook_config.yaml
+      matchConditions:
+        {{- $quotedNSList := list }}
+        {{- range $azimuth.filteredNamespaces }}
+        {{- $quotedNSList = append $quotedNSList (quote .) }}
+        {{- end }}
+        - expression: has(request.resourceAttributes) && (!has(request.resourceAttributes.namespace) || request.resourceAttributes.namespace == "" || request.resourceAttributes.namespace in [{{ join "," $quotedNSList }}])
+      {{- range $azimuth.extraPreFilters }}
+        - expression: {{ . }}
+      {{- end }}
+  {{- range $azimuth.additionalAuthorizers }}
+  - type: {{ .type }}
+    name: {{ .name }}
+  {{- end }}
 {{- end }}
 
 {{/*
 Produces integration for azimuth_authorization_webhook on apiserver
 */}}
 {{- define "openstack-cluster.azimuthAuthorizationWebhook" }}
+{{- $dir := "/etc/kubernetes/webhooks" }}
   files:
 {{- include "openstack-cluster.webhookMountDirectoryFile" . }}
     {{- if $.Values.azimuthAuthorizationWebhook.tls.enabled }}
-    - path: /etc/kubernetes/webhooks/ca.pem
+    - path: {{ $dir }}/ca.pem
       content: {{ $.Values.azimuthAuthorizationWebhook.tls.cert | toYaml | nindent 12 }}
     {{- end }}
-    - path: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
+    - path: {{ $dir }}/azimuth_authorization_webhook_config.yaml
       content: |
-        ---
-        apiVersion: v1
-        kind: Config
-        preferences: {}
-        clusters:
-          - cluster:
-              {{- if $.Values.azimuthAuthorizationWebhook.tls.enabled }}
-              certificate-authority: /etc/kubernetes/webhooks/ca.pem
-              {{- else }}
-              insecure-skip-tls-verify: true
-              {{- end }}
-              server: {{ $.Values.azimuthAuthorizationWebhook.server }}
-            name: webhook
-        users:
-          - name: webhook
-        contexts:
-          - context:
-              cluster: webhook
-              user: webhook
-            name: webhook
-        current-context: webhook
+        {{- include "openstack-cluster.azimuthWebhookKubeconfig" (list . $dir) | nindent 8 }}
       owner: root:root
       permissions: "0644"
-    - path: /etc/kubernetes/webhooks/authorization_config.yaml
+    - path: {{ $dir }}/authorization_config.yaml
       content: |
-        ---
-        apiVersion: apiserver.config.k8s.io/v1
-        kind: AuthorizationConfiguration
-        authorizers:
-          - type: Webhook
-            name: webhook
-            webhook:
-              timeout: {{ $.Values.azimuthAuthorizationWebhook.timeout }}
-              subjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
-              matchConditionSubjectAccessReviewVersion: {{ $.Values.azimuthAuthorizationWebhook.webhookVersion }}
-              failurePolicy: {{ $.Values.azimuthAuthorizationWebhook.failurePolicy }}
-              connectionInfo:
-                type: KubeConfigFile
-                kubeConfigFile: /etc/kubernetes/webhooks/azimuth_authorization_webhook_config.yaml
-              matchConditions:
-                {{- $quotedNSList := list }}
-                {{- range $.Values.azimuthAuthorizationWebhook.filteredNamespaces }}
-                {{- $quotedNSList = append $quotedNSList (quote .) }}
-                {{- end }}
-                - expression: has(request.resourceAttributes) && (!has(request.resourceAttributes.namespace) || request.resourceAttributes.namespace == "" || request.resourceAttributes.namespace in [{{ join "," $quotedNSList }}])
-              {{- range $.Values.azimuthAuthorizationWebhook.extraPreFilters }}
-                - expression: {{ . }}
-              {{- end }}
-          {{- range $.Values.azimuthAuthorizationWebhook.additionalAuthorizers }}
-          - type: {{ .type }}
-            name: {{ .name }}
-          {{- end }}
+        {{- include "openstack-cluster.azimuthAuthorizationConfig" (list . $dir) | nindent 8 }}
 {{- end }}
 
 {{/*
