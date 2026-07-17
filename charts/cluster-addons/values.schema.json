@@ -2,6 +2,19 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
+    "kubernetesDashboard": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "kubernetesDashboard",
+      "type": "object"
+    },
     "amdGPUOperator": {
       "additionalProperties": false,
       "properties": {
@@ -1792,6 +1805,29 @@
           "additionalProperties": false,
           "description": "cloud-config options for the OpenStack integrations\nThe [Global] section is configured to use the target cloud\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager\nand https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage",
           "properties": {
+          "LoadBalancer": {
+            "additionalProperties": false,
+            "properties": {
+              "lb-provider": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "lb-method": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "create-monitor": {
+                "type": "boolean"
+              }
+            },
+            "required": [],
+            "title": "LoadBalancer",
+            "type": "object"
+          },
             "BlockStorage": {
               "additionalProperties": false,
               "description": "By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ",
