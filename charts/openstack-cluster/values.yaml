@@ -238,6 +238,7 @@ osDistro: ubuntu
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
 # possible values: none, k8s-keystone-auth, azimuth-authorization-webhook
+# With controlPlane.type = kamaji, the webhook runs in the hosted control plane pods
 authWebhook: none
 
 azimuthAuthorizationWebhook:
@@ -262,6 +263,11 @@ azimuthAuthorizationWebhook:
 
 # Settings for the control plane
 controlPlane:
+  # The type of control plane to deploy
+  #   kubeadm - control plane machines running on OpenStack VMs (the default)
+  #   kamaji  - a hosted control plane running as pods on the management cluster
+  # kamaji requires the Kamaji operator and CAPI control plane provider installed
+  type: kubeadm
   # The failure domains to use for control plane nodes
   # If given, should be a list of availability zones
   # Only used when omitFailureDomain = false
@@ -399,6 +405,67 @@ controlPlane:
         - type: Ready
           status: "False"
           timeout: 5m0s
+
+  # Settings for a Kamaji hosted control plane
+  # Only used when controlPlane.type = kamaji
+  # As the control plane runs as pods on the management cluster, the machine,
+  # healthCheck, failureDomain, remediation and rollout settings above do not apply
+  kamaji:
+    # The Kamaji DataStore that holds this control plane's etcd data
+    dataStoreName: default
+    # How the API server is exposed from the management cluster
+    #   LoadBalancer - a Service of type LoadBalancer (the default)
+    #   NodePort     - a Service of type NodePort
+    #   ClusterIP    - a Service of type ClusterIP (requires ingress/gateway)
+    serviceType: LoadBalancer
+    # Annotations for the Service that exposes the API server
+    serviceAnnotations: {}
+    # A pre-assigned address (e.g. a VIP) for the API server
+    # Mainly useful when serviceType is NodePort
+    serviceAddress:
+    # Extra Subject Alternative Names for the API server certificate
+    certSANs: []
+    # Control plane addons managed by Kamaji
+    # Set an addon to an object (possibly empty) to enable it, or null to disable it
+    #   coreDNS/kubeProxy are off by default as this chart deploys them as addons
+    #   konnectivity is on by default to tunnel API-server-initiated traffic to nodes
+    addons:
+      coreDNS:
+      konnectivity: {}
+      kubeProxy:
+    # Resources for the API server container
+    apiServerResources:
+    # Settings for the k8s-keystone-auth webhook sidecar
+    # Only used when authWebhook = k8s-keystone-auth
+    # The addons.openstack.k8sKeystoneAuth addon must NOT be enabled alongside this
+    keystoneAuth:
+      # The Keystone URL, e.g. https://keystone.my.cloud:5000/v3
+      # Required when authWebhook = k8s-keystone-auth, must be reachable from the
+      # management cluster
+      authUrl:
+      # A PEM-encoded CA bundle used to verify the Keystone server (optional)
+      caCert:
+      # The Keystone authorization policy for the webhook, as documented in
+      # https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/keystone-auth/using-keystone-webhook-authenticator-and-authorizer.md
+      # Equivalent to the rbacPolicies value of the kubeadm k8s-keystone-auth addon
+      # If empty, authorization falls through to RBAC (Keystone is auth only)
+      policy: []
+      # The image for the webhook sidecar container
+      image:
+        repository: registry.k8s.io/provider-os/k8s-keystone-auth
+        tag: v1.32.0
+      # Resources for the webhook sidecar container
+      resources: {}
+      # Extra arguments for the webhook sidecar container
+      extraArgs: []
+      # The TLS certificate and private key for the webhook server
+      # If not given, a self-signed certificate is generated on each deploy
+      tls:
+        cert:
+        key:
+    # Extra spec merged into the KamajiControlPlane spec
+    # Use this for any field not exposed above (deployment, kubelet, etc.)
+    extraSpec: {}
 
 # Defaults for node groups
 # Each of these can be overridden in the specification for an individual node group
@@ -563,6 +630,10 @@ autoscaler:
 addons:
   # Indicates if cluster addons should be deployed
   enabled: true
+  # Set to true when the control plane is hosted off-cluster (controlPlane.type = kamaji)
+  # so addons are not pinned to control plane nodes that do not exist
+  # Validated against controlPlane.type, so normally left alone
+  hostedControlPlane: false
   # Enable the openstack integrations by default
   openstack:
     enabled: true
