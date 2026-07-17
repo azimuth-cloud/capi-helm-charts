@@ -18,6 +18,15 @@ enabled: true
 # @schema
 clusterName:
 
+# Indicates that the cluster uses a hosted control plane (e.g. Kamaji)
+# When true there are no control plane nodes in the workload cluster, so addons
+# that would normally run on them (CCM, Cinder CSI controller) are not pinned there
+# and the etcd defragmentation job (which needs in-cluster etcd pods) is disabled
+# @schema
+# type: boolean
+# @schema
+hostedControlPlane: false
+
 # @schema
 # type: object
 # required: true

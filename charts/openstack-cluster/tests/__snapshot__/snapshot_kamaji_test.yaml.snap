@@ -1,0 +1,3199 @@
+templated manifests should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-config
+    stringData:
+      defaults: |
+        installation:
+          nodeMetricsPort: 9091
+          typhaMetricsPort: 9093
+          calicoNetwork:
+            bgp: Disabled
+            nodeAddressAutodetectionV4:
+              kubernetes: NodeInternalIP
+            ipPools:
+        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+              - blockSize: 26
+                cidr: {{ cidr }}
+                disableBGPExport: false
+                encapsulation: VXLAN
+                natOutgoing: Enabled
+                nodeSelector: all()
+        {% endfor %}
+      overrides: |
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: ""
+  2: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico
+    spec:
+      bootstrap: true
+      chart:
+        name: tigera-operator
+        repo: https://projectcalico.docs.tigera.io/charts
+        version: v3.31.5
+      clusterName: RELEASE-NAME
+      releaseName: cni-calico
+      targetNamespace: tigera-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-cni-calico-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-cni-calico-config
+  3: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico-globalnetpolicy
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-globalnetpolicy
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: "---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-deny-egress\nspec:\n  order: 10\n  namespaceSelector: kubernetes.io/metadata.name != 'openstack-system'\n  types:\n    - Egress\n  egress:\n    - action: Deny\n      ipVersion: 4\n      destination:\n        nets:\n          - 169.254.169.254/32\n        \n    - action: Deny\n      ipVersion: 6\n      destination:\n        nets:\n          - fe80::a9fe:a9fe/128\n        \n---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-allow-global-egress\nspec:\n  order: 20\n  types:\n    - Egress\n  egress:\n    - action: Allow\n      ipVersion: 4\n      destination:\n        nets:\n          - 0.0.0.0/0\n        \n    - action: Allow\n      ipVersion: 6\n      destination:\n        nets:\n          - ::/0\n        \n"
+      releaseName: cni-calico-metadata-global-netpolicy
+      targetNamespace: tigera-operator
+  4: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: mellanox-network-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-mellanox-network-operator-config
+    stringData:
+      defaults: |
+        # Use the shared NFD
+        nfd:
+          enabled: false
+        # Deploy the default NICClusterPolicy
+        deployCR: true
+        # Deploy the OFED driver onto nodes with a suitable NIC
+        ofedDriver:
+          deploy: true
+          # OFED takes ages to deploy on low-resource nodes
+          # The startup probe has a fixed failure threshold of 60
+          # So in order to give the drivers up to one hour to install, we use a period
+          # of 60 seconds for the startup probe
+          startupProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
+        # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
+        rdmaSharedDevicePlugin:
+          deploy: true
+        # Disable all other features for now
+        ibKubernetes:
+          deploy: false
+        nvPeerDriver:
+          deploy: false
+        sriovNetworkOperator:
+          enabled: false
+        sriovDevicePlugin:
+          deploy: false
+        secondaryNetwork:
+          deploy: false
+      overrides: |
+        {}
+  5: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: mellanox-network-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-mellanox-network-operator
+    spec:
+      bootstrap: true
+      chart:
+        name: network-operator
+        repo: https://helm.ngc.nvidia.com/nvidia
+        version: 26.1.1
+      clusterName: RELEASE-NAME
+      releaseName: mellanox-network-operator
+      targetNamespace: network-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-mellanox-network-operator-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-mellanox-network-operator-config
+  6: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: metrics-server
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-metrics-server-config
+    stringData:
+      defaults: |
+        args:
+          - --kubelet-insecure-tls
+        # Since we deploy in kube-system, we need a PDB to allow eviction to happen
+        podDisruptionBudget:
+          enabled: true
+          maxUnavailable: 1
+      overrides: |
+        {}
+  7: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: metrics-server
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-metrics-server
+    spec:
+      bootstrap: true
+      chart:
+        name: metrics-server
+        repo: https://kubernetes-sigs.github.io/metrics-server
+        version: 3.13.0
+      clusterName: RELEASE-NAME
+      releaseName: metrics-server
+      targetNamespace: kube-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-metrics-server-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-metrics-server-config
+  8: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-feature-discovery
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-feature-discovery-config
+    stringData:
+      defaults: |
+        master:
+          extraLabelNs:
+            - nvidia.com
+        worker:
+          # Allow the NFD pods to be scheduled on all pods
+          tolerations:
+            - effect: "NoSchedule"
+              operator: "Exists"
+          # We want to be able to identify nodes with high-performance hardware
+          # So the whitelisted device classes are:
+          #   02   - Network Controllers (e.g. Ethernet, Infiniband)
+          #   03   - Display Controllers (e.g. GPUs)
+          #   0b40 - Co-processors
+          #   12   - Processing Accelerators (e.g. specialised AI inference chips)
+          config:
+            sources:
+              pci:
+                deviceClassWhitelist:
+                  - "02"
+                  - "03"
+                  - "0b40"
+                  - "12"
+                deviceLabelFields:
+                  - vendor
+      overrides: |
+        {}
+  9: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-feature-discovery
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-feature-discovery
+    spec:
+      bootstrap: true
+      chart:
+        name: node-feature-discovery
+        repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+        version: 0.18.3
+      clusterName: RELEASE-NAME
+      releaseName: node-feature-discovery
+      targetNamespace: node-feature-discovery
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-node-feature-discovery-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-node-feature-discovery-config
+  10: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-problem-detector
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-problem-detector-config
+    stringData:
+      defaults: |
+        metrics:
+          enabled: false
+      overrides: |
+        {}
+  11: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-problem-detector
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-problem-detector
+    spec:
+      bootstrap: true
+      chart:
+        name: node-problem-detector
+        repo: https://charts.deliveryhero.io
+        version: 2.3.14
+      clusterName: RELEASE-NAME
+      releaseName: node-problem-detector
+      targetNamespace: node-problem-detector
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-node-problem-detector-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-node-problem-detector-config
+  12: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: nvidia-gpu-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-nvidia-gpu-operator-config
+    stringData:
+      defaults: |
+        # Use the shared NFD
+        nfd:
+          enabled: false
+        # Export operator and node metrics in a Prometheus format.
+        # The component provides information on the status of the
+        # operator (e.g. reconciliation status, number of GPU enabled nodes).
+        nodeStatusExporter:
+          enabled: true
+        toolkit:
+          # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+          # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+          # Instead make a new config file specifically for nvidia runtime config,
+          # which is parsed as an "include" in the main containerd config file.
+          #
+          # https://github.com/NVIDIA/gpu-operator/issues/301
+          env:
+            - name: "CONTAINERD_CONFIG"
+              value: "/etc/containerd/conf.d/nvidia.toml"
+      overrides: |
+        dcgmExporter:
+          serviceMonitor:
+            enabled: true
+  13: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: nvidia-gpu-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-nvidia-gpu-operator
+    spec:
+      bootstrap: true
+      chart:
+        name: gpu-operator
+        repo: https://helm.ngc.nvidia.com/nvidia
+        version: v26.3.1
+      clusterName: RELEASE-NAME
+      releaseName: nvidia-gpu-operator
+      targetNamespace: gpu-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-nvidia-gpu-operator-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-nvidia-gpu-operator-config
+  14: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: ccm-openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-ccm-openstack-config
+    stringData:
+      defaults: |
+        secret:
+          create: false
+        cluster:
+          name: RELEASE-NAME
+        controllerExtraArgs: |-
+          - --use-service-account-credentials=false
+        tolerations:
+          - key: node.cloudprovider.kubernetes.io/uninitialized
+            value: "true"
+            effect: NoSchedule
+          - key: node-role.kubernetes.io/master
+            effect: NoSchedule
+          - key: node-role.kubernetes.io/control-plane
+            effect: NoSchedule
+      overrides: |
+        {}
+  15: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: ccm-openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-ccm-openstack
+    spec:
+      bootstrap: true
+      chart:
+        name: openstack-cloud-controller-manager
+        repo: https://kubernetes.github.io/cloud-provider-openstack
+        version: 2.36.0
+      clusterName: RELEASE-NAME
+      releaseName: ccm-openstack
+      targetNamespace: openstack-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-ccm-openstack-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-ccm-openstack-config
+  16: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cloud-config
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cloud-config
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n  {%- if \"externalNetwork\" in infra_cluster.status %}\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n  {%- endif %}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
+      releaseName: cloud-config
+      targetNamespace: openstack-system
+  17: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder-config
+    stringData:
+      defaults: |
+        csi:
+          plugin:
+            # This has to be non-empty or the chart fails to render
+            volumes:
+              - name: cacert
+                emptyDir: {}
+            volumeMounts:
+              - name: cloud-config
+                mountPath: /etc/config
+                readOnly: true
+              - name: cloud-config
+                mountPath: /etc/kubernetes
+                readOnly: true
+          provisioner:
+            topology: "false"
+        secret:
+          enabled: true
+          create: false
+          name: cloud-config
+        storageClass:
+          enabled: false
+        clusterID: RELEASE-NAME
+      overrides: |
+        csi:
+          plugin:
+            controllerPlugin:
+              tolerations:
+              - effect: NoSchedule
+                key: node-role.kubernetes.io/control-plane
+  18: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder
+    spec:
+      bootstrap: true
+      chart:
+        name: openstack-cinder-csi
+        repo: https://kubernetes.github.io/cloud-provider-openstack
+        version: 2.35.0
+      clusterName: RELEASE-NAME
+      releaseName: csi-cinder
+      targetNamespace: openstack-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-csi-cinder-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-csi-cinder-config
+  19: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder-storageclass
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: |
+            apiVersion: storage.k8s.io/v1
+            kind: StorageClass
+            metadata:
+              name: csi-cinder
+              annotations:
+                storageclass.kubernetes.io/is-default-class: "true"
+            provisioner: cinder.csi.openstack.org
+            parameters:
+              availability: nova
+            reclaimPolicy: Delete
+            allowVolumeExpansion: true
+            volumeBindingMode: WaitForFirstConsumer
+      releaseName: csi-cinder-storageclass
+      targetNamespace: openstack-system
+  20: |
+    raw: |
+      DEPRECATION NOTICE:
+
+        .Values.addons.ingress.nginx.enabled=true is deprecated, therefore using capi-helm-charts to
+        install Ingress NGINX controller as an addon is deprecated.
+
+        .Values.addons.ingress.traefik.enabled=true is set by default. The supported cluster addon for
+        ingress controller and GatewayAPI is Traefik. This means that setting .Values.addons.ingress.enabled=true will now default to installing Traefik and removing Ingress NGINX if it is installed.
+
+        For safety and security reasons, Ingress NGINX was retired in
+        March 2026 [https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/]. As Ingress
+        NGINX is the only Ingress controller addon supported by capi-helm-charts,
+        capi-helm-charts can no longer deploy an Ingress controller as an addon.
+
+        - capi-helm-charts retains the ability to **enable** Ingress NGINX as a cluster addon for
+          backwards compatibility with other tooling.
+        - The deployment of Ingress NGINX will no longer be tested as part of the release
+          process for capi-helm-charts.
+        - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
+          a functioning NGINX Ingress controller.
+  21: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: autoscaler
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: autoscaler
+        spec:
+          containers:
+            - args:
+                - --cloud-provider=clusterapi
+                - --kubeconfig=/mnt/kubeconfig/value
+                - --clusterapi-cloud-config-authoritative
+                - --node-group-auto-discovery=clusterapi:namespace=NAMESPACE,clusterName=RELEASE-NAME
+                - --cordon-node-before-terminating=true
+                - --expander=least-waste,random
+                - --logtostderr=true
+                - --skip-nodes-with-custom-controller-pods=false
+                - --skip-nodes-with-local-storage=false
+                - --skip-nodes-with-system-pods=true
+                - --stderrthreshold=info
+                - --v=4
+              command:
+                - /cluster-autoscaler
+              image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.4
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                httpGet:
+                  path: /health-check
+                  port: 8085
+              name: autoscaler
+              ports:
+                - containerPort: 8085
+              resources: {}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /mnt/kubeconfig
+                  name: kubeconfig
+                  readOnly: true
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          serviceAccountName: RELEASE-NAME-autoscaler
+          volumes:
+            - name: kubeconfig
+              secret:
+                secretName: RELEASE-NAME-kubeconfig
+  22: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    rules:
+      - apiGroups:
+          - cluster.x-k8s.io
+        resources:
+          - machinedeployments
+          - machines
+          - machinesets
+          - machinepools
+        verbs:
+          - get
+          - list
+          - update
+          - watch
+      - apiGroups:
+          - cluster.x-k8s.io
+        resources:
+          - machinedeployments/scale
+        verbs:
+          - get
+          - patch
+          - update
+  23: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: RELEASE-NAME-autoscaler
+    subjects:
+      - kind: ServiceAccount
+        name: RELEASE-NAME-autoscaler
+        namespace: NAMESPACE
+  24: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+  25: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackCluster
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME
+    spec:
+      disableAPIServerFloatingIP: true
+      identityRef:
+        cloudName: openstack
+        name: RELEASE-NAME-cloud-credentials
+      managedSecurityGroups:
+        allowAllInClusterTraffic: true
+      managedSubnets:
+        - cidr: 192.168.3.0/24
+  26: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: Cluster
+    metadata:
+      annotations: {}
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME
+    spec:
+      clusterNetwork:
+        pods:
+          cidrBlocks:
+            - 172.16.0.0/13
+        serviceDomain: cluster.local
+        services:
+          cidrBlocks:
+            - 172.24.0.0/13
+      controlPlaneRef:
+        apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+        kind: KamajiControlPlane
+        name: RELEASE-NAME-control-plane
+        namespace: NAMESPACE
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackCluster
+        name: RELEASE-NAME
+        namespace: NAMESPACE
+  27: |
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+    kind: KamajiControlPlane
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: control-plane
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-control-plane
+    spec:
+      addons:
+        konnectivity: {}
+      apiServer:
+        extraArgs:
+          - --v=2
+          - --oidc-issuer-url=https://auth.example.org
+          - --oidc-client-id=my-cluster
+          - --oidc-username-claim=sub
+          - '--oidc-username-prefix=oidc:'
+          - --oidc-groups-claim=groups
+          - '--oidc-groups-prefix=oidc:'
+          - --oidc-signing-algs=RS256
+          - --admission-control-config-file=/etc/kubernetes/admission/admission-configuration.yaml
+        extraVolumeMounts:
+          - mountPath: /etc/kubernetes/admission
+            name: admission-configuration
+            readOnly: true
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+      dataStoreName: default
+      deployment:
+        extraVolumes:
+          - name: admission-configuration
+            secret:
+              secretName: RELEASE-NAME-admission-configuration
+      network:
+        certSANs:
+          - my-cluster.example.org
+        serviceAnnotations:
+          loadbalancer.openstack.org/keep-floatingip: "true"
+        serviceType: LoadBalancer
+      registry: registry.k8s.io
+      replicas: 3
+      version: v1.29.2
+  28: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: admission-configuration
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-admission-configuration
+    stringData:
+      admission-configuration.yaml: "apiVersion: apiserver.config.k8s.io/v1\nkind: AdmissionConfiguration\nplugins:\n  - name: PodSecurity\n    configuration: \n      apiVersion: pod-security.admission.config.k8s.io/v1\n      defaults:\n        enforce: baseline\n        enforce-version: latest\n      exemptions:\n        namespaces:\n        - kube-system\n      kind: PodSecurityConfiguration\n"
+  29: |
+    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+    kind: KubeadmConfigTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: d43bd1bb079c9f949f46b9f6bf89e1e1027a45756426801398f5ab1199a331c4
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1-d43bd1bb
+    spec:
+      template:
+        spec:
+          files:
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/conf.d/.keepdir
+              permissions: "0644"
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/certs.d/.keepdir
+              permissions: "0644"
+            - content: |
+                server = "https://registry-1.docker.io"
+                [host."https://quay.io/v2/azimuth/docker.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/docker.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://ghcr.io"
+                [host."https://quay.io/v2/azimuth/ghcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/ghcr.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://nvcr.io"
+                [host."https://quay.io/v2/azimuth/nvcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/nvcr.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://quay.io"
+                [host."https://quay.io/v2/azimuth/quay.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/quay.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://registry.k8s.io"
+                [host."https://quay.io/v2/azimuth/registry.k8s.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+              permissions: "0644"
+          joinConfiguration:
+            nodeRegistration:
+              kubeletExtraArgs:
+                cloud-provider: external
+                node-labels: capi.stackhpc.com/node-group=group-1
+              name: '{{ local_hostname }}'
+          preKubeadmCommands:
+            - |-
+              /usr/bin/bash -s <<EOF
+              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
+              cat <<CONTENT >> /etc/containerd/config.toml
+              [plugins."io.containerd.grpc.v1.cri".registry]
+                config_path = "/etc/containerd/certs.d"
+              CONTENT
+              systemctl restart containerd
+              EOF
+  30: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineDeployment
+    metadata:
+      annotations: null
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1
+    spec:
+      clusterName: RELEASE-NAME
+      replicas: 1
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-1
+          cluster.x-k8s.io/cluster-name: RELEASE-NAME
+      strategy:
+        rollingUpdate:
+          deletePolicy: Random
+          maxSurge: 0
+          maxUnavailable: 1
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: worker
+            capi.stackhpc.com/node-group: group-1
+        spec:
+          bootstrap:
+            configRef:
+              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+              kind: KubeadmConfigTemplate
+              name: RELEASE-NAME-group-1-d43bd1bb
+          clusterName: RELEASE-NAME
+          infrastructureRef:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: OpenStackMachineTemplate
+            name: RELEASE-NAME-group-1-974c4cfd
+          nodeDeletionTimeout: 5m0s
+          nodeDrainTimeout: 5m0s
+          nodeVolumeDetachTimeout: 5m0s
+          version: v1.29.2
+  31: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineHealthCheck
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1
+    spec:
+      clusterName: RELEASE-NAME
+      maxUnhealthy: 100%
+      nodeStartupTimeout: 30m0s
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-1
+      unhealthyConditions:
+        - status: Unknown
+          timeout: 5m0s
+          type: Ready
+        - status: "False"
+          timeout: 5m0s
+          type: Ready
+  32: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackMachineTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: 974c4cfd217a218b8577c9b1362980b997329854003b0b8d126a018fb0429b61
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1-974c4cfd
+    spec:
+      template:
+        spec:
+          flavor: vm.small
+          identityRef:
+            cloudName: openstack
+            name: RELEASE-NAME-cloud-credentials
+          image:
+            filter:
+              name: ubuntu-jammy-kube-v1.29.2
+  33: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cloud-credentials
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-cloud-credentials
+    stringData:
+      clouds.yaml: |
+        clouds:
+          openstack:
+            auth:
+              application_credential_id: <app cred id>
+              application_credential_secret: <app cred secret>
+              auth_url: https://my.cloud:5000
+            auth_type: v3applicationcredential
+            identity_api_version: 3
+            interface: public
+            region_name: RegionOne
+templated manifests with azimuth authorization webhook should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-config
+    stringData:
+      defaults: |
+        installation:
+          nodeMetricsPort: 9091
+          typhaMetricsPort: 9093
+          calicoNetwork:
+            bgp: Disabled
+            nodeAddressAutodetectionV4:
+              kubernetes: NodeInternalIP
+            ipPools:
+        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+              - blockSize: 26
+                cidr: {{ cidr }}
+                disableBGPExport: false
+                encapsulation: VXLAN
+                natOutgoing: Enabled
+                nodeSelector: all()
+        {% endfor %}
+      overrides: |
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: ""
+  2: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico
+    spec:
+      bootstrap: true
+      chart:
+        name: tigera-operator
+        repo: https://projectcalico.docs.tigera.io/charts
+        version: v3.31.5
+      clusterName: RELEASE-NAME
+      releaseName: cni-calico
+      targetNamespace: tigera-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-cni-calico-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-cni-calico-config
+  3: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico-globalnetpolicy
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-globalnetpolicy
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: "---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-deny-egress\nspec:\n  order: 10\n  namespaceSelector: kubernetes.io/metadata.name != 'openstack-system'\n  types:\n    - Egress\n  egress:\n    - action: Deny\n      ipVersion: 4\n      destination:\n        nets:\n          - 169.254.169.254/32\n        \n    - action: Deny\n      ipVersion: 6\n      destination:\n        nets:\n          - fe80::a9fe:a9fe/128\n        \n---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-allow-global-egress\nspec:\n  order: 20\n  types:\n    - Egress\n  egress:\n    - action: Allow\n      ipVersion: 4\n      destination:\n        nets:\n          - 0.0.0.0/0\n        \n    - action: Allow\n      ipVersion: 6\n      destination:\n        nets:\n          - ::/0\n        \n"
+      releaseName: cni-calico-metadata-global-netpolicy
+      targetNamespace: tigera-operator
+  4: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: mellanox-network-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-mellanox-network-operator-config
+    stringData:
+      defaults: |
+        # Use the shared NFD
+        nfd:
+          enabled: false
+        # Deploy the default NICClusterPolicy
+        deployCR: true
+        # Deploy the OFED driver onto nodes with a suitable NIC
+        ofedDriver:
+          deploy: true
+          # OFED takes ages to deploy on low-resource nodes
+          # The startup probe has a fixed failure threshold of 60
+          # So in order to give the drivers up to one hour to install, we use a period
+          # of 60 seconds for the startup probe
+          startupProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
+        # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
+        rdmaSharedDevicePlugin:
+          deploy: true
+        # Disable all other features for now
+        ibKubernetes:
+          deploy: false
+        nvPeerDriver:
+          deploy: false
+        sriovNetworkOperator:
+          enabled: false
+        sriovDevicePlugin:
+          deploy: false
+        secondaryNetwork:
+          deploy: false
+      overrides: |
+        {}
+  5: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: mellanox-network-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-mellanox-network-operator
+    spec:
+      bootstrap: true
+      chart:
+        name: network-operator
+        repo: https://helm.ngc.nvidia.com/nvidia
+        version: 26.1.1
+      clusterName: RELEASE-NAME
+      releaseName: mellanox-network-operator
+      targetNamespace: network-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-mellanox-network-operator-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-mellanox-network-operator-config
+  6: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: metrics-server
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-metrics-server-config
+    stringData:
+      defaults: |
+        args:
+          - --kubelet-insecure-tls
+        # Since we deploy in kube-system, we need a PDB to allow eviction to happen
+        podDisruptionBudget:
+          enabled: true
+          maxUnavailable: 1
+      overrides: |
+        {}
+  7: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: metrics-server
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-metrics-server
+    spec:
+      bootstrap: true
+      chart:
+        name: metrics-server
+        repo: https://kubernetes-sigs.github.io/metrics-server
+        version: 3.13.0
+      clusterName: RELEASE-NAME
+      releaseName: metrics-server
+      targetNamespace: kube-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-metrics-server-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-metrics-server-config
+  8: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-feature-discovery
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-feature-discovery-config
+    stringData:
+      defaults: |
+        master:
+          extraLabelNs:
+            - nvidia.com
+        worker:
+          # Allow the NFD pods to be scheduled on all pods
+          tolerations:
+            - effect: "NoSchedule"
+              operator: "Exists"
+          # We want to be able to identify nodes with high-performance hardware
+          # So the whitelisted device classes are:
+          #   02   - Network Controllers (e.g. Ethernet, Infiniband)
+          #   03   - Display Controllers (e.g. GPUs)
+          #   0b40 - Co-processors
+          #   12   - Processing Accelerators (e.g. specialised AI inference chips)
+          config:
+            sources:
+              pci:
+                deviceClassWhitelist:
+                  - "02"
+                  - "03"
+                  - "0b40"
+                  - "12"
+                deviceLabelFields:
+                  - vendor
+      overrides: |
+        {}
+  9: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-feature-discovery
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-feature-discovery
+    spec:
+      bootstrap: true
+      chart:
+        name: node-feature-discovery
+        repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+        version: 0.18.3
+      clusterName: RELEASE-NAME
+      releaseName: node-feature-discovery
+      targetNamespace: node-feature-discovery
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-node-feature-discovery-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-node-feature-discovery-config
+  10: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-problem-detector
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-problem-detector-config
+    stringData:
+      defaults: |
+        metrics:
+          enabled: false
+      overrides: |
+        {}
+  11: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-problem-detector
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-problem-detector
+    spec:
+      bootstrap: true
+      chart:
+        name: node-problem-detector
+        repo: https://charts.deliveryhero.io
+        version: 2.3.14
+      clusterName: RELEASE-NAME
+      releaseName: node-problem-detector
+      targetNamespace: node-problem-detector
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-node-problem-detector-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-node-problem-detector-config
+  12: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: nvidia-gpu-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-nvidia-gpu-operator-config
+    stringData:
+      defaults: |
+        # Use the shared NFD
+        nfd:
+          enabled: false
+        # Export operator and node metrics in a Prometheus format.
+        # The component provides information on the status of the
+        # operator (e.g. reconciliation status, number of GPU enabled nodes).
+        nodeStatusExporter:
+          enabled: true
+        toolkit:
+          # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+          # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+          # Instead make a new config file specifically for nvidia runtime config,
+          # which is parsed as an "include" in the main containerd config file.
+          #
+          # https://github.com/NVIDIA/gpu-operator/issues/301
+          env:
+            - name: "CONTAINERD_CONFIG"
+              value: "/etc/containerd/conf.d/nvidia.toml"
+      overrides: |
+        dcgmExporter:
+          serviceMonitor:
+            enabled: true
+  13: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: nvidia-gpu-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-nvidia-gpu-operator
+    spec:
+      bootstrap: true
+      chart:
+        name: gpu-operator
+        repo: https://helm.ngc.nvidia.com/nvidia
+        version: v26.3.1
+      clusterName: RELEASE-NAME
+      releaseName: nvidia-gpu-operator
+      targetNamespace: gpu-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-nvidia-gpu-operator-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-nvidia-gpu-operator-config
+  14: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: ccm-openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-ccm-openstack-config
+    stringData:
+      defaults: |
+        secret:
+          create: false
+        cluster:
+          name: RELEASE-NAME
+        controllerExtraArgs: |-
+          - --use-service-account-credentials=false
+        tolerations:
+          - key: node.cloudprovider.kubernetes.io/uninitialized
+            value: "true"
+            effect: NoSchedule
+          - key: node-role.kubernetes.io/master
+            effect: NoSchedule
+          - key: node-role.kubernetes.io/control-plane
+            effect: NoSchedule
+      overrides: |
+        {}
+  15: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: ccm-openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-ccm-openstack
+    spec:
+      bootstrap: true
+      chart:
+        name: openstack-cloud-controller-manager
+        repo: https://kubernetes.github.io/cloud-provider-openstack
+        version: 2.36.0
+      clusterName: RELEASE-NAME
+      releaseName: ccm-openstack
+      targetNamespace: openstack-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-ccm-openstack-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-ccm-openstack-config
+  16: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cloud-config
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cloud-config
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n  {%- if \"externalNetwork\" in infra_cluster.status %}\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n  {%- endif %}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
+      releaseName: cloud-config
+      targetNamespace: openstack-system
+  17: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder-config
+    stringData:
+      defaults: |
+        csi:
+          plugin:
+            # This has to be non-empty or the chart fails to render
+            volumes:
+              - name: cacert
+                emptyDir: {}
+            volumeMounts:
+              - name: cloud-config
+                mountPath: /etc/config
+                readOnly: true
+              - name: cloud-config
+                mountPath: /etc/kubernetes
+                readOnly: true
+          provisioner:
+            topology: "false"
+        secret:
+          enabled: true
+          create: false
+          name: cloud-config
+        storageClass:
+          enabled: false
+        clusterID: RELEASE-NAME
+      overrides: |
+        csi:
+          plugin:
+            controllerPlugin:
+              tolerations:
+              - effect: NoSchedule
+                key: node-role.kubernetes.io/control-plane
+  18: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder
+    spec:
+      bootstrap: true
+      chart:
+        name: openstack-cinder-csi
+        repo: https://kubernetes.github.io/cloud-provider-openstack
+        version: 2.35.0
+      clusterName: RELEASE-NAME
+      releaseName: csi-cinder
+      targetNamespace: openstack-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-csi-cinder-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-csi-cinder-config
+  19: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder-storageclass
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: |
+            apiVersion: storage.k8s.io/v1
+            kind: StorageClass
+            metadata:
+              name: csi-cinder
+              annotations:
+                storageclass.kubernetes.io/is-default-class: "true"
+            provisioner: cinder.csi.openstack.org
+            parameters:
+              availability: nova
+            reclaimPolicy: Delete
+            allowVolumeExpansion: true
+            volumeBindingMode: WaitForFirstConsumer
+      releaseName: csi-cinder-storageclass
+      targetNamespace: openstack-system
+  20: |
+    raw: |
+      DEPRECATION NOTICE:
+
+        .Values.addons.ingress.nginx.enabled=true is deprecated, therefore using capi-helm-charts to
+        install Ingress NGINX controller as an addon is deprecated.
+
+        .Values.addons.ingress.traefik.enabled=true is set by default. The supported cluster addon for
+        ingress controller and GatewayAPI is Traefik. This means that setting .Values.addons.ingress.enabled=true will now default to installing Traefik and removing Ingress NGINX if it is installed.
+
+        For safety and security reasons, Ingress NGINX was retired in
+        March 2026 [https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/]. As Ingress
+        NGINX is the only Ingress controller addon supported by capi-helm-charts,
+        capi-helm-charts can no longer deploy an Ingress controller as an addon.
+
+        - capi-helm-charts retains the ability to **enable** Ingress NGINX as a cluster addon for
+          backwards compatibility with other tooling.
+        - The deployment of Ingress NGINX will no longer be tested as part of the release
+          process for capi-helm-charts.
+        - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
+          a functioning NGINX Ingress controller.
+  21: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: autoscaler
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: autoscaler
+        spec:
+          containers:
+            - args:
+                - --cloud-provider=clusterapi
+                - --kubeconfig=/mnt/kubeconfig/value
+                - --clusterapi-cloud-config-authoritative
+                - --node-group-auto-discovery=clusterapi:namespace=NAMESPACE,clusterName=RELEASE-NAME
+                - --cordon-node-before-terminating=true
+                - --expander=least-waste,random
+                - --logtostderr=true
+                - --skip-nodes-with-custom-controller-pods=false
+                - --skip-nodes-with-local-storage=false
+                - --skip-nodes-with-system-pods=true
+                - --stderrthreshold=info
+                - --v=4
+              command:
+                - /cluster-autoscaler
+              image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.4
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                httpGet:
+                  path: /health-check
+                  port: 8085
+              name: autoscaler
+              ports:
+                - containerPort: 8085
+              resources: {}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /mnt/kubeconfig
+                  name: kubeconfig
+                  readOnly: true
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          serviceAccountName: RELEASE-NAME-autoscaler
+          volumes:
+            - name: kubeconfig
+              secret:
+                secretName: RELEASE-NAME-kubeconfig
+  22: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    rules:
+      - apiGroups:
+          - cluster.x-k8s.io
+        resources:
+          - machinedeployments
+          - machines
+          - machinesets
+          - machinepools
+        verbs:
+          - get
+          - list
+          - update
+          - watch
+      - apiGroups:
+          - cluster.x-k8s.io
+        resources:
+          - machinedeployments/scale
+        verbs:
+          - get
+          - patch
+          - update
+  23: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: RELEASE-NAME-autoscaler
+    subjects:
+      - kind: ServiceAccount
+        name: RELEASE-NAME-autoscaler
+        namespace: NAMESPACE
+  24: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+  25: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackCluster
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME
+    spec:
+      disableAPIServerFloatingIP: true
+      identityRef:
+        cloudName: openstack
+        name: RELEASE-NAME-cloud-credentials
+      managedSecurityGroups:
+        allowAllInClusterTraffic: true
+      managedSubnets:
+        - cidr: 192.168.3.0/24
+  26: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: Cluster
+    metadata:
+      annotations: {}
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME
+    spec:
+      clusterNetwork:
+        pods:
+          cidrBlocks:
+            - 172.16.0.0/13
+        serviceDomain: cluster.local
+        services:
+          cidrBlocks:
+            - 172.24.0.0/13
+      controlPlaneRef:
+        apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+        kind: KamajiControlPlane
+        name: RELEASE-NAME-control-plane
+        namespace: NAMESPACE
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackCluster
+        name: RELEASE-NAME
+        namespace: NAMESPACE
+  27: |
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+    kind: KamajiControlPlane
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: control-plane
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-control-plane
+    spec:
+      addons:
+        konnectivity: {}
+      apiServer:
+        extraArgs:
+          - --v=2
+          - --oidc-issuer-url=https://auth.example.org
+          - --oidc-client-id=my-cluster
+          - --oidc-username-claim=sub
+          - '--oidc-username-prefix=oidc:'
+          - --oidc-groups-claim=groups
+          - '--oidc-groups-prefix=oidc:'
+          - --oidc-signing-algs=RS256
+          - --admission-control-config-file=/etc/kubernetes/admission/admission-configuration.yaml
+          - --authorization-config=/etc/kubernetes/authz/authorization_config.yaml
+        extraVolumeMounts:
+          - mountPath: /etc/kubernetes/admission
+            name: admission-configuration
+            readOnly: true
+          - mountPath: /etc/kubernetes/authz
+            name: auth-webhook
+            readOnly: true
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+      dataStoreName: default
+      deployment:
+        extraVolumes:
+          - name: admission-configuration
+            secret:
+              secretName: RELEASE-NAME-admission-configuration
+          - name: auth-webhook
+            secret:
+              secretName: RELEASE-NAME-auth-webhook
+      network:
+        certSANs:
+          - my-cluster.example.org
+        serviceAnnotations:
+          loadbalancer.openstack.org/keep-floatingip: "true"
+        serviceType: LoadBalancer
+      registry: registry.k8s.io
+      replicas: 3
+      version: v1.29.2
+  28: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: admission-configuration
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-admission-configuration
+    stringData:
+      admission-configuration.yaml: "apiVersion: apiserver.config.k8s.io/v1\nkind: AdmissionConfiguration\nplugins:\n  - name: PodSecurity\n    configuration: \n      apiVersion: pod-security.admission.config.k8s.io/v1\n      defaults:\n        enforce: baseline\n        enforce-version: latest\n      exemptions:\n        namespaces:\n        - kube-system\n      kind: PodSecurityConfiguration\n"
+  29: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: auth-webhook
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-auth-webhook
+    stringData:
+      authorization_config.yaml: |
+        ---
+        apiVersion: apiserver.config.k8s.io/v1
+        kind: AuthorizationConfiguration
+        authorizers:
+          - type: Webhook
+            name: webhook
+            webhook:
+              timeout: 10s
+              subjectAccessReviewVersion: v1
+              matchConditionSubjectAccessReviewVersion: v1
+              failurePolicy: Deny
+              connectionInfo:
+                type: KubeConfigFile
+                kubeConfigFile: /etc/kubernetes/authz/azimuth_authorization_webhook_config.yaml
+              matchConditions:
+                - expression: has(request.resourceAttributes) && (!has(request.resourceAttributes.namespace) || request.resourceAttributes.namespace == "" || request.resourceAttributes.namespace in ["kube-system","openstack-system"])
+          - type: Node
+            name: node
+          - type: RBAC
+            name: rbac
+      azimuth_authorization_webhook_config.yaml: |
+        ---
+        apiVersion: v1
+        kind: Config
+        preferences: {}
+        clusters:
+          - cluster:
+              insecure-skip-tls-verify: true
+              server: https://azimuth.example.org/authorize
+            name: webhook
+        users:
+          - name: webhook
+        contexts:
+          - context:
+              cluster: webhook
+              user: webhook
+            name: webhook
+        current-context: webhook
+  30: |
+    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+    kind: KubeadmConfigTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: e254efcfd3d69bb22e057087ef599f6ebcd40af117781492e6e4344146e544a8
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1-e254efcf
+    spec:
+      template:
+        spec:
+          files:
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/conf.d/.keepdir
+              permissions: "0644"
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/certs.d/.keepdir
+              permissions: "0644"
+            - content: |
+                server = "https://registry-1.docker.io"
+                [host."https://quay.io/v2/azimuth/docker.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/docker.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://ghcr.io"
+                [host."https://quay.io/v2/azimuth/ghcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/ghcr.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://nvcr.io"
+                [host."https://quay.io/v2/azimuth/nvcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/nvcr.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://quay.io"
+                [host."https://quay.io/v2/azimuth/quay.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/quay.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://registry.k8s.io"
+                [host."https://quay.io/v2/azimuth/registry.k8s.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+              permissions: "0644"
+          joinConfiguration:
+            nodeRegistration:
+              kubeletExtraArgs:
+                cloud-provider: external
+                node-labels: capi.stackhpc.com/node-group=group-1
+              name: '{{ local_hostname }}'
+          preKubeadmCommands:
+            - |-
+              /usr/bin/bash -s <<EOF
+              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
+              cat <<CONTENT >> /etc/containerd/config.toml
+              [plugins."io.containerd.grpc.v1.cri".registry]
+                config_path = "/etc/containerd/certs.d"
+              CONTENT
+              systemctl restart containerd
+              EOF
+            - mkdir -p /etc/kubernetes/webhooks
+            - mkdir -p /etc/kubernetes/patches
+  31: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineDeployment
+    metadata:
+      annotations: null
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1
+    spec:
+      clusterName: RELEASE-NAME
+      replicas: 1
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-1
+          cluster.x-k8s.io/cluster-name: RELEASE-NAME
+      strategy:
+        rollingUpdate:
+          deletePolicy: Random
+          maxSurge: 0
+          maxUnavailable: 1
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: worker
+            capi.stackhpc.com/node-group: group-1
+        spec:
+          bootstrap:
+            configRef:
+              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+              kind: KubeadmConfigTemplate
+              name: RELEASE-NAME-group-1-e254efcf
+          clusterName: RELEASE-NAME
+          infrastructureRef:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: OpenStackMachineTemplate
+            name: RELEASE-NAME-group-1-974c4cfd
+          nodeDeletionTimeout: 5m0s
+          nodeDrainTimeout: 5m0s
+          nodeVolumeDetachTimeout: 5m0s
+          version: v1.29.2
+  32: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineHealthCheck
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1
+    spec:
+      clusterName: RELEASE-NAME
+      maxUnhealthy: 100%
+      nodeStartupTimeout: 30m0s
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-1
+      unhealthyConditions:
+        - status: Unknown
+          timeout: 5m0s
+          type: Ready
+        - status: "False"
+          timeout: 5m0s
+          type: Ready
+  33: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackMachineTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: 974c4cfd217a218b8577c9b1362980b997329854003b0b8d126a018fb0429b61
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1-974c4cfd
+    spec:
+      template:
+        spec:
+          flavor: vm.small
+          identityRef:
+            cloudName: openstack
+            name: RELEASE-NAME-cloud-credentials
+          image:
+            filter:
+              name: ubuntu-jammy-kube-v1.29.2
+  34: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cloud-credentials
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-cloud-credentials
+    stringData:
+      clouds.yaml: |
+        clouds:
+          openstack:
+            auth:
+              application_credential_id: <app cred id>
+              application_credential_secret: <app cred secret>
+              auth_url: https://my.cloud:5000
+            auth_type: v3applicationcredential
+            identity_api_version: 3
+            interface: public
+            region_name: RegionOne
+templated manifests with keystoneAuth should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-config
+    stringData:
+      defaults: |
+        installation:
+          nodeMetricsPort: 9091
+          typhaMetricsPort: 9093
+          calicoNetwork:
+            bgp: Disabled
+            nodeAddressAutodetectionV4:
+              kubernetes: NodeInternalIP
+            ipPools:
+        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+              - blockSize: 26
+                cidr: {{ cidr }}
+                disableBGPExport: false
+                encapsulation: VXLAN
+                natOutgoing: Enabled
+                nodeSelector: all()
+        {% endfor %}
+      overrides: |
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: ""
+  2: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico
+    spec:
+      bootstrap: true
+      chart:
+        name: tigera-operator
+        repo: https://projectcalico.docs.tigera.io/charts
+        version: v3.31.5
+      clusterName: RELEASE-NAME
+      releaseName: cni-calico
+      targetNamespace: tigera-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-cni-calico-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-cni-calico-config
+  3: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico-globalnetpolicy
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-globalnetpolicy
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: "---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-deny-egress\nspec:\n  order: 10\n  namespaceSelector: kubernetes.io/metadata.name != 'openstack-system'\n  types:\n    - Egress\n  egress:\n    - action: Deny\n      ipVersion: 4\n      destination:\n        nets:\n          - 169.254.169.254/32\n        \n    - action: Deny\n      ipVersion: 6\n      destination:\n        nets:\n          - fe80::a9fe:a9fe/128\n        \n---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-allow-global-egress\nspec:\n  order: 20\n  types:\n    - Egress\n  egress:\n    - action: Allow\n      ipVersion: 4\n      destination:\n        nets:\n          - 0.0.0.0/0\n        \n    - action: Allow\n      ipVersion: 6\n      destination:\n        nets:\n          - ::/0\n        \n"
+      releaseName: cni-calico-metadata-global-netpolicy
+      targetNamespace: tigera-operator
+  4: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: mellanox-network-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-mellanox-network-operator-config
+    stringData:
+      defaults: |
+        # Use the shared NFD
+        nfd:
+          enabled: false
+        # Deploy the default NICClusterPolicy
+        deployCR: true
+        # Deploy the OFED driver onto nodes with a suitable NIC
+        ofedDriver:
+          deploy: true
+          # OFED takes ages to deploy on low-resource nodes
+          # The startup probe has a fixed failure threshold of 60
+          # So in order to give the drivers up to one hour to install, we use a period
+          # of 60 seconds for the startup probe
+          startupProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
+        # Deploy the RDMA shared device plugin to allow pods to access the RDMA device
+        rdmaSharedDevicePlugin:
+          deploy: true
+        # Disable all other features for now
+        ibKubernetes:
+          deploy: false
+        nvPeerDriver:
+          deploy: false
+        sriovNetworkOperator:
+          enabled: false
+        sriovDevicePlugin:
+          deploy: false
+        secondaryNetwork:
+          deploy: false
+      overrides: |
+        {}
+  5: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: mellanox-network-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-mellanox-network-operator
+    spec:
+      bootstrap: true
+      chart:
+        name: network-operator
+        repo: https://helm.ngc.nvidia.com/nvidia
+        version: 26.1.1
+      clusterName: RELEASE-NAME
+      releaseName: mellanox-network-operator
+      targetNamespace: network-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-mellanox-network-operator-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-mellanox-network-operator-config
+  6: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: metrics-server
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-metrics-server-config
+    stringData:
+      defaults: |
+        args:
+          - --kubelet-insecure-tls
+        # Since we deploy in kube-system, we need a PDB to allow eviction to happen
+        podDisruptionBudget:
+          enabled: true
+          maxUnavailable: 1
+      overrides: |
+        {}
+  7: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: metrics-server
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-metrics-server
+    spec:
+      bootstrap: true
+      chart:
+        name: metrics-server
+        repo: https://kubernetes-sigs.github.io/metrics-server
+        version: 3.13.0
+      clusterName: RELEASE-NAME
+      releaseName: metrics-server
+      targetNamespace: kube-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-metrics-server-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-metrics-server-config
+  8: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-feature-discovery
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-feature-discovery-config
+    stringData:
+      defaults: |
+        master:
+          extraLabelNs:
+            - nvidia.com
+        worker:
+          # Allow the NFD pods to be scheduled on all pods
+          tolerations:
+            - effect: "NoSchedule"
+              operator: "Exists"
+          # We want to be able to identify nodes with high-performance hardware
+          # So the whitelisted device classes are:
+          #   02   - Network Controllers (e.g. Ethernet, Infiniband)
+          #   03   - Display Controllers (e.g. GPUs)
+          #   0b40 - Co-processors
+          #   12   - Processing Accelerators (e.g. specialised AI inference chips)
+          config:
+            sources:
+              pci:
+                deviceClassWhitelist:
+                  - "02"
+                  - "03"
+                  - "0b40"
+                  - "12"
+                deviceLabelFields:
+                  - vendor
+      overrides: |
+        {}
+  9: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-feature-discovery
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-feature-discovery
+    spec:
+      bootstrap: true
+      chart:
+        name: node-feature-discovery
+        repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+        version: 0.18.3
+      clusterName: RELEASE-NAME
+      releaseName: node-feature-discovery
+      targetNamespace: node-feature-discovery
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-node-feature-discovery-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-node-feature-discovery-config
+  10: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-problem-detector
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-problem-detector-config
+    stringData:
+      defaults: |
+        metrics:
+          enabled: false
+      overrides: |
+        {}
+  11: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: node-problem-detector
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-node-problem-detector
+    spec:
+      bootstrap: true
+      chart:
+        name: node-problem-detector
+        repo: https://charts.deliveryhero.io
+        version: 2.3.14
+      clusterName: RELEASE-NAME
+      releaseName: node-problem-detector
+      targetNamespace: node-problem-detector
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-node-problem-detector-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-node-problem-detector-config
+  12: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: nvidia-gpu-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-nvidia-gpu-operator-config
+    stringData:
+      defaults: |
+        # Use the shared NFD
+        nfd:
+          enabled: false
+        # Export operator and node metrics in a Prometheus format.
+        # The component provides information on the status of the
+        # operator (e.g. reconciliation status, number of GPU enabled nodes).
+        nodeStatusExporter:
+          enabled: true
+        toolkit:
+          # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+          # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+          # Instead make a new config file specifically for nvidia runtime config,
+          # which is parsed as an "include" in the main containerd config file.
+          #
+          # https://github.com/NVIDIA/gpu-operator/issues/301
+          env:
+            - name: "CONTAINERD_CONFIG"
+              value: "/etc/containerd/conf.d/nvidia.toml"
+      overrides: |
+        dcgmExporter:
+          serviceMonitor:
+            enabled: true
+  13: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: nvidia-gpu-operator
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-nvidia-gpu-operator
+    spec:
+      bootstrap: true
+      chart:
+        name: gpu-operator
+        repo: https://helm.ngc.nvidia.com/nvidia
+        version: v26.3.1
+      clusterName: RELEASE-NAME
+      releaseName: nvidia-gpu-operator
+      targetNamespace: gpu-operator
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-nvidia-gpu-operator-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-nvidia-gpu-operator-config
+  14: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: ccm-openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-ccm-openstack-config
+    stringData:
+      defaults: |
+        secret:
+          create: false
+        cluster:
+          name: RELEASE-NAME
+        controllerExtraArgs: |-
+          - --use-service-account-credentials=false
+        tolerations:
+          - key: node.cloudprovider.kubernetes.io/uninitialized
+            value: "true"
+            effect: NoSchedule
+          - key: node-role.kubernetes.io/master
+            effect: NoSchedule
+          - key: node-role.kubernetes.io/control-plane
+            effect: NoSchedule
+      overrides: |
+        {}
+  15: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: ccm-openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-ccm-openstack
+    spec:
+      bootstrap: true
+      chart:
+        name: openstack-cloud-controller-manager
+        repo: https://kubernetes.github.io/cloud-provider-openstack
+        version: 2.36.0
+      clusterName: RELEASE-NAME
+      releaseName: ccm-openstack
+      targetNamespace: openstack-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-ccm-openstack-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-ccm-openstack-config
+  16: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cloud-config
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cloud-config
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n  {%- if \"externalNetwork\" in infra_cluster.status %}\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n  {%- endif %}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
+      releaseName: cloud-config
+      targetNamespace: openstack-system
+  17: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        addons.stackhpc.com/watch: ""
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder-config
+    stringData:
+      defaults: |
+        csi:
+          plugin:
+            # This has to be non-empty or the chart fails to render
+            volumes:
+              - name: cacert
+                emptyDir: {}
+            volumeMounts:
+              - name: cloud-config
+                mountPath: /etc/config
+                readOnly: true
+              - name: cloud-config
+                mountPath: /etc/kubernetes
+                readOnly: true
+          provisioner:
+            topology: "false"
+        secret:
+          enabled: true
+          create: false
+          name: cloud-config
+        storageClass:
+          enabled: false
+        clusterID: RELEASE-NAME
+      overrides: |
+        csi:
+          plugin:
+            controllerPlugin:
+              tolerations:
+              - effect: NoSchedule
+                key: node-role.kubernetes.io/control-plane
+  18: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder
+    spec:
+      bootstrap: true
+      chart:
+        name: openstack-cinder-csi
+        repo: https://kubernetes.github.io/cloud-provider-openstack
+        version: 2.35.0
+      clusterName: RELEASE-NAME
+      releaseName: csi-cinder
+      targetNamespace: openstack-system
+      valuesSources:
+        - secret:
+            key: defaults
+            name: RELEASE-NAME-csi-cinder-config
+        - secret:
+            key: overrides
+            name: RELEASE-NAME-csi-cinder-config
+  19: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: Manifests
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: csi-cinder
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-csi-cinder-storageclass
+    spec:
+      bootstrap: true
+      clusterName: RELEASE-NAME
+      manifestSources:
+        - template: |
+            apiVersion: storage.k8s.io/v1
+            kind: StorageClass
+            metadata:
+              name: csi-cinder
+              annotations:
+                storageclass.kubernetes.io/is-default-class: "true"
+            provisioner: cinder.csi.openstack.org
+            parameters:
+              availability: nova
+            reclaimPolicy: Delete
+            allowVolumeExpansion: true
+            volumeBindingMode: WaitForFirstConsumer
+      releaseName: csi-cinder-storageclass
+      targetNamespace: openstack-system
+  20: |
+    raw: |
+      DEPRECATION NOTICE:
+
+        .Values.addons.ingress.nginx.enabled=true is deprecated, therefore using capi-helm-charts to
+        install Ingress NGINX controller as an addon is deprecated.
+
+        .Values.addons.ingress.traefik.enabled=true is set by default. The supported cluster addon for
+        ingress controller and GatewayAPI is Traefik. This means that setting .Values.addons.ingress.enabled=true will now default to installing Traefik and removing Ingress NGINX if it is installed.
+
+        For safety and security reasons, Ingress NGINX was retired in
+        March 2026 [https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/]. As Ingress
+        NGINX is the only Ingress controller addon supported by capi-helm-charts,
+        capi-helm-charts can no longer deploy an Ingress controller as an addon.
+
+        - capi-helm-charts retains the ability to **enable** Ingress NGINX as a cluster addon for
+          backwards compatibility with other tooling.
+        - The deployment of Ingress NGINX will no longer be tested as part of the release
+          process for capi-helm-charts.
+        - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
+          a functioning NGINX Ingress controller.
+  21: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: autoscaler
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: autoscaler
+        spec:
+          containers:
+            - args:
+                - --cloud-provider=clusterapi
+                - --kubeconfig=/mnt/kubeconfig/value
+                - --clusterapi-cloud-config-authoritative
+                - --node-group-auto-discovery=clusterapi:namespace=NAMESPACE,clusterName=RELEASE-NAME
+                - --cordon-node-before-terminating=true
+                - --expander=least-waste,random
+                - --logtostderr=true
+                - --skip-nodes-with-custom-controller-pods=false
+                - --skip-nodes-with-local-storage=false
+                - --skip-nodes-with-system-pods=true
+                - --stderrthreshold=info
+                - --v=4
+              command:
+                - /cluster-autoscaler
+              image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.4
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                httpGet:
+                  path: /health-check
+                  port: 8085
+              name: autoscaler
+              ports:
+                - containerPort: 8085
+              resources: {}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /mnt/kubeconfig
+                  name: kubeconfig
+                  readOnly: true
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          serviceAccountName: RELEASE-NAME-autoscaler
+          volumes:
+            - name: kubeconfig
+              secret:
+                secretName: RELEASE-NAME-kubeconfig
+  22: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    rules:
+      - apiGroups:
+          - cluster.x-k8s.io
+        resources:
+          - machinedeployments
+          - machines
+          - machinesets
+          - machinepools
+        verbs:
+          - get
+          - list
+          - update
+          - watch
+      - apiGroups:
+          - cluster.x-k8s.io
+        resources:
+          - machinedeployments/scale
+        verbs:
+          - get
+          - patch
+          - update
+  23: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: RELEASE-NAME-autoscaler
+    subjects:
+      - kind: ServiceAccount
+        name: RELEASE-NAME-autoscaler
+        namespace: NAMESPACE
+  24: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: autoscaler
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-autoscaler
+  25: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackCluster
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME
+    spec:
+      disableAPIServerFloatingIP: true
+      identityRef:
+        cloudName: openstack
+        name: RELEASE-NAME-cloud-credentials
+      managedSecurityGroups:
+        allowAllInClusterTraffic: true
+      managedSubnets:
+        - cidr: 192.168.3.0/24
+  26: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: Cluster
+    metadata:
+      annotations: {}
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME
+    spec:
+      clusterNetwork:
+        pods:
+          cidrBlocks:
+            - 172.16.0.0/13
+        serviceDomain: cluster.local
+        services:
+          cidrBlocks:
+            - 172.24.0.0/13
+      controlPlaneRef:
+        apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+        kind: KamajiControlPlane
+        name: RELEASE-NAME-control-plane
+        namespace: NAMESPACE
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackCluster
+        name: RELEASE-NAME
+        namespace: NAMESPACE
+  27: |
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha2
+    kind: KamajiControlPlane
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: control-plane
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-control-plane
+    spec:
+      addons:
+        konnectivity: {}
+      apiServer:
+        extraArgs:
+          - --v=2
+          - --oidc-issuer-url=https://auth.example.org
+          - --oidc-client-id=my-cluster
+          - --oidc-username-claim=sub
+          - '--oidc-username-prefix=oidc:'
+          - --oidc-groups-claim=groups
+          - '--oidc-groups-prefix=oidc:'
+          - --oidc-signing-algs=RS256
+          - --admission-control-config-file=/etc/kubernetes/admission/admission-configuration.yaml
+          - --authentication-token-webhook-config-file=/etc/kubernetes/webhooks/keystone_webhook_config.yaml
+          - --authorization-webhook-config-file=/etc/kubernetes/webhooks/keystone_webhook_config.yaml
+          - --authorization-mode=Node,RBAC,Webhook
+        extraVolumeMounts:
+          - mountPath: /etc/kubernetes/admission
+            name: admission-configuration
+            readOnly: true
+          - mountPath: /etc/kubernetes/webhooks
+            name: auth-webhook
+            readOnly: true
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+      dataStoreName: default
+      deployment:
+        extraContainers:
+          - args:
+              - ./bin/k8s-keystone-auth
+              - --listen=127.0.0.1:8443
+              - --tls-cert-file=/etc/kubernetes/keystone-auth/tls.crt
+              - --tls-private-key-file=/etc/kubernetes/keystone-auth/tls.key
+              - --keystone-url=https://keystone.my.cloud:5000/v3
+              - --keystone-policy-file=/etc/kubernetes/keystone-auth/policy.json
+            image: registry.k8s.io/provider-os/k8s-keystone-auth:v1.32.0
+            name: k8s-keystone-auth
+            volumeMounts:
+              - mountPath: /etc/kubernetes/keystone-auth
+                name: keystone-auth
+                readOnly: true
+        extraVolumes:
+          - name: admission-configuration
+            secret:
+              secretName: RELEASE-NAME-admission-configuration
+          - name: auth-webhook
+            secret:
+              secretName: RELEASE-NAME-auth-webhook
+          - name: keystone-auth
+            secret:
+              secretName: RELEASE-NAME-keystone-auth
+      network:
+        certSANs:
+          - my-cluster.example.org
+        serviceAnnotations:
+          loadbalancer.openstack.org/keep-floatingip: "true"
+        serviceType: LoadBalancer
+      registry: registry.k8s.io
+      replicas: 3
+      version: v1.29.2
+  28: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: admission-configuration
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-admission-configuration
+    stringData:
+      admission-configuration.yaml: "apiVersion: apiserver.config.k8s.io/v1\nkind: AdmissionConfiguration\nplugins:\n  - name: PodSecurity\n    configuration: \n      apiVersion: pod-security.admission.config.k8s.io/v1\n      defaults:\n        enforce: baseline\n        enforce-version: latest\n      exemptions:\n        namespaces:\n        - kube-system\n      kind: PodSecurityConfiguration\n"
+  29: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: auth-webhook
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-auth-webhook
+    stringData:
+      keystone_webhook_config.yaml: |
+        ---
+        apiVersion: v1
+        kind: Config
+        preferences: {}
+        clusters:
+          - cluster:
+              insecure-skip-tls-verify: true
+              server: https://127.0.0.1:8443/webhook
+            name: webhook
+        users:
+          - name: webhook
+        contexts:
+          - context:
+              cluster: webhook
+              user: webhook
+            name: webhook
+        current-context: webhook
+  30: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: keystone-auth
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-keystone-auth
+    stringData:
+      policy.json: |
+        [
+          {
+            "match": {
+              "credentials": [
+                "X-Auth-Token"
+              ]
+            },
+            "resource": {
+              "services": [
+                {
+                  "actions": [
+                    "get",
+                    "list"
+                  ],
+                  "names": [
+                    "*"
+                  ],
+                  "type": "service"
+                }
+              ]
+            }
+          }
+        ]
+      tls.crt: |
+        -----BEGIN CERTIFICATE-----
+        MIIBdummyCertForSnapshotTestingOnlyNotARealCertificateAAAAAAAAAAAA
+        -----END CERTIFICATE-----
+      tls.key: |
+        -----BEGIN PRIVATE KEY-----
+        MIIBdummyKeyForSnapshotTestingOnlyNotARealPrivateKeyAAAAAAAAAAAAAA
+        -----END PRIVATE KEY-----
+  31: |
+    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+    kind: KubeadmConfigTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: 6a03688ffde99626f459e60ea32bf3e0688b96aefd1c292635793bb689066059
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1-6a03688f
+    spec:
+      template:
+        spec:
+          files:
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/conf.d/.keepdir
+              permissions: "0644"
+            - content: |
+                # This file is created by the capi-helm-chart to ensure that its parent directory exists
+              owner: root:root
+              path: /etc/containerd/certs.d/.keepdir
+              permissions: "0644"
+            - content: |
+                server = "https://registry-1.docker.io"
+                [host."https://quay.io/v2/azimuth/docker.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/docker.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://ghcr.io"
+                [host."https://quay.io/v2/azimuth/ghcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/ghcr.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://nvcr.io"
+                [host."https://quay.io/v2/azimuth/nvcr.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/nvcr.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://quay.io"
+                [host."https://quay.io/v2/azimuth/quay.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/quay.io/hosts.toml
+              permissions: "0644"
+            - content: |
+                server = "https://registry.k8s.io"
+                [host."https://quay.io/v2/azimuth/registry.k8s.io"]
+                capabilities = ["pull", "resolve"]
+                skip_verify = false
+                override_path = true
+              owner: root:root
+              path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+              permissions: "0644"
+          joinConfiguration:
+            nodeRegistration:
+              kubeletExtraArgs:
+                cloud-provider: external
+                node-labels: capi.stackhpc.com/node-group=group-1
+              name: '{{ local_hostname }}'
+          preKubeadmCommands:
+            - |-
+              /usr/bin/bash -s <<EOF
+              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
+              cat <<CONTENT >> /etc/containerd/config.toml
+              [plugins."io.containerd.grpc.v1.cri".registry]
+                config_path = "/etc/containerd/certs.d"
+              CONTENT
+              systemctl restart containerd
+              EOF
+            - mkdir -p /etc/kubernetes/webhooks
+            - mkdir -p /etc/kubernetes/patches
+            - mkdir -p /etc/kubernetes/keystone-auth
+  32: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineDeployment
+    metadata:
+      annotations: null
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1
+    spec:
+      clusterName: RELEASE-NAME
+      replicas: 1
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-1
+          cluster.x-k8s.io/cluster-name: RELEASE-NAME
+      strategy:
+        rollingUpdate:
+          deletePolicy: Random
+          maxSurge: 0
+          maxUnavailable: 1
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            capi.stackhpc.com/cluster: RELEASE-NAME
+            capi.stackhpc.com/component: worker
+            capi.stackhpc.com/node-group: group-1
+        spec:
+          bootstrap:
+            configRef:
+              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+              kind: KubeadmConfigTemplate
+              name: RELEASE-NAME-group-1-6a03688f
+          clusterName: RELEASE-NAME
+          infrastructureRef:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: OpenStackMachineTemplate
+            name: RELEASE-NAME-group-1-974c4cfd
+          nodeDeletionTimeout: 5m0s
+          nodeDrainTimeout: 5m0s
+          nodeVolumeDetachTimeout: 5m0s
+          version: v1.29.2
+  33: |
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineHealthCheck
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1
+    spec:
+      clusterName: RELEASE-NAME
+      maxUnhealthy: 100%
+      nodeStartupTimeout: 30m0s
+      selector:
+        matchLabels:
+          capi.stackhpc.com/cluster: RELEASE-NAME
+          capi.stackhpc.com/component: worker
+          capi.stackhpc.com/node-group: group-1
+      unhealthyConditions:
+        - status: Unknown
+          timeout: 5m0s
+          type: Ready
+        - status: "False"
+          timeout: 5m0s
+          type: Ready
+  34: |
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackMachineTemplate
+    metadata:
+      annotations:
+        capi.stackhpc.com/template-checksum: 974c4cfd217a218b8577c9b1362980b997329854003b0b8d126a018fb0429b61
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: worker
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        capi.stackhpc.com/node-group: group-1
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-group-1-974c4cfd
+    spec:
+      template:
+        spec:
+          flavor: vm.small
+          identityRef:
+            cloudName: openstack
+            name: RELEASE-NAME-cloud-credentials
+          image:
+            filter:
+              name: ubuntu-jammy-kube-v1.29.2
+  35: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cloud-credentials
+        capi.stackhpc.com/infrastructure-provider: openstack
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: openstack-cluster-0.1.0
+      name: RELEASE-NAME-cloud-credentials
+    stringData:
+      clouds.yaml: |
+        clouds:
+          openstack:
+            auth:
+              application_credential_id: <app cred id>
+              application_credential_secret: <app cred secret>
+              auth_url: https://my.cloud:5000
+            auth_type: v3applicationcredential
+            identity_api_version: 3
+            interface: public
+            region_name: RegionOne

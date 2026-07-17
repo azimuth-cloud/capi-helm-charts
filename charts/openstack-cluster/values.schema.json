@@ -636,6 +636,12 @@
           "title": "headlamp",
           "type": "object"
         },
+        "hostedControlPlane": {
+          "default": false,
+          "description": "Indicates that the cluster uses a hosted control plane (e.g. Kamaji)\nWhen true there are no control plane nodes in the workload cluster, so addons\nthat would normally run on them (CCM, Cinder CSI controller) are not pinned there\nand the etcd defragmentation job (which needs in-cluster etcd pods) is disabled",
+          "title": "hostedControlPlane",
+          "type": "boolean"
+        },
         "ingress": {
           "additionalProperties": false,
           "description": "Settings for ingress controllers",
@@ -2372,7 +2378,7 @@
     },
     "authWebhook": {
       "default": "none",
-      "description": "API server authentication/authorization webhook. Set this to\nintegrate into KubeadmControlPlane and KubeadmConfigTemplate",
+      "description": "API server authentication/authorization webhook.\nWith controlPlane.type = kamaji, k8s-keystone-auth runs as a sidecar in the\nhosted control plane pods (see controlPlane.kamaji.keystoneAuth), and\nazimuth-authorization-webhook mounts its config into those pods.",
       "enum": [
         "none",
         "k8s-keystone-auth",
@@ -2584,7 +2590,7 @@
         },
         "extraPreFilters": {
           "items": {
-            "type": "string"
+            "required": []
           },
           "title": "extraPreFilters",
           "type": "array"
@@ -2652,7 +2658,9 @@
           "type": "string"
         }
       },
-      "required": [],
+      "required": [
+        "extraPreFilters"
+      ],
       "title": "azimuthAuthorizationWebhook",
       "type": "object"
     },
@@ -2873,6 +2881,17 @@
           "title": "additionalBlockDevices",
           "type": "object"
         },
+        "certificatesExpiryDays": {
+          "default": "",
+          "description": "Roll out control plane machines before their certificates expire.\nIf unset, Cluster API does not trigger rollouts based on certificate expiry.\nSee https://cluster-api.sigs.k8s.io/tasks/certs/auto-rotate-certificates-in-kcp/",
+          "minimum": 7,
+          "required": [],
+          "title": "certificatesExpiryDays",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "failureDomains": {
           "default": "",
           "description": "The failure domains to use for control plane nodes\nIf given, should be a list of availability zones\nOnly used when omitFailureDomain = false",
@@ -2930,6 +2949,214 @@
           "required": [],
           "title": "healthCheck",
           "type": "object"
+        },
+        "kamaji": {
+          "additionalProperties": false,
+          "description": "Settings for a Kamaji hosted control plane\nOnly used when controlPlane.type = kamaji\nAs the control plane runs as pods on the management cluster, the machine,\nhealthCheck, failureDomain, remediation and rollout settings above do not apply",
+          "properties": {
+            "addons": {
+              "additionalProperties": true,
+              "description": "Control plane addons managed by Kamaji\nSet an addon to an object (possibly empty) to enable it, or null to disable it\n  coreDNS and kubeProxy are off by default - this chart already deploys them\n  as cluster addons, so enabling them here would conflict\n  konnectivity is on by default - it tunnels API-server-initiated traffic\n  (kubectl exec/logs/port-forward, aggregated APIs, webhooks) back to the\n  nodes, which the management cluster otherwise cannot reach. Only disable it\n  if the management cluster can route directly to the tenant pod/node network",
+              "properties": {
+                "coreDNS": {
+                  "additionalProperties": true,
+                  "default": "",
+                  "required": [],
+                  "title": "coreDNS",
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                },
+                "konnectivity": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "konnectivity",
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                },
+                "kubeProxy": {
+                  "additionalProperties": true,
+                  "default": "",
+                  "required": [],
+                  "title": "kubeProxy",
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                }
+              },
+              "required": [],
+              "title": "addons",
+              "type": "object"
+            },
+            "apiServerResources": {
+              "additionalProperties": true,
+              "default": "",
+              "description": "Resources for the API server container",
+              "required": [],
+              "title": "apiServerResources",
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "certSANs": {
+              "description": "Extra Subject Alternative Names for the API server certificate",
+              "items": {
+                "type": "string"
+              },
+              "title": "certSANs",
+              "type": "array"
+            },
+            "dataStoreName": {
+              "default": "default",
+              "description": "The Kamaji DataStore that holds this control plane's etcd data",
+              "title": "dataStoreName",
+              "type": "string"
+            },
+            "extraSpec": {
+              "additionalProperties": true,
+              "description": "Extra spec merged into the KamajiControlPlane spec\nUse this for any field not exposed above (deployment, kubelet, etc.)",
+              "required": [],
+              "title": "extraSpec",
+              "type": "object"
+            },
+            "keystoneAuth": {
+              "additionalProperties": false,
+              "description": "Settings for the k8s-keystone-auth webhook (only used when\nauthWebhook = k8s-keystone-auth). It runs as a sidecar in the hosted control\nplane pods, reached over localhost, mirroring the kubeadm hostNetwork setup.\nThe addons.openstack.k8sKeystoneAuth addon must NOT be enabled alongside this.",
+              "properties": {
+                "authUrl": {
+                  "default": "",
+                  "description": "The Keystone URL, e.g. https://keystone.my.cloud:5000/v3\nRequired when authWebhook = k8s-keystone-auth\nNote that it must be reachable from the management cluster",
+                  "required": [],
+                  "title": "authUrl",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "caCert": {
+                  "default": "",
+                  "description": "A PEM-encoded CA bundle used to verify the Keystone server (optional)",
+                  "required": [],
+                  "title": "caCert",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "extraArgs": {
+                  "description": "Extra arguments for the webhook sidecar container",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "extraArgs",
+                  "type": "array"
+                },
+                "image": {
+                  "additionalProperties": false,
+                  "description": "The image for the webhook sidecar container",
+                  "properties": {
+                    "repository": {
+                      "default": "registry.k8s.io/provider-os/k8s-keystone-auth",
+                      "title": "repository",
+                      "type": "string"
+                    },
+                    "tag": {
+                      "default": "v1.32.0",
+                      "title": "tag",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "image",
+                  "type": "object"
+                },
+                "policy": {
+                  "description": "The Keystone authorization policy for the webhook, as documented in\nhttps://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/k8s-keystone-auth/using-keystone-webhook-authenticator-and-authorizer.md\nEquivalent to the rbacPolicies value of the workload-cluster\nk8s-keystone-auth addon used with kubeadm. The API server runs with\nauthorization-mode=Node,RBAC,Webhook, so if empty, authorization falls\nthrough to RBAC and only Keystone authentication is used.",
+                  "items": {
+                    "additionalProperties": true,
+                    "required": [],
+                    "type": "object"
+                  },
+                  "title": "policy",
+                  "type": "array"
+                },
+                "resources": {
+                  "additionalProperties": true,
+                  "description": "Resources for the webhook sidecar container",
+                  "required": [],
+                  "title": "resources",
+                  "type": "object"
+                },
+                "tls": {
+                  "additionalProperties": false,
+                  "description": "The TLS certificate and private key for the webhook server\nIf not given, a self-signed certificate is generated on each deploy\n(the API server accesses the webhook over localhost and does not verify\nthe certificate, but the webhook API requires TLS)",
+                  "properties": {
+                    "cert": {
+                      "default": "",
+                      "required": [],
+                      "title": "cert",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "key": {
+                      "default": "",
+                      "required": [],
+                      "title": "key",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "keystoneAuth",
+              "type": "object"
+            },
+            "serviceAddress": {
+              "default": "",
+              "description": "A pre-assigned address (e.g. a VIP) for the API server\nMainly useful when serviceType is NodePort",
+              "required": [],
+              "title": "serviceAddress",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "serviceAnnotations": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Annotations for the Service that exposes the API server",
+              "required": [],
+              "title": "serviceAnnotations",
+              "type": "object"
+            },
+            "serviceType": {
+              "default": "LoadBalancer",
+              "description": "How the API server is exposed from the management cluster\n  LoadBalancer - a Service of type LoadBalancer (the default)\n  NodePort     - a Service of type NodePort\n  ClusterIP    - a Service of type ClusterIP (requires ingress/gateway)",
+              "enum": [
+                "LoadBalancer",
+                "NodePort",
+                "ClusterIP"
+              ],
+              "title": "serviceType",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "kamaji"
         },
         "kubeadmConfigSpec": {
           "additionalProperties": true,
@@ -3266,16 +3493,6 @@
           "additionalProperties": false,
           "required": []
         },
-        "certificatesExpiryDays": {
-          "description": "Roll out control plane Machines before their kubeadm-managed certificates expire. If unset, certificate-expiry based rollout is disabled.",
-          "minimum": 7,
-          "required": [],
-          "title": "certificatesExpiryDays",
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
         "serverGroupId": {
           "default": "",
           "description": "The ID of the server group to use for control plane machines",
@@ -3285,6 +3502,16 @@
             "string",
             "null"
           ]
+        },
+        "type": {
+          "default": "kubeadm",
+          "description": "The type of control plane to deploy\n  kubeadm - control plane machines running on OpenStack VMs (the default)\n  kamaji  - a hosted control plane running as pods on the management cluster\nUsing kamaji requires the Kamaji operator and its CAPI control plane provider\nto be installed on the management cluster",
+          "enum": [
+            "kubeadm",
+            "kamaji"
+          ],
+          "title": "type",
+          "type": "string"
         }
       },
       "required": [],

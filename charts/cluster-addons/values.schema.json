@@ -625,6 +625,12 @@
       "title": "headlamp",
       "type": "object"
     },
+    "hostedControlPlane": {
+      "default": false,
+      "description": "Indicates that the cluster uses a hosted control plane (e.g. Kamaji)\nWhen true there are no control plane nodes in the workload cluster, so addons\nthat would normally run on them (CCM, Cinder CSI controller) are not pinned there\nand the etcd defragmentation job (which needs in-cluster etcd pods) is disabled",
+      "title": "hostedControlPlane",
+      "type": "boolean"
+    },
     "ingress": {
       "additionalProperties": false,
       "description": "Settings for ingress controllers",

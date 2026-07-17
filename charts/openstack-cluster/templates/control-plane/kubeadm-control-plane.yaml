@@ -159,6 +159,7 @@ clusterConfiguration:
         pathType: Directory
 {{- end }}
 
+{{- if ne (include "openstack-cluster.controlplane.isKamaji" .) "true" }}
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
@@ -215,3 +216,4 @@ spec:
     toYaml |
     nindent 4
   }}
+{{- end }}
