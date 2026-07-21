@@ -305,6 +305,7 @@ Produces the kubeadmConfigSpec required to configure additional trusted CAs for 
 e.g. for private registries.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.trustedCAs" -}}
+{{- if ne .Values.osDistro "flatcar" }}
 {{- with .Values.trustedCAs }}
 files:
   {{- range $name, $certificate := . }}
@@ -318,15 +319,18 @@ preKubeadmCommands:
   - update-ca-certificates
 {{- end }}
 {{- end }}
+{{- end }}
 
 {{/*
 Produces the kubeadmConfigSpec required to install additional packages.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.additionalPackages" -}}
+{{- if ne .Values.osDistro "flatcar" }}
 {{- with .Values.additionalPackages }}
 preKubeadmCommands:
   - apt update -y
   - apt install -y {{ join " " . }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -348,14 +352,25 @@ Produces the spec for a KubeadmConfig object.
 
 {{/*
 Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
+Ignition downloads the sysexts declared in storage.files synchronously before any systemd service starts,
+so the extensions are already in place when systemd-sysext activates them during normal boot.
+${COREOS_OPENSTACK_HOSTNAME} and ${COREOS_OPENSTACK_INSTANCE_UUID} are set by coreos-metadata
+(EnvironmentFile=/run/metadata/flatcar), exported in preKubeadmCommands, then substituted into
+/etc/kubeadm.yml by envsubst before kubeadm runs.
 */}}
 {{- define "openstack-cluster.flatcarKubeadmConfigSpec" -}}
 initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
+    kubeletExtraArgs:
+      cloud-provider: external
+      provider-id: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
 joinConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
+    kubeletExtraArgs:
+      cloud-provider: external
+      provider-id: "openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}"
 preKubeadmCommands:
   - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
   - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
@@ -364,8 +379,38 @@ format: ignition
 ignition:
   containerLinuxConfig:
     additionalConfig: |
+      storage:
+        files:
+          - path: /opt/extensions/kubernetes/kubernetes.raw
+            contents:
+              source: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesUrl }}"
+              verification:
+                hash: "{{ required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesChecksum }}"
+            mode: 0644
+          - path: /opt/extensions/containerd/containerd.raw
+            contents:
+              source: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdUrl }}"
+              verification:
+                hash: "{{ required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdChecksum }}"
+            mode: 0644
+        links:
+          - target: /opt/extensions/kubernetes/kubernetes.raw
+            path: /etc/extensions/kubernetes.raw
+            hard: false
+          - target: /opt/extensions/containerd/containerd.raw
+            path: /etc/extensions/containerd.raw
+            hard: false
       systemd:
         units:
+        # Disabling auto-update
+        - name: update-engine.service
+          mask: true
+        - name: locksmithd.service
+          mask: true
+        - name: systemd-sysupdate.timer
+          enabled: false
+
+        # Kubernetes-focused units
         - name: coreos-metadata-sshkeys@.service
           enabled: true
         - name: kubeadm.service

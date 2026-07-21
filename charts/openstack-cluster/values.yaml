@@ -473,6 +473,17 @@ apiServer:
 # Set osDistro used. ubuntu, flatcar, etc.
 osDistro: ubuntu
 
+# Flatcar Linux sysext configuration (only used when osDistro: flatcar)
+flatcar:
+  # S3 public URL for the Kubernetes sysext .raw file
+  sysextKubernetesUrl: ""
+  # SHA256 checksum of the Kubernetes sysext in Ignition format (sha256-...)
+  sysextKubernetesChecksum: ""
+  # S3 public URL for the containerd sysext .raw file
+  sysextContainerdUrl: ""
+  # SHA256 checksum of the containerd sysext in Ignition format (sha256-...)
+  sysextContainerdChecksum: ""
+
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
 # @schema

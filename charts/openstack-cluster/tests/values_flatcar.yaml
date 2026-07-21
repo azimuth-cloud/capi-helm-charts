@@ -1,0 +1,8 @@
+osDistro: flatcar
+machineImage: flatcar-stable-3975-2-0
+
+flatcar:
+  sysextKubernetesUrl: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+  sysextKubernetesChecksum: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  sysextContainerdUrl: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+  sysextContainerdChecksum: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
