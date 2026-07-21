@@ -1796,12 +1796,18 @@
               "type": "object"
             },
             "cloudConfig": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "description": "cloud-config options for the OpenStack integrations\nThe [Global] section is configured to use the target cloud\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager\nand https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage",
               "properties": {
                 "LoadBalancer": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
+                    "floating-network-id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "lb-provider": {
                       "type": [
                         "string",
@@ -1820,6 +1826,20 @@
                   },
                   "required": [],
                   "title": "LoadBalancer",
+                  "type": "object"
+                },
+                "Networking": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "internal-network-name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "title": "Networking",
                   "type": "object"
                 },
                 "BlockStorage": {
@@ -2178,49 +2198,6 @@
               "description": "Indicates if the OpenStack integrations should be enabled",
               "title": "enabled",
               "type": "boolean"
-            },
-            "csiNfs": {
-              "additionalProperties": false,
-              "description": "Settings for the NFS CSI driver",
-              "properties": {
-                "enabled": {
-                  "default": false,
-                  "description": "Indicates if the NFS CSI driver should be enabled",
-                  "title": "enabled",
-                  "type": "boolean"
-                },
-                "chart": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "name": {
-                      "default": "csi-driver-nfs",
-                      "title": "name",
-                      "type": "string"
-                    },
-                    "repo": {
-                      "default": "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
-                      "title": "repo",
-                      "type": "string"
-                    },
-                    "version": {
-                      "default": "4.13.4",
-                      "title": "version",
-                      "type": "string"
-                    }
-                  },
-                  "required": [],
-                  "title": "chart",
-                  "type": "object"
-                },
-                "values": {
-                  "additionalProperties": true,
-                  "required": [],
-                  "title": "values"
-                }
-              },
-              "required": [],
-              "title": "csiNfs",
-              "type": "object"
             },
             "k8sKeystoneAuth": {
               "additionalProperties": false,

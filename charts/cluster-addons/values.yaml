@@ -479,38 +479,6 @@ openstack:
   # @schema
   # type: object
   # @schema
-
-  csiNfs:
-    # @schema
-    # type: boolean
-    # @schema
-    # Indicates if the NFS CSI driver should be enabled
-    # By default, it is disabled and can be enabled when Manila CSI uses NFS-backed shares
-    # See https://github.com/kubernetes-csi/csi-driver-nfs
-    enabled: false
-
-    # @schema
-    # type: object
-    # @schema
-    chart:
-      # @schema
-      # type: string
-      # @schema
-      repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-      # @schema
-      # type: string
-      # @schema
-      name: csi-driver-nfs
-      # @schema
-      # type: string
-      # @schema
-      version: 4.13.4
-
-    # @schema
-    # additionalProperties: true
-    # @schema
-    values: {}
-
   k8sKeystoneAuth:
     # @schema
     # type: boolean
