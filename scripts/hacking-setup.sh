@@ -11,6 +11,7 @@ cluster_api_provider_openstack="$(jq -r '.["cluster-api-provider-openstack"]' "$
 cert_manager="$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")"
 helm="$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")"
 sonobuoy="$(jq -r '.["sonobuoy"]' "$DEPENDENCIES_PATH")"
+orc_version="$(jq -r '.["openstack-resource-controller"]' "$DEPENDENCIES_PATH")"
 
 helm upgrade cert-manager cert-manager \
   --repo https://charts.jetstack.io \
@@ -36,6 +37,9 @@ fi
   --bootstrap kubeadm:${cluster_api} \
   --infrastructure openstack:${cluster_api_provider_openstack} \
   --wait-providers
+
+kubectl apply --server-side --force-conflicts -f \
+	https://github.com/k-orc/openstack-resource-controller/releases/download/${orc_version}/install.yaml
 
 helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
   --repo https://azimuth-cloud.github.io/cluster-api-addon-provider \

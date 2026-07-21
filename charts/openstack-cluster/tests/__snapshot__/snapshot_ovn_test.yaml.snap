@@ -921,15 +921,6 @@ templated manifests should match snapshot:
               cloud-provider: external
             name: '{{ local_hostname }}'
         preKubeadmCommands:
-          - |-
-            /usr/bin/bash -s <<EOF
-            grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-            cat <<CONTENT >> /etc/containerd/config.toml
-            [plugins."io.containerd.grpc.v1.cri".registry]
-              config_path = "/etc/containerd/certs.d"
-            CONTENT
-            systemctl restart containerd
-            EOF
           - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
       machineTemplate:
         infrastructureRef:
@@ -1025,7 +1016,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: d43bd1bb079c9f949f46b9f6bf89e1e1027a45756426801398f5ab1199a331c4
+        capi.stackhpc.com/template-checksum: 721aba62a4906c6fd142189ad849887a2390deedb803945e2ba659c626d6e562
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1034,7 +1025,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-d43bd1bb
+      name: RELEASE-NAME-group-1-721aba62
     spec:
       template:
         spec:
@@ -1100,22 +1091,12 @@ templated manifests should match snapshot:
                 cloud-provider: external
                 node-labels: capi.stackhpc.com/node-group=group-1
               name: '{{ local_hostname }}'
-          preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
   34: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: e1d1a382f8640c6551c40f3da6902e8d45a774e09fe30be4898ba00a70a63a67
+        capi.stackhpc.com/template-checksum: a2941a130c1048adae83807ce27650dad2fe29fd17a27762b014af6710c9b481
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1124,7 +1105,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-2
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-2-e1d1a382
+      name: RELEASE-NAME-group-2-a2941a13
     spec:
       template:
         spec:
@@ -1190,22 +1171,12 @@ templated manifests should match snapshot:
                 cloud-provider: external
                 node-labels: capi.stackhpc.com/node-group=group-2
               name: '{{ local_hostname }}'
-          preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
   35: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 5ff6f8cd8d78686d5c3ab32f5ed8fa82b82bf5feea7452c6466b5e9173e799e3
+        capi.stackhpc.com/template-checksum: 4dc11ecb2273b656a4350609ca6c2bb1c1c6d7ff1c9eec716b7be590fba51fd1
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1214,7 +1185,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-3
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-3-5ff6f8cd
+      name: RELEASE-NAME-group-3-4dc11ecb
     spec:
       template:
         spec:
@@ -1280,16 +1251,6 @@ templated manifests should match snapshot:
                 cloud-provider: external
                 node-labels: capi.stackhpc.com/node-group=group-3
               name: '{{ local_hostname }}'
-          preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
   36: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
@@ -1329,7 +1290,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-d43bd1bb
+              name: RELEASE-NAME-group-1-721aba62
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -1379,7 +1340,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-2-e1d1a382
+              name: RELEASE-NAME-group-2-a2941a13
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -1429,7 +1390,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-3-5ff6f8cd
+              name: RELEASE-NAME-group-3-4dc11ecb
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
