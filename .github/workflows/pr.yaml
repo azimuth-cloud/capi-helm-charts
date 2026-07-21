@@ -30,6 +30,7 @@ jobs:
     steps:
       - name: Workflow approved
         run: exit 0
+    if: ${{ github.repository != 'azimuth-cloud/capi-helm-charts' }}
 
   mirror_container_images:
     needs: [wait_for_approval]
