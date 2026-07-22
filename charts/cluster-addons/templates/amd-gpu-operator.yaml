@@ -22,6 +22,8 @@ stringData:
           prometheus:
             serviceMonitor:
               enable: {{ .Values.monitoring.enabled }}
+        selector:
+          feature.node.kubernetes.io/amd-vgpu: "true"
   overrides: |
     {{- toYaml .Values.amdGPUOperator.release.values | nindent 4 }}
 ---

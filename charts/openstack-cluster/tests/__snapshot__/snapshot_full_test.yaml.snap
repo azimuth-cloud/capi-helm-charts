@@ -25,6 +25,8 @@ templated manifests should match snapshot:
               prometheus:
                 serviceMonitor:
                   enable: true
+            selector:
+              feature.node.kubernetes.io/amd-vgpu: "true"
       overrides: |
         {}
   2: |
