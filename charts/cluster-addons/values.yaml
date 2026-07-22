@@ -451,43 +451,14 @@ nodeProblemDetector:
     values: {}
 
 # Settings for headlamp dashboard
-# @schema
-# type: object
-# required: true
-# @schema
 headlamp:
-  # @schema
-  # type: boolean
-  # @schema
   enabled: false
-  # @schema
-  # type: object
-  # @schema
   chart:
-    # @schema
-    # type: string
-    # @schema
     repo: https://kubernetes-sigs.github.io/headlamp
-    # @schema
-    # type: string
-    # @schema
     name: headlamp
-    # @schema
-    # type: string
-    # @schema
     version: 0.43.0
-  # @schema
-  # type: object
-  # @schema
   release:
-    # @schema
-    # type: string
-    # @schema
     namespace: headlamp
-    # @schema
-    # type: object
-    # additionalProperties: true
-    # @schema
     values: {}
 
 # Settings for any custom addons
