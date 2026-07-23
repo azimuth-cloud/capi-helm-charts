@@ -543,7 +543,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-gpu
         repo: https://intel.github.io/helm-charts
-        version: 0.32.0
+        version: 0.36.0
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-gpu
       targetNamespace: intel
@@ -1841,7 +1841,7 @@ templated manifests should match snapshot:
       chart:
         name: reloader
         repo: https://stakater.github.io/stakater-charts
-        version: 2.2.11
+        version: 2.2.14
       clusterName: RELEASE-NAME
       releaseName: reloader
       targetNamespace: openstack-system
