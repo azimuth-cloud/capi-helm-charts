@@ -2,6 +2,7 @@ kubernetesVersion: 1.29.2
 machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
 controlPlane:
   machineFlavor: vm.small
+  certificatesExpiryDays: 21
 nodeGroups:
   - name: group-1
     machineFlavor: vm.small
