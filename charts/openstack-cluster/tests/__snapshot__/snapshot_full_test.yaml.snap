@@ -1841,7 +1841,7 @@ templated manifests should match snapshot:
       chart:
         name: reloader
         repo: https://stakater.github.io/stakater-charts
-        version: 2.2.11
+        version: 2.2.14
       clusterName: RELEASE-NAME
       releaseName: reloader
       targetNamespace: openstack-system
