@@ -543,7 +543,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-gpu
         repo: https://intel.github.io/helm-charts
-        version: 0.32.0
+        version: 0.36.0
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-gpu
       targetNamespace: intel
@@ -783,7 +783,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 26.1.1
+        version: 26.4.1
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
