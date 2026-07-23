@@ -217,7 +217,7 @@ templated manifests should match snapshot:
       chart:
         name: metrics-server
         repo: https://kubernetes-sigs.github.io/metrics-server
-        version: 3.13.0
+        version: 3.13.1
       clusterName: RELEASE-NAME
       releaseName: metrics-server
       targetNamespace: kube-system
