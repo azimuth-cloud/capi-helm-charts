@@ -1,110 +1,43 @@
-# yaml-language-server: $schema=values.schema.json
-
-# @schema
-# type: string
-# @schema
 # The schedule for the cronjob (defaults to nightly)
 schedule: "0 0 * * *"
-# @schema
-# type: integer
-# @schema
 # Allow the jobs to start up to 12 hours after the configured time
 # If it does not start within this time, just wait for the next one
 startingDeadlineSeconds: 43200
 
-# @schema
-# type: integer
-# @schema
 # Abandon the defrag after three retries or one hour, whichever is sooner
 backoffLimit: 3
-# @schema
-# type: integer
-# @schema
 activeDeadlineSeconds: 3600
 
-# @schema
-# type: object
-# @schema
 # The kubectl image to use
 # NOTE: Image must also include a bash shell
 # even if it's not the default entrypoint
 image:
-  # @schema
-  # type: string
-  # @schema
   repository: bitnami/kubectl
-  # @schema
-  # type: string
-  # @schema
   pullPolicy: IfNotPresent
-  # @schema
-  # type: string
-  # @schema
   tag: latest
 
-# @schema
-# type: array
-# @schema
 imagePullSecrets: []
 
 # Pod-level security context
-# @schema
-# additionalProperties: true
-# @schema
 podSecurityContext:
-  # @schema
-  # type: boolean
-  # @schema
   runAsNonRoot: true
 
 # Container-level security context
-# @schema
-# additionalProperties: true
-# @schema
 securityContext:
-  # @schema
-  # type: boolean
-  # @schema
   allowPrivilegeEscalation: false
-  # @schema
-  # additionalProperties: true
-  # @schema
   capabilities:
-    # @schema
-    # type: array
-    # @schema
     drop: [ALL]
-  # @schema
-  # type: boolean
-  # @schema
   readOnlyRootFilesystem: true
 
 # Resources for the kubectl container
-# @schema
-# additionalProperties: true
-# @schema
 resources: {}
 
 # Scheduling parameters for the kubectl pod
-# @schema
-# additionalProperties: true
-# @schema
 nodeSelector: {}
-
 # Allow the pods to run on control plane nodes if they need to
-# @schema
-# type: array
-# items:
-#   type: object
-#   additionalProperties: true
-# @schema
 tolerations:
   - key: node-role.kubernetes.io/master
     effect: NoSchedule
   - key: node-role.kubernetes.io/control-plane
     effect: NoSchedule
-
-# @schema
-# additionalProperties: true
-# @schema
 affinity: {}
