@@ -1326,7 +1326,7 @@ templated manifests should match snapshot:
       chart:
         name: node-feature-discovery
         repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-        version: 0.18.3
+        version: 0.19.0
       clusterName: RELEASE-NAME
       releaseName: node-feature-discovery
       targetNamespace: node-feature-discovery
