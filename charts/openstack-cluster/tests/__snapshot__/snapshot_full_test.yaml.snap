@@ -1885,7 +1885,7 @@ templated manifests should match snapshot:
       chart:
         name: traefik
         repo: https://traefik.github.io/charts
-        version: 40.1.0
+        version: 41.0.2
       clusterName: RELEASE-NAME
       releaseName: traefik
       targetNamespace: traefik
