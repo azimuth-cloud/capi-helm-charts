@@ -363,7 +363,7 @@ amdGPUOperator:
   chart:
     repo: https://rocm.github.io/gpu-operator
     name: gpu-operator-charts
-    version: v1.5.0
+    version: v1.5.1
   release:
     namespace: kube-amd-gpu
     values: {}
