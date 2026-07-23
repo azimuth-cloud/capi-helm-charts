@@ -543,7 +543,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-gpu
         repo: https://intel.github.io/helm-charts
-        version: 0.32.0
+        version: 0.36.0
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-gpu
       targetNamespace: intel
@@ -1885,7 +1885,7 @@ templated manifests should match snapshot:
       chart:
         name: traefik
         repo: https://traefik.github.io/charts
-        version: 40.1.0
+        version: 41.0.2
       clusterName: RELEASE-NAME
       releaseName: traefik
       targetNamespace: traefik
