@@ -192,7 +192,6 @@ csi:
       # additionalProperties: true
       # @schema
       values: {}
-
 # @schema
 # type: object
 # required: true
@@ -209,18 +208,58 @@ openstack:
   # @schema
   # The target namespace for the OpenStack integrations
   targetNamespace: openstack-system
-  # @schema
-  # type: object
-  # @schema
   # cloud-config options for the OpenStack integrations
   # The [Global] section is configured to use the target cloud
   # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
   # and https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage
+  # @schema
+  # type: object
+  # additionalProperties: true
+  # @schema
   cloudConfig:
     # @schema
     # type: object
+    # additionalProperties: true
     # @schema
+    Networking:
+      # @schema
+      # type:
+      #   - string
+      #   - "null"
+      # @schema
+      internal-network-name:
+
+    # @schema
+    # type: object
+    # additionalProperties: true
+    # @schema
+    LoadBalancer:
+      # @schema
+      # type:
+      #   - string
+      #   - "null"
+      # @schema
+      floating-network-id:
+      # @schema
+      # type:
+      #   - string
+      #   - "null"
+      # @schema
+      lb-provider:
+      # @schema
+      # type:
+      #   - string
+      #   - "null"
+      # @schema
+      lb-method:
+      # @schema
+      # type: boolean
+      # @schema
+      create-monitor: false
     # By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ
+    # @schema
+    # type: object
+    # @schema
     BlockStorage:
       # @schema
       # type: boolean
