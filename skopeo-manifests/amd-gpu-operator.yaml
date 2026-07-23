@@ -1,0 +1,8 @@
+docker.io:
+  images:
+    rocm/gpu-operator:
+    - v1.5.1
+quay.io:
+  images:
+    argoproj/workflow-controller:
+    - v4.0.3
