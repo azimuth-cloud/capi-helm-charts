@@ -21,6 +21,18 @@ addons:
       enabled: true
   openstack:
     enabled: true
+    cloudConfig:
+      Networking:
+        internal-network-name: test-internal-network
+        custom-networking-option: test-networking-value
+      LoadBalancer:
+        floating-network-id: test-floating-network-id
+        lb-provider: amphora
+        lb-method: SOURCE_IP_PORT
+        create-monitor: true
+        custom-loadbalancer-option: test-loadbalancer-value
+      CustomSection:
+        custom-key: custom-value
     ccm:
       enabled: true
     csiCinder:

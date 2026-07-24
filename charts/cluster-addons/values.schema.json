@@ -1789,11 +1789,11 @@
           "type": "object"
         },
         "cloudConfig": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "description": "cloud-config options for the OpenStack integrations\nThe [Global] section is configured to use the target cloud\nSee https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager\nand https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/cinder-csi-plugin/using-cinder-csi-plugin.md#block-storage",
           "properties": {
             "BlockStorage": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "description": "By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ",
               "properties": {
                 "ignore-volume-az": {
@@ -1804,6 +1804,51 @@
               },
               "required": [],
               "title": "BlockStorage",
+              "type": "object"
+            },
+            "LoadBalancer": {
+              "additionalProperties": true,
+              "properties": {
+                "create-monitor": {
+                  "type": "boolean"
+                },
+                "floating-network-id": {
+                  "required": [],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "lb-method": {
+                  "required": [],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "lb-provider": {
+                  "required": [],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [],
+              "type": "object"
+            },
+            "Networking": {
+              "additionalProperties": true,
+              "properties": {
+                "internal-network-name": {
+                  "required": [],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [],
               "type": "object"
             }
           },

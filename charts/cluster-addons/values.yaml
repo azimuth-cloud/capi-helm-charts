@@ -211,6 +211,44 @@ openstack:
   targetNamespace: openstack-system
   # @schema
   # type: object
+  # additionalProperties: true
+  # properties:
+  #   Networking:
+  #     type: object
+  #     additionalProperties: true
+  #     properties:
+  #       internal-network-name:
+  #         type:
+  #           - string
+  #           - "null"
+  #   LoadBalancer:
+  #     type: object
+  #     additionalProperties: true
+  #     properties:
+  #       floating-network-id:
+  #         type:
+  #           - string
+  #           - "null"
+  #       lb-provider:
+  #         type:
+  #           - string
+  #           - "null"
+  #       lb-method:
+  #         type:
+  #           - string
+  #           - "null"
+  #       create-monitor:
+  #         type: boolean
+  #   BlockStorage:
+  #     type: object
+  #     title: BlockStorage
+  #     description: By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ
+  #     additionalProperties: true
+  #     properties:
+  #       ignore-volume-az:
+  #         type: boolean
+  #         title: ignore-volume-az
+  #         default: true
   # @schema
   # cloud-config options for the OpenStack integrations
   # The [Global] section is configured to use the target cloud
