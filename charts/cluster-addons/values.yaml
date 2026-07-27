@@ -367,6 +367,8 @@ amdGPUOperator:
   release:
     namespace: kube-amd-gpu
     values: {}
+  vgpuSelector:
+    enabled: false
 
 intelDevicePlugin:
   enabled: false
