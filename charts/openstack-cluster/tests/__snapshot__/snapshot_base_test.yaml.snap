@@ -592,135 +592,6 @@ templated manifests should match snapshot:
         - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
           a functioning NGINX Ingress controller.
   23: |
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: autoscaler
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-autoscaler
-    spec:
-      replicas: 1
-      selector:
-        matchLabels:
-          capi.stackhpc.com/cluster: RELEASE-NAME
-          capi.stackhpc.com/component: autoscaler
-      template:
-        metadata:
-          labels:
-            capi.stackhpc.com/cluster: RELEASE-NAME
-            capi.stackhpc.com/component: autoscaler
-        spec:
-          containers:
-            - args:
-                - --cloud-provider=clusterapi
-                - --kubeconfig=/mnt/kubeconfig/value
-                - --clusterapi-cloud-config-authoritative
-                - --node-group-auto-discovery=clusterapi:namespace=NAMESPACE,clusterName=RELEASE-NAME
-                - --cordon-node-before-terminating=true
-                - --expander=least-waste,random
-                - --logtostderr=true
-                - --skip-nodes-with-custom-controller-pods=false
-                - --skip-nodes-with-local-storage=false
-                - --skip-nodes-with-system-pods=true
-                - --stderrthreshold=info
-                - --v=4
-              command:
-                - /cluster-autoscaler
-              image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.4
-              imagePullPolicy: IfNotPresent
-              livenessProbe:
-                httpGet:
-                  path: /health-check
-                  port: 8085
-              name: autoscaler
-              ports:
-                - containerPort: 8085
-              resources: {}
-              securityContext:
-                allowPrivilegeEscalation: false
-                capabilities:
-                  drop:
-                    - ALL
-                readOnlyRootFilesystem: true
-              volumeMounts:
-                - mountPath: /mnt/kubeconfig
-                  name: kubeconfig
-                  readOnly: true
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1001
-          serviceAccountName: RELEASE-NAME-autoscaler
-          volumes:
-            - name: kubeconfig
-              secret:
-                secretName: RELEASE-NAME-kubeconfig
-  24: |
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: autoscaler
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-autoscaler
-    rules:
-      - apiGroups:
-          - cluster.x-k8s.io
-        resources:
-          - machinedeployments
-          - machines
-          - machinesets
-          - machinepools
-        verbs:
-          - get
-          - list
-          - update
-          - watch
-      - apiGroups:
-          - cluster.x-k8s.io
-        resources:
-          - machinedeployments/scale
-        verbs:
-          - get
-          - patch
-          - update
-  25: |
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: autoscaler
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-autoscaler
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: Role
-      name: RELEASE-NAME-autoscaler
-    subjects:
-      - kind: ServiceAccount
-        name: RELEASE-NAME-autoscaler
-        namespace: NAMESPACE
-  26: |
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: autoscaler
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-autoscaler
-  27: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -745,7 +616,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  28: |
+  24: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -775,7 +646,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  29: |
+  25: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -931,7 +802,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.29.2
-  30: |
+  26: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -957,7 +828,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  31: |
+  27: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -981,7 +852,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  32: |
+  28: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -997,7 +868,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  33: |
+  29: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1087,7 +958,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  34: |
+  30: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1136,7 +1007,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.29.2
-  35: |
+  31: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1164,7 +1035,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  36: |
+  32: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1189,7 +1060,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-jammy-kube-v1.29.2
-  37: |
+  33: |
     apiVersion: v1
     kind: Secret
     metadata:
