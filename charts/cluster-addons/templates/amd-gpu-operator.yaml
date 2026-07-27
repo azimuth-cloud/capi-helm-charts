@@ -24,8 +24,8 @@ stringData:
               enable: {{ .Values.monitoring.enabled }}
         {{- if .Values.amdGPUOperator.vgpuSelector.enabled }}
         selector:
-          feature.node.kubernetes.io/amd-gpu: false
-          feature.node.kubernetes.io/amd-vgpu: true
+          feature.node.kubernetes.io/amd-gpu: "false"
+          feature.node.kubernetes.io/amd-vgpu: "true"
         {{- end }}
   overrides: |
     {{- toYaml .Values.amdGPUOperator.release.values | nindent 4 }}
