@@ -949,6 +949,8 @@ templated manifests should match snapshot:
         minHealthyPeriod: 1h
         retryPeriod: 20m
       replicas: 3
+      rolloutBefore:
+        certificatesExpiryDays: 21
       rolloutStrategy:
         rollingUpdate:
           maxSurge: 1
