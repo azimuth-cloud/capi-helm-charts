@@ -8,21 +8,54 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "blackbox-exporter") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 stringData:
-  {{- if .Values.monitoring.blackboxExporter.openstackAuthUrlTarget.enabled }}
+  {{- if or .Values.monitoring.blackboxExporter.kubernetesApiTarget.enabled .Values.monitoring.blackboxExporter.openstackAuthUrlTarget.enabled }}
   defaults: |
+    {{- if .Values.monitoring.blackboxExporter.kubernetesApiTarget.enabled }}
+    # Mount the cluster CA so that the in-cluster Kubernetes API endpoint
+    # can be probed with certificate verification enabled.
+    extraConfigmapMounts:
+      - name: kube-root-ca
+        configMap: kube-root-ca.crt
+        mountPath: /etc/kubernetes-ca
+        readOnly: true
+        defaultMode: 420
+    config:
+      modules:
+        kubernetes_api:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions:
+              - HTTP/1.1
+              - HTTP/2.0
+            follow_redirects: true
+            preferred_ip_protocol: ip4
+            tls_config:
+              ca_file: /etc/kubernetes-ca/ca.crt
+    {{- end }}
     serviceMonitor:
       enabled: true
-      {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
-      {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
       targets:
+        {{- if .Values.monitoring.blackboxExporter.kubernetesApiTarget.enabled }}
+        - name: kube-api
+          # Use the short in-cluster service name so that this also works
+          # for clusters with a non-default service domain.
+          url: https://kubernetes.default.svc/livez
+          module: kubernetes_api
+        {{- end }}
+        {{- if .Values.monitoring.blackboxExporter.openstackAuthUrlTarget.enabled }}
+        {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
+        {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
         {% for name, config in clouds_data.clouds.items() %}
         - name: {{ "{{" }} name {{ "}}" }}-auth-url
           url: {{ "{{" }} config.auth.auth_url.strip("/").removesuffix("/v3") {{ "}}" }}/v3
         {% endfor %}
-      {% endif %}
+        {% endif %}
+        {{- end }}
   {{- else }}
   defaults: {}
   {{- end }}
+  # Additional chart values, including scrape targets, can be supplied as overrides.
   overrides: |
     {{- toYaml .Values.monitoring.blackboxExporter.release.values | nindent 4 }}
 ---
@@ -138,5 +171,21 @@ spec:
                   annotations:
                     summary: Blackbox SSL certificate expired (target {{ "{{" }} $labels.target {{ "}}" }})
                     description: "SSL certificate for blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' has expired"
+                {{- if .Values.monitoring.blackboxExporter.kubernetesApiTarget.enabled }}
+                - alert: KubeApiCertificateReplacementOverdue
+                  expr: |
+                    (
+                      min_over_time(
+                        probe_ssl_earliest_cert_expiry{target="kube-api"}[10m]
+                      )
+                      - time()
+                    ) <= (20 * 24 * 3600)
+                  for: 1h
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: Kubernetes API certificate replacement may be overdue (target {{ "{{" }} $labels.target {{ "}}" }})
+                    description: "The Kubernetes API endpoint for blackbox probe '{{ "{{" }} $labels.target {{ "}}" }}' is still serving a certificate with 20 days or less remaining. Automatic controlplane replacement should have started at the 21 day threshold but may not have completed. Operator investigation is required."
+                {{- end }}
         {% endraw %}
 {{- end }}
