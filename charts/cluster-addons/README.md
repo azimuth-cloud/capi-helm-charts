@@ -331,8 +331,8 @@ as well as set `.Values.amdGPUOperator.release.values.kmm.enable` and
 
 If using VM worker nodes, the
 [overrides given in the upstream docs](https://instinct.docs.amd.com/projects/gpu-operator/en/latest/usage.html#typical-deployment-scenarios)
-to select virtual-function devices doesn't work with the `capi-addon-provider` due to `null` values being
-treated as their upstream defaults. Instead set `.Values.amdGPUOperator.vgpuSelector.enabled`, which works around this issue by deploying a
+to select virtual-function devices don't work with the `capi-addon-provider` due to `null` values being
+treated as their upstream defaults. Instead set `.Values.amdGPUOperator.vgpuSelector.enabled: true`, which works around this issue by deploying a
 `NodeFeatureRule` to set `feature.node.kubernetes.io/amd-gpu: "false"` if VGPUs are detected and explicitly
 sets `deviceConfig.spec.selector` to look for this `false` value.
 
