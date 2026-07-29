@@ -1495,7 +1495,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.0
+        version: 2.36.1
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
