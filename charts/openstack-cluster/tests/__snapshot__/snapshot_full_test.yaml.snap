@@ -853,16 +853,42 @@ templated manifests should match snapshot:
       name: RELEASE-NAME-blackbox-exporter-config
     stringData:
       defaults: |
+        # Mount the cluster CA so that the in-cluster Kubernetes API endpoint
+        # can be probed with certificate verification enabled.
+        extraConfigmapMounts:
+          - name: kube-root-ca
+            configMap: kube-root-ca.crt
+            mountPath: /etc/kubernetes-ca
+            readOnly: true
+            defaultMode: 420
+        config:
+          modules:
+            kubernetes_api:
+              prober: http
+              timeout: 5s
+              http:
+                valid_http_versions:
+                  - HTTP/1.1
+                  - HTTP/2.0
+                follow_redirects: true
+                preferred_ip_protocol: ip4
+                tls_config:
+                  ca_file: /etc/kubernetes-ca/ca.crt
         serviceMonitor:
           enabled: true
-          {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
-          {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
           targets:
+            - name: kube-api
+              # Use the short in-cluster service name so that this also works
+              # for clusters with a non-default service domain.
+              url: https://kubernetes.default.svc/livez
+              module: kubernetes_api
+            {% if cloud_identity and "clouds.yaml" in cloud_identity.data %}
+            {% set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml %}
             {% for name, config in clouds_data.clouds.items() %}
             - name: {{ name }}-auth-url
               url: {{ config.auth.auth_url.strip("/").removesuffix("/v3") }}/v3
             {% endfor %}
-          {% endif %}
+            {% endif %}
       overrides: |
         {}
   33: |
@@ -980,6 +1006,20 @@ templated manifests should match snapshot:
                       annotations:
                         summary: Blackbox SSL certificate expired (target {{ $labels.target }})
                         description: "SSL certificate for blackbox probe '{{ $labels.target }}' has expired"
+                    - alert: KubeApiCertificateReplacementOverdue
+                      expr: |
+                        (
+                          min_over_time(
+                            probe_ssl_earliest_cert_expiry{target="kube-api"}[10m]
+                          )
+                          - time()
+                        ) <= (20 * 24 * 3600)
+                      for: 1h
+                      labels:
+                        severity: critical
+                      annotations:
+                        summary: Kubernetes API certificate replacement may be overdue (target {{ $labels.target }})
+                        description: "The Kubernetes API endpoint for blackbox probe '{{ $labels.target }}' is still serving a certificate with 20 days or less remaining. Automatic controlplane replacement should have started at the 21 day threshold but may not have completed. Operator investigation is required."
             {% endraw %}
       releaseName: blackbox-exporter-alerts
       targetNamespace: monitoring-system
@@ -1494,7 +1534,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.0
+        version: 2.36.1
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
