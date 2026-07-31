@@ -323,6 +323,9 @@ monitoring:
         #   targets:
         #     - name: example
         #       url: http://example.com/healthz
+    # Indicates if a blackbox target for the in-cluster Kubernetes API should be created
+    kubernetesApiTarget:
+      enabled: true
     # Indicates if a blackbox target for the cloud's auth endpoint should be created
     openstackAuthUrlTarget:
       enabled: true
