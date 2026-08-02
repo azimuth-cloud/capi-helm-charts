@@ -22,6 +22,11 @@ stringData:
           prometheus:
             serviceMonitor:
               enable: {{ .Values.monitoring.enabled }}
+        {{- if .Values.amdGPUOperator.vgpuSelector.enabled }}
+        selector:
+          feature.node.kubernetes.io/amd-gpu: "false"
+          feature.node.kubernetes.io/amd-vgpu: "true"
+        {{- end }}
   overrides: |
     {{- toYaml .Values.amdGPUOperator.release.values | nindent 4 }}
 ---
@@ -52,7 +57,6 @@ metadata:
   labels: {{ include "cluster-addons.componentLabels" (list . "amd-gpu-dashboards") | nindent 4 }}
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
-  bootstrap: true
   targetNamespace: {{ .Values.amdGPUOperator.release.namespace }}
   releaseName: amd-gpu-dashboards
   manifestSources:
@@ -72,5 +76,33 @@ spec:
             {% raw %}
             {{- .Files.Get "grafana-dashboards/amd-node.json" | nindent 12 }}
             {% endraw %}
+{{- end }}
+{{- if .Values.amdGPUOperator.vgpuSelector.enabled }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "amd-vgpu-selector") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "amd-vgpu-selector") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  targetNamespace: {{ .Values.amdGPUOperator.release.namespace }}
+  releaseName: amd-vgpu-selector
+  manifestSources:
+    - template: |
+        apiVersion: nfd.k8s-sigs.io/v1alpha1
+        kind: NodeFeatureRule
+        metadata:
+          name: amd-vgpu-selector
+        spec:
+          rules:
+          - name: "amd-vgpu-selector"
+            labels:
+              feature.node.kubernetes.io/amd-gpu: "false"
+            matchFeatures:
+            - feature: rule.matched
+              matchExpressions:
+                "feature.node.kubernetes.io/amd-vgpu":
+                  op: IsTrue
 {{- end }}
 {{- end }}
