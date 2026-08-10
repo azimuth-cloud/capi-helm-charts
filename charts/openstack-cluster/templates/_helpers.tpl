@@ -387,14 +387,31 @@ ignition:
 {{- end }}
 
 {{/*
-Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
+Splits a sysext checksum value into the {function, sum} pair CLC's contents.remote.verification.hash
+expects.
+Only sha512 checksums are supported by ignition, even though other ones are allowed by the schema.
+*/}}
+{{- define "openstack-cluster.flatcar.checksumParts" -}}
+{{- if not (hasPrefix "sha512-" .) -}}
+{{- fail (printf "sysext checksum %q must be in the form \"sha512-<hex>\" - Ignition only supports sha512 verification hashes" .) -}}
+{{- end -}}
+function: sha512
+sum: {{ trimPrefix "sha512-" . }}
+{{- end }}
+
+{{/*
+Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar-sysext".
 Ignition downloads the sysexts declared in storage.files synchronously before any systemd service starts,
 so the extensions are already in place when systemd-sysext activates them during normal boot.
 ${COREOS_OPENSTACK_HOSTNAME} and ${COREOS_OPENSTACK_INSTANCE_UUID} are set by coreos-metadata
 (EnvironmentFile=/run/metadata/flatcar), exported in preKubeadmCommands, then substituted into
 /etc/kubeadm.yml by envsubst before kubeadm runs.
+NOTE: additionalConfig is parsed as Container Linux Config (CLC), not native Ignition.
+Use the CLC config schema which will then be parsed into ignition.
 */}}
 {{- define "openstack-cluster.flatcarSysextKubeadmConfigSpec" -}}
+{{- $kubeChecksum := include "openstack-cluster.flatcar.checksumParts" (required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesChecksum) | fromYaml }}
+{{- $containerdChecksum := include "openstack-cluster.flatcar.checksumParts" (required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdChecksum) | fromYaml }}
 initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
@@ -419,15 +436,21 @@ ignition:
         files:
           - path: /opt/extensions/kubernetes/kubernetes.raw
             contents:
-              source: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesUrl }}"
-              verification:
-                hash: "{{ required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesChecksum }}"
+              remote:
+                url: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesUrl }}"
+                verification:
+                  hash:
+                    function: {{ $kubeChecksum.function }}
+                    sum: {{ $kubeChecksum.sum }}
             mode: 0644
           - path: /opt/extensions/containerd/containerd.raw
             contents:
-              source: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdUrl }}"
-              verification:
-                hash: "{{ required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdChecksum }}"
+              remote:
+                url: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdUrl }}"
+                verification:
+                  hash:
+                    function: {{ $containerdChecksum.function }}
+                    sum: {{ $containerdChecksum.sum }}
             mode: 0644
         links:
           - target: /opt/extensions/kubernetes/kubernetes.raw

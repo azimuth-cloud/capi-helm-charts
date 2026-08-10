@@ -24,7 +24,19 @@ fi
 
 # If not, download the image and upload it to Glance
 IMAGE_FNAME="${IMAGE_NAME}.${IMAGE_DISK_FORMAT:-qcow2}"
-curl -Lo "$IMAGE_FNAME" --progress-bar "$IMAGE_URL"
+
+# Handle bz2 images.
+DOWNLOAD_FNAME="$IMAGE_FNAME"
+if [[ "$IMAGE_URL" == *.bz2 ]]; then
+    DOWNLOAD_FNAME="${IMAGE_FNAME}.bz2"
+fi
+
+curl -Lo "$DOWNLOAD_FNAME" --progress-bar "$IMAGE_URL"
+
+if [[ "$DOWNLOAD_FNAME" == *.bz2 ]]; then
+    bunzip2 -f "$DOWNLOAD_FNAME"
+fi
+
 IMAGE_ID="$(
   openstack image create \
     --progress \

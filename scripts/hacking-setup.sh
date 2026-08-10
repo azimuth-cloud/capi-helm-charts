@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 DEPENDENCIES_PATH="$( dirname -- "$( readlink -f -- "$0"; )"; )/../dependencies.json"
 
 echo "Retrieving dependencies from $DEPENDENCIES_PATH"
@@ -10,6 +12,7 @@ cluster_api_janitor_openstack="$(jq -r '.["cluster-api-janitor-openstack"]' "$DE
 cluster_api_provider_openstack="$(jq -r '.["cluster-api-provider-openstack"]' "$DEPENDENCIES_PATH")"
 cert_manager="$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")"
 helm="$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")"
+openstack_resource_controller="$(jq -r '.["openstack-resource-controller"]' "$DEPENDENCIES_PATH")"
 sonobuoy="$(jq -r '.["sonobuoy"]' "$DEPENDENCIES_PATH")"
 
 helm upgrade cert-manager cert-manager \
@@ -30,12 +33,21 @@ if kubectl get provider -n capi-system cluster-api; then
   capi_function="upgrade apply"
 fi
 
+# Using ignition is required for flatcar-sysext
+export EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION=true
+
 ./clusterctl ${capi_function} \
   --core cluster-api:${cluster_api} \
   --control-plane kubeadm:${cluster_api} \
   --bootstrap kubeadm:${cluster_api} \
   --infrastructure openstack:${cluster_api_provider_openstack} \
   --wait-providers
+
+# CAPO required orc crds.
+orc_url="https://github.com/k-orc/openstack-resource-controller/releases/download/${openstack_resource_controller}/install.yaml"
+kubectl apply --server-side -f "${orc_url}" || kubectl apply --server-side --force-conflicts -f "${orc_url}"
+kubectl rollout restart deployment/capo-controller-manager -n capo-system
+kubectl rollout status deployment/capo-controller-manager -n capo-system --timeout=5m
 
 helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
   --repo https://azimuth-cloud.github.io/cluster-api-addon-provider \
@@ -54,4 +66,3 @@ helm upgrade cluster-api-janitor-openstack cluster-api-janitor-openstack \
   --install \
   --wait \
   --timeout 10m
-

@@ -895,15 +895,21 @@ templated manifests should match snapshot:
                 files:
                   - path: /opt/extensions/kubernetes/kubernetes.raw
                     contents:
-                      source: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
-                      verification:
-                        hash: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      remote:
+                        url: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                        verification:
+                          hash:
+                            function: sha512
+                            sum: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     mode: 0644
                   - path: /opt/extensions/containerd/containerd.raw
                     contents:
-                      source: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
-                      verification:
-                        hash: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                      remote:
+                        url: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                        verification:
+                          hash:
+                            function: sha512
+                            sum: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     mode: 0644
                 links:
                   - target: /opt/extensions/kubernetes/kubernetes.raw
@@ -1048,7 +1054,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 171e6028c79e06904c235c7204b03c3add48ad4a379c5f70c943d956f0934324
+        capi.stackhpc.com/template-checksum: 5c56b7d5eb56b38adbe439d0590ed33e1c07ad94c005ac2dc483bfdc2b16b3a9
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1057,7 +1063,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-171e6028
+      name: RELEASE-NAME-group-1-5c56b7d5
     spec:
       template:
         spec:
@@ -1125,15 +1131,21 @@ templated manifests should match snapshot:
                   files:
                     - path: /opt/extensions/kubernetes/kubernetes.raw
                       contents:
-                        source: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
-                        verification:
-                          hash: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        remote:
+                          url: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                          verification:
+                            hash:
+                              function: sha512
+                              sum: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       mode: 0644
                     - path: /opt/extensions/containerd/containerd.raw
                       contents:
-                        source: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
-                        verification:
-                          hash: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                        remote:
+                          url: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                          verification:
+                            hash:
+                              function: sha512
+                              sum: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                       mode: 0644
                   links:
                     - target: /opt/extensions/kubernetes/kubernetes.raw
@@ -1215,7 +1227,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-171e6028
+              name: RELEASE-NAME-group-1-5c56b7d5
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
