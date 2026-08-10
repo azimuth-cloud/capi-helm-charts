@@ -1,0 +1,35 @@
+{{- if .Values.falco.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "falco") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "falco") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  overrides: |
+    {{- toYaml .Values.falco.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "falco") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "falco") | nindent 4 }}
+  annotations:
+    # Tell Argo to ignore the non-controller owner references for this object
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true"
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart:
+    repo: {{ .Values.falco.chart.repo }}
+    name: {{ .Values.falco.chart.name }}
+    version: {{ default .Chart.Version .Values.falco.chart.version }}
+  targetNamespace: {{ .Values.falco.release.namespace }}
+  releaseName: falco
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "falco") }}-config
+        key: overrides
+{{- end }}

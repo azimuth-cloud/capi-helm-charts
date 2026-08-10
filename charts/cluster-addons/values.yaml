@@ -207,6 +207,90 @@ etcdDefrag:
     namespace: kube-system
     values: {}
 
+falco:
+  enabled: false
+  chart:
+    repo: https://falcosecurity.github.io/charts
+    name: falco
+    version: 4.21.3
+  release:
+    namespace: falco
+    values:
+      tty: true
+      falco:
+        rules_files:
+        - /etc/falco/falco_rules.yaml
+        - /etc/falco/falco_rules.local.yaml
+        - /etc/falco/rules.d
+        - /etc/falco/falco-incubating_rules.yaml
+      falcoctl:
+        config:
+          artifact:
+            install:
+              rulesfilesDir: /etc/falco
+              refs:
+              - falco-rules:3
+              - falco-incubating-rules:4
+            follow:
+              rulesfilesDir: /etc/falco
+              refs:
+              - falco-rules:3
+              - falco-incubating-rules:4
+      falcosidekick:
+        enabled: true
+        webui:
+          enabled: true
+
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+      - effect: NoSchedule
+        key: feature.node.kubernetes.io/gpu-dedicated
+      customRules:
+        custom-rules.yaml: |-
+          - macro: container_started
+            condition: >
+              ((evt.type = container or
+              (spawned_process and proc.vpid=1)) and
+              container.image.repository != incomplete)
+          - list: trusted_namespaces
+            items: [capi-addon-system,capi-janitor-system,capi-kubeadm-bootstrap-system,capi-kubeadm-control-plane-system,capi-operator-system,capi-self,capi-system,capo-system,cert-manager,flux-system,kube-node-lease,kube-public,kube-system,node-problem-detector,openstack-system,sealed-secrets-system,intel]
+          - macro: in_trusted_namespace
+            condition: (k8s.ns.name in (trusted_namespaces))
+
+          - rule: Contact K8S API Server From Container # generates a lot of noise, but could be worth having for some namespaces
+            enabled: false
+            override:
+              enabled: replace
+
+          - rule: Container Run as Root User # taken from sandbox rules minus exclusions (can add back in later) + higher priority
+            desc: > 
+              Container detected running as the root user. This should be taken into account especially when policies disallow containers from running with 
+              root user privileges. Note that a root user in containers doesn't inherently possess extensive power, as modern container environments define 
+              privileges through Linux capabilities. To learn more, check out the rule "Launch Privileged Container".
+            condition: > 
+              spawned_process 
+              and container 
+              and proc.vpid=1 
+              and user.uid=0 
+              and not in_trusted_namespace
+            output: Container launched with root user privilege (evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty exe_flags=%evt.arg.flags %container.info)
+            priority: CRITICAL
+            tags: [maturity_sandbox, container, process, users, mitre_execution, T1610]
+
+          - rule: Privileged Container Started # version in incubating rules seems to trust arbitrary images
+            desc: > 
+              Detect the initial process initiation within a privileged container. 
+            condition: >
+              container_started
+              and container
+              and container.privileged=true
+              and not in_trusted_namespace
+            output: Privileged container started (evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty %container.info)
+            priority: CRITICAL
+
 # Settings for the metrics server
 # https://github.com/kubernetes-sigs/metrics-server#helm-chart
 metricsServer:
