@@ -8,8 +8,9 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . 
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" -}}
 {{- $ctx := index . 0 }}
 {{- $osDistro := index . 1 }}
-{{- $kubeProxyConfigurationPath := eq $osDistro "flatcar" | ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" }}
-{{- $kubeadmPath := eq $osDistro "flatcar" | ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" }}
+{{- $isFlatcar := or (eq $osDistro "flatcar") (eq $osDistro "flatcar-sysext") }}
+{{- $kubeProxyConfigurationPath := $isFlatcar | ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" }}
+{{- $kubeadmPath := $isFlatcar | ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" }}
 {{- with $ctx.kubeProxyConfiguration }}
 files:
   - path: {{ $kubeProxyConfigurationPath }}

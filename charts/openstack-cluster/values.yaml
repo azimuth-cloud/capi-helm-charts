@@ -232,10 +232,10 @@ apiServer:
     #     namespaces:
     #       - kube-system
 
-# Set osDistro used. ubuntu, flatcar, etc.
+# Set osDistro used. ubuntu, flatcar, flatcar-sysext, etc.
 osDistro: ubuntu
 
-# Flatcar Linux sysext configuration (only used when osDistro: flatcar)
+# Flatcar Linux sysext configuration (only used when osDistro: flatcar-sysext)
 flatcar:
   # S3 public URL for the Kubernetes sysext .raw file
   sysextKubernetesUrl: ""

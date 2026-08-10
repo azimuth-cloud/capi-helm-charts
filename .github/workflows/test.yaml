@@ -456,15 +456,15 @@ jobs:
           process-id: ${{ github.repository }}/${{ github.run_id }}/${{ github.job }}
         if: ${{ vars.TARGET_CLOUD == 'arcus' && always() }}
 
-  # This job tests a basic Flatcar Linux deployment (Ignition + sysexts)
+  # This job tests a Flatcar Linux deployment using systemd-sysext (Ignition + sysexts)
   # Requires these repository variables to be configured:
-  #   FLATCAR_IMAGE_ID          — Glance UUID of the flatcar-stable base image
-  #   FLATCAR_SYSEXT_REGISTRY   — Harbor hostname serving flatcar sysexts (e.g. harbor.example.com)
-  #   FLATCAR_KUBE_VERSION      — Kubernetes version to test (e.g. 1.35.6)
-  #   FLATCAR_KUBE_DIGEST       — Blob digest for the kubernetes sysext (sha256:...)
-  #   FLATCAR_CONTAINERD_VERSION — containerd sysext version (e.g. 1.7.27)
-  #   FLATCAR_CONTAINERD_DIGEST  — Blob digest for the containerd sysext (sha256:...)
-  flatcar:
+  #   FLATCAR_IMAGE_ID                    — Glance UUID of the flatcar-stable base image
+  #   FLATCAR_KUBE_VERSION                — Kubernetes version to test (e.g. 1.35.6)
+  #   FLATCAR_SYSEXT_KUBERNETES_URL       — S3 public URL for the Kubernetes sysext .raw file
+  #   FLATCAR_SYSEXT_KUBERNETES_CHECKSUM  — SHA256 checksum of the Kubernetes sysext (sha256-...)
+  #   FLATCAR_SYSEXT_CONTAINERD_URL       — S3 public URL for the containerd sysext .raw file
+  #   FLATCAR_SYSEXT_CONTAINERD_CHECKSUM  — SHA256 checksum of the containerd sysext (sha256-...)
+  flatcar-sysext:
     runs-on: ubuntu-latest
     if: ${{ inputs.tests-full && vars.FLATCAR_IMAGE_ID != '' }}
     steps:
@@ -484,16 +484,15 @@ jobs:
         env:
           OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
-      - name: Write Flatcar override values
+      - name: Write Flatcar sysext override values
         run: |-
           cat > /tmp/flatcar-overrides.yaml <<'EOF'
-          osDistro: flatcar
+          osDistro: flatcar-sysext
           flatcar:
-            sysextRegistry: "${{ vars.FLATCAR_SYSEXT_REGISTRY }}"
-            sysextKubernetesTag: "kubernetes-v${{ vars.FLATCAR_KUBE_VERSION }}-x86-64"
-            sysextKubernetesDigest: "${{ vars.FLATCAR_KUBE_DIGEST }}"
-            sysextContainerdTag: "containerd-${{ vars.FLATCAR_CONTAINERD_VERSION }}-x86-64"
-            sysextContainerdDigest: "${{ vars.FLATCAR_CONTAINERD_DIGEST }}"
+            sysextKubernetesUrl: "${{ vars.FLATCAR_SYSEXT_KUBERNETES_URL }}"
+            sysextKubernetesChecksum: "${{ vars.FLATCAR_SYSEXT_KUBERNETES_CHECKSUM }}"
+            sysextContainerdUrl: "${{ vars.FLATCAR_SYSEXT_CONTAINERD_URL }}"
+            sysextContainerdChecksum: "${{ vars.FLATCAR_SYSEXT_CONTAINERD_CHECKSUM }}"
           EOF
 
       - name: Acquire S3 lock
@@ -508,7 +507,7 @@ jobs:
         timeout-minutes: 180
         if: ${{ vars.TARGET_CLOUD == 'arcus' }}
 
-      - name: Test Flatcar deployment
+      - name: Test Flatcar sysext deployment
         uses: ./.github/actions/upgrade-and-test
         with:
           name: ci-${{ github.run_id }}-${{ github.job }}
@@ -520,7 +519,7 @@ jobs:
           overrides-path: /tmp/flatcar-overrides.yaml
           sonobuoy-mode: quick
 
-      - name: Delete Flatcar deployment
+      - name: Delete Flatcar sysext deployment
         run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
         if: ${{ always() }}
 

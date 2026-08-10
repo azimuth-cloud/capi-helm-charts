@@ -891,8 +891,38 @@ templated manifests should match snapshot:
         ignition:
           containerLinuxConfig:
             additionalConfig: |-
+              storage:
+                files:
+                  - path: /opt/extensions/kubernetes/kubernetes.raw
+                    contents:
+                      source: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                      verification:
+                        hash: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    mode: 0644
+                  - path: /opt/extensions/containerd/containerd.raw
+                    contents:
+                      source: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                      verification:
+                        hash: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                    mode: 0644
+                links:
+                  - target: /opt/extensions/kubernetes/kubernetes.raw
+                    path: /etc/extensions/kubernetes.raw
+                    hard: false
+                  - target: /opt/extensions/containerd/containerd.raw
+                    path: /etc/extensions/containerd.raw
+                    hard: false
               systemd:
                 units:
+                # Disabling auto-update
+                - name: update-engine.service
+                  mask: true
+                - name: locksmithd.service
+                  mask: true
+                - name: systemd-sysupdate.timer
+                  enabled: false
+
+                # Kubernetes-focused units
                 - name: coreos-metadata-sshkeys@.service
                   enabled: true
                 - name: kubeadm.service
@@ -909,11 +939,13 @@ templated manifests should match snapshot:
           nodeRegistration:
             kubeletExtraArgs:
               cloud-provider: external
+              provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
             name: ${COREOS_OPENSTACK_HOSTNAME}
         joinConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
               cloud-provider: external
+              provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
             name: ${COREOS_OPENSTACK_HOSTNAME}
         preKubeadmCommands:
           - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
@@ -944,7 +976,7 @@ templated manifests should match snapshot:
         rollingUpdate:
           maxSurge: 1
         type: RollingUpdate
-      version: v1.36.2
+      version: v1.29.2
   30: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
@@ -1016,7 +1048,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 5a2d39baada2bd0ebea5eb7dca074b32bf6479ed5aa53922214d98f9aae91840
+        capi.stackhpc.com/template-checksum: 171e6028c79e06904c235c7204b03c3add48ad4a379c5f70c943d956f0934324
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1025,7 +1057,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-5a2d39ba
+      name: RELEASE-NAME-group-1-171e6028
     spec:
       template:
         spec:
@@ -1089,8 +1121,38 @@ templated manifests should match snapshot:
           ignition:
             containerLinuxConfig:
               additionalConfig: |-
+                storage:
+                  files:
+                    - path: /opt/extensions/kubernetes/kubernetes.raw
+                      contents:
+                        source: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                        verification:
+                          hash: "sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      mode: 0644
+                    - path: /opt/extensions/containerd/containerd.raw
+                      contents:
+                        source: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                        verification:
+                          hash: "sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                      mode: 0644
+                  links:
+                    - target: /opt/extensions/kubernetes/kubernetes.raw
+                      path: /etc/extensions/kubernetes.raw
+                      hard: false
+                    - target: /opt/extensions/containerd/containerd.raw
+                      path: /etc/extensions/containerd.raw
+                      hard: false
                 systemd:
                   units:
+                  # Disabling auto-update
+                  - name: update-engine.service
+                    mask: true
+                  - name: locksmithd.service
+                    mask: true
+                  - name: systemd-sysupdate.timer
+                    enabled: false
+
+                  # Kubernetes-focused units
                   - name: coreos-metadata-sshkeys@.service
                     enabled: true
                   - name: kubeadm.service
@@ -1108,6 +1170,7 @@ templated manifests should match snapshot:
               kubeletExtraArgs:
                 cloud-provider: external
                 node-labels: capi.stackhpc.com/node-group=group-1
+                provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
               name: ${COREOS_OPENSTACK_HOSTNAME}
           preKubeadmCommands:
             - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
@@ -1152,7 +1215,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-5a2d39ba
+              name: RELEASE-NAME-group-1-171e6028
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -1161,7 +1224,7 @@ templated manifests should match snapshot:
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
-          version: v1.36.2
+          version: v1.29.2
   35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
