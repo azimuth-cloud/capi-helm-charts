@@ -627,12 +627,28 @@ See [DEBUGGING.md](./DEBUGGING.md).
 
 ### Flatcar support
 
-To deploy clusters which use Ignition such as Flatcar, you will need to override the following
-setting in your local `values.yaml`:
+To deploy clusters which use Ignition such as Flatcar, you will need to override the `osDistro`
+setting in your local `values.yaml`. Both variants use
+[systemd-sysext](https://www.freedesktop.org/software/systemd/man/latest/systemd-sysext.html) to
+merge the Kubernetes and containerd extension images into `/usr` on every boot.
 
 ```yaml
 osDistro: flatcar
 ```
+Use this when the `.raw` sysext images for Kubernetes and containerd are already baked into the
+machine image at build time (e.g. a custom image produced by image-builder).
+
+```yaml
+osDistro: flatcar-sysext
+flatcar:
+  sysextKubernetesUrl: "https://.../kubernetes-vX.Y.Z-x86-64.raw"
+  sysextKubernetesChecksum: "sha256-..."
+  sysextContainerdUrl: "https://.../containerd-X.Y.Z-x86-64.raw"
+  sysextContainerdChecksum: "sha256-..."
+```
+Use this with a generic `flatcar-stable` image: Ignition fetches the sysext images
+during first-boot provisioning and writes them under `/opt/extensions/`.
+systemd-sysext then merges them on every boot exactly as it would a baked-in image.
 
 ### Keystone Authentication Webhook
 

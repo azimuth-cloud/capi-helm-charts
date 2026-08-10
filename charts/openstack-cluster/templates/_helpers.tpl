@@ -286,7 +286,7 @@ files:
     owner: root:root
     permissions: "0644"
 {{- end }}
-{{- if ne .Values.osDistro "flatcar" }}
+{{- if and (ne .Values.osDistro "flatcar") (ne .Values.osDistro "flatcar-sysext") }}
 preKubeadmCommands:
   - |
       /usr/bin/bash -s <<EOF
@@ -305,7 +305,7 @@ Produces the kubeadmConfigSpec required to configure additional trusted CAs for 
 e.g. for private registries.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.trustedCAs" -}}
-{{- if ne .Values.osDistro "flatcar" }}
+{{- if and (ne .Values.osDistro "flatcar") (ne .Values.osDistro "flatcar-sysext") }}
 {{- with .Values.trustedCAs }}
 files:
   {{- range $name, $certificate := . }}
@@ -325,7 +325,7 @@ preKubeadmCommands:
 Produces the kubeadmConfigSpec required to install additional packages.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.additionalPackages" -}}
-{{- if ne .Values.osDistro "flatcar" }}
+{{- if and (ne .Values.osDistro "flatcar") (ne .Values.osDistro "flatcar-sysext") }}
 {{- with .Values.additionalPackages }}
 preKubeadmCommands:
   - apt update -y
@@ -352,13 +352,49 @@ Produces the spec for a KubeadmConfig object.
 
 {{/*
 Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
+${COREOS_OPENSTACK_HOSTNAME} is set by coreos-metadata (EnvironmentFile=/run/metadata/flatcar),
+exported in preKubeadmCommands, then substituted into /etc/kubeadm.yml by envsubst before kubeadm runs.
+*/}}
+{{- define "openstack-cluster.flatcarKubeadmConfigSpec" -}}
+initConfiguration:
+  nodeRegistration:
+    name: ${COREOS_OPENSTACK_HOSTNAME}
+joinConfiguration:
+  nodeRegistration:
+    name: ${COREOS_OPENSTACK_HOSTNAME}
+preKubeadmCommands:
+  - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+  - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
+  - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
+format: ignition
+ignition:
+  containerLinuxConfig:
+    additionalConfig: |
+      systemd:
+        units:
+        - name: coreos-metadata-sshkeys@.service
+          enabled: true
+        - name: kubeadm.service
+          enabled: true
+          dropins:
+          - name: 10-flatcar.conf
+            contents: |
+              [Unit]
+              Requires=containerd.service coreos-metadata.service
+              After=containerd.service coreos-metadata.service
+              [Service]
+              EnvironmentFile=/run/metadata/flatcar
+{{- end }}
+
+{{/*
+Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
 Ignition downloads the sysexts declared in storage.files synchronously before any systemd service starts,
 so the extensions are already in place when systemd-sysext activates them during normal boot.
 ${COREOS_OPENSTACK_HOSTNAME} and ${COREOS_OPENSTACK_INSTANCE_UUID} are set by coreos-metadata
 (EnvironmentFile=/run/metadata/flatcar), exported in preKubeadmCommands, then substituted into
 /etc/kubeadm.yml by envsubst before kubeadm runs.
 */}}
-{{- define "openstack-cluster.flatcarKubeadmConfigSpec" -}}
+{{- define "openstack-cluster.flatcarSysextKubeadmConfigSpec" -}}
 initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
@@ -383,15 +419,15 @@ ignition:
         files:
           - path: /opt/extensions/kubernetes/kubernetes.raw
             contents:
-              source: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesUrl }}"
+              source: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesUrl }}"
               verification:
-                hash: "{{ required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar" .Values.flatcar.sysextKubernetesChecksum }}"
+                hash: "{{ required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesChecksum }}"
             mode: 0644
           - path: /opt/extensions/containerd/containerd.raw
             contents:
-              source: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdUrl }}"
+              source: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdUrl }}"
               verification:
-                hash: "{{ required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar" .Values.flatcar.sysextContainerdChecksum }}"
+                hash: "{{ required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdChecksum }}"
             mode: 0644
         links:
           - target: /opt/extensions/kubernetes/kubernetes.raw
@@ -430,6 +466,8 @@ ignition:
 {{- $osDistro := $ctx.Values.osDistro }}
 {{- if eq $osDistro "flatcar" }}
 {{- include "openstack-cluster.flatcarKubeadmConfigSpec" $ctx }}
+{{- else if eq $osDistro "flatcar-sysext" }}
+{{- include "openstack-cluster.flatcarSysextKubeadmConfigSpec" $ctx }}
 {{- end }}
 {{- end }}
 
@@ -464,7 +502,7 @@ webhooks and policies for audit logging can be added here.
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
-Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
+Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging)
 in future
 */}}
 {{- end }}
