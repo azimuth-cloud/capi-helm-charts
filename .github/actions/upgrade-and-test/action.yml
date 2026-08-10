@@ -86,7 +86,7 @@ runs:
                                 --no-headers=true |\
                                  grep ^clusters |\
                                  awk '{print $3}')
-        
+
         if [[ "$cluster_api_version" =~ v1beta1$ ]]; then
           echo "cluster-ready-condition-name=ready" >> $GITHUB_OUTPUT
         else
@@ -216,3 +216,23 @@ runs:
       env:
         KUBECONFIG: ./kubeconfig
       if: ${{ always() }}
+
+    - name: Run etcd-defrag job
+      shell: bash
+      run: |-
+        kubectl create job -n kube-system \
+          --from=cronjob/etcd-defrag etcd-defrag &&
+        kubectl wait job/etcd-defrag \
+          -n kube-system \
+          --for=condition=complete \
+          --timeout 3m
+      env:
+        KUBECONFIG: ./kubeconfig
+
+    - name: Delete etcd-defrag job
+      shell: bash
+      run: |-
+        kubectl delete job -n kube-system \
+          etcd-defrag
+      env:
+        KUBECONFIG: ./kubeconfig
