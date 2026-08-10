@@ -316,6 +316,26 @@ managed by FluxCD resources on the CAPI management cluster. Note that if XPU mon
 a Flux controller must be installed on the management cluster. See the upstream 
 [installation docs.](https://fluxcd.io/flux/installation/)
 
+## AMD GPU Operator
+
+Deploys the AMD GPU Operator for managing AMD GPU allocation for pods. Assumes that it is detecting in-box
+drivers, such as those
+[installed by the Kubernetes image builder](https://github.com/kubernetes-sigs/image-builder/blob/main/images/capi/ansible/roles/gpu/tasks/amd.yml).
+To configure to build and use out-of-tree drivers, the `.Values.amdGPUOperator.release.values.deviceConfig`
+override will need to be reconfigured in line with the
+[upstream docs,](https://instinct.docs.amd.com/projects/gpu-operator/en/latest/installation/kubernetes-helm.html#install-out-of-tree-amd-gpu-drivers-with-operator)
+as well as set `.Values.amdGPUOperator.release.values.kmm.enable` and
+`.Values.amdGPUOperator.release.values.kmm.watch` to `true`.
+
+### VGPU support
+
+If using VM worker nodes, the
+[overrides given in the upstream docs](https://instinct.docs.amd.com/projects/gpu-operator/en/latest/usage.html#typical-deployment-scenarios)
+to select virtual-function devices don't work with the `capi-addon-provider` due to `null` values being
+treated as their upstream defaults. Instead set `.Values.amdGPUOperator.vgpuSelector.enabled: true`, which works around this issue by deploying a
+`NodeFeatureRule` to set `feature.node.kubernetes.io/amd-gpu: "false"` if VGPUs are detected and explicitly
+sets `deviceConfig.spec.selector` to look for this `false` value.
+
 ## Custom addons
 
 This chart is able to manage the deployment of custom addons.

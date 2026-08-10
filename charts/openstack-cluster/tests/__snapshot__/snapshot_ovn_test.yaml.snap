@@ -443,7 +443,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.0
+        version: 2.36.1
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
@@ -935,7 +935,7 @@ templated manifests should match snapshot:
         infrastructureRef:
           apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
           kind: OpenStackMachineTemplate
-          name: RELEASE-NAME-control-plane-e39a716c
+          name: RELEASE-NAME-control-plane-d6645ee1
           namespace: NAMESPACE
         metadata:
           labels:
@@ -955,7 +955,7 @@ templated manifests should match snapshot:
         rollingUpdate:
           maxSurge: 1
         type: RollingUpdate
-      version: v1.29.2
+      version: v1.36.2
   30: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
@@ -987,7 +987,7 @@ templated manifests should match snapshot:
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: e39a716cdf1bf13ae070b43ebb6355fe88befcac4f72eedfcc3cfff10f0eabab
+        capi.stackhpc.com/template-checksum: d6645ee1c4875398411a95c2f580dd608bfe2c6083f619f0a596443ca4150d65
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -995,7 +995,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/infrastructure-provider: openstack
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-control-plane-e39a716c
+      name: RELEASE-NAME-control-plane-d6645ee1
     spec:
       template:
         spec:
@@ -1005,7 +1005,7 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-jammy-kube-v1.29.2
+              name: ubuntu-noble-kube-v1.36.2
   32: |
     apiVersion: v1
     kind: Secret
@@ -1336,11 +1336,11 @@ templated manifests should match snapshot:
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-1-974c4cfd
+            name: RELEASE-NAME-group-1-0ba6595d
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
-          version: v1.29.2
+          version: v1.36.2
   37: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
@@ -1386,11 +1386,11 @@ templated manifests should match snapshot:
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-2-26685203
+            name: RELEASE-NAME-group-2-473e2f89
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
-          version: v1.29.2
+          version: v1.36.2
   38: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
@@ -1436,11 +1436,11 @@ templated manifests should match snapshot:
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-3-26685203
+            name: RELEASE-NAME-group-3-473e2f89
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
-          version: v1.29.2
+          version: v1.36.2
   39: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
@@ -1530,7 +1530,7 @@ templated manifests should match snapshot:
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 974c4cfd217a218b8577c9b1362980b997329854003b0b8d126a018fb0429b61
+        capi.stackhpc.com/template-checksum: 0ba6595d95357caf9f03dfb03406ad918224b66b0b85248e59c6cb920282321d
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1539,7 +1539,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-974c4cfd
+      name: RELEASE-NAME-group-1-0ba6595d
     spec:
       template:
         spec:
@@ -1549,13 +1549,13 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-jammy-kube-v1.29.2
+              name: ubuntu-noble-kube-v1.36.2
   43: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 2668520359b6b0cda12be8a8a3bfeafa8e9d6866f2f3122b08e9755eb30c0d1c
+        capi.stackhpc.com/template-checksum: 473e2f89cf21cdf77304a331826ed94ef19f451ba5e06a05efd4c1b4fcb87660
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1564,7 +1564,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-2
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-2-26685203
+      name: RELEASE-NAME-group-2-473e2f89
     spec:
       template:
         spec:
@@ -1574,13 +1574,13 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-jammy-kube-v1.29.2
+              name: ubuntu-noble-kube-v1.36.2
   44: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 2668520359b6b0cda12be8a8a3bfeafa8e9d6866f2f3122b08e9755eb30c0d1c
+        capi.stackhpc.com/template-checksum: 473e2f89cf21cdf77304a331826ed94ef19f451ba5e06a05efd4c1b4fcb87660
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1589,7 +1589,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-3
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-3-26685203
+      name: RELEASE-NAME-group-3-473e2f89
     spec:
       template:
         spec:
@@ -1599,7 +1599,7 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-jammy-kube-v1.29.2
+              name: ubuntu-noble-kube-v1.36.2
   45: |
     apiVersion: v1
     kind: Secret
