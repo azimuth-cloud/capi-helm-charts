@@ -642,13 +642,16 @@ machine image at build time (e.g. a custom image produced by image-builder).
 osDistro: flatcar-sysext
 flatcar:
   sysextKubernetesUrl: "https://.../kubernetes-vX.Y.Z-x86-64.raw"
-  sysextKubernetesChecksum: "sha256-..."
+  sysextKubernetesChecksum: "sha512-..."
   sysextContainerdUrl: "https://.../containerd-X.Y.Z-x86-64.raw"
-  sysextContainerdChecksum: "sha256-..."
+  sysextContainerdChecksum: "sha512-..."
 ```
 Use this with a generic `flatcar-stable` image: Ignition fetches the sysext images
 during first-boot provisioning and writes them under `/opt/extensions/`.
 systemd-sysext then merges them on every boot exactly as it would a baked-in image.
+
+NOTE: Only sha512 checksums are accepted by ignition.
+Your checksum must be in the form `sha512-....`.
 
 ### Keystone Authentication Webhook
 

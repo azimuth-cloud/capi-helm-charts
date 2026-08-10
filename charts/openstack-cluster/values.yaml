@@ -239,11 +239,13 @@ osDistro: ubuntu
 flatcar:
   # S3 public URL for the Kubernetes sysext .raw file
   sysextKubernetesUrl: ""
-  # SHA256 checksum of the Kubernetes sysext in Ignition format (sha256-...)
+  # SHA512 checksum of the Kubernetes sysext, e.g. "sha512-<hex>".
+  # Only sha512 is supported.
   sysextKubernetesChecksum: ""
   # S3 public URL for the containerd sysext .raw file
   sysextContainerdUrl: ""
-  # SHA256 checksum of the containerd sysext in Ignition format (sha256-...)
+  # SHA512 checksum of the containerd sysext, e.g. "sha512-<hex>".
+  # Only sha512 is supported.
   sysextContainerdChecksum: ""
 #
 # API server authentication/authorization webhook. Set this to
