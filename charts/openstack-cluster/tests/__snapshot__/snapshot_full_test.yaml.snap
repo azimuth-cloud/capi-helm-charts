@@ -42,7 +42,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator-charts
         repo: https://rocm.github.io/gpu-operator
-        version: v1.5.0
+        version: v1.5.1
       clusterName: RELEASE-NAME
       releaseName: amd-gpu-operator
       targetNamespace: kube-amd-gpu
