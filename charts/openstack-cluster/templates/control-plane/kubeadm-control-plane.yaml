@@ -204,6 +204,7 @@ spec:
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcdEncryption" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.admissionConfigFile" . | fromYaml)
+          (include "openstack-cluster.cloudProvider" (list . "initConfiguration" "joinConfiguration") | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
           (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
           (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)

@@ -28,6 +28,10 @@ machineSSHKeyName:
 # Global metadata items to add to each machine
 machineMetadata: {}
 
+# The value for the kubelet --cloud-provider flag on cluster nodes
+# Defaults to "external" so OCCM initialises nodes; set to "" to omit the flag
+kubeletCloudProvider: external
+
 # The prefix used for project labels and annotations
 projectPrefix: capi.stackhpc.com
 
@@ -359,8 +363,6 @@ controlPlane:
     initConfiguration:
       nodeRegistration:
         name: '{{ local_hostname }}'
-        kubeletExtraArgs:
-          cloud-provider: external
     # As well as enabling an external cloud provider, we set the bind addresses for the
     # controller-manager, scheduler and kube-proxy to 0.0.0.0 so that Prometheus can reach
     # them to collect metrics
@@ -375,8 +377,6 @@ controlPlane:
     joinConfiguration:
       nodeRegistration:
         name: '{{ local_hostname }}'
-        kubeletExtraArgs:
-          cloud-provider: external
     kubeProxyConfiguration:
       metricsBindAddress: 0.0.0.0:10249
   # The machine health check for auto-healing of the control plane
@@ -476,8 +476,6 @@ nodeGroupDefaults:
     joinConfiguration:
       nodeRegistration:
         name: '{{ local_hostname }}'
-        kubeletExtraArgs:
-          cloud-provider: external
   # The default machine health check for worker nodes
   # See https://cluster-api.sigs.k8s.io/tasks/healthcheck.html
   # Note that maxUnhealthy or unhealthRange are evaluated per node group
