@@ -23,7 +23,7 @@ if [ -n "$IMAGE_ID" ]; then
 fi
 
 # If not, download the image and upload it to Glance
-IMAGE_FNAME="${IMAGE_NAME}.${IMAGE_DISK_FORMAT:-qcow2}"
+IMAGE_FNAME="${IMAGE_NAME}-${IMAGE_ARCH:x86_64}.${IMAGE_DISK_FORMAT:-qcow2}"
 
 # Handle bz2 images.
 DOWNLOAD_FNAME="$IMAGE_FNAME"
@@ -46,6 +46,7 @@ IMAGE_ID="$(
     --file "$IMAGE_FNAME" \
     --property hw_scsi_model=virtio-scsi \
     --property hw_disk_bus=scsi \
+    --property hw_architecture="${IMAGE_ARCH:x86_64}" \
     --format value \
     --column id \
     "$IMAGE_NAME"
