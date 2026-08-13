@@ -2,7 +2,10 @@ osDistro: flatcar-sysext
 machineImage: flatcar-stable-3975-2-0
 
 flatcar:
-  sysextKubernetesUrl: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
-  sysextKubernetesChecksum: "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  sysextContainerdUrl: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
-  sysextContainerdChecksum: "sha512-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  sysexts:
+    kubernetes:
+      url: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+      checksum: "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    containerd:
+      url: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+      checksum: "sha512-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
