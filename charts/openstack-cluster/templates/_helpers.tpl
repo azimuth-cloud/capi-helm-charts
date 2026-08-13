@@ -372,8 +372,10 @@ ignition:
     additionalConfig: |
       systemd:
         units:
+        {{- if .Values.machineSSHKeyName }}
         - name: coreos-metadata-sshkeys@.service
           enabled: true
+        {{- end }}
         - name: kubeadm.service
           enabled: true
           dropins:
@@ -463,8 +465,10 @@ ignition:
           enabled: false
 
         # Kubernetes-focused units
+        {{- if $ctx.Values.machineSSHKeyName }}
         - name: coreos-metadata-sshkeys@.service
           enabled: true
+        {{- end }}
         - name: kubeadm.service
           enabled: true
           dropins:
