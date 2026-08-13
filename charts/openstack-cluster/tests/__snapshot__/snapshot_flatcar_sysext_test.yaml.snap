@@ -929,8 +929,6 @@ templated manifests should match snapshot:
                   enabled: false
 
                 # Kubernetes-focused units
-                - name: coreos-metadata-sshkeys@.service
-                  enabled: true
                 - name: kubeadm.service
                   enabled: true
                   dropins:
@@ -1054,7 +1052,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 27604d06ad354681ff1e753654b6921cd4ba3a688e0b2523b930a580296b1999
+        capi.stackhpc.com/template-checksum: abc8d10e151b3076f25290a22453e75dae05cf82c1047f7e83fbf907f55ab148
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1063,7 +1061,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-27604d06
+      name: RELEASE-NAME-group-1-abc8d10e
     spec:
       template:
         spec:
@@ -1165,8 +1163,6 @@ templated manifests should match snapshot:
                     enabled: false
 
                   # Kubernetes-focused units
-                  - name: coreos-metadata-sshkeys@.service
-                    enabled: true
                   - name: kubeadm.service
                     enabled: true
                     dropins:
@@ -1227,7 +1223,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-27604d06
+              name: RELEASE-NAME-group-1-abc8d10e
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
