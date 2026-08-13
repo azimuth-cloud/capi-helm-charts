@@ -489,10 +489,13 @@ jobs:
           cat > /tmp/flatcar-overrides.yaml <<'EOF'
           osDistro: flatcar-sysext
           flatcar:
-            sysextKubernetesUrl: "${{ vars.FLATCAR_SYSEXT_KUBERNETES_URL }}"
-            sysextKubernetesChecksum: "${{ vars.FLATCAR_SYSEXT_KUBERNETES_CHECKSUM }}"
-            sysextContainerdUrl: "${{ vars.FLATCAR_SYSEXT_CONTAINERD_URL }}"
-            sysextContainerdChecksum: "${{ vars.FLATCAR_SYSEXT_CONTAINERD_CHECKSUM }}"
+            sysexts:
+              kubernetes:
+                url: "${{ vars.FLATCAR_SYSEXT_KUBERNETES_URL }}"
+                checksum: "${{ vars.FLATCAR_SYSEXT_KUBERNETES_CHECKSUM }}"
+              containerd:
+                url: "${{ vars.FLATCAR_SYSEXT_CONTAINERD_URL }}"
+                checksum: "${{ vars.FLATCAR_SYSEXT_CONTAINERD_CHECKSUM }}"
           EOF
 
       - name: Acquire S3 lock

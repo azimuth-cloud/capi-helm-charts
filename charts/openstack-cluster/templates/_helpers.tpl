@@ -410,8 +410,8 @@ NOTE: additionalConfig is parsed as Container Linux Config (CLC), not native Ign
 Use the CLC config schema which will then be parsed into ignition.
 */}}
 {{- define "openstack-cluster.flatcarSysextKubeadmConfigSpec" -}}
-{{- $kubeChecksum := include "openstack-cluster.flatcar.checksumParts" (required "flatcar.sysextKubernetesChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesChecksum) | fromYaml }}
-{{- $containerdChecksum := include "openstack-cluster.flatcar.checksumParts" (required "flatcar.sysextContainerdChecksum must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdChecksum) | fromYaml }}
+{{- $ctx := index . 0 }}
+{{- $sysexts := index . 1 }}
 initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
@@ -434,31 +434,24 @@ ignition:
     additionalConfig: |
       storage:
         files:
-          - path: /opt/extensions/kubernetes/kubernetes.raw
+        {{- range $name, $sysext := $sysexts }}
+        {{- $checksum := include "openstack-cluster.flatcar.checksumParts" (required (printf "flatcar.sysexts.%s.checksum is required when osDistro=flatcar-sysext" $name) $sysext.checksum) | fromYaml }}
+          - path: /opt/extensions/{{ $name }}/{{ $name }}.raw
             contents:
               remote:
-                url: "{{ required "flatcar.sysextKubernetesUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextKubernetesUrl }}"
+                url: "{{ required (printf "flatcar.sysexts.%s.url is required when osDistro=flatcar-sysext" $name) $sysext.url }}"
                 verification:
                   hash:
-                    function: {{ $kubeChecksum.function }}
-                    sum: {{ $kubeChecksum.sum }}
+                    function: {{ $checksum.function }}
+                    sum: {{ $checksum.sum }}
             mode: 0644
-          - path: /opt/extensions/containerd/containerd.raw
-            contents:
-              remote:
-                url: "{{ required "flatcar.sysextContainerdUrl must be set when osDistro=flatcar-sysext" .Values.flatcar.sysextContainerdUrl }}"
-                verification:
-                  hash:
-                    function: {{ $containerdChecksum.function }}
-                    sum: {{ $containerdChecksum.sum }}
-            mode: 0644
+        {{- end }}
         links:
-          - target: /opt/extensions/kubernetes/kubernetes.raw
-            path: /etc/extensions/kubernetes.raw
+        {{- range $name, $sysext := $sysexts }}
+          - target: /opt/extensions/{{ $name }}/{{ $name }}.raw
+            path: /etc/extensions/{{ $name }}.raw
             hard: false
-          - target: /opt/extensions/containerd/containerd.raw
-            path: /etc/extensions/containerd.raw
-            hard: false
+        {{- end }}
       systemd:
         units:
         # Disabling auto-update
@@ -486,11 +479,12 @@ ignition:
 
 {{- define "openstack-cluster.osDistroKubeadmConfigSpec" }}
 {{- $ctx := index . 0 }}
+{{- $sysexts := index . 1 }}
 {{- $osDistro := $ctx.Values.osDistro }}
 {{- if eq $osDistro "flatcar" }}
 {{- include "openstack-cluster.flatcarKubeadmConfigSpec" $ctx }}
 {{- else if eq $osDistro "flatcar-sysext" }}
-{{- include "openstack-cluster.flatcarSysextKubeadmConfigSpec" $ctx }}
+{{- include "openstack-cluster.flatcarSysextKubeadmConfigSpec" (list $ctx $sysexts) }}
 {{- end }}
 {{- end }}
 
