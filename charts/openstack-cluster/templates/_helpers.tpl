@@ -372,10 +372,17 @@ ignition:
     additionalConfig: |
       systemd:
         units:
-        {{- if .Values.machineSSHKeyName }}
-        - name: coreos-metadata-sshkeys@.service
+        # this service must not run if no key has been provided by openstack, it retries
+        # forever causing a mount error in the kernel log.
+        # sshkeys.service (baked into flatcar) starts this unit directly via `systemctl start`
+        # whenever it isn't already masked, regardless of enabled/disabled, so when there is
+        # no key the service must be masked.
+        - name: coreos-metadata-sshkeys@core.service
+          {{- if .Values.machineSSHKeyName }}
           enabled: true
-        {{- end }}
+          {{- else }}
+          mask: true
+          {{- end }}
         - name: kubeadm.service
           enabled: true
           dropins:
