@@ -240,6 +240,8 @@ osDistro: ubuntu
 # Ignition fetches these at first boot; systemd-sysext merges them into /usr on every boot.
 # The "kubernetes" and "containerd" sysexts are required for the cluster to start.
 flatcar:
+  # flatcar automatically logs in at the console as the core user.
+  disableAutologin: true
   sysexts: {}
     # kubernetes:
     #   # Public URL for the sysext .raw file
