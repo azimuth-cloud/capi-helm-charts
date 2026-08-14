@@ -22,6 +22,9 @@ Conditional on osDistro set to "flatcar-sysext".
 Ignition downloads the sysexts declared in storage.files synchronously before any systemd service starts,
 so the extensions are already in place when systemd-sysext activates them during normal boot.
 
+# Note that additionalConfig below is CLC and NOT butane. This is because CAPI only supports ignitionv2
+# at the moment.
+
 ${COREOS_OPENSTACK_HOSTNAME} and ${COREOS_OPENSTACK_INSTANCE_UUID} are set by coreos-metadata
 (EnvironmentFile=/run/metadata/flatcar), exported in preKubeadmCommands, then substituted into
 /etc/kubeadm.yml by envsubst before kubeadm runs.
@@ -118,4 +121,17 @@ ignition:
               After=containerd.service coreos-metadata.service
               [Service]
               EnvironmentFile=/run/metadata/flatcar
+
+        {{- if dig "disableAutologin" true ($ctx.Values.flatcar | default dict) }}
+        # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
+        # default. Disable this.
+        # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
+        - name: getty@.service
+          dropins:
+            - name: 10-autologin.conf
+              contents: |
+                [Service]
+                ExecStart=
+                ExecStart=-/sbin/agetty --noclear %I $TERM
+        {{- end }}
 {{- end }}
