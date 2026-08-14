@@ -210,6 +210,15 @@ runs:
         path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
       if: "${{ inputs.sonobuoy-upload == 'yes' }}"
 
+    - name: Fail if sonobuoy tests fail
+      shell: bash
+      run: |
+        if sonobuoy status --json | jq -e '.plugins[] | select(."result-status" != "passed")'; then
+          exit 1;
+        fi
+      env:
+        KUBECONFIG: ./kubeconfig
+
     - name: Remove sonobuoy artifacts from cluster
       shell: bash
       run: sonobuoy delete --wait --all
