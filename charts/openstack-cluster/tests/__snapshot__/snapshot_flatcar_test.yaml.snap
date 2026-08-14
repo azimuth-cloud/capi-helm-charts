@@ -893,6 +893,13 @@ templated manifests should match snapshot:
             additionalConfig: |-
               systemd:
                 units:
+                # this service must not run if no key has been provided by openstack, it retries
+                # forever causing a mount error in the kernel log.
+                # sshkeys.service (baked into flatcar) starts this unit directly via `systemctl start`
+                # whenever it isn't already masked, regardless of enabled/disabled, so when there is
+                # no key the service must be masked.
+                - name: coreos-metadata-sshkeys@core.service
+                  mask: true
                 - name: kubeadm.service
                   enabled: true
                   dropins:
@@ -1014,7 +1021,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: bef784a1d8a26486346db2bc01ebee022b2a9f831379a27bbae252790224d827
+        capi.stackhpc.com/template-checksum: 8cfdadd44326ee2750521e3a87f3cbe4a7b02fa2d4b18864b252f6547286f815
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1023,7 +1030,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-bef784a1
+      name: RELEASE-NAME-group-1-8cfdadd4
     spec:
       template:
         spec:
@@ -1089,6 +1096,13 @@ templated manifests should match snapshot:
               additionalConfig: |-
                 systemd:
                   units:
+                  # this service must not run if no key has been provided by openstack, it retries
+                  # forever causing a mount error in the kernel log.
+                  # sshkeys.service (baked into flatcar) starts this unit directly via `systemctl start`
+                  # whenever it isn't already masked, regardless of enabled/disabled, so when there is
+                  # no key the service must be masked.
+                  - name: coreos-metadata-sshkeys@core.service
+                    mask: true
                   - name: kubeadm.service
                     enabled: true
                     dropins:
@@ -1148,7 +1162,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-bef784a1
+              name: RELEASE-NAME-group-1-8cfdadd4
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
