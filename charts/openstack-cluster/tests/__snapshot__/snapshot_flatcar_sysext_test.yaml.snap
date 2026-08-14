@@ -957,6 +957,16 @@ templated manifests should match snapshot:
                       After=containerd.service coreos-metadata.service
                       [Service]
                       EnvironmentFile=/run/metadata/flatcar
+                # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
+                # default. Disable this.
+                # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
+                - name: getty@.service
+                  dropins:
+                    - name: 10-autologin.conf
+                      contents: |
+                        [Service]
+                        ExecStart=
+                        ExecStart=-/sbin/agetty --noclear %I $TERM
         initConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
@@ -1070,7 +1080,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 09a0ae4b57439aabdd316d0910cac1b88536122dce7a03b28ac57849ec6b9643
+        capi.stackhpc.com/template-checksum: fa99283ffa783bfa8755df8ee2de2f08a8c1bb568fb4a597342eff582496902c
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1079,7 +1089,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-09a0ae4b
+      name: RELEASE-NAME-group-1-fa99283f
     spec:
       template:
         spec:
@@ -1209,6 +1219,16 @@ templated manifests should match snapshot:
                         After=containerd.service coreos-metadata.service
                         [Service]
                         EnvironmentFile=/run/metadata/flatcar
+                  # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
+                  # default. Disable this.
+                  # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
+                  - name: getty@.service
+                    dropins:
+                      - name: 10-autologin.conf
+                        contents: |
+                          [Service]
+                          ExecStart=
+                          ExecStart=-/sbin/agetty --noclear %I $TERM
           joinConfiguration:
             nodeRegistration:
               kubeletExtraArgs:
@@ -1259,7 +1279,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-09a0ae4b
+              name: RELEASE-NAME-group-1-fa99283f
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
