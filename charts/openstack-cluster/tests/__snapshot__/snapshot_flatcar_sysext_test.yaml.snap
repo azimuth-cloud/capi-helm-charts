@@ -918,6 +918,17 @@ templated manifests should match snapshot:
                   - target: /opt/extensions/kubernetes/kubernetes.raw
                     path: /etc/extensions/kubernetes.raw
                     hard: false
+                  # Flatcar ships docker/containerd sysexts enabled by default
+                  # Disable this as per https://www.flatcar.org/docs/latest/sys-ext/#remove-docker-and--or-containerd-from-flatcar
+                  # So that we manage containerd outselves
+                  - path: /etc/extensions/docker-flatcar.raw
+                    target: /dev/null
+                    overwrite: true
+                    hard: false
+                  - path: /etc/extensions/containerd-flatcar.raw
+                    target: /dev/null
+                    overwrite: true
+                    hard: false
               systemd:
                 units:
                 # Disabling auto-update
@@ -1052,7 +1063,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: abc8d10e151b3076f25290a22453e75dae05cf82c1047f7e83fbf907f55ab148
+        capi.stackhpc.com/template-checksum: e0f251851270709de9bc08aabfbca5fc59e77796dcdc0d662fe9cf5b09f2e986
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1061,7 +1072,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-abc8d10e
+      name: RELEASE-NAME-group-1-e0f25185
     spec:
       template:
         spec:
@@ -1152,6 +1163,17 @@ templated manifests should match snapshot:
                     - target: /opt/extensions/kubernetes/kubernetes.raw
                       path: /etc/extensions/kubernetes.raw
                       hard: false
+                    # Flatcar ships docker/containerd sysexts enabled by default
+                    # Disable this as per https://www.flatcar.org/docs/latest/sys-ext/#remove-docker-and--or-containerd-from-flatcar
+                    # So that we manage containerd outselves
+                    - path: /etc/extensions/docker-flatcar.raw
+                      target: /dev/null
+                      overwrite: true
+                      hard: false
+                    - path: /etc/extensions/containerd-flatcar.raw
+                      target: /dev/null
+                      overwrite: true
+                      hard: false
                 systemd:
                   units:
                   # Disabling auto-update
@@ -1223,7 +1245,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-abc8d10e
+              name: RELEASE-NAME-group-1-e0f25185
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1

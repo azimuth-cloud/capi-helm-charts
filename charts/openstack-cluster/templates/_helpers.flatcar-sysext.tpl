@@ -75,6 +75,17 @@ ignition:
             path: /etc/extensions/{{ $name }}.raw
             hard: false
         {{- end }}
+          # Flatcar ships docker/containerd sysexts enabled by default
+          # Disable this as per https://www.flatcar.org/docs/latest/sys-ext/#remove-docker-and--or-containerd-from-flatcar
+          # So that we manage containerd outselves
+          - path: /etc/extensions/docker-flatcar.raw
+            target: /dev/null
+            overwrite: true
+            hard: false
+          - path: /etc/extensions/containerd-flatcar.raw
+            target: /dev/null
+            overwrite: true
+            hard: false
       systemd:
         units:
         # Disabling auto-update
