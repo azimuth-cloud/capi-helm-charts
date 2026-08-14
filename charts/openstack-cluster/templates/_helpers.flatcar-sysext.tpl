@@ -29,6 +29,12 @@ ${COREOS_OPENSTACK_HOSTNAME} and ${COREOS_OPENSTACK_INSTANCE_UUID} are set by co
 {{- define "openstack-cluster.flatcarSysextKubeadmConfigSpec" -}}
 {{- $ctx := index . 0 }}
 {{- $sysexts := index . 1 }}
+{{- if not (hasKey $sysexts "kubernetes") }}
+{{- fail "flatcar.sysexts.kubernetes is required when osDistro=flatcar-sysext - it provides the kubeadm/kubelet binaries" }}
+{{- end }}
+{{- if not (hasKey $sysexts "containerd") }}
+{{- fail "flatcar.sysexts.containerd is required when osDistro=flatcar-sysext" }}
+{{- end }}
 initConfiguration:
   nodeRegistration:
     name: ${COREOS_OPENSTACK_HOSTNAME}
