@@ -1447,15 +1447,23 @@ templated manifests should match snapshot:
         nodeStatusExporter:
           enabled: true
         toolkit:
-          # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
-          # breaks nvidia pod deployment on clusters with Harbor cache enabled.
-          # Instead make a new config file specifically for nvidia runtime config,
-          # which is parsed as an "include" in the main containerd config file.
-          #
-          # https://github.com/NVIDIA/gpu-operator/issues/301
           env:
+            # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+            # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+            # Instead make a new config file specifically for nvidia runtime config,
+            # which is parsed as an "include" in the main containerd config file.
+            #
+            # https://github.com/NVIDIA/gpu-operator/issues/301
             - name: "CONTAINERD_CONFIG"
               value: "/etc/containerd/conf.d/nvidia.toml"
+            # Default is "command,file", which tries to retrieve config by running
+            # `containerd config dump`, which outputs config migrated to the containerd client
+            # used by NVIDIA Container Toolkit and only uses the version from config.toml if
+            # this fails. This means the config drop-in generated from this can be incompatible
+            # with the containerd version in the image and crash containerd. Workaround
+            # to only use config.toml as config source. https://github.com/NVIDIA/aicr/issues/1688
+            - name: "RUNTIME_CONFIG_SOURCE"
+              value: "file"
       overrides: |
         dcgmExporter:
           serviceMonitor:
