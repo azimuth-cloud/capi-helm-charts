@@ -42,7 +42,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator-charts
         repo: https://rocm.github.io/gpu-operator
-        version: v1.5.0
+        version: v1.5.1
       clusterName: RELEASE-NAME
       releaseName: amd-gpu-operator
       targetNamespace: kube-amd-gpu
@@ -493,7 +493,7 @@ templated manifests should match snapshot:
       chart:
         name: headlamp
         repo: https://kubernetes-sigs.github.io/headlamp
-        version: 0.43.0
+        version: 0.44.0
       clusterName: RELEASE-NAME
       releaseName: headlamp
       targetNamespace: headlamp
@@ -782,7 +782,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 26.1.1
+        version: 26.4.1
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -829,7 +829,7 @@ templated manifests should match snapshot:
       chart:
         name: metrics-server
         repo: https://kubernetes-sigs.github.io/metrics-server
-        version: 3.13.0
+        version: 3.13.1
       clusterName: RELEASE-NAME
       releaseName: metrics-server
       targetNamespace: kube-system
@@ -1365,7 +1365,7 @@ templated manifests should match snapshot:
       chart:
         name: node-feature-discovery
         repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-        version: 0.18.3
+        version: 0.19.0
       clusterName: RELEASE-NAME
       releaseName: node-feature-discovery
       targetNamespace: node-feature-discovery
@@ -1447,15 +1447,23 @@ templated manifests should match snapshot:
         nodeStatusExporter:
           enabled: true
         toolkit:
-          # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
-          # breaks nvidia pod deployment on clusters with Harbor cache enabled.
-          # Instead make a new config file specifically for nvidia runtime config,
-          # which is parsed as an "include" in the main containerd config file.
-          #
-          # https://github.com/NVIDIA/gpu-operator/issues/301
           env:
+            # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+            # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+            # Instead make a new config file specifically for nvidia runtime config,
+            # which is parsed as an "include" in the main containerd config file.
+            #
+            # https://github.com/NVIDIA/gpu-operator/issues/301
             - name: "CONTAINERD_CONFIG"
               value: "/etc/containerd/conf.d/nvidia.toml"
+            # Default is "command,file", which tries to retrieve config by running
+            # `containerd config dump`, which outputs config migrated to the containerd client
+            # used by NVIDIA Container Toolkit and only uses the version from config.toml if
+            # this fails. This means the config drop-in generated from this can be incompatible
+            # with the containerd version in the image and crash containerd. Workaround
+            # to only use config.toml as config source. https://github.com/NVIDIA/aicr/issues/1688
+            - name: "RUNTIME_CONFIG_SOURCE"
+              value: "file"
       overrides: |
         dcgmExporter:
           serviceMonitor:
@@ -1623,7 +1631,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.35.0
+        version: 2.36.2
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system
@@ -1880,7 +1888,7 @@ templated manifests should match snapshot:
       chart:
         name: reloader
         repo: https://stakater.github.io/stakater-charts
-        version: 2.2.11
+        version: 2.2.16
       clusterName: RELEASE-NAME
       releaseName: reloader
       targetNamespace: openstack-system
@@ -1924,7 +1932,7 @@ templated manifests should match snapshot:
       chart:
         name: traefik
         repo: https://traefik.github.io/charts
-        version: 41.1.1
+        version: 41.2.0
       clusterName: RELEASE-NAME
       releaseName: traefik
       targetNamespace: traefik
