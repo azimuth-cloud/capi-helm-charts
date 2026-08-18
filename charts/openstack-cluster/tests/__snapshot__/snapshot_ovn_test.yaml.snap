@@ -170,7 +170,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 26.1.1
+        version: 26.4.1
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -217,7 +217,7 @@ templated manifests should match snapshot:
       chart:
         name: metrics-server
         repo: https://kubernetes-sigs.github.io/metrics-server
-        version: 3.13.0
+        version: 3.13.1
       clusterName: RELEASE-NAME
       releaseName: metrics-server
       targetNamespace: kube-system
@@ -282,7 +282,7 @@ templated manifests should match snapshot:
       chart:
         name: node-feature-discovery
         repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-        version: 0.18.3
+        version: 0.19.0
       clusterName: RELEASE-NAME
       releaseName: node-feature-discovery
       targetNamespace: node-feature-discovery
@@ -538,7 +538,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.35.0
+        version: 2.36.2
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system
