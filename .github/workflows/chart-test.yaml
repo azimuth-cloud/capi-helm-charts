@@ -1,0 +1,48 @@
+---
+name: Publish artifacts
+
+on: # yamllint disable-line rule:truthy
+  # Publish artifacts on every push
+  push:
+  # Also allow publication to be done via a workflow call
+  # In this case, the chart version is returned as an output
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        description: The ref to build.
+        required: true
+
+jobs:
+  push_azimuth_chart:
+    name: Push azimuth-flux helm chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Get SemVer version for current commit
+        id: semver
+        uses: azimuth-cloud/github-actions/semver@master
+
+      - name: Publish Helm charts
+        uses: azimuth-cloud/github-actions/helm-publish@PLATFORM-1316-helm-charts
+        with:
+          directory: charts/etcd-defrag
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ steps.semver.outputs.version }}
+          app-version: ${{ steps.semver.outputs.short-sha }}
+
+      - name: Publish artifact metadata
+        uses: azimuth-cloud/github-actions/artifacthub-metadata@PLATFORM-1316-helm-charts
+        with:
+          directory: charts/etcd-defrag
+          token: ${{ secrets.GITHUB_TOKEN }}
