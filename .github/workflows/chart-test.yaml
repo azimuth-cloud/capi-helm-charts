@@ -21,6 +21,13 @@ jobs:
       contents: read
       id-token: write
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        chart-dir:
+          - cluster-addons
+          - etcd-defrag
+          - openstack-cluster
     steps:
       - name: Check out the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -36,13 +43,14 @@ jobs:
       - name: Publish Helm charts
         uses: azimuth-cloud/github-actions/helm-publish@PLATFORM-1316-helm-charts
         with:
-          directory: charts/etcd-defrag
+          directory: charts/${{ matrix.chart-dir }}
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ steps.semver.outputs.version }}
           app-version: ${{ steps.semver.outputs.short-sha }}
 
       - name: Publish artifact metadata
         uses: azimuth-cloud/github-actions/artifacthub-metadata@PLATFORM-1316-helm-charts
+        if: ${{ matrix.chart-dir == 'etcd-defrag' }}
         with:
-          directory: charts/etcd-defrag
+          directory: charts/${{ matrix.chart-dir }}
           token: ${{ secrets.GITHUB_TOKEN }}
