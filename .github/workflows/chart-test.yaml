@@ -44,7 +44,10 @@ jobs:
         uses: azimuth-cloud/github-actions/helm-publish@PLATFORM-1316-helm-charts
         with:
           directory: charts/${{ matrix.chart-dir }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.QUAY_IO_USER }}
+          token: ${{secrets.QUAY_IO_TOKEN}}
+          registry: quay.io
+          repository: azimuth/capi-helm-charts
           version: ${{ steps.semver.outputs.version }}
           app-version: ${{ steps.semver.outputs.short-sha }}
 
@@ -53,4 +56,7 @@ jobs:
         if: ${{ matrix.chart-dir == 'etcd-defrag' }}
         with:
           directory: charts/${{ matrix.chart-dir }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: quay.io
+          repository: azimuth/capi-helm-charts
+          username: ${{ secrets.QUAY_IO_USER }}
+          token: ${{ secrets.QUAY_IO_TOKEN }}
