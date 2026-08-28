@@ -15,7 +15,7 @@ jobs:
     name: Build and push Helm charts
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     outputs:
       chart-version: ${{ steps.semver.outputs.version }}
     steps:
