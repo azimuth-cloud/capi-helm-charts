@@ -50,9 +50,13 @@ jobs:
         run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
       - name: Get latest tag
         id: latest-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -eo pipefail
-          TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
+          TAG_NAME="$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
           echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
       - name: Checkout default values from latest tag
         run: |

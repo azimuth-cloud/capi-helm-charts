@@ -331,6 +331,21 @@ preKubeadmCommands:
 {{- end }}
 
 {{/*
+Sets the kubelet cloud-provider arg on the given nodeRegistration configs.
+*/}}
+{{- define "openstack-cluster.cloudProvider" -}}
+{{- $provider := (index . 0).Values.kubeletCloudProvider }}
+{{- if $provider }}
+{{- range $config := rest . }}
+{{ $config }}:
+  nodeRegistration:
+    kubeletExtraArgs:
+      cloud-provider: {{ $provider }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Produces the spec for a KubeadmConfig object.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec" -}}
