@@ -4,3 +4,9 @@ description: Helm chart that deploys cluster addons for a CAPI cluster.
 type: application
 version: 0.1.0
 appVersion: main
+home: https://github.com/azimuth-cloud/capi-helm-charts
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/changes: |
+    - Moved to Quay hosting
+  artifacthub.io/license: Apache-2.0
