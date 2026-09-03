@@ -39,7 +39,14 @@ stringData:
       secret.reloader.stakater.com/reload: cloud-config
     {{- end }}
   overrides: |
-    {{- toYaml .Values.openstack.csiCinder.values | nindent 4 }}
+    {{- $cinderValues := .Values.openstack.csiCinder.values }}
+    {{- if .Values.hostedControlPlane }}
+    {{- /* No control plane nodes to run the controller on, so let it schedule anywhere */}}
+    {{- $cinderValues = deepCopy $cinderValues }}
+    {{- $controllerPlugin := dig "csi" "plugin" "controllerPlugin" dict $cinderValues }}
+    {{- $_ := unset $controllerPlugin "nodeSelector" }}
+    {{- end }}
+    {{- toYaml $cinderValues | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease

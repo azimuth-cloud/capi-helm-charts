@@ -15,8 +15,10 @@ stringData:
       name: {{ include "cluster-addons.clusterName" . }}
     controllerExtraArgs: |-
       - --use-service-account-credentials=false
+    {{- if not .Values.hostedControlPlane }}
     nodeSelector:
       node-role.kubernetes.io/control-plane: ""
+    {{- end }}
     tolerations:
       - key: node.cloudprovider.kubernetes.io/uninitialized
         value: "true"
