@@ -25,6 +25,8 @@ jobs:
   # For tests-full=false it uses a pre-existing internal network and runs Sonobuoy in quick mode
   latest:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -98,6 +100,8 @@ jobs:
   # This job tests a deployment against the latest version with the monitoring and ingress enabled
   latest-addons:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
@@ -172,6 +176,8 @@ jobs:
   # It uses a pre-existing internal network and the default volume type
   etcd-volume:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
@@ -246,6 +252,8 @@ jobs:
   # It uses a pre-existing internal network
   kube-upgrade:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout
@@ -343,6 +351,8 @@ jobs:
   # It installs ALL of the addons so that we test upgrading them
   chart-upgrade:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ inputs.tests-full }}
     steps:
       - name: Checkout current
