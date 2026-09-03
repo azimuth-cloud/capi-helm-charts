@@ -232,9 +232,26 @@ apiServer:
     #     namespaces:
     #       - kube-system
 
-# Set osDistro used. ubuntu, flatcar, etc.
+# Set osDistro used. ubuntu, flatcar, flatcar-sysext, etc.
 osDistro: ubuntu
-#
+
+# Flatcar Linux sysext configuration (only used when osDistro: flatcar-sysext)
+# A dict of sysext name to {url, checksum} for a systemd-sysext .raw image.
+# Ignition fetches these at first boot; systemd-sysext merges them into /usr on every boot.
+# The "kubernetes" and "containerd" sysexts are required for the cluster to start.
+flatcar:
+  # flatcar automatically logs in at the console as the core user.
+  disableAutologin: true
+  sysexts: {}
+    # kubernetes:
+    #   # Public URL for the sysext .raw file
+    #   url: "https://.../kubernetes-vX.Y.Z-x86-64.raw"
+    #   # SHA512 checksum, e.g. "sha512-<hex>". Only sha512 is supported by ignition.
+    #   checksum: "sha512-..."
+    # containerd:
+    #   url: "https://.../containerd-X.Y.Z-x86-64.raw"
+    #   checksum: "sha512-..."
+
 # API server authentication/authorization webhook. Set this to
 # integrate into KubeadmControlPlane and KubeadmConfigTemplate
 # possible values: none, k8s-keystone-auth, azimuth-authorization-webhook
@@ -280,6 +297,9 @@ controlPlane:
   machineImageId:
   # The flavor to use for control plane machines
   machineFlavor:
+  # Flatcar sysext overrides for control plane machines (only used when osDistro: flatcar-sysext)
+  flatcar:
+    sysexts: {}
   # The ports for control plane nodes
   # If no ports are given, the cluster internal network is used
   # See https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/book/src/clusteropenstack/configuration.md#network-filters
@@ -413,6 +433,9 @@ nodeGroupDefaults:
   machineImage:
   # The ID of the image to use for nodeGroup machines
   machineImageId:
+  # Flatcar sysext overrides for node group machines (only used when osDistro: flatcar-sysext)
+  flatcar:
+    sysexts: {}
   # Kubernetes version for nodeGroup machines
   kubernetesVersion:
   # The default networks and ports for worker nodes
