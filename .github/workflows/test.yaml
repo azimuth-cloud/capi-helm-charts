@@ -353,10 +353,10 @@ jobs:
 
       - name: Get latest tag
         id: latest-tag
-        run: |
-          set -eo pipefail
-          TAG_NAME="$(curl -fsSL "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest" | jq -r '.tag_name')"
-          echo "tag-name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+        run: echo "tag-name=$(gh release view --json tagName --jq .tagName)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
 
       - name: Checkout latest tag
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
