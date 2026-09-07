@@ -1101,7 +1101,7 @@ templated manifests should match snapshot:
       chart:
         name: kube-prometheus-stack
         repo: https://prometheus-community.github.io/helm-charts
-        version: 85.0.2
+        version: 90.0.0
       clusterName: RELEASE-NAME
       lifecycleHooks:
         postDelete:
@@ -1483,7 +1483,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v26.3.1
+        version: v26.7.0
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
@@ -1631,7 +1631,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.2
+        version: 2.36.3
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system

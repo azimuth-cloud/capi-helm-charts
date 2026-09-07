@@ -42,7 +42,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.19.3
+      version: 1.20.1
     release:
       namespace: kube-system
       values: {}
@@ -94,7 +94,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
-      version: 2.36.2
+      version: 2.36.3
     values:
       csi:
         plugin:
@@ -260,7 +260,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 85.0.2
+      version: 90.0.0
     release:
       namespace: monitoring-system
       values:
@@ -353,7 +353,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v26.3.1
+    version: v26.7.0
   release:
     namespace: gpu-operator
     values:
