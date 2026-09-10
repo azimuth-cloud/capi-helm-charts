@@ -1,7 +1,33 @@
+# group-1 replaces the default taints and exercises deduplication against
+# kubeadmConfigSpec taints, group-2 inherits the default taints and group-3
+# clears them with an explicit empty list
+nodeGroupDefaults:
+  nodeTaints:
+    - key: my.company.org/default
+      value: "true"
+      effect: PreferNoSchedule
+
 nodeGroups:
   - name: group-1
     machineFlavor: vm.small
     machineCount: 1
+    nodeLabels:
+      my.company.org/workload: gpu
+    nodeTaints:
+      - key: my.company.org/reserved
+        value: "true"
+        effect: NoSchedule
+      - key: my.company.org/dedicated
+        effect: NoExecute
+    kubeadmConfigSpec:
+      joinConfiguration:
+        nodeRegistration:
+          taints:
+            - key: my.company.org/reserved
+              value: "loses-to-nodeTaints"
+              effect: NoSchedule
+            - key: my.company.org/kubeadm
+              effect: NoExecute
   - name: group-2
     machineFlavor: vm.large
     machineCountMin: 1
@@ -12,6 +38,7 @@ nodeGroups:
     machineCountMin: 0
     machineCountMax: 5
     autoscale: true
+    nodeTaints: []
 
 # Enable as many addons as possible for template
 # validation and snapshot testing
