@@ -461,7 +461,7 @@ headlamp:
   chart:
     repo: https://kubernetes-sigs.github.io/headlamp
     name: headlamp
-    version: 0.44.0
+    version: 0.45.0
   release:
     namespace: headlamp
     values: {}
