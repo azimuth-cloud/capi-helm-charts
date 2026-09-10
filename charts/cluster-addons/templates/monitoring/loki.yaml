@@ -1,0 +1,133 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.loki_v2.enabled }}
+# TODO: Update this to include Loki v3 once the new addon is available
+{{- if .Values.monitoring.lokiStack.enabled }}
+{{- fail (printf "Cannot enable both 'lokiStack' and 'loki' addons simultaneously; please choose one.") }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "loki") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    monitoring:
+      serviceMonitor:
+        enabled: true
+      dashboards:
+        enabled: false
+    {{- if not .Values.monitoring.loki_v2.release.values.singleBinary.persistence.enabled }}
+    # Default Loki container user cannot write to container's /var/loki so use emptyDir instead
+    singleBinary:
+      extraVolumes:
+        - name: loki
+          emptyDir: {}
+      extraVolumeMounts:
+        - name: loki
+          mountPath: /var/loki
+    {{- end }}
+  overrides: |
+    {{- toYaml .Values.monitoring.loki_v2.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "loki") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.monitoring.loki_v2.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.loki_v2.release.namespace }}
+  releaseName: loki
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "loki") }}-config
+        key: overrides
+  # StatefulSets do not allow their PVCs to be resized, but we can use lifecycle hooks
+  # to ensure that it happens correctly
+  lifecycleHooks:
+    preUpgrade:
+      - apiVersion: apps/v1
+        kind: StatefulSet
+        name: loki
+        action: delete
+    {{- if .Values.monitoring.loki_v2.release.values.singleBinary.persistence.enabled }}
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app.kubernetes.io/instance: loki
+          app.kubernetes.io/name: loki
+        action: patch
+        options:
+          data:
+            spec:
+              resources:
+                requests:
+                  storage: {{ .Values.monitoring.loki_v2.release.values.singleBinary.persistence.size }}
+    {{- else }}
+    postUpgrade:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        selector:
+          app.kubernetes.io/instance: loki
+          app.kubernetes.io/name: loki
+        action: delete
+    {{- end }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "loki-dashboards") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "loki-dashboards") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.monitoring.loki_v2.release.namespace }}
+  releaseName: loki-dashboards
+  manifestSources:
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: loki-grafana-datasource
+          labels:
+            grafana_datasource: "1"
+        data:
+          loki-datasource.yaml: |-
+            apiVersion: 1
+            datasources:
+              - name: Loki
+                type: loki
+                {{- with .Values.monitoring.loki_v2 }}
+                url: http://{{ .release.values.fullnameOverride | default .chart.name }}.{{ .release.namespace }}:3100
+                {{- end }}
+                access: proxy
+                version: 1
+                isDefault: false
+    - template: |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: loki-grafana-dashboards
+          labels:
+            grafana_dashboard: "1"
+        data:
+          loki-pod-logs-dashboard.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/loki-pod-logs-dashboard.json" | nindent 12 }}
+            {% endraw %}
+          loki-systemd-logs-dashboard.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/loki-systemd-logs-dashboard.json" | nindent 12 }}
+            {% endraw %}
+          loki-metrics-dashboard.json: |
+            {% raw %}
+            {{- .Files.Get "grafana-dashboards/loki-metrics-dashboard.json" | nindent 12 }}
+            {% endraw %}
+{{- end }}
