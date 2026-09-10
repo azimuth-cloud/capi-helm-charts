@@ -60,6 +60,12 @@ jobs:
 
           - key: loki-stack
             path: monitoring.lokiStack.chart
+          
+          - key: loki
+            path: monitoring.loki_v3.chart
+
+          - key: alloy
+            path: monitoring.alloy.chart
 
           - key: prometheus-blackbox-exporter
             path: monitoring.blackboxExporter.chart

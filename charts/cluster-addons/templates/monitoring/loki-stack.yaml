@@ -1,4 +1,10 @@
 {{- if and .Values.monitoring.enabled .Values.monitoring.lokiStack.enabled }}
+{{- if .Values.monitoring.loki_v3.enabled }}
+{{- fail (printf "Cannot enable both 'lokiStack' and 'loki' addons simultaneously; please choose one.") }}
+{{- end }}
+{{- if .Values.monitoring.alloy.enabled }}
+{{- fail (printf "Cannot enable both 'lokiStack' and 'alloy' addons simultaneously; please choose one.") }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
