@@ -51,6 +51,7 @@ spec:
   {{- end }}
   {{- end }}
   {{- end }}
+  {{- if ne (include "openstack-cluster.controlplane.isKamaji" .) "true" }}
   {{- with .Values.apiServer }}
   {{- if .enableLoadBalancer }}
   apiServerLoadBalancer:
@@ -80,4 +81,11 @@ spec:
   {{- else if .failureDomains }}
   controlPlaneAvailabilityZones: {{ toYaml .failureDomains | nindent 4 }}
   {{- end }}
+  {{- end }}
+  {{- else }}
+  {{/*
+    Kamaji has no control plane VMs in OpenStack
+    The API server is exposed on the management cluster and its endpoint comes from the KamajiControlPlane
+  */}}
+  disableAPIServerFloatingIP: true
   {{- end }}

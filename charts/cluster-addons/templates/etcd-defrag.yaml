@@ -1,4 +1,4 @@
-{{- if .Values.etcdDefrag.enabled }}
+{{- if and .Values.etcdDefrag.enabled (not .Values.hostedControlPlane) }}
 ---
 apiVersion: v1
 kind: Secret

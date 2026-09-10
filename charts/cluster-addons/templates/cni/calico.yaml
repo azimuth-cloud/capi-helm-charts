@@ -26,7 +26,13 @@ stringData:
             nodeSelector: all()
     {% endfor %}
   overrides: |
-    {{- toYaml .Values.cni.calico.release.values | nindent 4 }}
+    {{- $calicoValues := .Values.cni.calico.release.values }}
+    {{- if .Values.hostedControlPlane }}
+    {{- /* No control plane nodes to run the tigera operator on, so let it schedule anywhere */}}
+    {{- $calicoValues = deepCopy $calicoValues }}
+    {{- $_ := unset $calicoValues "nodeSelector" }}
+    {{- end }}
+    {{- toYaml $calicoValues | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
