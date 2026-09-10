@@ -286,7 +286,7 @@ files:
     owner: root:root
     permissions: "0644"
 {{- end }}
-{{- if ne .Values.osDistro "flatcar" }}
+{{- if and (ne .Values.osDistro "flatcar") (ne .Values.osDistro "flatcar-sysext") }}
 preKubeadmCommands:
   - |
       /usr/bin/bash -s <<EOF
@@ -305,6 +305,7 @@ Produces the kubeadmConfigSpec required to configure additional trusted CAs for 
 e.g. for private registries.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.trustedCAs" -}}
+{{- if and (ne .Values.osDistro "flatcar") (ne .Values.osDistro "flatcar-sysext") }}
 {{- with .Values.trustedCAs }}
 files:
   {{- range $name, $certificate := . }}
@@ -318,15 +319,18 @@ preKubeadmCommands:
   - update-ca-certificates
 {{- end }}
 {{- end }}
+{{- end }}
 
 {{/*
 Produces the kubeadmConfigSpec required to install additional packages.
 */}}
 {{- define "openstack-cluster.kubeadmConfigSpec.additionalPackages" -}}
+{{- if and (ne .Values.osDistro "flatcar") (ne .Values.osDistro "flatcar-sysext") }}
 {{- with .Values.additionalPackages }}
 preKubeadmCommands:
   - apt update -y
   - apt install -y {{ join " " . }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -348,6 +352,8 @@ Produces the spec for a KubeadmConfig object.
 
 {{/*
 Produces the spec for an Ignition based OS specific KubeadmConfig object conditional on osDistro set to "flatcar".
+${COREOS_OPENSTACK_HOSTNAME} is set by coreos-metadata (EnvironmentFile=/run/metadata/flatcar),
+exported in preKubeadmCommands, then substituted into /etc/kubeadm.yml by envsubst before kubeadm runs.
 */}}
 {{- define "openstack-cluster.flatcarKubeadmConfigSpec" -}}
 initConfiguration:
@@ -366,8 +372,17 @@ ignition:
     additionalConfig: |
       systemd:
         units:
-        - name: coreos-metadata-sshkeys@.service
+        # this service must not run if no key has been provided by openstack, it retries
+        # forever causing a mount error in the kernel log.
+        # sshkeys.service (baked into flatcar) starts this unit directly via `systemctl start`
+        # whenever it isn't already masked, regardless of enabled/disabled, so when there is
+        # no key the service must be masked.
+        - name: coreos-metadata-sshkeys@core.service
+          {{- if .Values.machineSSHKeyName }}
           enabled: true
+          {{- else }}
+          mask: true
+          {{- end }}
         - name: kubeadm.service
           enabled: true
           dropins:
@@ -380,11 +395,19 @@ ignition:
               EnvironmentFile=/run/metadata/flatcar
 {{- end }}
 
+{{/*
+Produces the spec for an Ignition based OS specific KubeadmConfig object, dispatching to the
+osDistro-specific helper.
+The flatcar-sysext helpers live in _helpers.flatcar-sysext.tpl.
+*/}}
 {{- define "openstack-cluster.osDistroKubeadmConfigSpec" }}
 {{- $ctx := index . 0 }}
+{{- $sysexts := index . 1 }}
 {{- $osDistro := $ctx.Values.osDistro }}
 {{- if eq $osDistro "flatcar" }}
 {{- include "openstack-cluster.flatcarKubeadmConfigSpec" $ctx }}
+{{- else if eq $osDistro "flatcar-sysext" }}
+{{- include "openstack-cluster.flatcarSysextKubeadmConfigSpec" (list $ctx $sysexts) }}
 {{- end }}
 {{- end }}
 
@@ -419,7 +442,7 @@ webhooks and policies for audit logging can be added here.
 {{- if eq $authWebhook "azimuth-authorization-webhook" }}
         authorization-config: /etc/kubernetes/webhooks/authorization_config.yaml
 {{/*
-Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging) 
+Add else if blocks with other webhooks and apiServer arguments (i.e. audit logging)
 in future
 */}}
 {{- end }}
