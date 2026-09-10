@@ -1,4 +1,4 @@
-# openstack-cluster chart  <!-- omit in toc -->
+# openstack-cluster chart <!-- omit in toc -->
 
 This [Helm chart](https://helm.sh/) manages the lifecycle of a [Kubernetes](https://kubernetes.io)
 cluster on an [OpenStack](https://www.openstack.org/) cloud using
@@ -20,7 +20,7 @@ This README describes some of the basic options, however there are many other op
 available. Check out the [values.yaml](./values.yaml) (commented) and the chart
 templates for more details.
 
-## Contents  <!-- omit in toc -->
+## Contents <!-- omit in toc -->
 
 - [Prerequisites](#prerequisites)
 - [OpenStack images](#openstack-images)
@@ -73,14 +73,14 @@ software installed (e.g.
 
 Using this pattern, particularly with pre-built images, has some significant advantages, e.g.:
 
-  * Creating, upgrading and (auto-)scaling of clusters is fast as the required software
-    is already available in the image.
-  * New images for operating system updates or new Kubernetes versions can be
-    built and tested before being rolled out onto a production cluster with confidence
-    that nothing has changed.
-  * Images can be built and tested once and shared by multiple clusters.
-  * Zero-downtime upgrades can be performed by replacing machines one at a time,
-    with rollback if the upgrade fails.
+- Creating, upgrading and (auto-)scaling of clusters is fast as the required software
+  is already available in the image.
+- New images for operating system updates or new Kubernetes versions can be
+  built and tested before being rolled out onto a production cluster with confidence
+  that nothing has changed.
+- Images can be built and tested once and shared by multiple clusters.
+- Zero-downtime upgrades can be performed by replacing machines one at a time,
+  with rollback if the upgrade fails.
 
 Your cloud provider may use a centralised process to build, test and share suitable
 images with all projects. If you need to build a suitable image, the
@@ -92,8 +92,8 @@ Lifecycle SIG provides a tool for building images for use with Cluster API using
 
 OpenStack credentials are required for two purposes:
 
-  1. For Cluster API to manage OpenStack resources for the workload cluster, e.g. networks, machines.
-  2. For OpenStack integrations on the workload cluster, e.g. OpenStack CCM, Cinder CSI.
+1. For Cluster API to manage OpenStack resources for the workload cluster, e.g. networks, machines.
+2. For OpenStack integrations on the workload cluster, e.g. OpenStack CCM, Cinder CSI.
 
 By default, this chart uses the same credentials for both, ensuring that the credential used for
 Cluster API operations is propagated to the workload cluster.
@@ -185,13 +185,13 @@ NAME                                                           READY  SEVERITY  
 To update the cluster, just modify the configuration as required and run the above
 command again. Some examples of updates that can be performed are:
 
-  * Adding and removing node groups. A cluster can have several node groups, and
-    each node group can have a different flavor and machine count.
-  * Scaling the cluster. Change the machine count for the required node group(s)
-    to add or remove machines.
-  * Changing the image to update system packages or upgrade Kubernetes.
-    Once a new image is available, change the machine image and Kubernetes version
-    as required to trigger a rolling upgrade of the cluster nodes.
+- Adding and removing node groups. A cluster can have several node groups, and
+  each node group can have a different flavor and machine count.
+- Scaling the cluster. Change the machine count for the required node group(s)
+  to add or remove machines.
+- Changing the image to update system packages or upgrade Kubernetes.
+  Once a new image is available, change the machine image and Kubernetes version
+  as required to trigger a rolling upgrade of the cluster nodes.
 
 ## Multiple external networks
 
@@ -455,14 +455,14 @@ users:
         args:
           - oidc-login
           - get-token
-          - --grant-type=device-code  # or authcode for Authorization Code + PKCE
+          - --grant-type=device-code # or authcode for Authorization Code + PKCE
           - --oidc-issuer-url=https://auth.example.com
           - --oidc-client-id=k8s-my-cluster
 contexts:
-- context:
-    cluster: my-cluster
-    user: oidc
-  name: oidc@my-cluster
+  - context:
+      cluster: my-cluster
+      user: oidc
+    name: oidc@my-cluster
 current-context: oidc@my-cluster
 preferences: {}
 ```
@@ -579,9 +579,9 @@ for each.
 
 The standards can be applied in one of three modes:
 
-  * `enforce` - policy violations cause the pod to be rejected
-  * `audit` - policy violations are recorded in the audit log, if enabled
-  * `warn` - policy violations trigger a user-facing warning
+- `enforce` - policy violations cause the pod to be rejected
+- `audit` - policy violations are recorded in the audit log, if enabled
+- `warn` - policy violations trigger a user-facing warning
 
 A different standard can be applied for each mode, e.g. enforce the `baseline` standard but
 warn users when their workloads violate the `restricted` standard.
@@ -621,7 +621,14 @@ The configuration format is
 
 ## Troubleshooting
 
-See [DEBUGGING.md](./DEBUGGING.md).
+The `openstack-cluster` chart has a schema defined for the values, if the provided
+values fail validation against the schema the chart won't be deployed.
+This can be overridden by setting `capi_cluster_skip_schema_validation: true` in the
+azimuth-config environment.
+
+**Please report any valid values failing schema validation to azimuth maintainers for investigation**
+
+For further information about debugging or troubleshooting a deployment see [DEBUGGING.md](./DEBUGGING.md).
 
 ## Advanced
 
