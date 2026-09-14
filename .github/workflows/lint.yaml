@@ -1,5 +1,6 @@
 name: Helm Lint
 on:
+  push:
   workflow_call:
     inputs:
       ref:

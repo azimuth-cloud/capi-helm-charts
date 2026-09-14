@@ -14,17 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Run the chart linting on every PR, even from external repos
-  lint:
-    uses: ./.github/workflows/lint.yaml
-    with:
-      ref: ${{ github.event.pull_request.head.sha }}
-
   # This job does nothing, but uses an environment that has protection in place
   # It is used as a guard to the rest of the workflow so that we can require approval
   # for all commits to a PR
   wait_for_approval:
-    needs: [lint]
     runs-on: ubuntu-latest
     environment: ci-approval
     steps:
