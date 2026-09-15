@@ -19,12 +19,15 @@ on:
         value: ${{ jobs.produce_outputs.outputs.kube-1-36-image }}
       kube-1-36-version:
         value: ${{ jobs.produce_outputs.outputs.kube-1-36-version }}
+      flatcar-images:
+        value: ${{ jobs.produce_outputs.outputs.flatcar-images }}
 
 jobs:
   image_manifest:
     runs-on: ubuntu-latest
     outputs:
       manifest: ${{ steps.images.outputs.manifest }}
+      flatcar-manifest: ${{ steps.flatcar-manifest.outputs.manifest }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -36,6 +39,13 @@ jobs:
         run: |
           VN="$(jq -r '.["azimuth-images"]' ./dependencies.json)"
           MANIFEST="$(curl -fsSL "https://github.com/azimuth-cloud/azimuth-images/releases/download/${VN}/manifest.json")"
+          echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
+
+      - name: Fetch Flatcar sysext image details
+        id: flatcar-manifest
+        run: |
+          VN="$(jq -r '.["azimuth-images"]' ./dependencies.json)"
+          MANIFEST="$(curl -fsSL "https://github.com/azimuth-cloud/azimuth-images/releases/download/${VN}/flatcar-sysext-manifest.json")"
           echo "manifest=$(jq -c . <<< "$MANIFEST")" >> $GITHUB_OUTPUT
 
   ensure_image:
@@ -54,6 +64,10 @@ jobs:
           - name: kube-1-36
             image: ${{ fromJSON(needs.image_manifest.outputs.manifest).kubernetes-1-36-noble }}
             skip: false
+          - name: flatcar-1-36-x86_64
+            image: ${{ fromJSON(needs.image_manifest.outputs.flatcar-manifest)['kubernetes-1-36-flatcar-sysext'].x86_64 }}
+            kube-version: ${{ fromJSON(needs.image_manifest.outputs.flatcar-manifest)['kubernetes-1-36-flatcar-sysext'].kubernetes_version }}
+            skip: false
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -70,7 +84,7 @@ jobs:
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.10'
+          python-version: "3.10"
           check-latest: true
         if: ${{ !matrix.skip }}
 
@@ -94,14 +108,28 @@ jobs:
             --arg key "$MATRIX_NAME" \
             --arg image_id "$IMAGE_ID" \
             --arg kube_version "$KUBE_VERSION" \
-            '{
+            --arg sysext_kube_url "$SYSEXT_KUBERNETES_URL" \
+            --arg sysext_kube_checksum "$SYSEXT_KUBERNETES_CHECKSUM" \
+            --arg sysext_containerd_url "$SYSEXT_CONTAINERD_URL" \
+            --arg sysext_containerd_checksum "$SYSEXT_CONTAINERD_CHECKSUM" \
+            '
+            {
               "image-id": {($key): $image_id},
               "kube-version": {($key): $kube_version}
-            }' > "matrix-outputs/${MATRIX_NAME}.json"
+            }
+            + (if $sysext_kube_url != "" then {"sysext-kubernetes-url": {($key): $sysext_kube_url}} else {} end)
+            + (if $sysext_kube_checksum != "" then {"sysext-kubernetes-checksum": {($key): $sysext_kube_checksum}} else {} end)
+            + (if $sysext_containerd_url != "" then {"sysext-containerd-url": {($key): $sysext_containerd_url}} else {} end)
+            + (if $sysext_containerd_checksum != "" then {"sysext-containerd-checksum": {($key): $sysext_containerd_checksum}} else {} end)
+            ' > "matrix-outputs/${MATRIX_NAME}.json"
         env:
           IMAGE_ID: ${{ steps.ensure-image.outputs.image-id }}
-          KUBE_VERSION: ${{ matrix.image.kubernetes_version }}
+          KUBE_VERSION: ${{ matrix.kube-version || matrix.image.kubernetes_version }}
           MATRIX_NAME: ${{ matrix.name }}
+          SYSEXT_KUBERNETES_URL: ${{ matrix.image.sysexts && matrix.image.sysexts.kubernetes.url }}
+          SYSEXT_KUBERNETES_CHECKSUM: ${{ matrix.image.sysexts && matrix.image.sysexts.kubernetes.checksum_sha512 }}
+          SYSEXT_CONTAINERD_URL: ${{ matrix.image.sysexts && matrix.image.sysexts.containerd.url }}
+          SYSEXT_CONTAINERD_CHECKSUM: ${{ matrix.image.sysexts && matrix.image.sysexts.containerd.checksum_sha512 }}
         if: ${{ !matrix.skip }}
 
       - name: Upload matrix outputs
@@ -121,6 +149,7 @@ jobs:
       kube-1-35-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-35 }}
       kube-1-36-image: ${{ fromJSON(steps.matrix-outputs.outputs.result).image-id.kube-1-36 }}
       kube-1-36-version: ${{ fromJSON(steps.matrix-outputs.outputs.result).kube-version.kube-1-36 }}
+      flatcar-images: ${{ steps.flatcar-images.outputs.result }}
     steps:
       - name: Download matrix outputs
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -133,3 +162,26 @@ jobs:
         id: matrix-outputs
         run: |
           echo "result=$(jq -sc 'reduce .[] as $x ({}; . * $x)' matrix-outputs/*.json)" >> $GITHUB_OUTPUT
+
+      - name: Extract Flatcar images
+        id: flatcar-images
+        run: |
+          echo "result=$(jq -c '
+            . as $all
+            | (($all["image-id"] // {}) | keys) as $names
+            | [ $names[] | select(startswith("flatcar-")) ] as $flatcar_names
+            | reduce $flatcar_names[] as $name ({};
+                . + {
+                  ($name): {
+                    "image-id": (($all["image-id"] // {})[$name] // null),
+                    "kube-version": (($all["kube-version"] // {})[$name] // null),
+                    "sysext-kubernetes-url": (($all["sysext-kubernetes-url"] // {})[$name] // null),
+                    "sysext-kubernetes-checksum": (($all["sysext-kubernetes-checksum"] // {})[$name] // null),
+                    "sysext-containerd-url": (($all["sysext-containerd-url"] // {})[$name] // null),
+                    "sysext-containerd-checksum": (($all["sysext-containerd-checksum"] // {})[$name] // null)
+                  }
+                }
+              )
+          ' <<< "$COMBINED")" >> "$GITHUB_OUTPUT"
+        env:
+          COMBINED: ${{ steps.matrix-outputs.outputs.result }}
