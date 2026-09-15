@@ -11,7 +11,7 @@ quay.io:
     kiwigrid/k8s-sidecar:
     - 2.11.2
     prometheus-operator/prometheus-operator:
-    - v0.93.1
+    - v0.94.0
     prometheus/alertmanager:
     - v0.34.0
     prometheus/node-exporter:
