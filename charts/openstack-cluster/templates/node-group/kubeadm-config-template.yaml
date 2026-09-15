@@ -19,19 +19,46 @@
 joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $nodeLabels | nindent 2 }}
 {{- end }}
 
+{{- define "openstack-cluster.nodegroup.kct.spec.nodeTaints" -}}
+{{- $nodeGroup := index . 1 }}
+{{- $nodeTaints := dig "nodeTaints" list $nodeGroup }}
+{{- if $nodeTaints }}
+joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeTaints" $nodeTaints | nindent 2 }}
+{{- end }}
+{{- end }}
+
 {{- define "openstack-cluster.nodegroup.kct.spec" -}}
 {{- $ctx := index . 0 }}
 {{- $nodeGroup := index . 1 }}
 {{-
-  list
-    (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)
-    (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml)
-    (omit (include "openstack-cluster.osDistroKubeadmConfigSpec" (list $ctx) | fromYaml) "initConfiguration")
-    (pick (include "openstack-cluster.patchConfigSpec" (list $ctx ) | fromYaml) "preKubeadmCommands") |
-  include "openstack-cluster.mergeConcatMany" |
-  fromYaml |
-  toYaml
+  $spec :=
+    list
+      (include "openstack-cluster.nodegroup.kct.spec.nodeLabels" (list $ctx $nodeGroup) | fromYaml)
+      (include "openstack-cluster.nodegroup.kct.spec.nodeTaints" (list $ctx $nodeGroup) | fromYaml)
+      (include "openstack-cluster.kubeadmConfigSpec" (list $ctx $nodeGroup.kubeadmConfigSpec) | fromYaml)
+      (omit (include "openstack-cluster.osDistroKubeadmConfigSpec" (list $ctx) | fromYaml) "initConfiguration")
+      (pick (include "openstack-cluster.patchConfigSpec" (list $ctx ) | fromYaml) "preKubeadmCommands") |
+    include "openstack-cluster.mergeConcatMany" |
+    fromYaml
 }}
+{{- /*
+  Merging concatenates nodeTaints with any taints given in kubeadmConfigSpec, which can
+  produce duplicates that Kubernetes rejects at node registration
+  Keep the first entry for each key and effect pair, i.e. nodeTaints wins
+*/}}
+{{- with dig "joinConfiguration" "nodeRegistration" "taints" list $spec }}
+{{- $taints := list }}
+{{- $seen := dict }}
+{{- range $taint := . }}
+{{- $id := printf "%s/%s" $taint.key $taint.effect }}
+{{- if not (hasKey $seen $id) }}
+{{- $_ := set $seen $id true }}
+{{- $taints = append $taints $taint }}
+{{- end }}
+{{- end }}
+{{- $_ := set $spec.joinConfiguration.nodeRegistration "taints" $taints }}
+{{- end }}
+{{- toYaml $spec }}
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.kct.checksum" -}}
@@ -46,7 +73,12 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $n
 {{- end }}
 
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
-{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
+{{- /* mustMerge mutates its destination, so merge a copy of the overrides to keep .Values.nodeGroups pristine */}}
+{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge (deepCopy $nodeGroupOverrides) }}
+{{- /* mustMerge treats an empty list as unset, so restore an explicit nodeTaints to give it replace semantics */}}
+{{- if hasKey $nodeGroupOverrides "nodeTaints" }}
+{{- $nodeGroup = set $nodeGroup "nodeTaints" $nodeGroupOverrides.nodeTaints }}
+{{- end }}
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
