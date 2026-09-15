@@ -1,4 +1,4 @@
-{{- if .Values.controlPlane.healthCheck.enabled }}
+{{- if and .Values.controlPlane.healthCheck.enabled (ne (include "openstack-cluster.controlplane.isKamaji" .) "true") }}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineHealthCheck

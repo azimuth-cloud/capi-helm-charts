@@ -30,6 +30,7 @@ templates for more details.
 - [Volume-backed instances](#volume-backed-instances)
 - [Etcd configuration](#etcd-configuration)
 - [Load-balancer provider](#load-balancer-provider)
+- [Kamaji hosted control plane](#kamaji-hosted-control-plane)
 - [Cluster addons](#cluster-addons)
 - [Accessing a workload cluster](#accessing-a-workload-cluster)
 - [OpenID Connect authentication](#openid-connect-authentication)
@@ -43,6 +44,7 @@ templates for more details.
 - [Advanced](#advanced)
   - [Flatcar support](#flatcar-support)
   - [Keystone Authentication Webhook](#keystone-authentication-webhook)
+  - [Azimuth authorization webhook](#azimuth-authorization-webhook)
 
 ## Prerequisites
 
@@ -92,8 +94,8 @@ Lifecycle SIG provides a tool for building images for use with Cluster API using
 
 OpenStack credentials are required for two purposes:
 
-  1. For Cluster API to manage OpenStack resources for the workload cluster, e.g. networks, machines.
-  2. For OpenStack integrations on the workload cluster, e.g. OpenStack CCM, Cinder CSI.
+1. For Cluster API to manage OpenStack resources for the workload cluster, e.g. networks, machines.
+2. For OpenStack integrations on the workload cluster, e.g. OpenStack CCM, Cinder CSI.
 
 By default, this chart uses the same credentials for both, ensuring that the credential used for
 Cluster API operations is propagated to the workload cluster.
@@ -297,6 +299,103 @@ addons:
       LoadBalancer:
         lb-provider: ovn
         lb-method: SOURCE_IP_PORT
+```
+
+## Kamaji hosted control plane
+
+Instead of deploying the control plane onto OpenStack VMs via
+[kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/), the API server,
+controller manager and scheduler can run as pods on the management cluster using
+[Kamaji](https://kamaji.clastix.io/). Only the worker nodes run as VMs. This makes
+clusters cheaper and faster to provision, at the cost of running the control planes on
+the management cluster.
+
+Prerequisites: the [Kamaji operator](https://github.com/clastix/kamaji) and its
+[Cluster API control plane provider](https://github.com/clastix/cluster-api-control-plane-provider-kamaji)
+on the management cluster, with a Kamaji
+[DataStore](https://kamaji.clastix.io/concepts/#datastore) for the etcd data.
+
+Minimal configuration:
+
+```yaml
+controlPlane:
+  type: kamaji
+
+addons:
+  hostedControlPlane: true
+```
+
+`hostedControlPlane: true` is required so that addons are not pinned to control plane
+nodes (which do not exist in the workload cluster). Without it, the chart fails.
+
+Since there are no control plane machines, the machine settings under `controlPlane`
+(`machineFlavor`, `machineRootVolume`, `healthCheck`) and `etcd` do not apply. Only
+`controlPlane.machineCount` is used, as the number of hosted control plane replicas.
+The API server is exposed from the management cluster by Kamaji, so no OpenStack
+load-balancer or floating IP is created and the `apiServer` networking options do not
+apply.
+
+### Configuration options
+
+All under `controlPlane.kamaji`:
+
+```yaml
+controlPlane:
+  type: kamaji
+  kamaji:
+    dataStoreName: default
+    serviceType: LoadBalancer
+    serviceAnnotations: {}
+    serviceAddress:
+    certSANs: []
+    apiServerResources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+```
+
+`serviceType` controls how the API server is exposed from the management cluster:
+`LoadBalancer` (default), `NodePort`, or `ClusterIP` (requires
+an Ingress or gateway in front of it). `certSANs` adds extra SANs to the API server
+certificate — required when the API server is accessed through a hostname that differs
+from the default.
+
+### Addons managed by Kamaji
+
+Kamaji can manage CoreDNS, kube-proxy and konnectivity for the cluster. By default,
+only [konnectivity](https://kubernetes.io/docs/tasks/extend-kubernetes/setup-konnectivity/)
+is enabled. It tunnels API-server-initiated traffic (kubectl exec/logs/port-forward,
+aggregated APIs, webhooks) back to the nodes, which the management cluster otherwise
+cannot reach. CoreDNS and kube-proxy are left disabled because this chart already
+deploys them as [cluster addons](#cluster-addons), enabling both would conflict.
+
+### Auth webhooks
+
+Kamaji control planes support the same `authWebhook` options as kubeadm:
+
+- [k8s-keystone-auth](#keystone-authentication-webhook), runs as a sidecar in the
+  hosted control plane pods, configured via `controlPlane.kamaji.keystoneAuth`.
+- [azimuth-authorization-webhook](#azimuth-authorization-webhook) — config is mounted
+  into the hosted control plane pods from a Secret.
+
+See the linked sections for details.
+
+### Extra spec
+
+Any field of the
+[KamajiControlPlane spec](https://github.com/clastix/cluster-api-control-plane-provider-kamaji)
+not covered above can be set via `controlPlane.kamaji.extraSpec`, which is deep-merged
+into the generated resource:
+
+```yaml
+controlPlane:
+  type: kamaji
+  kamaji:
+    extraSpec:
+      registry: registry.my-mirror.example.org
+      deployment:
+        nodeSelector:
+          node-role.example.org/control-plane-host: ''
 ```
 
 ## Cluster addons
@@ -643,4 +742,63 @@ to "k8s-keystone-auth".
 authWebhook: k8s-keystone-auth
 ```
 
-See cluster-addons README for instructions on installing the `k8s-keystone-auth` subchart.
+**kubeadm**: the webhook server runs as a host-network pod on the control plane
+nodes and is reached by the API server over localhost. See the cluster-addons
+README for instructions on installing the `k8s-keystone-auth` subchart addon.
+
+**Kamaji**: the workload-cluster addon cannot be used because the API server runs
+on the management cluster and cannot reach the workload cluster network. The webhook
+runs as a sidecar in the hosted control plane pods instead, reached over localhost.
+Do not enable the workload-cluster addon in this case — configure the sidecar via
+`controlPlane.kamaji.keystoneAuth`:
+
+```yaml
+controlPlane:
+  type: kamaji
+  kamaji:
+    keystoneAuth:
+      # Required: the Keystone URL (reachable from the management cluster)
+      authUrl: https://keystone.my.cloud:5000/v3
+      # The Keystone authorization policy (equivalent to the rbacPolicies value
+      # of the workload-cluster k8s-keystone-auth addon used with kubeadm)
+      # The API server is always wired for both authentication and authorization
+      # via the webhook, matching the kubeadm integration; this controls what is
+      # authorized. If omitted, authorization falls through to RBAC
+      policy:
+        - resource:
+            services:
+              - type: service
+                names: ['*']
+                actions: ['get', 'list']
+          match:
+            credentials: ['X-Auth-Token']
+```
+
+### Azimuth authorization webhook
+
+To deploy with the azimuth authorization webhook enabled, set `authWebhook`
+to "azimuth-authorization-webhook" and point it at your webhook server:
+
+```yaml
+authWebhook: azimuth-authorization-webhook
+azimuthAuthorizationWebhook:
+  server: https://azimuth-authorization-webhook.example.org/authorize
+  tls:
+    enabled: true
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+```
+
+An authorization-only webhook using the structured
+[AuthorizationConfiguration](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#configuring-the-api-server-using-an-authorization-config-file)
+(`--authorization-config`), which supports CEL `matchConditions` for namespace
+prefiltering (see `azimuthAuthorizationWebhook.filteredNamespaces`). Works with
+both control plane types:
+
+- **kubeadm**: config written to the control plane nodes, `--authorization-config`
+  set on the static-pod API server.
+- **Kamaji**: config mounted into the hosted control plane pods from a Secret,
+  `--authorization-config` set via `apiServer.extraArgs`. No sidecar needed (the
+  webhook server is external).

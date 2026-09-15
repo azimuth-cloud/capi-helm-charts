@@ -1,0 +1,24 @@
+# To update manifest snapshots run helm unittest plugin with -u option:
+# docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest -u charts/openstack-cluster
+suite: Manifest snapshot tests
+values:
+  - values_base.yaml
+  - values_kamaji.yaml
+tests:
+  - it: templated manifests should match snapshot
+    asserts:
+      - matchSnapshot: {}
+  - it: templated manifests with keystoneAuth should match snapshot
+    values:
+      - values_base.yaml
+      - values_kamaji.yaml
+      - values_kamaji_authwebhook.yaml
+    asserts:
+      - matchSnapshot: {}
+  - it: templated manifests with azimuth authorization webhook should match snapshot
+    set:
+      authWebhook: azimuth-authorization-webhook
+      azimuthAuthorizationWebhook.server: https://azimuth.example.org/authorize
+      azimuthAuthorizationWebhook.tls.enabled: false
+    asserts:
+      - matchSnapshot: {}
