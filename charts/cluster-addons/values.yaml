@@ -288,6 +288,8 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          prune: true
   lokiStack:
     enabled: true
     chart:
@@ -308,6 +310,107 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
+  alloy:
+    enabled: false
+    chart:
+      repo: https://grafana.github.io/helm-charts
+      name: alloy
+      version: 1.5.2
+    release:
+      namespace: monitoring-system
+      values:
+        controller:
+          tolerations:
+            - operator: Exists
+  # Loki v3 is the successor to the lokiStack addon since the Helm
+  # chart for the latter is no longer maintained upstream.
+
+  # No backwards compatibility promises are made between the old lokiStack addon and
+  # the newer Loki v3 addon. For existing clusters with lokiStack enabled, switching
+  # to Loki v3 with the default config values will result in the storage volume
+  # containing historical logging data being retained as backup. A new volume will
+  # be provisioned in its place for the new Loki v3 addon.
+
+  # For use cases requiring historical log retention, it is the chart consumers's
+  # responsibility to research, test and implement a viable upgrade path which works
+  # for them.
+  loki_v3:
+    enabled: false
+    chart:
+      # The chart repository that contains the chart to use
+      repo: https://grafana.github.io/helm-charts
+      # The name of the chart to use
+      name: loki
+      # The version of the chart to use (must be an exact version)
+      version: 6.52.0
+    # The Helm values to use for the release
+    release:
+      namespace: monitoring-system
+      values:
+        # Default deploymentMode "SimpleScalable" overriden for compatibility
+        # to filesystem storage
+        deploymentMode: SingleBinary
+        # The components for this microservices-first architecture
+        # are thus disabled as overrides.
+        backend:
+          replicas: 0
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+        ingester:
+          replicas: 0
+        querier:
+          replicas: 0
+        queryFrontend:
+          replicas: 0
+        queryScheduler:
+          replicas: 0
+        distributor:
+          replicas: 0
+        compactor:
+          replicas: 0
+        indexGateway:
+          replicas: 0
+        bloomCompactor:
+          replicas: 0
+        bloomGateway:
+          replicas: 0
+        chunksCache:
+          enabled: false
+        loki:
+          schemaConfig:
+            configs:
+              - from: "2024-04-01"
+                store: tsdb
+                object_store: filesystem
+                schema: v13
+                index:
+                  prefix: loki_index_
+                  period: 24h
+          storage:
+            type: 'filesystem'
+          compactor:
+            retention_enabled: true
+            delete_request_store: filesystem
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 1
+          limits_config:
+            allow_structured_metadata: true
+            volume_enabled: true
+            retention_period: 72h
+          ruler:
+            enable_api: true
+        singleBinary:
+          replicas: 1
+          # Enable persistence by default
+          persistence:
+            enabled: true
+            size: 10Gi
+            # Required to allow resizing of PVC during Helm upgrades
+            enableStatefulSetAutoDeletePVC: false
+
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true
