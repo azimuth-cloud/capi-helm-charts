@@ -627,12 +627,44 @@ See [DEBUGGING.md](./DEBUGGING.md).
 
 ### Flatcar support
 
-To deploy clusters which use Ignition such as Flatcar, you will need to override the following
-setting in your local `values.yaml`:
+To deploy clusters which use Ignition such as Flatcar, you will need to override the `osDistro`
+setting in your local `values.yaml`. Both variants use
+[systemd-sysext](https://www.freedesktop.org/software/systemd/man/latest/systemd-sysext.html) to
+merge the Kubernetes and containerd extension images into `/usr` on every boot.
 
 ```yaml
 osDistro: flatcar
 ```
+Use this when the `.raw` sysext images for Kubernetes and containerd are already baked into the
+machine image at build time (e.g. a custom image produced by image-builder).
+
+```yaml
+osDistro: flatcar-sysext
+flatcar:
+  sysexts:
+    kubernetes:
+      url: "https://.../kubernetes-vX.Y.Z-x86-64.raw"
+      checksum: "sha512-..."
+    containerd:
+      url: "https://.../containerd-X.Y.Z-x86-64.raw"
+      checksum: "sha512-..."
+```
+Use this with a generic `flatcar-stable` image: Ignition fetches the sysext images
+during first-boot provisioning and writes them under `/opt/extensions/`.
+systemd-sysext then merges them on every boot exactly as it would a baked-in image.
+
+You may add arbitary sysexts to the flatcar.sysexts dict.
+Kubernetes and containerd are required for the kubernetes cluster to start and should
+always be present, but others are can be added when required.
+
+NOTE: Only sha512 checksums are accepted by ignition.
+Your checksum must be in the form `sha512-....`.
+
+machineImage and the flatcar sysext list may also be overriden for just the control plane
+and/or for each node group.
+A machineImage here overrides the top level, but the sysext list is merged.
+Note that sysexts are architecture specific, so for mixed-arch clusters the defaults
+much be overriden to match the machineImage.
 
 ### Keystone Authentication Webhook
 
