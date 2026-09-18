@@ -170,7 +170,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 26.1.1
+        version: 26.7.0
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -217,7 +217,7 @@ templated manifests should match snapshot:
       chart:
         name: metrics-server
         repo: https://kubernetes-sigs.github.io/metrics-server
-        version: 3.13.0
+        version: 3.14.0
       clusterName: RELEASE-NAME
       releaseName: metrics-server
       targetNamespace: kube-system
@@ -282,7 +282,7 @@ templated manifests should match snapshot:
       chart:
         name: node-feature-discovery
         repo: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-        version: 0.18.3
+        version: 0.19.0
       clusterName: RELEASE-NAME
       releaseName: node-feature-discovery
       targetNamespace: node-feature-discovery
@@ -358,15 +358,23 @@ templated manifests should match snapshot:
         nodeStatusExporter:
           enabled: true
         toolkit:
-          # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
-          # breaks nvidia pod deployment on clusters with Harbor cache enabled.
-          # Instead make a new config file specifically for nvidia runtime config,
-          # which is parsed as an "include" in the main containerd config file.
-          #
-          # https://github.com/NVIDIA/gpu-operator/issues/301
           env:
+            # Allowing the toolkit to edit /etc/containerd/config.toml (the default)
+            # breaks nvidia pod deployment on clusters with Harbor cache enabled.
+            # Instead make a new config file specifically for nvidia runtime config,
+            # which is parsed as an "include" in the main containerd config file.
+            #
+            # https://github.com/NVIDIA/gpu-operator/issues/301
             - name: "CONTAINERD_CONFIG"
               value: "/etc/containerd/conf.d/nvidia.toml"
+            # Default is "command,file", which tries to retrieve config by running
+            # `containerd config dump`, which outputs config migrated to the containerd client
+            # used by NVIDIA Container Toolkit and only uses the version from config.toml if
+            # this fails. This means the config drop-in generated from this can be incompatible
+            # with the containerd version in the image and crash containerd. Workaround
+            # to only use config.toml as config source. https://github.com/NVIDIA/aicr/issues/1688
+            - name: "RUNTIME_CONFIG_SOURCE"
+              value: "file"
       overrides: |
         dcgmExporter:
           serviceMonitor:
@@ -386,7 +394,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v26.3.1
+        version: v26.7.0
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
@@ -443,7 +451,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.1
+        version: 2.36.3
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
@@ -530,7 +538,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.35.0
+        version: 2.36.5
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system
@@ -957,6 +965,15 @@ templated manifests should match snapshot:
                       After=containerd.service coreos-metadata.service
                       [Service]
                       EnvironmentFile=/run/metadata/flatcar
+                - name: containerd.service
+                  enabled: true
+                  dropins:
+                  - name: 10-flatcar.conf
+                    contents: |
+                      [Service]
+                      # To fix race between containerd and kubeadm
+                      # https://github.com/kubernetes-sigs/image-builder/issues/939#issuecomment-1752614500
+                      Type=notify
                 # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
                 # default. Disable this.
                 # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
@@ -1080,7 +1097,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: fa99283ffa783bfa8755df8ee2de2f08a8c1bb568fb4a597342eff582496902c
+        capi.stackhpc.com/template-checksum: f118c091f7ebba41f90e9c223eb1d099ea18f58e27cb4b4ccdcf9909e90e559b
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1089,7 +1106,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-fa99283f
+      name: RELEASE-NAME-group-1-f118c091
     spec:
       template:
         spec:
@@ -1219,6 +1236,15 @@ templated manifests should match snapshot:
                         After=containerd.service coreos-metadata.service
                         [Service]
                         EnvironmentFile=/run/metadata/flatcar
+                  - name: containerd.service
+                    enabled: true
+                    dropins:
+                    - name: 10-flatcar.conf
+                      contents: |
+                        [Service]
+                        # To fix race between containerd and kubeadm
+                        # https://github.com/kubernetes-sigs/image-builder/issues/939#issuecomment-1752614500
+                        Type=notify
                   # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
                   # default. Disable this.
                   # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
@@ -1279,7 +1305,7 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-fa99283f
+              name: RELEASE-NAME-group-1-f118c091
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1

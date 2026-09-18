@@ -121,6 +121,15 @@ ignition:
               After=containerd.service coreos-metadata.service
               [Service]
               EnvironmentFile=/run/metadata/flatcar
+        - name: containerd.service
+          enabled: true
+          dropins:
+          - name: 10-flatcar.conf
+            contents: |
+              [Service]
+              # To fix race between containerd and kubeadm
+              # https://github.com/kubernetes-sigs/image-builder/issues/939#issuecomment-1752614500
+              Type=notify
 
         {{- if dig "disableAutologin" true ($ctx.Values.flatcar | default dict) }}
         # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
