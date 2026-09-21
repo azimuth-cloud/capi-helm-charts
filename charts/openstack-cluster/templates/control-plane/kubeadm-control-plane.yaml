@@ -8,8 +8,9 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . 
 {{- define "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" -}}
 {{- $ctx := index . 0 }}
 {{- $osDistro := index . 1 }}
-{{- $kubeProxyConfigurationPath := eq $osDistro "flatcar" | ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" }}
-{{- $kubeadmPath := eq $osDistro "flatcar" | ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" }}
+{{- $isFlatcar := or (eq $osDistro "flatcar") (eq $osDistro "flatcar-sysext") }}
+{{- $kubeProxyConfigurationPath := $isFlatcar | ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" }}
+{{- $kubeadmPath := $isFlatcar | ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" }}
 {{- with $ctx.kubeProxyConfiguration }}
 files:
   - path: {{ $kubeProxyConfigurationPath }}
@@ -194,6 +195,7 @@ spec:
     nodeDrainTimeout: {{ .Values.controlPlane.nodeDrainTimeout }}
     nodeVolumeDetachTimeout: {{ .Values.controlPlane.nodeVolumeDetachTimeout }}
     nodeDeletionTimeout: {{ .Values.controlPlane.nodeDeletionTimeout }}
+  {{- $flatcarSysexts := mergeOverwrite (deepCopy ((.Values.flatcar | default dict).sysexts | default dict)) ((.Values.controlPlane.flatcar | default dict).sysexts | default dict) }}
   kubeadmConfigSpec: {{
     omit
       (
@@ -205,7 +207,7 @@ spec:
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.admissionConfigFile" . | fromYaml)
           (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
-          (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
+          (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . $flatcarSysexts) | fromYaml)
           (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)
           (include "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" (list .Values.controlPlane.kubeadmConfigSpec .Values.osDistro) | fromYaml) |
         include "openstack-cluster.mergeConcatMany" |
