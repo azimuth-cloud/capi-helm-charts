@@ -1,4 +1,4 @@
-{{- if and .Values.openstack.enabled .Values.openstack.csiNfs.enabled }}
+{{- if .Values.csi.csiNfs.enabled }}
 ---
 apiVersion: v1
 kind: Secret
@@ -9,7 +9,7 @@ metadata:
     addons.stackhpc.com/watch: ""
 stringData:
   defaults: |
-    {{- toYaml .Values.openstack.csiNfs.values | nindent 4 }}
+    {{- toYaml .Values.csi.csiNfs.values | nindent 4 }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
@@ -19,8 +19,8 @@ metadata:
 spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
-  chart: {{ toYaml .Values.openstack.csiNfs.chart | nindent 4 }}
-  targetNamespace: kube-system
+  chart: {{ toYaml .Values.csi.csiNfs.chart | nindent 4 }}
+  targetNamespace: {{ .Values.csi.csiNfs.targetNamespace }}
   releaseName: csi-nfs
   valuesSources:
     - secret:
