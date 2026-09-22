@@ -8,6 +8,8 @@ on:
       - reopened
     branches:
       - main
+  # merge_group is required to use merge queues
+  merge_group:
 
 concurrency:
   group: ${{ github.head_ref }}
