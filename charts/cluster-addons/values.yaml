@@ -59,7 +59,14 @@ csi:
     release:
       namespace: csi-ceph-system
       values: {}
-
+  # Indicates if the NFS CSI driver should be enabled
+  csiNfs:
+    enabled: true
+    chart:
+      repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+      name: csi-driver-nfs
+      version: 4.13.4
+    values: {}
 # Settings for the OpenStack integrations
 openstack:
   # Indicates if the OpenStack integrations should be enabled
@@ -170,16 +177,6 @@ openstack:
     # Additional storage classes to create for the Manila CSI
     # For each item, the properties from the default storage class are supported (except for "enabled")
     additionalStorageClasses: []
-
-  # Indicates if the NFS CSI driver should be enabled
-  csiNfs:
-    enabled: true
-    chart:
-      repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-      name: csi-driver-nfs
-      version: 4.13.4
-    values: {}
-
   k8sKeystoneAuth:
     enabled: false
     targetNamespace: kube-system

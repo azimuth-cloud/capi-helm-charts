@@ -120,8 +120,7 @@ jobs:
             path: headlamp.chart
 
           - key: csi-nfs-driver
-            path: openstack.csiNfs.chart
-
+            path: csi.csiNfs.chart
 
     name: ${{ matrix.key }}
     steps:
