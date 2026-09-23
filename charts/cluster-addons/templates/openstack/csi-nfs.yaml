@@ -20,7 +20,7 @@ spec:
   clusterName: {{ include "cluster-addons.clusterName" . }}
   bootstrap: true
   chart: {{ toYaml .Values.csi.csiNfs.chart | nindent 4 }}
-  targetNamespace: {{ .Values.csi.csiNfs.targetNamespace }}
+  targetNamespace: {{ .Values.csi.csiNfs.release.namespace }}
   releaseName: csi-nfs
   valuesSources:
     - secret:
