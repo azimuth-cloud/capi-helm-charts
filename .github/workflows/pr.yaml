@@ -1,11 +1,16 @@
+---
 name: test pr
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - synchronize
       - ready_for_review
       - reopened
+    branches:
+      - main
+  merge_group:
+    types: [checks_requested]
     branches:
       - main
 
