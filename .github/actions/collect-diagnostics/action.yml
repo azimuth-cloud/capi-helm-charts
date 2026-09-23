@@ -41,6 +41,32 @@ runs:
           -A -o yaml > diagnostics/capi-resources.yaml
         kubectl get events -A --sort-by=.lastTimestamp > diagnostics/capi-events.txt
 
+    - name: Dump workload cluster node and pod status (best-effort)
+      shell: bash
+      continue-on-error: true
+      run: |-
+        mkdir -p diagnostics
+        # Get the kubeconfig secret for the workload cluser.
+        # NB this secret should not be included in the output.
+        (umask 077; kubectl get secret ${{ inputs.name }}-kubeconfig \
+          -o go-template='{{ .data.value | base64decode }}' \
+          > workload-kubeconfig) \
+          || echo "no ${{ inputs.name }}-kubeconfig secret found" > diagnostics/workload-cluster-MISSING.txt
+        # Get diagnostics from the workload cluster.
+        if [ -s workload-kubeconfig ]; then
+          kubectl --kubeconfig=workload-kubeconfig --request-timeout=15s \
+            get nodes -o yaml > diagnostics/workload-nodes.yaml \
+            || echo "could not list workload nodes" > diagnostics/workload-nodes.yaml
+          kubectl --kubeconfig=workload-kubeconfig --request-timeout=15s \
+            get pods -A -o wide > diagnostics/workload-pods.txt \
+            || echo "could not list workload pods" > diagnostics/workload-pods.txt
+          kubectl --kubeconfig=workload-kubeconfig --request-timeout=15s \
+            get events -A --sort-by=.lastTimestamp > diagnostics/workload-events.txt \
+            || echo "could not list workload events" > diagnostics/workload-events.txt
+        fi
+        # scrap the secret so it can't be leaked by mistake.
+        rm -f workload-kubeconfig
+
     - name: Dump OpenStack server and quota state
       shell: bash
       continue-on-error: true
