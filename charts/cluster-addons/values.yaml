@@ -59,7 +59,16 @@ csi:
     release:
       namespace: csi-ceph-system
       values: {}
-
+  # Indicates if the NFS CSI driver should be enabled
+  csiNfs:
+    enabled: true
+    chart:
+      repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+      name: csi-driver-nfs
+      version: 4.13.4
+    release:
+      namespace: csi-nfs
+    values: {}
 # Settings for the OpenStack integrations
 openstack:
   # Indicates if the OpenStack integrations should be enabled
