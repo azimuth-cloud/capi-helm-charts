@@ -66,6 +66,8 @@ csi:
       repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
       name: csi-driver-nfs
       version: 4.13.4
+    release:
+      namespace: csi-nfs
     values: {}
 # Settings for the OpenStack integrations
 openstack:
@@ -99,6 +101,7 @@ openstack:
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/cinder-csi-plugin/values.yaml
     enabled: true
     chart:
+
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
       version: 2.36.5
