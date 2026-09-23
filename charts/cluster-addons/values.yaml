@@ -74,6 +74,8 @@ openstack:
     # By default, ignore volume AZs for Cinder as most clouds have a single globally-attachable Cinder AZ
     BlockStorage:
       ignore-volume-az: true
+    LoadBalancer:
+      manage-security-groups: true
   # Settings for the Cloud Controller Manager (CCM)
   ccm:
     # Indicates if the OpenStack CCM should be enabled
