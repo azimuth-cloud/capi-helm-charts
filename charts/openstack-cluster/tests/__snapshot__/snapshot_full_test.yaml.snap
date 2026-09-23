@@ -1852,7 +1852,7 @@ templated manifests should match snapshot:
         version: 4.13.4
       clusterName: RELEASE-NAME
       releaseName: csi-nfs
-      targetNamespace: null
+      targetNamespace: csi-nfs
       valuesSources:
         - secret:
             key: defaults
