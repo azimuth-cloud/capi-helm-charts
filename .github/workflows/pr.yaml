@@ -70,11 +70,14 @@ jobs:
   # The workflow checks whether any flatcar sysext related files have changed
   test_flatcar_sysext:
     needs: [mirror_container_images, publish_charts]
-    # Only test PRs that are ready for review, and not the merge queue
-    if: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
+    # Only test PRs that are ready for review
+    if: ${{ !github.event.pull_request.draft }}
     uses: ./.github/workflows/flatcar-sysext.yaml
     secrets: inherit
     with:
       ref: ${{ github.event.pull_request.head.sha }}
-      base-ref: ${{ github.event.pull_request.base.sha }}
+      base-ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       chart-version: ${{ needs.publish_charts.outputs.chart-version }}
+      # If the PR is in draft, just run a sanity check
+      # If the PR is in review, run the full test suite
+      tests-full: ${{ !github.event.pull_request.draft }}

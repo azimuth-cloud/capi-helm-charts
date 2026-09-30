@@ -15,6 +15,10 @@ on:
         type: string
         description: The version of the charts to test
         required: true
+      tests-full:
+        type: boolean
+        description: Run Sonobuoy in full mode for the latest tests, rather than quick mode
+        required: true
 
 jobs:
   # Only run when the flatcar sysext manifest (via the azimuth-images version) or flatcar specific code has changed
@@ -40,7 +44,8 @@ jobs:
             scripts/ensure-flatcar-sysext-images.py
             .github/workflows/flatcar-sysext.yaml
           )
-          if [ -n "$(git diff --name-only "$BASE_REF" HEAD -- "${FLATCAR_PATHS[@]}")" ]; then
+          CHANGED="$(git diff --name-only "$BASE_REF" HEAD -- "${FLATCAR_PATHS[@]}")"
+          if [ -n "$CHANGED" ]; then
             echo "Flatcar sysext files changed, running tests"
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
@@ -100,7 +105,7 @@ jobs:
     env:
       # Flatcar sysext requires the Ignition bootstrap format, enabled when clusterctl installs CAPI
       EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION: "true"
-      CLUSTER_NAME: ci-${{ github.run_id }}-flatcar-latest-${{ strategy.job-index }}
+      CLUSTER_NAME: ci-${{ github.run_id }}-flatcar-${{ matrix.label }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -134,13 +139,14 @@ jobs:
           image-id: ${{ matrix.image_id }}
           defaults-path: ./.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
           overrides-path: ./flatcar-sysext-values.yaml
-          sonobuoy-mode: quick
+          sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
+          sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
       - name: Collect workload cluster diagnostics
         uses: ./.github/actions/collect-diagnostics
         with:
           name: ${{ env.CLUSTER_NAME }}
-          name-suffix: flatcar-latest-${{ strategy.job-index }}
+          name-suffix: flatcar-${{ matrix.label }}
           os-cloud: ${{ vars.TARGET_CLOUD }}
         if: ${{ always() }}
 
@@ -151,7 +157,7 @@ jobs:
       - name: Upload logs
         uses: ./.github/actions/upload-logs
         with:
-          name-suffix: flatcar-latest-${{ strategy.job-index }}
+          name-suffix: flatcar-${{ matrix.label }}
         if: ${{ always() }}
 
   # This job tests upgrading between each pair of consecutive versions
@@ -168,7 +174,7 @@ jobs:
     env:
       # Flatcar sysext requires the Ignition bootstrap format, enabled when clusterctl installs CAPI
       EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION: "true"
-      CLUSTER_NAME: ci-${{ github.run_id }}-flatcar-upgrade-${{ strategy.job-index }}
+      CLUSTER_NAME: ci-${{ github.run_id }}-flatcar-${{ matrix.label }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -186,7 +192,6 @@ jobs:
         env:
           OS_CLOUDS: ${{ secrets.OS_CLOUDS }}
 
-      # JSON is valid YAML, so the values from the matrix can be used as-is
       - name: Write Flatcar sysext values
         run: |
           echo "$FROM_VALUES" > ./flatcar-sysext-values-from.yaml
@@ -221,7 +226,7 @@ jobs:
         uses: ./.github/actions/collect-diagnostics
         with:
           name: ${{ env.CLUSTER_NAME }}
-          name-suffix: flatcar-upgrade-${{ strategy.job-index }}
+          name-suffix: flatcar-${{ matrix.label }}
           os-cloud: ${{ vars.TARGET_CLOUD }}
         if: ${{ always() }}
 
@@ -232,5 +237,5 @@ jobs:
       - name: Upload logs
         uses: ./.github/actions/upload-logs
         with:
-          name-suffix: flatcar-upgrade-${{ strategy.job-index }}
+          name-suffix: flatcar-${{ matrix.label }}
         if: ${{ always() }}

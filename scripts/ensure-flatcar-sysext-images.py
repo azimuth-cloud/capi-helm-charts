@@ -99,6 +99,16 @@ def version_key(version_data):
     return tuple(int(part) for part in version_data["kubernetes_version"].lstrip("v").split("."))
 
 
+def dns_label(*parts):
+    """Join parts into a DNS-safe label, for use in k8s names."""
+    return "-".join(parts).lower().replace("_", "-").replace(".", "-")
+
+
+def minor_version(item):
+    """Get the major.minor k8s version of a matrix item, e.g. v1.36.4 -> 1.36"""
+    return ".".join(item["kubernetes_version"].lstrip("v").split(".")[:2])
+
+
 def version_item(version_data, arch):
     """Generate a matrix item for a version."""
     data = version_data[arch]
@@ -126,8 +136,16 @@ latest = []
 upgrade = []
 for arch in args.arches:
     items = [version_item(version_data, arch) for version_data in versions]
-    latest.append({"arch": arch} | items[-1])
-    upgrade.extend({"arch": arch, "from": from_item, "to": to_item} for from_item, to_item in zip(items, items[1:]))
+    latest.append({"arch": arch, "label": dns_label(arch, minor_version(items[-1]), "latest")} | items[-1])
+    upgrade.extend(
+        {
+            "arch": arch,
+            "label": dns_label(arch, minor_version(from_item), "to", minor_version(to_item)),
+            "from": from_item,
+            "to": to_item,
+        }
+        for from_item, to_item in zip(items, items[1:])
+    )
 
 logger.info("Writing the matrices to %s", args.output)
 with open(args.output, "a") as f:
