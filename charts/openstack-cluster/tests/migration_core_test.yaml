@@ -1,0 +1,168 @@
+suite: v1beta2 core values compatibility
+templates:
+  - templates/control-plane/machine-health-check.yaml
+  - templates/node-group/machine-health-check.yaml
+  - templates/node-group/machine-deployment.yaml
+  - templates/node-group/kubeadm-config-template.yaml
+  - templates/node-group/openstack-machine-template.yaml
+values:
+  - values_base.yaml
+release:
+  name: foo
+tests:
+  - it: converts health checks with zero values and a remediation template
+    template: templates/control-plane/machine-health-check.yaml
+    set:
+      controlPlane.healthCheck.spec:
+        maxUnhealthy: 0
+        unhealthyRange: "[0-2]"
+        nodeStartupTimeout: 0s
+        unhealthyConditions:
+          - type: Ready
+            status: "False"
+            timeout: 0s
+        unhealthyMachineConditions:
+          - type: Ready
+            status: "False"
+            timeout: 1m2.9s
+        remediationTemplate:
+          apiVersion: infrastructure.example.io/v1beta1
+          kind: RecoveryTemplate
+          name: recover-control-plane
+          namespace: ignored-by-api-conversion
+    asserts:
+      - equal:
+          path: spec.checks
+          value:
+            nodeStartupTimeoutSeconds: 0
+            unhealthyNodeConditions:
+              - type: Ready
+                status: "False"
+                timeoutSeconds: 0
+            unhealthyMachineConditions:
+              - type: Ready
+                status: "False"
+                timeoutSeconds: 62
+      - equal:
+          path: spec.remediation
+          value:
+            triggerIf:
+              unhealthyLessThanOrEqualTo: 0
+              unhealthyInRange: "[0-2]"
+            templateRef:
+              apiVersion: infrastructure.example.io/v1beta1
+              kind: RecoveryTemplate
+              name: recover-control-plane
+      - notExists:
+          path: spec.unhealthyConditions
+      - notExists:
+          path: spec.maxUnhealthy
+      - notExists:
+          path: spec.remediationTemplate
+  - it: omits empty unhealthy node conditions
+    template: templates/control-plane/machine-health-check.yaml
+    set:
+      controlPlane.healthCheck.spec.unhealthyConditions: []
+    asserts:
+      - notExists:
+          path: spec.checks.unhealthyNodeConditions
+      - equal:
+          path: spec.checks.nodeStartupTimeoutSeconds
+          value: 1800
+  - it: keeps percentage thresholds and node group overrides
+    template: templates/node-group/machine-health-check.yaml
+    set:
+      nodeGroupDefaults.healthCheck.spec.maxUnhealthy: 50%
+      nodeGroups:
+        - name: group-1
+          machineFlavor: vm.small
+          machineCount: 1
+          healthCheck:
+            spec:
+              maxUnhealthy: 2
+              unhealthyRange: "[0-1]"
+        - name: group-2
+          machineFlavor: vm.small
+          machineCount: 1
+    asserts:
+      - equal:
+          path: spec.remediation.triggerIf
+          value:
+            unhealthyLessThanOrEqualTo: 2
+            unhealthyInRange: "[0-1]"
+        documentIndex: 0
+      - equal:
+          path: spec.remediation.triggerIf.unhealthyLessThanOrEqualTo
+          value: 50%
+        documentIndex: 1
+  - it: moves deployment settings and converts deletion timeouts
+    template: templates/node-group/machine-deployment.yaml
+    set:
+      nodeGroupDefaults.nodeDrainTimeout: 0s
+      nodeGroupDefaults.nodeVolumeDetachTimeout: 1h2m3.9s
+      nodeGroupDefaults.nodeDeletionTimeout: 0.999999999s1ns
+      nodeGroupDefaults.rolloutStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 25%
+          deletePolicy: Newest
+        remediation:
+          maxInFlight: 0
+    asserts:
+      - equal:
+          path: spec.rollout.strategy
+          value:
+            type: RollingUpdate
+            rollingUpdate:
+              maxSurge: 0
+              maxUnavailable: 25%
+      - equal:
+          path: spec.deletion.order
+          value: Newest
+      - equal:
+          path: spec.remediation.maxInFlight
+          value: 0
+      - equal:
+          path: spec.template.spec.deletion
+          value:
+            nodeDrainTimeoutSeconds: 0
+            nodeVolumeDetachTimeoutSeconds: 3723
+            nodeDeletionTimeoutSeconds: 1
+      - notExists:
+          path: spec.strategy
+      - notExists:
+          path: spec.template.spec.nodeDrainTimeout
+  - it: omits unset deletion timeouts and caps seconds at the API limit
+    template: templates/node-group/machine-deployment.yaml
+    set:
+      nodeGroupDefaults.nodeDrainTimeout: null
+      nodeGroupDefaults.nodeVolumeDetachTimeout: ""
+      nodeGroupDefaults.nodeDeletionTimeout: 2147483648s
+    asserts:
+      - equal:
+          path: spec.template.spec.deletion
+          value:
+            nodeDeletionTimeoutSeconds: 2147483647
+  - it: omits empty rolling update options and keeps deletion order
+    template: templates/node-group/machine-deployment.yaml
+    set:
+      nodeGroupDefaults.rolloutStrategy.rollingUpdate:
+        maxSurge: null
+        maxUnavailable: null
+        deletePolicy: Oldest
+    asserts:
+      - equal:
+          path: spec.rollout.strategy
+          value:
+            type: RollingUpdate
+      - equal:
+          path: spec.deletion.order
+          value: Oldest
+  - it: rejects invalid Go durations
+    template: templates/node-group/machine-deployment.yaml
+    set:
+      nodeGroupDefaults.nodeDrainTimeout: 2d
+    asserts:
+      - failedTemplate:
+          errorMessage: 'invalid Go duration "2d"'

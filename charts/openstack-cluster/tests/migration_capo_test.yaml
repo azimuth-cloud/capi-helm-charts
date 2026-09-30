@@ -1,0 +1,91 @@
+suite: v1beta2 OpenStack values compatibility
+templates:
+  - templates/cluster-openstack.yaml
+  - templates/control-plane/openstack-machine-template.yaml
+  - templates/node-group/openstack-machine-template.yaml
+values:
+  - values_base.yaml
+release:
+  name: foo
+tests:
+  - it: preserves disabled floating IP and external network settings
+    template: templates/cluster-openstack.yaml
+    set:
+      clusterNetworking.disableExternalNetwork: true
+      apiServer.associateFloatingIP: false
+      apiServer.enableLoadBalancer: false
+      apiServer.port: 7443
+    asserts:
+      - equal:
+          path: spec.enableExternalNetwork
+          value: false
+      - equal:
+          path: spec.apiServer
+          value:
+            enableFloatingIP: false
+            port: 7443
+      - notExists:
+          path: spec.disableExternalNetwork
+      - notExists:
+          path: spec.disableAPIServerFloatingIP
+      - notExists:
+          path: spec.apiServerPort
+  - it: converts true and false port security settings and leaves unset values omitted
+    template: templates/control-plane/openstack-machine-template.yaml
+    set:
+      controlPlane.machineNetworking.ports:
+        - name: secured
+          disablePortSecurity: false
+        - name: isolated
+          disablePortSecurity: true
+        - name: defaulted
+    asserts:
+      - equal:
+          path: spec.template.spec.ports
+          value:
+            - name: secured
+              enablePortSecurity: true
+            - name: isolated
+              enablePortSecurity: false
+            - name: defaulted
+      - equal:
+          path: spec.template.spec.flavor
+          value:
+            filter:
+              name: vm.small
+  - it: applies node group overrides before converting port security
+    template: templates/node-group/openstack-machine-template.yaml
+    set:
+      nodeGroupDefaults.machineNetworking.ports:
+        - name: inherited
+          disablePortSecurity: true
+      nodeGroups:
+        - name: group-1
+          machineFlavor: vm.small
+          machineCount: 1
+          machineNetworking:
+            ports:
+              - name: overridden
+                disablePortSecurity: false
+        - name: group-2
+          machineFlavor: vm.large
+          machineCount: 1
+    asserts:
+      - equal:
+          path: spec.template.spec.ports
+          value:
+            - name: overridden
+              enablePortSecurity: true
+        documentIndex: 0
+      - equal:
+          path: spec.template.spec.ports
+          value:
+            - name: inherited
+              enablePortSecurity: false
+        documentIndex: 1
+      - equal:
+          path: spec.template.spec.flavor
+          value:
+            filter:
+              name: vm.large
+        documentIndex: 1
