@@ -21,3 +21,11 @@ docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-c
 where the `-u` option is used to update the existing snapshots. If you receive
 permissions errors when trying to update snapshots, ensure that you are using
 the latest version of the `helmunittest/helm-unittest` image.
+
+### CAPI/CAPO API migration checks
+
+Changes to CAPI/CAPO templates must also pass the [v1beta2 migration tests](docs/v1beta2-migration.md).
+CI compares old and new chart output to check values compatibility and template names.
+It also checks that configuration changes still update the affected templates.
+Run the tests with Helm and Python with PyYAML.
+Separate CI steps validate schemas with kubeconform.

@@ -1,0 +1,59 @@
+suite: v1beta2 worker bootstrap compatibility
+templates:
+  - templates/node-group/kubeadm-config-template.yaml
+values:
+  - values_base.yaml
+release:
+  name: foo
+tests:
+  - it: keeps the bootstrap template name used by 0.28.1 and 0.29.0
+    asserts:
+      - equal:
+          path: apiVersion
+          value: bootstrap.cluster.x-k8s.io/v1beta2
+      - equal:
+          path: metadata.name
+          value: foo-group-1-d43bd1bb
+      - equal:
+          path: spec.template.spec.joinConfiguration.nodeRegistration.kubeletExtraArgs
+          value:
+            - name: cloud-provider
+              value: external
+            - name: node-labels
+              value: capi.stackhpc.com/node-group=group-1
+  - it: applies node group overrides and keeps empty argument values
+    set:
+      nodeGroupDefaults.kubeadmConfigSpec.joinConfiguration.nodeRegistration.kubeletExtraArgs:
+        v: "1"
+        register-with-taints: ""
+      nodeGroups:
+        - name: group-1
+          machineFlavor: vm.small
+          machineCount: 1
+          kubeadmConfigSpec:
+            joinConfiguration:
+              nodeRegistration:
+                kubeletExtraArgs:
+                  v: "8"
+        - name: group-2
+          machineFlavor: vm.small
+          machineCount: 1
+    asserts:
+      - contains:
+          path: spec.template.spec.joinConfiguration.nodeRegistration.kubeletExtraArgs
+          content:
+            name: v
+            value: "8"
+        documentIndex: 0
+      - contains:
+          path: spec.template.spec.joinConfiguration.nodeRegistration.kubeletExtraArgs
+          content:
+            name: v
+            value: "1"
+        documentIndex: 1
+      - contains:
+          path: spec.template.spec.joinConfiguration.nodeRegistration.kubeletExtraArgs
+          content:
+            name: register-with-taints
+            value: ""
+        documentIndex: 0

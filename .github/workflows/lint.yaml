@@ -11,6 +11,11 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      # CAPO v0.15.0 schemas from datreeio/CRDs-catalog#984.
+      CRDS_CATALOG_REPOSITORY: jihyun-huh/CRDs-catalog
+      CRDS_CATALOG_REF: 68fa611d691a34bd4f14b03bf707482ccbca8c70
+      KUBECONFORM_IMAGE: ghcr.io/yannh/kubeconform:v0.8.0@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -39,16 +44,36 @@ jobs:
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
-            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
-            --strict --summary \
+            | docker run -i --rm "$KUBECONFORM_IMAGE" \
+            --strict --summary --verbose \
             --schema-location default \
-            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --schema-location "https://raw.githubusercontent.com/$CRDS_CATALOG_REPOSITORY/$CRDS_CATALOG_REF/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            --skip HelmRelease,Manifests
 
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
       - name: Run manifest snapshot test (current values)
         run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
+
+      - name: Check v1beta2 migration compatibility
+        run: |
+          set -eo pipefail
+          python3 -m venv "$RUNNER_TEMP/migration-venv"
+          "$RUNNER_TEMP/migration-venv/bin/pip" install -r scripts/requirements-migration.txt
+          "$RUNNER_TEMP/migration-venv/bin/python" scripts/check-v1beta2-migration.py \
+            --output-dir "$RUNNER_TEMP/migration-results"
+
+      - name: Upload migration comparison results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: v1beta2-migration-comparison
+          if-no-files-found: ignore
+          path: |
+            ${{ runner.temp }}/migration-results/*.json
+            ${{ runner.temp }}/migration-results/*.yaml
+            ${{ runner.temp }}/migration-results/*.log
+
       - name: Get latest tag
         id: latest-tag
         run: |
@@ -67,11 +92,11 @@ jobs:
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
-            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
-            --strict --summary \
+            | docker run -i --rm "$KUBECONFORM_IMAGE" \
+            --strict --summary --verbose \
             --schema-location default \
-            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --schema-location "https://raw.githubusercontent.com/$CRDS_CATALOG_REPOSITORY/$CRDS_CATALOG_REF/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            --skip HelmRelease,Manifests
 
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u

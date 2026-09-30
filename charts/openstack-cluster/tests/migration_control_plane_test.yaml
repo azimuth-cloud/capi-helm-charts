@@ -1,0 +1,197 @@
+suite: v1beta2 control plane values compatibility
+templates:
+  - templates/control-plane/kubeadm-control-plane.yaml
+  - templates/control-plane/openstack-machine-template.yaml
+values:
+  - values_base.yaml
+release:
+  name: foo
+tests:
+  - it: keeps the machine template reference and certificate expiry setting
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    asserts:
+      - equal:
+          path: apiVersion
+          value: controlplane.cluster.x-k8s.io/v1beta2
+      - equal:
+          path: spec.machineTemplate.spec.infrastructureRef
+          value:
+            apiGroup: infrastructure.cluster.x-k8s.io
+            kind: OpenStackMachineTemplate
+            name: foo-control-plane-a43634ee
+      - equal:
+          path: spec.rollout.before.certificatesExpiryDays
+          value: 21
+      - equal:
+          path: spec.machineTemplate.spec.deletion.nodeDrainTimeoutSeconds
+          value: 300
+  - it: merges legacy argument maps before converting them to lists
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      oidc.issuerUrl: https://issuer.example.test
+      oidc.clientId: original-client
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.apiServer.extraArgs:
+        oidc-client-id: overridden-client
+        audit-log-maxage: "0"
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.controllerManager.extraArgs:
+        bind-address: 127.0.0.1
+        profiling: "false"
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.scheduler.extraArgs:
+        profiling: "false"
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.etcd.local.extraArgs:
+        heartbeat-interval: "750"
+    asserts:
+      - notExists:
+          path: spec.kubeadmConfigSpec.Error
+      - contains:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.apiServer.extraArgs
+          content:
+            name: oidc-issuer-url
+            value: https://issuer.example.test
+      - contains:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.apiServer.extraArgs
+          content:
+            name: oidc-client-id
+            value: overridden-client
+      - contains:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.apiServer.extraArgs
+          content:
+            name: admission-control-config-file
+            value: /etc/kubernetes/admission/configuration.yaml
+      - contains:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.apiServer.extraArgs
+          content:
+            name: audit-log-maxage
+            value: "0"
+      - equal:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.controllerManager.extraArgs
+          value:
+            - name: bind-address
+              value: 127.0.0.1
+            - name: cloud-provider
+              value: external
+            - name: profiling
+              value: "false"
+      - contains:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.scheduler.extraArgs
+          content:
+            name: bind-address
+            value: 0.0.0.0
+      - contains:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.etcd.local.extraArgs
+          content:
+            name: heartbeat-interval
+            value: "750"
+  - it: keeps zero values and converts kubeadm timeouts to seconds
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      controlPlane.certificatesExpiryDays: 0
+      controlPlane.nodeDrainTimeout: 0s
+      controlPlane.remediationStrategy.maxRetry: 0
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.apiServer.timeoutForControlPlane: 1m30.5s
+      controlPlane.kubeadmConfigSpec.joinConfiguration.discovery.timeout: 2m
+      controlPlane.kubeadmConfigSpec.initConfiguration.bootstrapTokens:
+        - ttl: 0s
+    asserts:
+      - notExists:
+          path: spec.rollout.before
+      - equal:
+          path: spec.machineTemplate.spec.deletion.nodeDrainTimeoutSeconds
+          value: 0
+      - equal:
+          path: spec.remediation.maxRetry
+          value: 0
+      - equal:
+          path: spec.kubeadmConfigSpec.initConfiguration.timeouts.controlPlaneComponentHealthCheckSeconds
+          value: 90
+      - equal:
+          path: spec.kubeadmConfigSpec.joinConfiguration.timeouts.controlPlaneComponentHealthCheckSeconds
+          value: 90
+      - equal:
+          path: spec.kubeadmConfigSpec.joinConfiguration.timeouts.tlsBootstrapSeconds
+          value: 120
+      - equal:
+          path: spec.kubeadmConfigSpec.initConfiguration.bootstrapTokens[0].ttlSeconds
+          value: 0
+      - notExists:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.apiServer.timeoutForControlPlane
+      - notExists:
+          path: spec.kubeadmConfigSpec.joinConfiguration.discovery.timeout
+  - it: removes empty fields but keeps empty taint lists
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      controlPlane.kubeadmConfigSpec.ignition.containerLinuxConfig.strict: false
+      controlPlane.kubeadmConfigSpec.joinConfiguration.discovery:
+        timeout: 45s
+        file: null
+      controlPlane.kubeadmConfigSpec.initConfiguration.nodeRegistration.taints: []
+      controlPlane.kubeadmConfigSpec.files:
+        - path: /etc/test-empty
+          content: ""
+          append: false
+    asserts:
+      - notExists:
+          path: spec.kubeadmConfigSpec.ignition
+      - notExists:
+          path: spec.kubeadmConfigSpec.joinConfiguration.discovery
+      - equal:
+          path: spec.kubeadmConfigSpec.joinConfiguration.timeouts.tlsBootstrapSeconds
+          value: 45
+      - equal:
+          path: spec.kubeadmConfigSpec.initConfiguration.nodeRegistration.taints
+          value: []
+      - contains:
+          path: spec.kubeadmConfigSpec.files
+          content:
+            path: /etc/test-empty
+  - it: accepts null optional bootstrap configuration
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      controlPlane.kubeadmConfigSpec.ignition: null
+      controlPlane.kubeadmConfigSpec.joinConfiguration.discovery: null
+    asserts:
+      - notExists:
+          path: spec.kubeadmConfigSpec.ignition
+      - notExists:
+          path: spec.kubeadmConfigSpec.joinConfiguration.discovery
+  - it: omits remediation when only a zero retry period is set
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      controlPlane.remediationStrategy:
+        retryPeriod: 0s
+        maxRetry: null
+        minHealthyPeriod: null
+    asserts:
+      - notExists:
+          path: spec.remediation
+  - it: omits empty environment lists
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.apiServer.extraEnvs: []
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.controllerManager.extraEnvs: []
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.scheduler.extraEnvs: []
+      controlPlane.kubeadmConfigSpec.clusterConfiguration.etcd.local.extraEnvs: []
+    asserts:
+      - notExists:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.apiServer.extraEnvs
+      - notExists:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.controllerManager.extraEnvs
+      - notExists:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.scheduler.extraEnvs
+      - notExists:
+          path: spec.kubeadmConfigSpec.clusterConfiguration.etcd.local.extraEnvs
+  - it: omits default endpoint fields but keeps the control plane join configuration
+    template: templates/control-plane/kubeadm-control-plane.yaml
+    set:
+      controlPlane.kubeadmConfigSpec.initConfiguration.localAPIEndpoint:
+        bindPort: 0
+        advertiseAddress: ""
+      controlPlane.kubeadmConfigSpec.joinConfiguration.controlPlane.localAPIEndpoint:
+        bindPort: 0
+        advertiseAddress: ""
+    asserts:
+      - notExists:
+          path: spec.kubeadmConfigSpec.initConfiguration.localAPIEndpoint
+      - equal:
+          path: spec.kubeadmConfigSpec.joinConfiguration.controlPlane
+          value: {}
