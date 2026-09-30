@@ -97,7 +97,7 @@ template:
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
 kind: OpenStackMachineTemplate
 metadata:
   name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
@@ -109,5 +109,5 @@ metadata:
     # Cluster API complains when old templates disappear before it has rolled all the machines over
     # When deploying with Helm, leave the resource behind and let Cluster API clean it up
     helm.sh/resource-policy: keep
-spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
+spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | fromYaml | include "openstack-cluster.capo.v1beta2.machineTemplateSpec" | nindent 2 }}
 {{- end }}

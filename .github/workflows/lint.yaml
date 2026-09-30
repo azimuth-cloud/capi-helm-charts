@@ -11,6 +11,11 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      # CAPO v0.15.0 schemas from datreeio/CRDs-catalog#984.
+      CRDS_CATALOG_REPOSITORY: datreeio/CRDs-catalog
+      CRDS_CATALOG_REF: b816c3f39cbda8e23a398bb2ddf19b48e3aeb7bf
+      KUBECONFORM_IMAGE: ghcr.io/yannh/kubeconform:v0.8.0@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -39,38 +44,41 @@ jobs:
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
-            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
-            --strict --summary \
+            | docker run -i --rm "$KUBECONFORM_IMAGE" \
+            --strict --summary --verbose \
             --schema-location default \
-            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --schema-location "https://raw.githubusercontent.com/$CRDS_CATALOG_REPOSITORY/$CRDS_CATALOG_REF/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            --skip HelmRelease,Manifests
 
       - name: Run template validation (Flatcar values)
         run: |-
+          set -eo pipefail
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_flatcar.yaml \
-            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            | docker run -i --rm "$KUBECONFORM_IMAGE" \
             --strict --summary \
             --schema-location default \
-            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --schema-location "https://raw.githubusercontent.com/$CRDS_CATALOG_REPOSITORY/$CRDS_CATALOG_REF/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            --skip HelmRelease,Manifests
 
       - name: Run template validation (Flatcar sysext values)
         run: |-
+          set -eo pipefail
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_flatcar_sysext.yaml \
-            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            | docker run -i --rm "$KUBECONFORM_IMAGE" \
             --strict --summary \
             --schema-location default \
-            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --schema-location "https://raw.githubusercontent.com/$CRDS_CATALOG_REPOSITORY/$CRDS_CATALOG_REF/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            --skip HelmRelease,Manifests
 
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
       - name: Run manifest snapshot test (current values)
         run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
+
       - name: Get latest tag
         id: latest-tag
         run: |
@@ -89,11 +97,11 @@ jobs:
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
-            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
-            --strict --summary \
+            | docker run -i --rm "$KUBECONFORM_IMAGE" \
+            --strict --summary --verbose \
             --schema-location default \
-            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+            --schema-location "https://raw.githubusercontent.com/$CRDS_CATALOG_REPOSITORY/$CRDS_CATALOG_REF/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+            --skip HelmRelease,Manifests
 
       # NOTE: Run the following command locally to generate updated snapshots:
       # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
