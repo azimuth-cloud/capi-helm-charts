@@ -1,14 +1,4 @@
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: OpenStackCluster
-metadata:
-  name: {{ include "openstack-cluster.clusterName" . }}
-  labels: {{ include "openstack-cluster.labels" . | nindent 4 }}
-  annotations:
-    # We let Cluster API clean up this resource
-    # Deleting it ourselves, which CAPI is not expecting, can cause some nasty race conditions
-    helm.sh/resource-policy: keep
-spec:
+{{- define "openstack-cluster.capo.legacyClusterSpec" }}
   identityRef:
     name: {{ include "openstack-cluster.cloudCredentialsSecretName" . }}
     cloudName: openstack
@@ -81,3 +71,16 @@ spec:
   controlPlaneAvailabilityZones: {{ toYaml .failureDomains | nindent 4 }}
   {{- end }}
   {{- end }}
+{{- end -}}
+
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: OpenStackCluster
+metadata:
+  name: {{ include "openstack-cluster.clusterName" . }}
+  labels: {{ include "openstack-cluster.labels" . | nindent 4 }}
+  annotations:
+    # We let Cluster API clean up this resource
+    # Deleting it ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    helm.sh/resource-policy: keep
+spec: {{ include "openstack-cluster.capo.legacyClusterSpec" . | fromYaml | include "openstack-cluster.capo.v1beta2.clusterSpec" | nindent 2 }}
