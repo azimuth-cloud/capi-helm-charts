@@ -627,8 +627,8 @@ See [DEBUGGING.md](./DEBUGGING.md).
 
 ### Flatcar support
 
-To deploy clusters which use Ignition such as Flatcar, you will need to override the `osDistro`
-setting in your local `values.yaml`. Both variants use
+To deploy clusters based on Flatcar Linux, you will need to override the `osDistro`
+setting in your local `values.yaml`. Both the flatcar and flatcar-sysext variants use
 [systemd-sysext](https://www.freedesktop.org/software/systemd/man/latest/systemd-sysext.html) to
 merge the Kubernetes and containerd extension images into `/usr` on every boot.
 
@@ -657,7 +657,8 @@ You may add arbitary sysexts to the flatcar.sysexts dict.
 Kubernetes and containerd are required for the kubernetes cluster to start and should
 always be present, but others are can be added when required.
 
-NOTE: Only sha512 checksums are accepted by ignition.
+[!WARNING]
+Only sha512 checksums are accepted by ignition.
 Your checksum must be in the form `sha512-....`.
 
 machineImage and the flatcar sysext list may also be overriden for just the control plane
