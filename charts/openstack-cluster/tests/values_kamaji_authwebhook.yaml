@@ -1,0 +1,27 @@
+---
+authWebhook: k8s-keystone-auth
+controlPlane:
+  type: kamaji
+  kamaji:
+    keystoneAuth:
+      authUrl: https://keystone.my.cloud:5000/v3
+      # A fixed cert/key keeps this snapshot deterministic, without them the
+      # chart generates a fresh self-signed cert on every render (genSelfSignedCert)
+      # and the snapshot could never match.
+      tls:
+        cert: |
+          -----BEGIN CERTIFICATE-----
+          MIIBdummyCertForSnapshotTestingOnlyNotARealCertificateAAAAAAAAAAAA
+          -----END CERTIFICATE-----
+        key: |
+          -----BEGIN PRIVATE KEY-----
+          MIIBdummyKeyForSnapshotTestingOnlyNotARealPrivateKeyAAAAAAAAAAAAAA
+          -----END PRIVATE KEY-----
+      policy:
+        - resource:
+            services:
+              - type: service
+                names: ["*"]
+                actions: ["get", "list"]
+          match:
+            credentials: ["X-Auth-Token"]
