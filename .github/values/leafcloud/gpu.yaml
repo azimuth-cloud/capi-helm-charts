@@ -1,0 +1,4 @@
+nodeGroups:
+  - name: gpu
+    machineFlavor: eg1.a30x1.V8-32
+    machineCount: 1
