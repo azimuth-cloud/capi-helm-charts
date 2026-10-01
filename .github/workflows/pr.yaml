@@ -46,7 +46,7 @@ jobs:
 
       - name: Check GPU operator template changes
         id: gpu_template
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
         with:
           filters: |
             gpu_template:
