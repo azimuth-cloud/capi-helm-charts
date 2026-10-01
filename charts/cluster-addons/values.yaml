@@ -276,6 +276,10 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          grafana.ini:
+            users:
+              default_theme: system
         prometheus:
           prometheusSpec:
             # The amount of data that is retained will be 90 days or 95% of the size of the
