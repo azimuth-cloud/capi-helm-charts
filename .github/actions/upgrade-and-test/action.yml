@@ -174,11 +174,24 @@ runs:
         NAMESPACES=$(kubectl get ns --no-headers --output jsonpath='{.items[*].metadata.name}')
         for ns in $NAMESPACES; do
           echo "namespace: $ns"
+          # Deployments
           kubectl rollout status \
             --namespace "$ns" \
             --watch \
-            --timeout 20m  \
-            deployments,statefulsets,daemonsets
+            --timeout 20m \
+            deployments
+          # To skip StatefulSets and DaemonSets using OnDelete strategy 
+          for resource in statefulsets daemonsets; do
+            for name in $(kubectl get "$resource" \
+              --namespace "$ns" \
+              -o jsonpath='{range .items[?(@.spec.updateStrategy.type=="RollingUpdate")]}{.metadata.name}{"\n"}{end}'); do
+              kubectl rollout status \
+                --namespace "$ns" \
+                --watch \
+                --timeout 20m \
+                "$resource/$name"
+            done
+          done
         done
       env:
         KUBECONFIG: ./kubeconfig
