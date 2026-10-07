@@ -43,7 +43,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-
       - name: Check GPU operator template changes
         id: gpu_template
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
@@ -51,7 +50,6 @@ jobs:
           filters: |
             gpu_template:
               - 'charts/cluster-addons/templates/nvidia-gpu-operator.yaml'
-
       - name: Compare NVIDIA GPU operator values
         id: gpu_values
         env:
@@ -59,19 +57,15 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           VALUES_FILE="charts/cluster-addons/values.yaml"
-
           git show "$BASE_SHA:$VALUES_FILE" > /tmp/base-values.yaml
           git show "$HEAD_SHA:$VALUES_FILE" > /tmp/head-values.yaml
-
           BASE_GPU=$(yq -o=json '.nvidiaGPUOperator' /tmp/base-values.yaml)
           HEAD_GPU=$(yq -o=json '.nvidiaGPUOperator' /tmp/head-values.yaml)
-
           if [ "$BASE_GPU" != "$HEAD_GPU" ]; then
             echo "gpu_values_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "gpu_values_changed=false" >> "$GITHUB_OUTPUT"
           fi
-
       - name: Set GPU change result
         id: result
         env:
