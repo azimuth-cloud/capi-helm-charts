@@ -4,6 +4,13 @@
 # if not given, the release name is used
 clusterName:
 
+# Indicates that the cluster uses a hosted control plane (e.g. Kamaji)
+# When true there are no control plane nodes in the workload cluster, so addons
+# that would normally run on them (tigera operator, CCM, Cinder CSI controller) are
+# not pinned there and the etcd defragmentation job (which needs in-cluster etcd
+# pods) is disabled
+hostedControlPlane: false
+
 # Settings for the CNI addon
 cni:
   # Indicates if a CNI should be deployed

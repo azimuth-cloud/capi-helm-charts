@@ -96,6 +96,7 @@ template:
 {{- include "openstack-cluster.componentName" (list . "control-plane") }}-{{ trunc 8 $checksum }}
 {{- end }}
 
+{{- if ne (include "openstack-cluster.controlplane.isKamaji" .) "true" }}
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
 metadata:
@@ -108,3 +109,4 @@ metadata:
     helm.sh/resource-policy: keep
 spec:
   {{- include "openstack-cluster.controlplane.mt.spec" . | nindent 2 }}
+{{- end }}

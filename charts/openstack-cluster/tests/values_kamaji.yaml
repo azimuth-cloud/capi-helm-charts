@@ -1,0 +1,34 @@
+---
+controlPlane:
+  type: kamaji
+  kamaji:
+    dataStoreName: default
+    serviceType: LoadBalancer
+    serviceAnnotations:
+      loadbalancer.openstack.org/keep-floatingip: "true"
+    certSANs:
+      - my-cluster.example.org
+    addons:
+      konnectivity: {}
+    apiServerResources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    extraSpec:
+      registry: registry.k8s.io
+apiServer:
+  admissionConfiguration:
+    PodSecurity:
+      apiVersion: pod-security.admission.config.k8s.io/v1
+      kind: PodSecurityConfiguration
+      defaults:
+        enforce: baseline
+        enforce-version: latest
+      exemptions:
+        namespaces:
+          - kube-system
+oidc:
+  issuerUrl: https://auth.example.org
+  clientId: my-cluster
+addons:
+  hostedControlPlane: true
