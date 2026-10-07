@@ -36,7 +36,8 @@ stringData:
         - name: "RUNTIME_CONFIG_SOURCE"
           value: "file"
   overrides: |
-    {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }} 
+    {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }}
+# CI Test to test dorny/pathfilter action to detect changes to the nvidia-gpu-operator chart and values
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
