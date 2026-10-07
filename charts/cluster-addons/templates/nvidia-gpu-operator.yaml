@@ -1,4 +1,3 @@
-# CI test: verify GPU operator change detection
 {{- if .Values.nvidiaGPUOperator.enabled }}
 ---
 apiVersion: v1
@@ -37,8 +36,7 @@ stringData:
         - name: "RUNTIME_CONFIG_SOURCE"
           value: "file"
   overrides: |
-    {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }}
-# CI test: verify GPU operator change detection    
+    {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }} 
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
