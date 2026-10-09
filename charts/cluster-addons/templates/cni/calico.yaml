@@ -1,5 +1,18 @@
 {{- if and .Values.cni.enabled (eq .Values.cni.type "calico") }}
 ---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-crds
+  labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.cni.calico.crdChart | nindent 4 }}
+  targetNamespace: {{ .Values.cni.calico.release.namespace }}
+  releaseName: cni-calico-crds
+  valuesSources: []
+---
 apiVersion: v1
 kind: Secret
 metadata:
