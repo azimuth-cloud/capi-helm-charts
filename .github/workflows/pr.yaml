@@ -1,3 +1,4 @@
+---
 name: test pr
 on:
   pull_request:
@@ -6,6 +7,10 @@ on:
       - synchronize
       - ready_for_review
       - reopened
+    branches:
+      - main
+  merge_group:
+    types: [checks_requested]
     branches:
       - main
 
@@ -58,6 +63,21 @@ jobs:
       chart-version: ${{ needs.publish_charts.outputs.chart-version }}
       # We want to test the code in the PR
       ref: ${{ github.event.pull_request.head.sha }}
+      # If the PR is in draft, just run a sanity check
+      # If the PR is in review, run the full test suite
+      tests-full: ${{ !github.event.pull_request.draft }}
+
+  # The workflow checks whether any flatcar sysext related files have changed
+  test_flatcar_sysext:
+    needs: [mirror_container_images, publish_charts]
+    # Only test PRs that are ready for review
+    if: ${{ !github.event.pull_request.draft }}
+    uses: ./.github/workflows/flatcar-sysext.yaml
+    secrets: inherit
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      base-ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+      chart-version: ${{ needs.publish_charts.outputs.chart-version }}
       # If the PR is in draft, just run a sanity check
       # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
