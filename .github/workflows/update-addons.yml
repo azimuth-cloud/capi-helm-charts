@@ -119,6 +119,9 @@ jobs:
           - key: headlamp
             path: headlamp.chart
 
+          - key: csi-nfs-driver
+            path: csi.csiNfs.chart
+
     name: ${{ matrix.key }}
     steps:
       - name: Checkout
