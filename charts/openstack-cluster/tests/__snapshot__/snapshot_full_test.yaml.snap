@@ -493,7 +493,7 @@ templated manifests should match snapshot:
       chart:
         name: headlamp
         repo: https://kubernetes-sigs.github.io/headlamp
-        version: 0.44.0
+        version: 0.45.0
       clusterName: RELEASE-NAME
       releaseName: headlamp
       targetNamespace: headlamp
@@ -715,7 +715,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-operator
         repo: https://intel.github.io/helm-charts
-        version: 0.32.0
+        version: 0.36.0
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-operator
       targetNamespace: intel
@@ -782,7 +782,7 @@ templated manifests should match snapshot:
       chart:
         name: network-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: 26.4.1
+        version: 26.7.0
       clusterName: RELEASE-NAME
       releaseName: mellanox-network-operator
       targetNamespace: network-operator
@@ -829,7 +829,7 @@ templated manifests should match snapshot:
       chart:
         name: metrics-server
         repo: https://kubernetes-sigs.github.io/metrics-server
-        version: 3.13.1
+        version: 3.14.0
       clusterName: RELEASE-NAME
       releaseName: metrics-server
       targetNamespace: kube-system
@@ -906,7 +906,7 @@ templated manifests should match snapshot:
       chart:
         name: prometheus-blackbox-exporter
         repo: https://prometheus-community.github.io/helm-charts
-        version: 11.9.1
+        version: 11.18.0
       clusterName: RELEASE-NAME
       releaseName: prometheus-blackbox-exporter
       targetNamespace: monitoring-system
@@ -1075,6 +1075,10 @@ templated manifests should match snapshot:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          grafana.ini:
+            users:
+              default_theme: system
         prometheus:
           prometheusSpec:
             retention: 90d
@@ -1101,7 +1105,7 @@ templated manifests should match snapshot:
       chart:
         name: kube-prometheus-stack
         repo: https://prometheus-community.github.io/helm-charts
-        version: 85.0.2
+        version: 90.0.0
       clusterName: RELEASE-NAME
       lifecycleHooks:
         postDelete:
@@ -1244,7 +1248,7 @@ templated manifests should match snapshot:
       chart:
         name: loki-stack
         repo: https://grafana.github.io/helm-charts
-        version: 2.10.2
+        version: 2.10.3
       clusterName: RELEASE-NAME
       lifecycleHooks:
         preUpgrade:
@@ -1483,7 +1487,7 @@ templated manifests should match snapshot:
       chart:
         name: gpu-operator
         repo: https://helm.ngc.nvidia.com/nvidia
-        version: v26.3.1
+        version: v26.7.0
       clusterName: RELEASE-NAME
       releaseName: nvidia-gpu-operator
       targetNamespace: gpu-operator
@@ -1542,7 +1546,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.1
+        version: 2.36.3
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
@@ -1631,7 +1635,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cinder-csi
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.2
+        version: 2.36.5
       clusterName: RELEASE-NAME
       releaseName: csi-cinder
       targetNamespace: openstack-system
@@ -1888,7 +1892,7 @@ templated manifests should match snapshot:
       chart:
         name: reloader
         repo: https://stakater.github.io/stakater-charts
-        version: 2.2.16
+        version: 2.2.17
       clusterName: RELEASE-NAME
       releaseName: reloader
       targetNamespace: openstack-system
@@ -1932,7 +1936,7 @@ templated manifests should match snapshot:
       chart:
         name: traefik
         repo: https://traefik.github.io/charts
-        version: 41.2.0
+        version: 41.5.0
       clusterName: RELEASE-NAME
       releaseName: traefik
       targetNamespace: traefik

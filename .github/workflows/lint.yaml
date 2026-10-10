@@ -1,5 +1,6 @@
 name: Helm Lint
 on:
+  push:
   workflow_call:
     inputs:
       ref:
@@ -38,6 +39,28 @@ jobs:
           helm template foo charts/openstack-cluster \
             -f charts/openstack-cluster/tests/values_base.yaml \
             -f charts/openstack-cluster/tests/values_full.yaml \
+            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            --strict --summary \
+            --schema-location default \
+            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+
+      - name: Run template validation (Flatcar values)
+        run: |-
+          helm template foo charts/openstack-cluster \
+            -f charts/openstack-cluster/tests/values_base.yaml \
+            -f charts/openstack-cluster/tests/values_flatcar.yaml \
+            | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
+            --strict --summary \
+            --schema-location default \
+            --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
+
+      - name: Run template validation (Flatcar sysext values)
+        run: |-
+          helm template foo charts/openstack-cluster \
+            -f charts/openstack-cluster/tests/values_base.yaml \
+            -f charts/openstack-cluster/tests/values_flatcar_sysext.yaml \
             | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
             --strict --summary \
             --schema-location default \

@@ -743,7 +743,6 @@ templated manifests should match snapshot:
     spec:
       apiServerLoadBalancer:
         enabled: true
-        provider: ovn
       apiServerPort: 6443
       controlPlaneOmitAvailabilityZone: true
       disableAPIServerFloatingIP: false
@@ -752,28 +751,6 @@ templated manifests should match snapshot:
         name: RELEASE-NAME-cloud-credentials
       managedSecurityGroups:
         allowAllInClusterTraffic: true
-        workerNodesSecurityGroupRules:
-          - direction: ingress
-            etherType: IPv4
-            name: Worker nodePort TCP
-            portRangeMax: 32767
-            portRangeMin: 30000
-            protocol: tcp
-            remoteIPPrefix: 0.0.0.0/0
-          - direction: ingress
-            etherType: IPv4
-            name: Worker nodePort TCP2
-            portRangeMax: 32767
-            portRangeMin: 30001
-            protocol: tcp
-            remoteIPPrefix: 0.0.0.0/0
-          - direction: ingress
-            etherType: IPv4
-            name: Worker nodePort UDP
-            portRangeMax: 32767
-            portRangeMin: 30000
-            protocol: udp
-            remoteIPPrefix: 0.0.0.0/0
       managedSubnets:
         - cidr: 192.168.3.0/24
   28: |
@@ -916,34 +893,110 @@ templated manifests should match snapshot:
               kind: KubeProxyConfiguration
               metricsBindAddress: 0.0.0.0:10249
             owner: root:root
-            path: /run/kubeadm/kube-proxy-configuration.yaml
+            path: /etc/kube-proxy-configuration.yaml
             permissions: "0644"
+        format: ignition
+        ignition:
+          containerLinuxConfig:
+            additionalConfig: |-
+              storage:
+                files:
+                  - path: /opt/extensions/containerd/containerd.raw
+                    contents:
+                      remote:
+                        url: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                        verification:
+                          hash:
+                            function: sha512
+                            sum: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    mode: 0644
+                  - path: /opt/extensions/kubernetes/kubernetes.raw
+                    contents:
+                      remote:
+                        url: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                        verification:
+                          hash:
+                            function: sha512
+                            sum: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    mode: 0644
+                links:
+                  - target: /opt/extensions/containerd/containerd.raw
+                    path: /etc/extensions/containerd.raw
+                    hard: false
+                  - target: /opt/extensions/kubernetes/kubernetes.raw
+                    path: /etc/extensions/kubernetes.raw
+                    hard: false
+                  # Flatcar ships docker/containerd sysexts enabled by default
+                  # Disable this as per https://www.flatcar.org/docs/latest/sys-ext/#remove-docker-and--or-containerd-from-flatcar
+                  # So that we manage containerd outselves
+                  - path: /etc/extensions/docker-flatcar.raw
+                    target: /dev/null
+                    overwrite: true
+                    hard: false
+                  - path: /etc/extensions/containerd-flatcar.raw
+                    target: /dev/null
+                    overwrite: true
+                    hard: false
+              systemd:
+                units:
+                # Disabling auto-update
+                - name: update-engine.service
+                  mask: true
+                - name: locksmithd.service
+                  mask: true
+                - name: systemd-sysupdate.timer
+                  enabled: false
+
+                # Kubernetes-focused units
+                # this service must not run if no key has been provided by openstack, it retries
+                # forever causing a mount error in the kernel log.
+                # sshkeys.service (baked into flatcar) starts this unit directly via `systemctl start`
+                # whenever it isn't already masked, regardless of enabled/disabled, so when there is
+                # no key the service must be masked.
+                - name: coreos-metadata-sshkeys@core.service
+                  mask: true
+                - name: kubeadm.service
+                  enabled: true
+                  dropins:
+                  - name: 10-flatcar.conf
+                    contents: |
+                      [Unit]
+                      Requires=containerd.service coreos-metadata.service
+                      After=containerd.service coreos-metadata.service
+                      [Service]
+                      EnvironmentFile=/run/metadata/flatcar
+                # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
+                # default. Disable this.
+                # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
+                - name: getty@.service
+                  dropins:
+                    - name: 10-autologin.conf
+                      contents: |
+                        [Service]
+                        ExecStart=
+                        ExecStart=-/sbin/agetty --noclear %I $TERM
         initConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
               cloud-provider: external
-            name: '{{ local_hostname }}'
+              provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
+            name: ${COREOS_OPENSTACK_HOSTNAME}
         joinConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
               cloud-provider: external
-            name: '{{ local_hostname }}'
+              provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
+            name: ${COREOS_OPENSTACK_HOSTNAME}
         preKubeadmCommands:
-          - |-
-            /usr/bin/bash -s <<EOF
-            grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-            cat <<CONTENT >> /etc/containerd/config.toml
-            [plugins."io.containerd.grpc.v1.cri".registry]
-              config_path = "/etc/containerd/certs.d"
-            CONTENT
-            systemctl restart containerd
-            EOF
-          - cat /run/kubeadm/kube-proxy-configuration.yaml >> /run/kubeadm/kubeadm.yaml
+          - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+          - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
+          - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
+          - cat /etc/kube-proxy-configuration.yaml >> /etc/kubeadm.yml
       machineTemplate:
         infrastructureRef:
           apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
           kind: OpenStackMachineTemplate
-          name: RELEASE-NAME-control-plane-d6645ee1
+          name: RELEASE-NAME-control-plane-40c52ad6
           namespace: NAMESPACE
         metadata:
           labels:
@@ -995,7 +1048,7 @@ templated manifests should match snapshot:
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: d6645ee1c4875398411a95c2f580dd608bfe2c6083f619f0a596443ca4150d65
+        capi.stackhpc.com/template-checksum: 40c52ad60b10c631adf7372b43f08c6a497cf1c3c6d3fd647690a3240acd38bb
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1003,7 +1056,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/infrastructure-provider: openstack
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-control-plane-d6645ee1
+      name: RELEASE-NAME-control-plane-40c52ad6
     spec:
       template:
         spec:
@@ -1013,7 +1066,7 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-noble-kube-v1.36.2
+              name: flatcar-stable-3975-2-0
   32: |
     apiVersion: v1
     kind: Secret
@@ -1035,7 +1088,7 @@ templated manifests should match snapshot:
     kind: KubeadmConfigTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: d43bd1bb079c9f949f46b9f6bf89e1e1027a45756426801398f5ab1199a331c4
+        capi.stackhpc.com/template-checksum: fa99283ffa783bfa8755df8ee2de2f08a8c1bb568fb4a597342eff582496902c
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1044,7 +1097,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-d43bd1bb
+      name: RELEASE-NAME-group-1-fa99283f
     spec:
       template:
         spec:
@@ -1104,203 +1157,98 @@ templated manifests should match snapshot:
               owner: root:root
               path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
               permissions: "0644"
+          format: ignition
+          ignition:
+            containerLinuxConfig:
+              additionalConfig: |-
+                storage:
+                  files:
+                    - path: /opt/extensions/containerd/containerd.raw
+                      contents:
+                        remote:
+                          url: "https://cdn.example.com/flatcar/sysexts/containerd-2.3.2-x86-64.raw"
+                          verification:
+                            hash:
+                              function: sha512
+                              sum: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                      mode: 0644
+                    - path: /opt/extensions/kubernetes/kubernetes.raw
+                      contents:
+                        remote:
+                          url: "https://cdn.example.com/flatcar/sysexts/kubernetes-v1.36.2-x86-64.raw"
+                          verification:
+                            hash:
+                              function: sha512
+                              sum: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      mode: 0644
+                  links:
+                    - target: /opt/extensions/containerd/containerd.raw
+                      path: /etc/extensions/containerd.raw
+                      hard: false
+                    - target: /opt/extensions/kubernetes/kubernetes.raw
+                      path: /etc/extensions/kubernetes.raw
+                      hard: false
+                    # Flatcar ships docker/containerd sysexts enabled by default
+                    # Disable this as per https://www.flatcar.org/docs/latest/sys-ext/#remove-docker-and--or-containerd-from-flatcar
+                    # So that we manage containerd outselves
+                    - path: /etc/extensions/docker-flatcar.raw
+                      target: /dev/null
+                      overwrite: true
+                      hard: false
+                    - path: /etc/extensions/containerd-flatcar.raw
+                      target: /dev/null
+                      overwrite: true
+                      hard: false
+                systemd:
+                  units:
+                  # Disabling auto-update
+                  - name: update-engine.service
+                    mask: true
+                  - name: locksmithd.service
+                    mask: true
+                  - name: systemd-sysupdate.timer
+                    enabled: false
+
+                  # Kubernetes-focused units
+                  # this service must not run if no key has been provided by openstack, it retries
+                  # forever causing a mount error in the kernel log.
+                  # sshkeys.service (baked into flatcar) starts this unit directly via `systemctl start`
+                  # whenever it isn't already masked, regardless of enabled/disabled, so when there is
+                  # no key the service must be masked.
+                  - name: coreos-metadata-sshkeys@core.service
+                    mask: true
+                  - name: kubeadm.service
+                    enabled: true
+                    dropins:
+                    - name: 10-flatcar.conf
+                      contents: |
+                        [Unit]
+                        Requires=containerd.service coreos-metadata.service
+                        After=containerd.service coreos-metadata.service
+                        [Service]
+                        EnvironmentFile=/run/metadata/flatcar
+                  # flatcar enables auto-login to the console (core user, which has paswordless sudo) by
+                  # default. Disable this.
+                  # https://www.flatcar.org/docs/latest/os-config/host-config/other-settings/?highlight=autologin#adding-custom-kernel-boot-options
+                  - name: getty@.service
+                    dropins:
+                      - name: 10-autologin.conf
+                        contents: |
+                          [Service]
+                          ExecStart=
+                          ExecStart=-/sbin/agetty --noclear %I $TERM
           joinConfiguration:
             nodeRegistration:
               kubeletExtraArgs:
                 cloud-provider: external
                 node-labels: capi.stackhpc.com/node-group=group-1
-              name: '{{ local_hostname }}'
+                provider-id: openstack:///${COREOS_OPENSTACK_INSTANCE_UUID}
+              name: ${COREOS_OPENSTACK_HOSTNAME}
           preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
+            - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+            - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
+            - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
   34: |
-    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-    kind: KubeadmConfigTemplate
-    metadata:
-      annotations:
-        capi.stackhpc.com/template-checksum: e1d1a382f8640c6551c40f3da6902e8d45a774e09fe30be4898ba00a70a63a67
-        helm.sh/resource-policy: keep
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-2
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-2-e1d1a382
-    spec:
-      template:
-        spec:
-          files:
-            - content: |
-                # This file is created by the capi-helm-chart to ensure that its parent directory exists
-              owner: root:root
-              path: /etc/containerd/conf.d/.keepdir
-              permissions: "0644"
-            - content: |
-                # This file is created by the capi-helm-chart to ensure that its parent directory exists
-              owner: root:root
-              path: /etc/containerd/certs.d/.keepdir
-              permissions: "0644"
-            - content: |
-                server = "https://registry-1.docker.io"
-                [host."https://quay.io/v2/azimuth/docker.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/docker.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://ghcr.io"
-                [host."https://quay.io/v2/azimuth/ghcr.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/ghcr.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://nvcr.io"
-                [host."https://quay.io/v2/azimuth/nvcr.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/nvcr.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://quay.io"
-                [host."https://quay.io/v2/azimuth/quay.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/quay.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://registry.k8s.io"
-                [host."https://quay.io/v2/azimuth/registry.k8s.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
-              permissions: "0644"
-          joinConfiguration:
-            nodeRegistration:
-              kubeletExtraArgs:
-                cloud-provider: external
-                node-labels: capi.stackhpc.com/node-group=group-2
-              name: '{{ local_hostname }}'
-          preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
-  35: |
-    apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-    kind: KubeadmConfigTemplate
-    metadata:
-      annotations:
-        capi.stackhpc.com/template-checksum: 5ff6f8cd8d78686d5c3ab32f5ed8fa82b82bf5feea7452c6466b5e9173e799e3
-        helm.sh/resource-policy: keep
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-3
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-3-5ff6f8cd
-    spec:
-      template:
-        spec:
-          files:
-            - content: |
-                # This file is created by the capi-helm-chart to ensure that its parent directory exists
-              owner: root:root
-              path: /etc/containerd/conf.d/.keepdir
-              permissions: "0644"
-            - content: |
-                # This file is created by the capi-helm-chart to ensure that its parent directory exists
-              owner: root:root
-              path: /etc/containerd/certs.d/.keepdir
-              permissions: "0644"
-            - content: |
-                server = "https://registry-1.docker.io"
-                [host."https://quay.io/v2/azimuth/docker.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/docker.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://ghcr.io"
-                [host."https://quay.io/v2/azimuth/ghcr.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/ghcr.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://nvcr.io"
-                [host."https://quay.io/v2/azimuth/nvcr.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/nvcr.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://quay.io"
-                [host."https://quay.io/v2/azimuth/quay.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/quay.io/hosts.toml
-              permissions: "0644"
-            - content: |
-                server = "https://registry.k8s.io"
-                [host."https://quay.io/v2/azimuth/registry.k8s.io"]
-                capabilities = ["pull", "resolve"]
-                skip_verify = false
-                override_path = true
-              owner: root:root
-              path: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
-              permissions: "0644"
-          joinConfiguration:
-            nodeRegistration:
-              kubeletExtraArgs:
-                cloud-provider: external
-                node-labels: capi.stackhpc.com/node-group=group-3
-              name: '{{ local_hostname }}'
-          preKubeadmCommands:
-            - |-
-              /usr/bin/bash -s <<EOF
-              grep -q '\[plugins."io.containerd.grpc.v1.cri".registry\]' /etc/containerd/config.toml && exit
-              cat <<CONTENT >> /etc/containerd/config.toml
-              [plugins."io.containerd.grpc.v1.cri".registry]
-                config_path = "/etc/containerd/certs.d"
-              CONTENT
-              systemctl restart containerd
-              EOF
-  36: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1339,117 +1287,17 @@ templated manifests should match snapshot:
             configRef:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-1-d43bd1bb
+              name: RELEASE-NAME-group-1-fa99283f
           clusterName: RELEASE-NAME
           infrastructureRef:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-1-0ba6595d
+            name: RELEASE-NAME-group-1-c64e8ea0
           nodeDeletionTimeout: 5m0s
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.36.2
-  37: |
-    apiVersion: cluster.x-k8s.io/v1beta1
-    kind: MachineDeployment
-    metadata:
-      annotations:
-        cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
-        cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-2
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-2
-    spec:
-      clusterName: RELEASE-NAME
-      selector:
-        matchLabels:
-          capi.stackhpc.com/cluster: RELEASE-NAME
-          capi.stackhpc.com/component: worker
-          capi.stackhpc.com/node-group: group-2
-          cluster.x-k8s.io/cluster-name: RELEASE-NAME
-      strategy:
-        rollingUpdate:
-          deletePolicy: Random
-          maxSurge: 0
-          maxUnavailable: 1
-        type: RollingUpdate
-      template:
-        metadata:
-          labels:
-            capi.stackhpc.com/cluster: RELEASE-NAME
-            capi.stackhpc.com/component: worker
-            capi.stackhpc.com/node-group: group-2
-        spec:
-          bootstrap:
-            configRef:
-              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-              kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-2-e1d1a382
-          clusterName: RELEASE-NAME
-          infrastructureRef:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-            kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-2-473e2f89
-          nodeDeletionTimeout: 5m0s
-          nodeDrainTimeout: 5m0s
-          nodeVolumeDetachTimeout: 5m0s
-          version: v1.36.2
-  38: |
-    apiVersion: cluster.x-k8s.io/v1beta1
-    kind: MachineDeployment
-    metadata:
-      annotations:
-        cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "5"
-        cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "0"
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-3
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-3
-    spec:
-      clusterName: RELEASE-NAME
-      selector:
-        matchLabels:
-          capi.stackhpc.com/cluster: RELEASE-NAME
-          capi.stackhpc.com/component: worker
-          capi.stackhpc.com/node-group: group-3
-          cluster.x-k8s.io/cluster-name: RELEASE-NAME
-      strategy:
-        rollingUpdate:
-          deletePolicy: Random
-          maxSurge: 0
-          maxUnavailable: 1
-        type: RollingUpdate
-      template:
-        metadata:
-          labels:
-            capi.stackhpc.com/cluster: RELEASE-NAME
-            capi.stackhpc.com/component: worker
-            capi.stackhpc.com/node-group: group-3
-        spec:
-          bootstrap:
-            configRef:
-              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-              kind: KubeadmConfigTemplate
-              name: RELEASE-NAME-group-3-5ff6f8cd
-          clusterName: RELEASE-NAME
-          infrastructureRef:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-            kind: OpenStackMachineTemplate
-            name: RELEASE-NAME-group-3-473e2f89
-          nodeDeletionTimeout: 5m0s
-          nodeDrainTimeout: 5m0s
-          nodeVolumeDetachTimeout: 5m0s
-          version: v1.36.2
-  39: |
+  35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1477,68 +1325,12 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  40: |
-    apiVersion: cluster.x-k8s.io/v1beta1
-    kind: MachineHealthCheck
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-2
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-2
-    spec:
-      clusterName: RELEASE-NAME
-      maxUnhealthy: 100%
-      nodeStartupTimeout: 30m0s
-      selector:
-        matchLabels:
-          capi.stackhpc.com/cluster: RELEASE-NAME
-          capi.stackhpc.com/component: worker
-          capi.stackhpc.com/node-group: group-2
-      unhealthyConditions:
-        - status: Unknown
-          timeout: 5m0s
-          type: Ready
-        - status: "False"
-          timeout: 5m0s
-          type: Ready
-  41: |
-    apiVersion: cluster.x-k8s.io/v1beta1
-    kind: MachineHealthCheck
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-3
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-3
-    spec:
-      clusterName: RELEASE-NAME
-      maxUnhealthy: 100%
-      nodeStartupTimeout: 30m0s
-      selector:
-        matchLabels:
-          capi.stackhpc.com/cluster: RELEASE-NAME
-          capi.stackhpc.com/component: worker
-          capi.stackhpc.com/node-group: group-3
-      unhealthyConditions:
-        - status: Unknown
-          timeout: 5m0s
-          type: Ready
-        - status: "False"
-          timeout: 5m0s
-          type: Ready
-  42: |
+  36: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
       annotations:
-        capi.stackhpc.com/template-checksum: 0ba6595d95357caf9f03dfb03406ad918224b66b0b85248e59c6cb920282321d
+        capi.stackhpc.com/template-checksum: c64e8ea03205a629b5e927db13c0ed429060ace7a4aa2a6f2c22ef526e906718
         helm.sh/resource-policy: keep
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
@@ -1547,7 +1339,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         capi.stackhpc.com/node-group: group-1
         helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-1-0ba6595d
+      name: RELEASE-NAME-group-1-c64e8ea0
     spec:
       template:
         spec:
@@ -1557,58 +1349,8 @@ templated manifests should match snapshot:
             name: RELEASE-NAME-cloud-credentials
           image:
             filter:
-              name: ubuntu-noble-kube-v1.36.2
-  43: |
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: OpenStackMachineTemplate
-    metadata:
-      annotations:
-        capi.stackhpc.com/template-checksum: 473e2f89cf21cdf77304a331826ed94ef19f451ba5e06a05efd4c1b4fcb87660
-        helm.sh/resource-policy: keep
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-2
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-2-473e2f89
-    spec:
-      template:
-        spec:
-          flavor: vm.large
-          identityRef:
-            cloudName: openstack
-            name: RELEASE-NAME-cloud-credentials
-          image:
-            filter:
-              name: ubuntu-noble-kube-v1.36.2
-  44: |
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: OpenStackMachineTemplate
-    metadata:
-      annotations:
-        capi.stackhpc.com/template-checksum: 473e2f89cf21cdf77304a331826ed94ef19f451ba5e06a05efd4c1b4fcb87660
-        helm.sh/resource-policy: keep
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: worker
-        capi.stackhpc.com/infrastructure-provider: openstack
-        capi.stackhpc.com/managed-by: Helm
-        capi.stackhpc.com/node-group: group-3
-        helm.sh/chart: openstack-cluster-0.1.0
-      name: RELEASE-NAME-group-3-473e2f89
-    spec:
-      template:
-        spec:
-          flavor: vm.large
-          identityRef:
-            cloudName: openstack
-            name: RELEASE-NAME-cloud-credentials
-          image:
-            filter:
-              name: ubuntu-noble-kube-v1.36.2
-  45: |
+              name: flatcar-stable-3975-2-0
+  37: |
     apiVersion: v1
     kind: Secret
     metadata:
