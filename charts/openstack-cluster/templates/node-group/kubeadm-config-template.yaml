@@ -36,6 +36,7 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $n
 {{- end }}
 
 {{- define "openstack-cluster.nodegroup.kct.checksum" -}}
+{{/* Hash the v1beta1 spec to keep existing template names. */}}
 {{- include "openstack-cluster.nodegroup.kct.spec" . | sha256sum }}
 {{- end }}
 
@@ -49,7 +50,7 @@ joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" $n
 {{- range $nodeGroupOverrides := .Values.nodeGroups }}
 {{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
 metadata:
   name: {{ include "openstack-cluster.nodegroup.kct.name" (list $ $nodeGroup) }}
@@ -63,5 +64,5 @@ metadata:
     helm.sh/resource-policy: keep
 spec:
   template:
-    spec: {{ include "openstack-cluster.nodegroup.kct.spec" (list $ $nodeGroup) | nindent 6 }}
+    spec: {{ include "openstack-cluster.nodegroup.kct.spec" (list $ $nodeGroup) | fromYaml | include "openstack-cluster.v1beta2.kubeadmConfigSpec" | nindent 6 }}
 {{- end }}
