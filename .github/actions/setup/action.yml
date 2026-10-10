@@ -65,12 +65,17 @@ runs:
 
     - name: Install clusterctl
       shell: bash
-      run: >
-        curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/${CAPI_VERSION}/clusterctl-linux-amd64 -o clusterctl &&
-        sudo install -o root -g root -m 0755 clusterctl /usr/local/bin/clusterctl &&
+      run: |-
+        gh release download "${CAPI_VERSION}" \
+          --repo kubernetes-sigs/cluster-api \
+          --pattern clusterctl-linux-amd64 \
+          --output clusterctl \
+          --clobber
+        sudo install -o root -g root -m 0755 clusterctl /usr/local/bin/clusterctl
         clusterctl version
       env:
         CAPI_VERSION: ${{ steps.deps.outputs.cluster-api }}
+        GH_TOKEN: ${{ github.token }}
 
     - name: Check if Cluster API is already installed
       id: capi-check
