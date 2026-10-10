@@ -1075,6 +1075,10 @@ templated manifests should match snapshot:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          grafana.ini:
+            users:
+              default_theme: system
         prometheus:
           prometheusSpec:
             retention: 90d
