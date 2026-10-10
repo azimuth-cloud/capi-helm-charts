@@ -115,14 +115,6 @@ runs:
           --for=condition=${{ steps.check-ready-condition.outputs.cluster-ready-condition-name }} \
           --timeout 30m
 
-    - name: Wait for machine deployments to be running
-      shell: bash
-      run: |-
-        kubectl wait machinedeployments \
-          --all \
-          --for=jsonpath='{.status.phase}'=Running \
-          --timeout 30m
-
     - name: Wait for control-plane and worker machines to be up-to-date and ready (v1beta2)
       shell: bash
       run: |-
@@ -146,6 +138,14 @@ runs:
           --for=condition=WorkerMachinesReady \
           --timeout 30m
       if: ${{ steps.check-ready-condition.outputs.cluster-ready-condition-name == 'available' }}
+
+    - name: Wait for machine deployments to be running
+      shell: bash
+      run: |-
+        kubectl wait machinedeployments \
+          --all \
+          --for=jsonpath='{.status.phase}'=Running \
+          --timeout 30m
 
     - name: Wait for addons to deploy
       shell: bash

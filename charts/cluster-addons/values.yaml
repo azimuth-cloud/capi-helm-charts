@@ -42,7 +42,7 @@ cni:
     chart:
       repo: https://helm.cilium.io/
       name: cilium
-      version: 1.19.3
+      version: 1.20.1
     release:
       namespace: kube-system
       values: {}
@@ -83,7 +83,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cloud-controller-manager
-      version: 2.36.1
+      version: 2.36.3
     values: {}
   # Settings for the Cinder CSI plugin
   csiCinder:
@@ -94,7 +94,7 @@ openstack:
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
-      version: 2.36.2
+      version: 2.36.5
     values:
       csi:
         plugin:
@@ -185,7 +185,7 @@ reloader:
   chart:
     repo: https://stakater.github.io/stakater-charts
     name: reloader
-    version: 2.2.16
+    version: 2.2.17
   release:
     # Deploy to the same namespace as OpenStack services
     namespace: openstack-system
@@ -215,7 +215,7 @@ metricsServer:
   chart:
     repo: https://kubernetes-sigs.github.io/metrics-server
     name: metrics-server
-    version: 3.13.1
+    version: 3.14.0
   release:
     namespace: kube-system
     values: {}
@@ -245,7 +245,7 @@ ingress:
     chart:
       repo: https://traefik.github.io/charts
       name: traefik
-      version: 41.2.0
+      version: 41.5.0
     release:
       namespace: traefik
       values: {}
@@ -260,7 +260,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: kube-prometheus-stack
-      version: 85.0.2
+      version: 90.0.0
     release:
       namespace: monitoring-system
       values:
@@ -276,6 +276,10 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          grafana.ini:
+            users:
+              default_theme: system
         prometheus:
           prometheusSpec:
             # The amount of data that is retained will be 90 days or 95% of the size of the
@@ -293,7 +297,7 @@ monitoring:
     chart:
       repo: https://grafana.github.io/helm-charts
       name: loki-stack
-      version: 2.10.2
+      version: 2.10.3
     release:
       namespace: monitoring-system
       values:
@@ -314,7 +318,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: prometheus-blackbox-exporter
-      version: 11.9.1
+      version: 11.18.0
     release:
       namespace: monitoring-system
       values: {}
@@ -353,7 +357,7 @@ nvidiaGPUOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: gpu-operator
-    version: v26.3.1
+    version: v26.7.0
   release:
     namespace: gpu-operator
     values:
@@ -379,7 +383,7 @@ intelDevicePlugin:
     chart:
       repo: https://intel.github.io/helm-charts
       name: intel-device-plugins-operator
-      version: 0.32.0
+      version: 0.36.0
     release:
       namespace: intel
       values:
@@ -438,7 +442,7 @@ mellanoxNetworkOperator:
   chart:
     repo: https://helm.ngc.nvidia.com/nvidia
     name: network-operator
-    version: 26.4.1
+    version: 26.7.0
   release:
     namespace: network-operator
     values: {}
@@ -461,7 +465,7 @@ headlamp:
   chart:
     repo: https://kubernetes-sigs.github.io/headlamp
     name: headlamp
-    version: 0.44.0
+    version: 0.45.0
   release:
     namespace: headlamp
     values: {}
