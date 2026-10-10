@@ -29,6 +29,55 @@ jobs:
       - name: Workflow approved
         run: exit 0
 
+  detect_gpu_changes:
+    needs: [wait_for_approval]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      gpu_changed: ${{ steps.result.outputs.gpu_changed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Check GPU operator template changes
+        id: gpu_template
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
+        with:
+          filters: |
+            gpu_template:
+              - 'charts/cluster-addons/templates/nvidia-gpu-operator.yaml'
+      - name: Compare NVIDIA GPU operator values
+        id: gpu_values
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          VALUES_FILE="charts/cluster-addons/values.yaml"
+          git show "$BASE_SHA:$VALUES_FILE" > /tmp/base-values.yaml
+          git show "$HEAD_SHA:$VALUES_FILE" > /tmp/head-values.yaml
+          BASE_GPU=$(yq -o=json '.nvidiaGPUOperator' /tmp/base-values.yaml)
+          HEAD_GPU=$(yq -o=json '.nvidiaGPUOperator' /tmp/head-values.yaml)
+          if [ "$BASE_GPU" != "$HEAD_GPU" ]; then
+            echo "gpu_values_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "gpu_values_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Set GPU change result
+        id: result
+        env:
+          GPU_TEMPLATE_CHANGED: ${{ steps.gpu_template.outputs.gpu_template }}
+          GPU_VALUES_CHANGED: ${{ steps.gpu_values.outputs.gpu_values_changed }}
+        run: |
+          if [ "$GPU_TEMPLATE_CHANGED" = "true" ] || [ "$GPU_VALUES_CHANGED" = "true" ]; then
+            echo "gpu_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "gpu_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   mirror_container_images:
     needs: [wait_for_approval]
     uses: ./.github/workflows/sync-images.yaml
@@ -53,7 +102,7 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
 
   test:
-    needs: [mirror_container_images, ensure_capi_images, publish_charts]
+    needs: [detect_gpu_changes, mirror_container_images, ensure_capi_images, publish_charts]
     uses: ./.github/workflows/test.yaml
     secrets: inherit
     with:
@@ -64,8 +113,8 @@ jobs:
       # We want to test the code in the PR
       ref: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
-      # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
+      gpu-tests: ${{ needs.detect_gpu_changes.outputs.gpu_changed == 'true' }}
 
   # The workflow checks whether any flatcar sysext related files have changed
   test_flatcar_sysext:
