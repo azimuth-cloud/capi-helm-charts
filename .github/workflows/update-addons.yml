@@ -40,6 +40,9 @@ jobs:
           - key: csi-cinder
             path: openstack.csiCinder.chart
 
+          - key: ceph-csi-cephfs
+            path: csi.cephfs.chart
+
           - key: k8s-keystone-auth
             path: openstack.k8sKeystoneAuth.chart
             values: |
