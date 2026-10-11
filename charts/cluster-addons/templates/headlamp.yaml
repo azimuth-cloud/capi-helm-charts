@@ -1,0 +1,79 @@
+{{- if .Values.headlamp.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "headlamp") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "headlamp") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    config:
+      # Disable default dashboard context requiring token auth
+      inCluster: false
+      extraArgs:
+        - "-kubeconfig=/mnt/config/kubeconfig"
+    initContainers:
+      # Generate kubeconfig to from service account secrets in container
+      - name: init-kubeconfig
+        image: busybox:latest
+        command:
+          - /bin/sh
+          - -c
+          - |
+            KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+            KUBE_CA=$(cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | base64 | tr -d '\n')
+            NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+            
+            cat <<EOF > /mnt/config/kubeconfig
+            apiVersion: v1
+            kind: Config
+            clusters:
+            - name: {{ .Release.Name }}
+              cluster:
+                certificate-authority-data: ${KUBE_CA}
+                server: https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}
+            contexts:
+            - name: {{ .Release.Name }}
+              context:
+                cluster: {{ .Release.Name }}
+                user: headlamp
+                namespace: ${NAMESPACE}
+            current-context: {{ .Release.Name }}
+            users:
+            - name: headlamp
+              user:
+                token: ${KUBE_TOKEN}
+            EOF
+        volumeMounts:
+          - name: kubeconfig-volume
+            mountPath: /mnt/config
+    volumeMounts:
+      - name: kubeconfig-volume
+        mountPath: /mnt/config
+    volumes:
+      - name: kubeconfig-volume
+        emptyDir: {}
+  overrides: |
+    {{- toYaml .Values.headlamp.release.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "headlamp") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "headlamp") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.headlamp.chart | nindent 4 }}
+  targetNamespace: {{ .Values.headlamp.release.namespace }}
+  releaseName: headlamp
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "headlamp") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "headlamp") }}-config
+        key: overrides
+{{- end }}

@@ -98,6 +98,7 @@ jobs:
           helm dependency update charts/openstack-cluster && \
             docker run -i --rm --user $(id -u) \
             -v $(pwd):/apps \
+            --tmpfs /.cache \
             helmunittest/helm-unittest -u \
             charts/openstack-cluster
 

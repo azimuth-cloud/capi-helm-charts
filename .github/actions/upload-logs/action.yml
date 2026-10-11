@@ -21,6 +21,30 @@ runs:
         kubectl -n capi-addon-system logs deploy/cluster-api-addon-provider > capi-addon-provider-logs.txt
         kubectl -n capi-janitor-system logs deploy/cluster-api-janitor-openstack > capi-janitor-openstack-logs.txt
 
+    - name: Output controller pod status and restart history
+      shell: bash
+      continue-on-error: true
+      run: |-
+        for ns_deploy in \
+          capi-system:capi-controller-manager \
+          capi-kubeadm-control-plane-system:capi-kubeadm-control-plane-controller-manager \
+          capi-kubeadm-bootstrap-system:capi-kubeadm-bootstrap-controller-manager \
+          capo-system:capo-controller-manager \
+          capi-addon-system:cluster-api-addon-provider \
+          capi-janitor-system:cluster-api-janitor-openstack \
+        ; do
+          ns="${ns_deploy%%:*}"
+          deploy="${ns_deploy##*:}"
+          {
+            echo "=== $ns/$deploy ==="
+            kubectl -n "$ns" get pods -l "app.kubernetes.io/name=$deploy" -o wide 2>&1 \
+              || kubectl -n "$ns" get pods -o wide 2>&1
+            kubectl -n "$ns" describe pods 2>&1
+          } >> capi-controller-pod-status-logs.txt
+          kubectl -n "$ns" logs "deploy/$deploy" --previous > "${deploy}-previous-logs.txt" 2>&1 \
+            || echo "no previous container instance (no restart, or history already gone)" > "${deploy}-previous-logs.txt"
+        done
+
     - name: Upload controller log artifacts
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:

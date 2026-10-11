@@ -86,7 +86,7 @@ runs:
                                 --no-headers=true |\
                                  grep ^clusters |\
                                  awk '{print $3}')
-        
+
         if [[ "$cluster_api_version" =~ v1beta1$ ]]; then
           echo "cluster-ready-condition-name=ready" >> $GITHUB_OUTPUT
         else
@@ -115,14 +115,6 @@ runs:
           --for=condition=${{ steps.check-ready-condition.outputs.cluster-ready-condition-name }} \
           --timeout 30m
 
-    - name: Wait for machine deployments to be running
-      shell: bash
-      run: |-
-        kubectl wait machinedeployments \
-          --all \
-          --for=jsonpath='{.status.phase}'=Running \
-          --timeout 30m
-
     - name: Wait for control-plane and worker machines to be up-to-date and ready (v1beta2)
       shell: bash
       run: |-
@@ -146,6 +138,14 @@ runs:
           --for=condition=WorkerMachinesReady \
           --timeout 30m
       if: ${{ steps.check-ready-condition.outputs.cluster-ready-condition-name == 'available' }}
+
+    - name: Wait for machine deployments to be running
+      shell: bash
+      run: |-
+        kubectl wait machinedeployments \
+          --all \
+          --for=jsonpath='{.status.phase}'=Running \
+          --timeout 30m
 
     - name: Wait for addons to deploy
       shell: bash
@@ -210,9 +210,38 @@ runs:
         path: ./sonobuoy-results-${{ inputs.name }}.tar.gz
       if: "${{ inputs.sonobuoy-upload == 'yes' }}"
 
+    - name: Fail if sonobuoy tests fail
+      shell: bash
+      run: |
+        if sonobuoy status --json | jq -e '.plugins[] | select(."result-status" != "passed")'; then
+          exit 1;
+        fi
+      env:
+        KUBECONFIG: ./kubeconfig
+
     - name: Remove sonobuoy artifacts from cluster
       shell: bash
       run: sonobuoy delete --wait --all
       env:
         KUBECONFIG: ./kubeconfig
       if: ${{ always() }}
+
+    - name: Run etcd-defrag job
+      shell: bash
+      run: |-
+        kubectl create job -n kube-system \
+          --from=cronjob/etcd-defrag etcd-defrag &&
+        kubectl wait job/etcd-defrag \
+          -n kube-system \
+          --for=condition=complete \
+          --timeout 3m
+      env:
+        KUBECONFIG: ./kubeconfig
+
+    - name: Delete etcd-defrag job
+      shell: bash
+      run: |-
+        kubectl delete job -n kube-system \
+          etcd-defrag
+      env:
+        KUBECONFIG: ./kubeconfig

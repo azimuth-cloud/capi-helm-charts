@@ -84,6 +84,14 @@ jobs:
               nfd:
                 enabled: false
 
+          - key: amd-gpu-operator
+            path: amdGPUOperator.chart
+            values: |
+              node-feature-discovery:
+                enabled: false
+              kmm:
+                enabled: false
+
           - key: mellanox-network-operator
             path: mellanoxNetworkOperator.chart
             values: |
@@ -110,6 +118,9 @@ jobs:
 
           - key: reloader
             path: reloader.chart
+
+          - key: headlamp
+            path: headlamp.chart
 
     name: ${{ matrix.key }}
     steps:
@@ -177,6 +188,7 @@ jobs:
           helm dependency update charts/openstack-cluster && \
             docker run -i --rm --user $(id -u) \
             -v $(pwd):/apps \
+            --tmpfs /.cache \
             helmunittest/helm-unittest -u \
             charts/openstack-cluster
 

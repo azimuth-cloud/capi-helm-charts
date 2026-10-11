@@ -1,7 +1,8 @@
-kubernetesVersion: 1.29.2
-machineImage: ubuntu-jammy-kube-v{{ .Values.kubernetesVersion }}
+kubernetesVersion: 1.36.2
+machineImage: ubuntu-noble-kube-v{{ .Values.kubernetesVersion }}
 controlPlane:
   machineFlavor: vm.small
+  certificatesExpiryDays: 21
 nodeGroups:
   - name: group-1
     machineFlavor: vm.small
