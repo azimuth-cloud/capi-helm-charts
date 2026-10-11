@@ -276,6 +276,10 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+        grafana:
+          grafana.ini:
+            users:
+              default_theme: system
         prometheus:
           prometheusSpec:
             # The amount of data that is retained will be 90 days or 95% of the size of the
@@ -314,7 +318,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: prometheus-blackbox-exporter
-      version: 11.18.0
+      version: 11.20.0
     release:
       namespace: monitoring-system
       values: {}
