@@ -197,12 +197,15 @@ runs:
           for name in $(kubectl get daemonsets \
             --namespace "$ns" \
             -o jsonpath='{range .items[?(@.spec.updateStrategy.type=="OnDelete")]}{.metadata.name}{"\n"}{end}'); do
-            timeout 20m bash -c "
+            echo "Checking OnDelete DaemonSet $ns/$name"
+            timeout 5m bash -c "
               until [ \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.numberReady}')\" = \
                       \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.desiredNumberScheduled}')\" ]; do
                 sleep 10
               done
             "
+
+            echo "DaemonSet \"$name\" is healthy and all desired pods are ready"
           done
         done
       env:
