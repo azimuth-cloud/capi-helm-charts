@@ -337,7 +337,7 @@ templated manifests should match snapshot:
       chart:
         name: ceph-csi-cephfs
         repo: https://ceph.github.io/csi-charts
-        version: 3.11.0
+        version: 3.18.1
       clusterName: RELEASE-NAME
       releaseName: csi-cephfs
       targetNamespace: csi-ceph-system
@@ -542,7 +542,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-gpu
         repo: https://intel.github.io/helm-charts
-        version: 0.36.0
+        version: 0.37.1
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-gpu
       targetNamespace: intel
@@ -715,7 +715,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-operator
         repo: https://intel.github.io/helm-charts
-        version: 0.36.0
+        version: 0.37.1
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-operator
       targetNamespace: intel
