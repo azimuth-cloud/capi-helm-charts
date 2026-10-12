@@ -337,7 +337,7 @@ templated manifests should match snapshot:
       chart:
         name: ceph-csi-cephfs
         repo: https://ceph.github.io/csi-charts
-        version: 3.11.0
+        version: 3.18.1
       clusterName: RELEASE-NAME
       releaseName: csi-cephfs
       targetNamespace: csi-ceph-system
