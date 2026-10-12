@@ -160,7 +160,6 @@ runs:
           --for=jsonpath='{.status.phase}'=Deployed \
           --timeout 20m
 
-
     - name: Write kubeconfig
       shell: bash
       run: |-
