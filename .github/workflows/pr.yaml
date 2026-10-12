@@ -113,6 +113,7 @@ jobs:
       # We want to test the code in the PR
       ref: ${{ github.event.pull_request.head.sha }}
       # If the PR is in draft, just run a sanity check
+      # If the PR is in review, run the full test suite
       tests-full: ${{ !github.event.pull_request.draft }}
       gpu-tests: ${{ needs.detect_gpu_changes.outputs.gpu_changed == 'true' }}
 

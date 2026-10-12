@@ -160,6 +160,7 @@ runs:
           --for=jsonpath='{.status.phase}'=Deployed \
           --timeout 20m
 
+
     - name: Write kubeconfig
       shell: bash
       run: |-
@@ -180,7 +181,7 @@ runs:
             --watch \
             --timeout 20m \
             deployments
-          # To skip StatefulSets and DaemonSets using OnDelete strategy 
+          # StatefulSets and DaemonSets using RollingUpdate strategy can be checked using rollout status
           for resource in statefulsets daemonsets; do
             for name in $(kubectl get "$resource" \
               --namespace "$ns" \
@@ -191,6 +192,18 @@ runs:
                 --timeout 20m \
                 "$resource/$name"
             done
+          done
+          # NVIDIA GPU DaemonSets use OnDelete strategy that do not use rollout status so it needs to be checked manually
+          # if the resources are healthy and ready
+          for name in $(kubectl get daemonsets \
+            --namespace "$ns" \
+            -o jsonpath='{range .items[?(@.spec.updateStrategy.type=="OnDelete")]}{.metadata.name}{"\n"}{end}'); do
+            timeout 20m bash -c "
+              until [ \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.numberReady}')\" = \
+                      \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.desiredNumberScheduled}')\" ]; do
+                sleep 10
+              done
+            "
           done
         done
       env:
