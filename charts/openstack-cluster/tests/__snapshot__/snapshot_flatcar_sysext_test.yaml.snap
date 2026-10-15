@@ -1,5 +1,25 @@
 templated manifests should match snapshot:
   1: |
+    apiVersion: addons.stackhpc.com/v1alpha1
+    kind: HelmRelease
+    metadata:
+      labels:
+        capi.stackhpc.com/cluster: RELEASE-NAME
+        capi.stackhpc.com/component: cni-calico
+        capi.stackhpc.com/managed-by: Helm
+        helm.sh/chart: addons-0.1.0
+      name: RELEASE-NAME-cni-calico-crds
+    spec:
+      bootstrap: true
+      chart:
+        name: crd.projectcalico.org.v1
+        repo: https://projectcalico.docs.tigera.io/charts
+        version: v3.33.0
+      clusterName: RELEASE-NAME
+      releaseName: cni-calico-crds
+      targetNamespace: tigera-operator
+      valuesSources: []
+  2: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -31,7 +51,7 @@ templated manifests should match snapshot:
       overrides: |
         nodeSelector:
           node-role.kubernetes.io/control-plane: ""
-  2: |
+  3: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -46,7 +66,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.31.5
+        version: v3.33.0
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -57,7 +77,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-cni-calico-config
-  3: |
+  4: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -74,7 +94,7 @@ templated manifests should match snapshot:
         - template: "---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-deny-egress\nspec:\n  order: 10\n  namespaceSelector: kubernetes.io/metadata.name != 'openstack-system'\n  types:\n    - Egress\n  egress:\n    - action: Deny\n      ipVersion: 4\n      destination:\n        nets:\n          - 169.254.169.254/32\n        \n    - action: Deny\n      ipVersion: 6\n      destination:\n        nets:\n          - fe80::a9fe:a9fe/128\n        \n---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-allow-global-egress\nspec:\n  order: 20\n  types:\n    - Egress\n  egress:\n    - action: Allow\n      ipVersion: 4\n      destination:\n        nets:\n          - 0.0.0.0/0\n        \n    - action: Allow\n      ipVersion: 6\n      destination:\n        nets:\n          - ::/0\n        \n"
       releaseName: cni-calico-metadata-global-netpolicy
       targetNamespace: tigera-operator
-  4: |
+  5: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -88,7 +108,7 @@ templated manifests should match snapshot:
     stringData:
       overrides: |
         {}
-  5: |
+  6: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -111,7 +131,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-etcd-defrag-config
-  6: |
+  7: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -155,7 +175,7 @@ templated manifests should match snapshot:
           deploy: false
       overrides: |
         {}
-  7: |
+  8: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -181,7 +201,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-mellanox-network-operator-config
-  8: |
+  9: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -202,7 +222,7 @@ templated manifests should match snapshot:
           maxUnavailable: 1
       overrides: |
         {}
-  9: |
+  10: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -228,7 +248,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-metrics-server-config
-  10: |
+  11: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -267,7 +287,7 @@ templated manifests should match snapshot:
                   - vendor
       overrides: |
         {}
-  11: |
+  12: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -293,7 +313,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-feature-discovery-config
-  12: |
+  13: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -310,7 +330,7 @@ templated manifests should match snapshot:
           enabled: false
       overrides: |
         {}
-  13: |
+  14: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -336,7 +356,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-node-problem-detector-config
-  14: |
+  15: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -379,7 +399,7 @@ templated manifests should match snapshot:
         dcgmExporter:
           serviceMonitor:
             enabled: true
-  15: |
+  16: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -405,7 +425,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-nvidia-gpu-operator-config
-  16: |
+  17: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -436,7 +456,7 @@ templated manifests should match snapshot:
             effect: NoSchedule
       overrides: |
         {}
-  17: |
+  18: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -462,7 +482,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-ccm-openstack-config
-  18: |
+  19: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -479,7 +499,7 @@ templated manifests should match snapshot:
         - template: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: cloud-config\ndata:\n  {{ cloud_identity.data | toyaml | indent(2) }}\nstringData:\n  cloud.conf: |\n    [Global]\n    use-clouds=true\n    clouds-file=/etc/config/clouds.yaml\n    cloud=openstack\n{%- if \"cacert\" in cloud_identity.data %}\n    ca-file=/etc/config/cacert\n{%- else %}\n    tls-insecure=true\n{%- endif %}\n    [Networking]\n    internal-network-name={{ infra_cluster.status.network.name }}\n    [LoadBalancer]\n  {%- if \"externalNetwork\" in infra_cluster.status %}\n    floating-network-id={{ infra_cluster.status.externalNetwork.id }}\n  {%- endif %}\n    [BlockStorage]\n    ignore-volume-az=true\n    \n"
       releaseName: cloud-config
       targetNamespace: openstack-system
-  19: |
+  20: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -523,7 +543,7 @@ templated manifests should match snapshot:
               tolerations:
               - effect: NoSchedule
                 key: node-role.kubernetes.io/control-plane
-  20: |
+  21: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
     metadata:
@@ -549,7 +569,7 @@ templated manifests should match snapshot:
         - secret:
             key: overrides
             name: RELEASE-NAME-csi-cinder-config
-  21: |
+  22: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: Manifests
     metadata:
@@ -578,7 +598,7 @@ templated manifests should match snapshot:
             volumeBindingMode: WaitForFirstConsumer
       releaseName: csi-cinder-storageclass
       targetNamespace: openstack-system
-  22: |
+  23: |
     raw: |
       DEPRECATION NOTICE:
 
@@ -599,7 +619,7 @@ templated manifests should match snapshot:
           process for capi-helm-charts.
         - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
           a functioning NGINX Ingress controller.
-  23: |
+  24: |
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -666,7 +686,7 @@ templated manifests should match snapshot:
             - name: kubeconfig
               secret:
                 secretName: RELEASE-NAME-kubeconfig
-  24: |
+  25: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -698,7 +718,7 @@ templated manifests should match snapshot:
           - get
           - patch
           - update
-  25: |
+  26: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
@@ -717,7 +737,7 @@ templated manifests should match snapshot:
       - kind: ServiceAccount
         name: RELEASE-NAME-autoscaler
         namespace: NAMESPACE
-  26: |
+  27: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -728,7 +748,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-autoscaler
-  27: |
+  28: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -753,7 +773,7 @@ templated manifests should match snapshot:
         allowAllInClusterTraffic: true
       managedSubnets:
         - cidr: 192.168.3.0/24
-  28: |
+  29: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -783,7 +803,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  29: |
+  30: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -1017,7 +1037,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.36.2
-  30: |
+  31: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1043,7 +1063,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  31: |
+  32: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1067,7 +1087,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: flatcar-stable-3975-2-0
-  32: |
+  33: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1083,7 +1103,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  33: |
+  34: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1248,7 +1268,7 @@ templated manifests should match snapshot:
             - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
             - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
             - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
-  34: |
+  35: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1297,7 +1317,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.36.2
-  35: |
+  36: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1325,7 +1345,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  36: |
+  37: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1350,7 +1370,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: flatcar-stable-3975-2-0
-  37: |
+  38: |
     apiVersion: v1
     kind: Secret
     metadata:
