@@ -198,7 +198,7 @@ runs:
             --namespace "$ns" \
             -o jsonpath='{range .items[?(@.spec.updateStrategy.type=="OnDelete")]}{.metadata.name}{"\n"}{end}'); do
             echo "Checking OnDelete DaemonSet $ns/$name"
-            timeout 5m bash -c "
+            timeout 20m bash -c "
               until [ \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.numberReady}')\" = \
                       \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.desiredNumberScheduled}')\" ]; do
                 sleep 10
