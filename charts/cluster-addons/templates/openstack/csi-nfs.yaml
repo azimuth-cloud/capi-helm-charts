@@ -1,0 +1,29 @@
+{{- if .Values.csi.csiNfs.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "csi-nfs") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    {{- toYaml .Values.csi.csiNfs.values | nindent 4 }}
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "csi-nfs") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart: {{ toYaml .Values.csi.csiNfs.chart | nindent 4 }}
+  targetNamespace: {{ .Values.csi.csiNfs.release.namespace }}
+  releaseName: csi-nfs
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "csi-nfs") }}-config
+        key: defaults
+{{- end }}
