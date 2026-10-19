@@ -37,7 +37,6 @@ stringData:
           value: "file"
   overrides: |
     {{- toYaml .Values.nvidiaGPUOperator.release.values | nindent 4 }}
-  # Change to test CI
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
 kind: HelmRelease
