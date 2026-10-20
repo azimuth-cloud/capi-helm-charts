@@ -51,6 +51,9 @@ First, you must set up a
 with the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
 installed.
 
+Chart version `0.30.0` and later require OpenStack Infrastructure Provider (CAPO) `v0.15.0` or later.
+The versions tested in CI are listed in the `dependencies.json` file attached to each [release](https://github.com/azimuth-cloud/capi-helm-charts/releases).
+
 Addons are managed by the
 [Cluster API Addon Provider](https://github.com/azimuth-cloud/cluster-api-addon-provider),
 which must also be installed if you wish to use the addons functionality.
