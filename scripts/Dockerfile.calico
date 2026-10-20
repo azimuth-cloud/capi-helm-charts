@@ -1,0 +1,8 @@
+FROM alpine
+
+RUN apk update && \
+    apk add helm kubectl
+
+COPY --chmod=755 install-calico-crds.sh ./install-calico-crds.sh
+
+CMD ./install-calico-crds.sh
