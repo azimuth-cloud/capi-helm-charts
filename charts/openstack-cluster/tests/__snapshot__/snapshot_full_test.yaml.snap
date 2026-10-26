@@ -1530,7 +1530,7 @@ templated manifests should match snapshot:
         commonAnnotations:
           secret.reloader.stakater.com/reload: cloud-config
       overrides: |
-        {}
+        dnsPolicy: Default
   49: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
@@ -1546,7 +1546,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.3
+        version: 2.36.5
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
