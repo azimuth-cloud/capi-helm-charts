@@ -1,6 +1,6 @@
 nvcr.io:
   images:
     nvidia/cloud-native/network-operator:
-    - v26.7.0
+    - v26.7.1
     nvidia/mellanox/network-operator-init-container:
-    - network-operator-v26.7.0
+    - network-operator-v26.7.1
