@@ -318,7 +318,7 @@ monitoring:
     chart:
       repo: https://prometheus-community.github.io/helm-charts
       name: prometheus-blackbox-exporter
-      version: 11.20.0
+      version: 11.20.2
     release:
       namespace: monitoring-system
       values: {}
