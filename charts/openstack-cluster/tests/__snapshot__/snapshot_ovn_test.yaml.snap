@@ -46,7 +46,7 @@ templated manifests should match snapshot:
       chart:
         name: tigera-operator
         repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.33.0
+        version: v3.32.2
       clusterName: RELEASE-NAME
       releaseName: cni-calico
       targetNamespace: tigera-operator
@@ -115,8 +115,20 @@ templated manifests should match snapshot:
                   hostNetwork: true
                   containers:
                   - name: install
-                    image: quay.io/azimuth/install-calico-crds:v3.33.0
+                    image: alpine/k8s:1.35.9
                     imagePullPolicy: Always
+                    command:
+                      - bash
+                      - -c
+                      - |
+                          set -o pipefail
+                          helm repo add projectcalico \
+                            https://docs.tigera.io/calico/charts
+                          helm template calico-crds projectcalico/crd.projectcalico.org.v1 \
+                            --version v3.32.2 | \
+                            kubectl apply \
+                            --server-side --force-conflicts \
+                            -f -
                   nodeSelector:
                     node-role.kubernetes.io/control-plane: ""
                   tolerations:
