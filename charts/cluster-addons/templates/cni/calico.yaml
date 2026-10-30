@@ -102,8 +102,20 @@ spec:
               hostNetwork: true
               containers:
               - name: install
-                image: quay.io/azimuth/install-calico-crds:{{ .Values.cni.calico.crdChartVersion }}
+                image: {{ .Values.cni.calico.crdImage }}
                 imagePullPolicy: Always
+                command:
+                  - bash
+                  - -c
+                  - |
+                      set -o pipefail
+                      helm repo add projectcalico \
+                        https://docs.tigera.io/calico/charts
+                      helm template calico-crds projectcalico/crd.projectcalico.org.v1 \
+                        --version {{ .Values.cni.calico.crdChartVersion }} | \
+                        kubectl apply \
+                        --server-side --force-conflicts \
+                        -f -
               nodeSelector:
                 node-role.kubernetes.io/control-plane: ""
               tolerations:

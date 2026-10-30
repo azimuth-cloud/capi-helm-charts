@@ -13,6 +13,7 @@ cni:
   # Settings for the calico CNI
   # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
   calico:
+    crdImage: alpine/k8s:1.35.9
     crdChartVersion: v3.32.2
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
