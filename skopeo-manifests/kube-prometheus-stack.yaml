@@ -1,23 +1,23 @@
 docker.io:
   images:
     grafana/grafana:
-    - 13.2.3-distroless
+    - 13.3.0-distroless
 ghcr.io:
   images:
     jkroepke/kube-webhook-certgen:
-    - 1.8.9
+    - 1.11.0
 quay.io:
   images:
     kiwigrid/k8s-sidecar:
     - 2.14.1
     prometheus-operator/prometheus-operator:
-    - v0.94.1
+    - v0.94.2
     prometheus/alertmanager:
-    - v0.34.1
+    - v0.34.2
     prometheus/node-exporter:
     - v1.12.1-distroless
     prometheus/prometheus:
-    - v3.15.0-distroless
+    - v3.15.1-distroless
 registry.k8s.io:
   images:
     kube-state-metrics/kube-state-metrics:
