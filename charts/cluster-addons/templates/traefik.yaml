@@ -1,6 +1,6 @@
 {{- if and .Values.ingress.enabled .Values.ingress.traefik.enabled }}
-{{- if .Values.ingress.nginx.enabled }}
-{{- fail (printf "Cannot enable both ingress.nginx and ingress.traefik addons simultaneously; please choose one") }}
+{{- if and .Values.ingress.nginx.enabled (not .Values.ingress.allowNginxAndTraefik) }}
+{{- fail (printf "Cannot enable both ingress.nginx and ingress.traefik addons simultaneously; please choose one, or set ingress.allowNginxAndTraefik to migrate between them") }}
 {{- end }}
 ---
 apiVersion: v1

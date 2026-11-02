@@ -224,6 +224,8 @@ metricsServer:
 ingress:
   # Indicates if ingress controllers should be enabled
   enabled: false
+  # Only intended to allow migration. If you enable this you must handle conflicts yourself.
+  allowNginxAndTraefik: false
   # Settings for the Nginx ingress controller
   # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx#configuration
   nginx:
