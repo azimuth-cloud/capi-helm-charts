@@ -1,0 +1,49 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterOutput
+metadata:
+  name: cluster-logging
+  namespace: monitoring-system
+spec:
+  loki:
+    url: http://loki.monitoring-system.svc.cluster.local:3100
+    extract_kubernetes_labels: false
+
+    labels:
+      namespace: "$.kubernetes.namespace_name"
+      pod: "$.kubernetes.pod_name"
+      container: "$.kubernetes.container_name"
+      app: "$.kubernetes.labels.app"
+
+    buffer:
+      timekey: 30s
+      timekey_wait: 1s
+      timekey_use_utc: true
+      chunk_limit_size: 8M
+      queued_chunks_limit_size: 16
+
+---
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterOutput
+metadata:
+  name: cluster-logging-systemd
+  namespace: monitoring-system
+spec:
+  loki:
+    url: http://loki.monitoring-system.svc.cluster.local:3100
+
+    labels:
+      unit: "$._SYSTEMD_UNIT"
+      hostname: "$._HOSTNAME"
+
+    remove_keys:
+      - _SYSTEMD_UNIT
+      - _HOSTNAME
+
+    drop_single_key: true
+
+    buffer:
+      timekey: 10m
+      timekey_wait: 1m
+      timekey_use_utc: true
+      chunk_limit_size: 8M
+      queued_chunks_limit_size: 16

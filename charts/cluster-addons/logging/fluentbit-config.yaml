@@ -1,0 +1,26 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: FluentbitAgent
+metadata:
+  name: logging-configuration
+  namespace: monitoring-system
+spec:
+  metrics:
+    serviceMonitor: true
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  network:
+    keepalive: true
+    keepaliveIdleTimeout: 60
+    keepaliveMaxRecycle: 2000
+    connectTimeout: 10
+    connectTimeoutLogError: true
+
+  tolerations:
+    - operator: Exists

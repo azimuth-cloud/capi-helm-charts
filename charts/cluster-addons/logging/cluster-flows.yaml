@@ -1,0 +1,80 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: cluster-logging-json
+  namespace: monitoring-system
+spec:
+  filters:
+    - tag_normaliser: {}
+    - dedot:
+        de_dot_separator: "-"
+        de_dot_nested: true
+    - parser:
+        remove_key_name_field: true
+        reserve_data: true
+        parse:
+          type: json
+  match:
+    - select:
+        labels:
+          logging/format: json
+  globalOutputRefs:
+    - cluster-logging
+
+---
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: cluster-logging
+  namespace: monitoring-system
+spec:
+  filters:
+    - tag_normaliser: {}
+    - dedot:
+        de_dot_separator: "-"
+        de_dot_nested: true
+  match:
+    - exclude:
+        namespaces:
+          - monitoring-system
+        container_names:
+          - journal
+    - exclude:
+        labels:
+          logging/format: json
+    - select: {}
+  globalOutputRefs:
+    - cluster-logging
+
+---
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: cluster-logging-systemd
+  namespace: monitoring-system
+spec:
+  filters:
+    - parser:
+        key_name: message
+        reserve_data: true
+        remove_key_name_field: true
+        parse:
+          type: json
+
+    - record_transformer:
+        enable_ruby: true
+        renew_record: true
+        records:
+          - MESSAGE: '${record["MESSAGE"]}'
+          - _SYSTEMD_UNIT: '${record["_SYSTEMD_UNIT"]}'
+          - _HOSTNAME: '${record["_HOSTNAME"]}'
+
+  match:
+    - select:
+        namespaces:
+          - monitoring-system
+        container_names:
+          - journal
+
+  globalOutputRefs:
+    - cluster-logging-systemd

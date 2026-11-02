@@ -1,0 +1,2 @@
+tolerations:
+  {{- toYaml .Values.fluentbit.tolerations | nindent 4 }}
