@@ -280,6 +280,7 @@ monitoring:
           grafana.ini:
             users:
               default_theme: system
+          prune: true
         prometheus:
           prometheusSpec:
             # The amount of data that is retained will be 90 days or 95% of the size of the
@@ -292,8 +293,6 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
-        grafana:
-          prune: true
   lokiStack:
     enabled: true
     chart:

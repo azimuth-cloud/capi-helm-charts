@@ -1079,6 +1079,7 @@ templated manifests should match snapshot:
           grafana.ini:
             users:
               default_theme: system
+          prune: true
         prometheus:
           prometheusSpec:
             retention: 90d
