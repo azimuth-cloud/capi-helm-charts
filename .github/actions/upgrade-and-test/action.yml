@@ -174,11 +174,39 @@ runs:
         NAMESPACES=$(kubectl get ns --no-headers --output jsonpath='{.items[*].metadata.name}')
         for ns in $NAMESPACES; do
           echo "namespace: $ns"
+          # Deployments
           kubectl rollout status \
             --namespace "$ns" \
             --watch \
-            --timeout 20m  \
-            deployments,statefulsets,daemonsets
+            --timeout 20m \
+            deployments
+          # StatefulSets and DaemonSets using RollingUpdate strategy can be checked using rollout status
+          for resource in statefulsets daemonsets; do
+            for name in $(kubectl get "$resource" \
+              --namespace "$ns" \
+              -o jsonpath='{range .items[?(@.spec.updateStrategy.type=="RollingUpdate")]}{.metadata.name}{"\n"}{end}'); do
+              kubectl rollout status \
+                --namespace "$ns" \
+                --watch \
+                --timeout 20m \
+                "$resource/$name"
+            done
+          done
+          # NVIDIA GPU DaemonSets use OnDelete strategy that do not use rollout status so it needs to be checked manually
+          # if the resources are healthy and ready
+          for name in $(kubectl get daemonsets \
+            --namespace "$ns" \
+            -o jsonpath='{range .items[?(@.spec.updateStrategy.type=="OnDelete")]}{.metadata.name}{"\n"}{end}'); do
+            echo "Checking OnDelete DaemonSet $ns/$name"
+            timeout 20m bash -c "
+              until [ \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.numberReady}')\" = \
+                      \"\$(kubectl get daemonset '$name' -n '$ns' -o jsonpath='{.status.desiredNumberScheduled}')\" ]; do
+                sleep 10
+              done
+            "
+
+            echo "DaemonSet \"$name\" is healthy and all desired pods are ready"
+          done
         done
       env:
         KUBECONFIG: ./kubeconfig

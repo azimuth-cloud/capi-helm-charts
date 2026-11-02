@@ -17,6 +17,11 @@ on:
         description: Indicates whether to run the full test suite or just a sanity check
         required: true
         default: false
+      gpu-tests:
+        type: boolean
+        description: GPU-specific tests in case of changes to the GPU operator template or values
+        required: true
+        default: false
 
 jobs:
   # This job tests a basic deployment against the latest version
@@ -381,6 +386,8 @@ jobs:
   # It only runs for non-draft PRs
   # It uses a pre-existing internal network
   # It installs ALL of the addons so that we test upgrading them
+  # When gpu-tests=true, the GPU operator template or values have changed,
+  # it thus runs tests a deployment against the latest version with the GPU operator enabled
   chart-upgrade:
     runs-on: ubuntu-latest
     permissions:
@@ -457,7 +464,7 @@ jobs:
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-37-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-37-image }}
           defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
+          overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade${{ inputs.gpu-tests && '-gpu' || '' }}.yaml
 
       - name: Update test environment with current dependencies
         uses: ./current/.github/actions/setup
@@ -474,7 +481,7 @@ jobs:
           kubernetes-version: ${{ fromJson(inputs.images).kube-1-37-version }}
           image-id: ${{ fromJson(inputs.images).kube-1-37-image }}
           defaults-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/base.yaml
-          overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade.yaml
+          overrides-path: ./current/.github/values/${{ vars.TARGET_CLOUD }}/chart-upgrade${{ inputs.gpu-tests && '-gpu' || '' }}.yaml
 
       - name: Collect workload cluster diagnostics
         uses: ./current/.github/actions/collect-diagnostics
