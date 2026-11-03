@@ -435,7 +435,7 @@ templated manifests should match snapshot:
           - key: node-role.kubernetes.io/control-plane
             effect: NoSchedule
       overrides: |
-        {}
+        dnsPolicy: Default
   17: |
     apiVersion: addons.stackhpc.com/v1alpha1
     kind: HelmRelease
@@ -451,7 +451,7 @@ templated manifests should match snapshot:
       chart:
         name: openstack-cloud-controller-manager
         repo: https://kubernetes.github.io/cloud-provider-openstack
-        version: 2.36.3
+        version: 2.36.5
       clusterName: RELEASE-NAME
       releaseName: ccm-openstack
       targetNamespace: openstack-system
