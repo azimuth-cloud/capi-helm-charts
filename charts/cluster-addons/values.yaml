@@ -322,6 +322,10 @@ monitoring:
     release:
       namespace: monitoring-system
       values: {}
+  fluentbit:
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: "Exists"
   # Loki v3 is the successor to the lokiStack addon since the Helm
   # chart for the latter is no longer maintained upstream.
 
