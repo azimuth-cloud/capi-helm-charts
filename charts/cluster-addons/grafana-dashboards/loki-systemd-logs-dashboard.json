@@ -102,7 +102,7 @@
       "targets": [
         {
           "datasource": "Loki",
-          "expr": "sum(count_over_time({unit=~\"$unit\", hostname=~\"$hostname\"} |~ \"$search\"[$__interval]))",
+          "expr": "sum(count_over_time({unit=\"${unit}\", hostname=~\"${hostname:regex}\"} |~ \"$search\"[$__interval]))",
           "refId": "A"
         }
       ],
@@ -131,7 +131,7 @@
       "targets": [
         {
           "datasource": "Loki",
-          "expr": "{unit=~\"$unit\", hostname=~\"$hostname\"} |~ \"$search\"",
+          "expr": "{unit=\"${unit}\", hostname=~\"${hostname:regex}\"} |~ \"$search\"",
           "refId": "A"
         }
       ],
@@ -147,25 +147,22 @@
         "allValue": ".+",
         "current": {
           "selected": true,
-          "text": "ansible-init.service",
-          "value": "ansible-init.service"
+          "text": "containerd.service",
+          "value": "containerd.service"
         },
         "datasource": "Loki",
-        "definition": "label_values(unit)",
+        "definition": "label_values({unit=~\".+\"}, unit)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "unit",
         "options": [],
-        "query": "label_values(unit)",
-        "refresh": 1,
+        "query": "label_values({unit=~\".+\"}, unit)",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "sort": 1,
+        "type": "query"
       },
       {
         "allValue": ".+",
@@ -179,14 +176,14 @@
           ]
         },
         "datasource": "Loki",
-        "definition": "label_values({unit=~\"$unit\"}, hostname)",
+        "definition": "label_values({unit=\"${unit}\"}, hostname)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "hostname",
         "options": [],
-        "query": "label_values({unit=~\"$unit\"}, hostname)",
-        "refresh": 1,
+        "query": "label_values({unit=\"${unit}\"}, hostname)",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
