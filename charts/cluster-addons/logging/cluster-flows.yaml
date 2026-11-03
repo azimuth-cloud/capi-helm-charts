@@ -2,7 +2,7 @@ apiVersion: logging.banzaicloud.io/v1beta1
 kind: ClusterFlow
 metadata:
   name: cluster-logging-json
-  namespace: monitoring-system
+  namespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
 spec:
   filters:
     - tag_normaliser: {}
@@ -26,7 +26,7 @@ apiVersion: logging.banzaicloud.io/v1beta1
 kind: ClusterFlow
 metadata:
   name: cluster-logging
-  namespace: monitoring-system
+  namespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
 spec:
   filters:
     - tag_normaliser: {}
@@ -51,7 +51,7 @@ apiVersion: logging.banzaicloud.io/v1beta1
 kind: ClusterFlow
 metadata:
   name: cluster-logging-systemd
-  namespace: monitoring-system
+  namespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
 spec:
   filters:
     - parser:

@@ -46,10 +46,10 @@ metadata:
     {{- include "cluster-addons.componentLabels" (list . "logging-configuration") | nindent 4 }}
     addons.stackhpc.com/watch: ""
 data:
-  {{- range $path, $content := .Files.Glob "logging/*.yaml" }}
+{{- range $path, $content := .Files.Glob "logging/*.yaml" }}
   {{ base $path }}: |
-{{ $content | toString | indent 4 }}
-  {{- end }}
+{{ tpl ($content | toString) $ | indent 4 }}
+{{- end }}
 
 ---
 apiVersion: addons.stackhpc.com/v1alpha1

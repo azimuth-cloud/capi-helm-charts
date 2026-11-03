@@ -2,7 +2,7 @@ apiVersion: logging.banzaicloud.io/v1beta1
 kind: FluentdConfig
 metadata:
   name: logging-configuration
-  namespace: monitoring-system
+  namespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
 spec:
   logLevel: warn
   metrics:
@@ -11,15 +11,10 @@ spec:
   image:
     pullPolicy: IfNotPresent
   scaling:
-    replicas: 2
+    replicas: {{ .Values.monitoring.loggingOperator.fluentd.replicas }}
   livenessDefaultCheck: true
   disablePvc: true
   bufferStorageVolume:
     emptyDir: {}
   resources:
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-    requests:
-      cpu: 500m
-      memory: 2Gi
+{{ toYaml .Values.monitoring.loggingOperator.fluentd.resources | indent 4 }}
