@@ -55,7 +55,7 @@ csi:
     chart:
       repo: https://ceph.github.io/csi-charts
       name: ceph-csi-cephfs
-      version: 3.18.1
+      version: 3.18.2
     release:
       namespace: csi-ceph-system
       values: {}
