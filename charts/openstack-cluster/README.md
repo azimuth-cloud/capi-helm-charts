@@ -51,6 +51,9 @@ First, you must set up a
 with the [OpenStack Infrastructure Provider](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
 installed.
 
+Install the controllers and matching CRDs using the versions listed in the `dependencies.json` file attached to the chart [release](https://github.com/azimuth-cloud/capi-helm-charts/releases).
+For existing clusters, follow the [v1beta2 migration guide](../../docs/v1beta2-migration.md).
+
 Addons are managed by the
 [Cluster API Addon Provider](https://github.com/azimuth-cloud/cluster-api-addon-provider),
 which must also be installed if you wish to use the addons functionality.
