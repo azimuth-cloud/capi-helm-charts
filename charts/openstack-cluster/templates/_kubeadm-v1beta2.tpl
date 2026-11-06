@@ -1,6 +1,6 @@
 {{/*
 Convert a copy of the merged bootstrap spec after calculating template checksums.
-Match CAPI v1.14.2's conversion from v1beta1 to v1beta2.
+Match CAPI's conversion from v1beta1 to v1beta2.
 */}}
 {{- define "openstack-cluster.v1beta2.args" -}}
 {{- $args := list -}}

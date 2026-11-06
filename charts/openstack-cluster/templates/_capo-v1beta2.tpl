@@ -1,5 +1,5 @@
 {{/*
-Convert specs for output using CAPO v0.15.0's conversion rules.
+Convert specs for output using CAPO's v1beta2 conversion rules.
 Keep the original specs for hashing so template names stay the same.
 Check for nil rather than empty values to preserve explicit false and zero.
 */}}
