@@ -962,10 +962,10 @@ templated manifests should match snapshot:
           capi.stackhpc.com/component: control-plane
       unhealthyConditions:
         - status: Unknown
-          timeout: 5m0s
+          timeout: 15m0s
           type: Ready
         - status: "False"
-          timeout: 5m0s
+          timeout: 15m0s
           type: Ready
   31: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -1169,10 +1169,10 @@ templated manifests should match snapshot:
           capi.stackhpc.com/node-group: group-1
       unhealthyConditions:
         - status: Unknown
-          timeout: 5m0s
+          timeout: 15m0s
           type: Ready
         - status: "False"
-          timeout: 5m0s
+          timeout: 15m0s
           type: Ready
   36: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
