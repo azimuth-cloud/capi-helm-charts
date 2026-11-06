@@ -24,6 +24,9 @@ with mock.patch.dict(sys.modules, {"openstack": None}):
 LB_ID = "11111111-1111-4111-8111-111111111111"
 VOLUME_ID = "22222222-2222-4222-8222-222222222222"
 OTHER_ID = "33333333-3333-4333-8333-333333333333"
+FIP_ID = "44444444-4444-4444-8444-444444444444"
+VIP_PORT_ID = "55555555-5555-4555-8555-555555555555"
+FIP_ADDRESS = "192.0.2.10"
 RAW_BODY = "sensitive-cloud-response-and-credential-marker"
 
 
@@ -129,20 +132,88 @@ class StateTests(StateFileTestCase):
                 self.assertNotIn("volume_id", state)
 
 
+class FindFloatingIPTests(unittest.TestCase):
+    def setUp(self):
+        self.floating_ip = SimpleNamespace(
+            id=FIP_ID, port_id=VIP_PORT_ID, floating_ip_address=FIP_ADDRESS,
+        )
+        self.load_balancer = SimpleNamespace(id=LB_ID, vip_port_id=VIP_PORT_ID)
+        self.connection = SimpleNamespace(
+            load_balancer=SimpleNamespace(get_load_balancer=mock.Mock(return_value=self.load_balancer)),
+            network=SimpleNamespace(ips=mock.Mock(return_value=[self.floating_ip])),
+            session=SimpleNamespace(timeout=None),
+        )
+
+    def find(self):
+        return cleanup.find_floating_ip(
+            self.connection, LB_ID, [{"ip": FIP_ADDRESS}], cleanup.Deadline(30),
+        )
+
+    def test_finds_the_floating_ip_on_the_vip_port_with_the_service_address(self):
+        self.assertIs(self.find(), self.floating_ip)
+
+        self.connection.load_balancer.get_load_balancer.assert_called_once_with(LB_ID)
+        self.connection.network.ips.assert_called_once_with(port_id=VIP_PORT_ID)
+
+    def test_missing_or_unrelated_floating_ips_do_not_match(self):
+        for candidates in (
+            [],
+            [SimpleNamespace(id=FIP_ID, port_id=OTHER_ID, floating_ip_address=FIP_ADDRESS)],
+            [SimpleNamespace(id=FIP_ID, port_id=VIP_PORT_ID, floating_ip_address="192.0.2.11")],
+        ):
+            with self.subTest(candidates=candidates):
+                self.connection.network.ips.return_value = candidates
+
+                self.assertIsNone(self.find())
+
+    def test_missing_vip_port_does_not_list_unrelated_floating_ips(self):
+        self.load_balancer.vip_port_id = None
+
+        with self.assertRaises(cleanup.CleanupError):
+            self.find()
+
+        self.connection.network.ips.assert_not_called()
+
+    def test_multiple_matches_are_rejected(self):
+        self.connection.network.ips.return_value = [
+            self.floating_ip,
+            SimpleNamespace(id=OTHER_ID, port_id=VIP_PORT_ID, floating_ip_address=FIP_ADDRESS),
+        ]
+
+        with self.assertRaises(cleanup.CleanupError):
+            self.find()
+
+    def test_errors_while_iterating_floating_ips_are_sanitized(self):
+        def failed_listing(status):
+            yield self.floating_ip
+            raise HTTPFailure(status)
+
+        for status in (401, 403, 404, 500):
+            with self.subTest(status=status):
+                self.connection.network.ips.return_value = failed_listing(status)
+
+                with self.assertRaises(cleanup.CleanupError) as raised:
+                    self.find()
+
+                self.assertNotIn(RAW_BODY, str(raised.exception))
+
+
 class PrepareTests(StateFileTestCase):
-    def test_preparation_records_service_and_pv_ids_before_cluster_deletion(self):
+    def test_preparation_waits_for_the_floating_ip_and_records_all_ids(self):
         args = SimpleNamespace(
             cluster_name="test-cluster", namespace="default",
             workload_kubeconfig="workload-kubeconfig", state_file=self.state_path,
         )
         state = {"prepared": False, "verified": False}
-        responses = [
+        cluster_responses = [
             {"metadata": {"uid": "cluster-uid"}},
             None,
             None,
+        ]
+        workload_responses = [
             {
                 "metadata": {"annotations": {cleanup.LB_ID_ANNOTATION: LB_ID}},
-                "status": {"loadBalancer": {"ingress": [{"ip": "192.0.2.10"}]}},
+                "status": {"loadBalancer": {"ingress": [{"ip": FIP_ADDRESS}]}},
             },
             {"spec": {"volumeName": "test-pv"}, "status": {"phase": "Bound"}},
             {"spec": {
@@ -151,18 +222,31 @@ class PrepareTests(StateFileTestCase):
             }},
             {"status": {"conditions": [{"type": "Ready", "status": "True"}]}},
         ]
+        floating_ip = SimpleNamespace(id=FIP_ID, port_id=VIP_PORT_ID, floating_ip_address=FIP_ADDRESS)
         connection = SimpleNamespace(
-            load_balancer=SimpleNamespace(get_load_balancer=mock.Mock(return_value=object())),
+            load_balancer=SimpleNamespace(
+                get_load_balancer=mock.Mock(return_value=SimpleNamespace(id=LB_ID, vip_port_id=VIP_PORT_ID)),
+            ),
+            network=SimpleNamespace(
+                ips=mock.Mock(side_effect=[[], [floating_ip]]),
+                get_ip=mock.Mock(return_value=floating_ip),
+            ),
             block_storage=SimpleNamespace(get_volume=mock.Mock(return_value=object())),
             session=SimpleNamespace(timeout=None),
         )
-        with mock.patch.object(cleanup, "kubectl", side_effect=responses) as kubectl:
+        with (
+            mock.patch.object(cleanup, "kubectl", side_effect=cluster_responses + workload_responses * 2) as kubectl,
+            mock.patch.object(cleanup.time, "sleep") as sleep,
+        ):
             cleanup.prepare(args, connection, state, cleanup.Deadline(30))
 
-        connection.load_balancer.get_load_balancer.assert_called_once_with(LB_ID)
+        self.assertTrue(all(call == mock.call(LB_ID) for call in connection.load_balancer.get_load_balancer.call_args_list))
+        connection.network.get_ip.assert_called_once_with(FIP_ID)
         connection.block_storage.get_volume.assert_called_once_with(VOLUME_ID)
+        sleep.assert_called_once()
         self.assertIs(self.read_state()["prepared"], True)
         self.assertEqual(self.read_state()["load_balancer_id"], LB_ID)
+        self.assertEqual(self.read_state()["floating_ip_id"], FIP_ID)
         self.assertEqual(self.read_state()["volume_id"], VOLUME_ID)
         calls = kubectl.call_args_list
         self.assertIn(f"{cleanup.VOLUME_POLICY_ANNOTATION}=delete", calls[1].args[0])
@@ -186,13 +270,21 @@ class VerifyTests(StateFileTestCase):
             "prepared": True,
             "verified": False,
             "load_balancer_id": LB_ID,
+            "floating_ip_id": FIP_ID,
             "volume_id": VOLUME_ID,
         }
         self.write_state(self.state)
         self.lb_getter = mock.Mock()
+        self.fip_getter = mock.Mock()
         self.volume_getter = mock.Mock()
+        self.getters = {
+            "load_balancer_id": self.lb_getter,
+            "floating_ip_id": self.fip_getter,
+            "volume_id": self.volume_getter,
+        }
         self.connection = SimpleNamespace(
             load_balancer=SimpleNamespace(get_load_balancer=self.lb_getter),
+            network=SimpleNamespace(get_ip=self.fip_getter),
             block_storage=SimpleNamespace(get_volume=self.volume_getter),
             session=SimpleNamespace(timeout=None),
         )
@@ -205,13 +297,13 @@ class VerifyTests(StateFileTestCase):
         self.addCleanup(self.sleep.stop)
 
     def assert_exact_ids(self):
-        self.assertTrue(self.lb_getter.called)
-        self.assertTrue(self.volume_getter.called)
-        self.assertTrue(all(call == mock.call(LB_ID) for call in self.lb_getter.call_args_list))
-        self.assertTrue(all(call == mock.call(VOLUME_ID) for call in self.volume_getter.call_args_list))
+        for key, getter in self.getters.items():
+            self.assertTrue(getter.called)
+            self.assertTrue(all(call == mock.call(self.state[key]) for call in getter.call_args_list))
 
-    def test_polls_the_recorded_ids_until_both_are_http_404(self):
+    def test_polls_the_recorded_ids_until_all_are_http_404(self):
         self.lb_getter.side_effect = [SimpleNamespace(id=LB_ID), HTTPFailure(404)]
+        self.fip_getter.side_effect = [SimpleNamespace(id=FIP_ID, port_id=None), HTTPFailure(404)]
         self.volume_getter.side_effect = HTTPFailure(404, "http_status")
 
         cleanup.verify(self.connection, self.state, self.state_path, timeout=30)
@@ -222,23 +314,21 @@ class VerifyTests(StateFileTestCase):
         self.assertIs(self.state["verified"], True)
         self.assertIs(self.read_state()["verified"], True)
         self.assertEqual(self.read_state()["load_balancer_id"], LB_ID)
+        self.assertEqual(self.read_state()["floating_ip_id"], FIP_ID)
         self.assertEqual(self.read_state()["volume_id"], VOLUME_ID)
 
     def test_one_remaining_resource_times_out_without_verified_success(self):
-        for present_key in ("load_balancer_id", "volume_id"):
+        for present_key in self.getters:
             with self.subTest(present_key=present_key):
                 self.state["verified"] = False
                 self.write_state(self.state)
-                for key, getter in (
-                    ("load_balancer_id", self.lb_getter),
-                    ("volume_id", self.volume_getter),
-                ):
+                for key, getter in self.getters.items():
                     getter.reset_mock()
                     getter.side_effect = None if key == present_key else HTTPFailure(404)
-                    getter.return_value = SimpleNamespace(id=self.state[key])
+                    getter.return_value = SimpleNamespace(id=self.state[key], port_id=None)
 
                 with self.assertRaises(cleanup.CleanupError):
-                    cleanup.verify(self.connection, self.state, self.state_path, timeout=8)
+                    cleanup.verify(self.connection, self.state, self.state_path, timeout=20)
 
                 self.assert_exact_ids()
                 self.assertIsNot(self.state.get("verified"), True)
@@ -253,10 +343,11 @@ class VerifyTests(StateFileTestCase):
                     cleanup.verify(self.connection, state, self.state_path, timeout=30)
 
                 self.lb_getter.assert_not_called()
+                self.fip_getter.assert_not_called()
                 self.volume_getter.assert_not_called()
 
     def test_verification_rejects_missing_or_invalid_recorded_ids(self):
-        for key in ("load_balancer_id", "volume_id"):
+        for key in self.getters:
             for value in (None, "", "not-a-uuid"):
                 with self.subTest(key=key, value=value):
                     state = {**self.state, key: value}
@@ -265,19 +356,21 @@ class VerifyTests(StateFileTestCase):
                         cleanup.verify(self.connection, state, self.state_path, timeout=30)
 
                     self.lb_getter.assert_not_called()
+                    self.fip_getter.assert_not_called()
                     self.volume_getter.assert_not_called()
 
     def test_verification_does_not_accept_cloud_errors_as_cleanup(self):
-        self.lb_getter.side_effect = HTTPFailure(404)
-        self.volume_getter.side_effect = HTTPFailure(403)
+        for failing_key in self.getters:
+            with self.subTest(failing_key=failing_key):
+                for key, getter in self.getters.items():
+                    getter.side_effect = HTTPFailure(403 if key == failing_key else 404)
 
-        with self.assertRaises(cleanup.CleanupError) as raised:
-            cleanup.verify(self.connection, self.state, self.state_path, timeout=30)
+                with self.assertRaises(cleanup.CleanupError) as raised:
+                    cleanup.verify(self.connection, self.state, self.state_path, timeout=30)
 
-        self.assert_exact_ids()
-        self.assertNotIn(RAW_BODY, str(raised.exception))
-        self.assertIsNot(self.state.get("verified"), True)
-        self.assertIsNot(self.read_state().get("verified"), True)
+                self.assertNotIn(RAW_BODY, str(raised.exception))
+                self.assertIsNot(self.state.get("verified"), True)
+                self.assertIsNot(self.read_state().get("verified"), True)
 
 
 if __name__ == "__main__":

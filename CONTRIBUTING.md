@@ -38,13 +38,16 @@ The `scripts/janitor-cleanup.py` script is a CI regression test, separate from H
 It uses Python and the OpenStack SDK, as `scripts/ensure-flatcar-sysext-images.py` already does, to distinguish missing resources from authentication and API errors.
 
 The `latest` test job creates a LoadBalancer Service and a Pod with a Cinder PVC in the workload cluster.
-It records their OpenStack IDs, enables volume deletion for that test cluster, and leaves the Service and PVC in place when deleting the cluster.
-After deletion, the test waits for both IDs to return HTTP 404 from OpenStack.
+It finds the floating IP attached to the load balancer's VIP port and checks that its address matches the Service ingress.
+The test requires a floating IP. An internal VIP alone does not pass this check.
+It records the load balancer, floating IP and volume IDs, enables volume deletion for that test cluster, and leaves the Service and PVC in place when deleting the cluster.
+After deletion, the test waits for all three IDs to return HTTP 404 from OpenStack.
+A floating IP that is detached but still allocated fails this check.
 The state file and controller logs are uploaded for diagnosis, including when the test fails.
 
 This checks cleanup through OCCM, Cinder CSI and Go Janitor together.
 Janitor's own integration suite separately checks resources without workload controllers managing them.
-Run the cloud test only in the disposable CI cluster and allow quota for one additional load balancer and one 1 GiB volume.
+Run the cloud test only in the disposable CI cluster and allow quota for one additional load balancer, one floating IP and one 1 GiB cinder volume.
 If the test fails, use its recorded IDs to investigate and remove any remaining test resources.
 The test does not delete cloud resources itself after checking them.
 
