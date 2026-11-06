@@ -126,11 +126,29 @@ runs:
     - name: Install Go Janitor
       shell: bash
       run: |-
+        chart_dir=$(mktemp -d)
+        trap 'rm -rf "$chart_dir"' EXIT
+
+        for attempt in 1 2 3; do
+          echo "Downloading Go Janitor chart (attempt $attempt/3)"
+          if helm pull oci://quay.io/azimuth/cluster-api-janitor-openstack-charts/cluster-api-janitor-openstack \
+            --version "$JANITOR_CHART_VERSION" \
+            --destination "$chart_dir"; then
+            break
+          fi
+          if [ "$attempt" -eq 3 ]; then
+            echo "::error::Failed to download the Go Janitor chart after 3 attempts."
+            exit 1
+          fi
+          sleep 10
+        done
+
         helm upgrade cluster-api-janitor-openstack \
-          oci://quay.io/azimuth/cluster-api-janitor-openstack-charts/cluster-api-janitor-openstack \
-          --version ${{ steps.deps.outputs.capi-janitor-openstack-go }} \
+          "$chart_dir/cluster-api-janitor-openstack-${JANITOR_CHART_VERSION}.tgz" \
           --namespace capi-janitor-system \
           --create-namespace \
           --install \
           --wait \
           --timeout 10m
+      env:
+        JANITOR_CHART_VERSION: ${{ steps.deps.outputs.capi-janitor-openstack-go }}

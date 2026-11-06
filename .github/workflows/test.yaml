@@ -117,7 +117,7 @@ jobs:
         timeout-minutes: 11
         if: ${{ always() && steps.prepare-janitor-cleanup.outcome == 'success' }}
 
-      - name: Verify Janitor deleted the load balancer and volume
+      - name: Verify Janitor deleted the load balancer, floating IP and volume
         run: >-
           uv run --python 3.12 --script scripts/janitor-cleanup.py verify
           --state-file ./janitor-cleanup-state.json

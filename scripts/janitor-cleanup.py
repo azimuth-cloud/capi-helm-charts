@@ -168,6 +168,29 @@ def fixture_manifest():
     }
 
 
+def find_floating_ip(connection, load_balancer_id, ingress, deadline):
+    connection.session.timeout = min(30, deadline.remaining())
+    load_balancer = get_resource(connection.load_balancer.get_load_balancer, load_balancer_id)
+    if load_balancer is None:
+        raise CleanupError("The test load balancer is absent before cluster deletion")
+    if not load_balancer.vip_port_id:
+        raise CleanupError("The test load balancer has no VIP port")
+
+    addresses = {entry["ip"] for entry in ingress if entry.get("ip")}
+    connection.session.timeout = min(30, deadline.remaining())
+    try:
+        matches = [
+            floating_ip for floating_ip in connection.network.ips(port_id=load_balancer.vip_port_id)
+            if floating_ip.port_id == load_balancer.vip_port_id
+            and floating_ip.floating_ip_address in addresses
+        ]
+    except Exception as error:
+        raise CleanupError(f"Find the test floating IP: {error_summary(error)}") from None
+    if len(matches) > 1:
+        raise CleanupError("Multiple floating IPs match the test Service and load balancer")
+    return matches[0] if matches else None
+
+
 def prepare(args, connection, state, deadline):
     cluster = kubectl(
         ["get", "openstackcluster", args.cluster_name, "-n", args.namespace, "-o=json"], deadline,
@@ -188,6 +211,12 @@ def prepare(args, connection, state, deadline):
             deadline, args.workload_kubeconfig,
         )
         record_id(state, "load_balancer_id", service["metadata"].get("annotations", {}).get(LB_ID_ANNOTATION), args.state_file)
+        ingress = service.get("status", {}).get("loadBalancer", {}).get("ingress", [])
+        floating_ip = None
+        if state.get("load_balancer_id") and ingress:
+            floating_ip = find_floating_ip(connection, state["load_balancer_id"], ingress, deadline)
+            if floating_ip is not None:
+                record_id(state, "floating_ip_id", floating_ip.id, args.state_file)
         claim = kubectl(
             ["get", "pvc", RESOURCE_NAME, "-n", WORKLOAD_NAMESPACE, "-o=json"],
             deadline, args.workload_kubeconfig,
@@ -209,9 +238,8 @@ def prepare(args, connection, state, deadline):
             condition.get("type") == "Ready" and condition.get("status") == "True"
             for condition in pod.get("status", {}).get("conditions", [])
         )
-        if (state.get("load_balancer_id") and state.get("volume_id") and pod_ready
-                and claim.get("status", {}).get("phase") == "Bound"
-                and service.get("status", {}).get("loadBalancer", {}).get("ingress")):
+        if (floating_ip is not None and state.get("volume_id") and pod_ready
+                and claim.get("status", {}).get("phase") == "Bound"):
             break
         deadline.pause()
 
@@ -221,20 +249,21 @@ def prepare(args, connection, state, deadline):
             raise CleanupError(f"Recorded {key} is absent before cluster deletion")
     state["prepared"] = True
     write_state(state, args.state_file)
-    print("Confirmed the workload load balancer and Cinder volume exist")
+    print("Confirmed the workload load balancer, floating IP and Cinder volume exist")
 
 
 def resource_getters(connection):
     return (
         ("load_balancer_id", connection.load_balancer.get_load_balancer),
+        ("floating_ip_id", connection.network.get_ip),
         ("volume_id", connection.block_storage.get_volume),
     )
 
 
 def verify(connection, state, state_path, timeout):
     if state.get("prepared") is not True:
-        raise CleanupError("Preparation did not confirm both OpenStack resources")
-    for key in ("load_balancer_id", "volume_id"):
+        raise CleanupError("Preparation did not confirm all OpenStack resources")
+    for key, _ in resource_getters(connection):
         checked_id(state.get(key))
     deadline = Deadline(timeout)
     while True:
@@ -247,7 +276,7 @@ def verify(connection, state, state_path, timeout):
         state["verified"] = not remaining
         write_state(state, state_path)
         if state["verified"]:
-            print("Confirmed HTTP 404 for the recorded load balancer and Cinder volume")
+            print("Confirmed HTTP 404 for the recorded load balancer, floating IP and Cinder volume")
             return
         deadline.pause()
 
