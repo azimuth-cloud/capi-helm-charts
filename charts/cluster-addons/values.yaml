@@ -293,6 +293,7 @@ monitoring:
                   resources:
                     requests:
                       storage: 10Gi
+
   lokiStack:
     enabled: true
     chart:
@@ -313,6 +314,8 @@ monitoring:
           persistence:
             enabled: true
             size: 10Gi
+
+  # Manages Fluent Bit and Fluentd log for log collection and forwarding.
   loggingOperator:
     enabled: false
     chart:
@@ -342,6 +345,7 @@ monitoring:
         requests:
           cpu: 500m
           memory: 2Gi
+
   # Loki v3 is the successor to the lokiStack addon since the Helm
   # chart for the latter is no longer maintained upstream.
 
@@ -435,6 +439,7 @@ monitoring:
             size: 10Gi
             # Required to allow resizing of PVC during Helm upgrades
             enableStatefulSetAutoDeletePVC: false
+
   # Configuration for the blackbox exporter
   blackboxExporter:
     enabled: true

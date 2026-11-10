@@ -20,7 +20,6 @@ spec:
           logging/format: json
   globalOutputRefs:
     - cluster-logging
-
 ---
 apiVersion: logging.banzaicloud.io/v1beta1
 kind: ClusterFlow
@@ -45,7 +44,6 @@ spec:
     - select: {}
   globalOutputRefs:
     - cluster-logging
-
 ---
 apiVersion: logging.banzaicloud.io/v1beta1
 kind: ClusterFlow
@@ -60,7 +58,6 @@ spec:
         remove_key_name_field: true
         parse:
           type: json
-
     - record_transformer:
         enable_ruby: true
         renew_record: true
@@ -68,13 +65,12 @@ spec:
           - MESSAGE: '${record["MESSAGE"]}'
           - _SYSTEMD_UNIT: '${record["_SYSTEMD_UNIT"]}'
           - _HOSTNAME: '${record["_HOSTNAME"]}'
-
   match:
     - select:
         namespaces:
           - monitoring-system
         container_names:
           - journal
-
   globalOutputRefs:
     - cluster-logging-systemd
+

@@ -6,16 +6,7 @@ metadata:
 spec:
   metrics:
     serviceMonitor: true
-
   resources:
 {{ toYaml .Values.monitoring.loggingOperator.fluentbit.resources | indent 4 }}
-
-  network:
-    keepalive: true
-    keepaliveIdleTimeout: 60
-    keepaliveMaxRecycle: 2000
-    connectTimeout: 10
-    connectTimeoutLogError: true
-
   tolerations:
 {{ toYaml .Values.monitoring.loggingOperator.fluentbit.tolerations | indent 4 }}
