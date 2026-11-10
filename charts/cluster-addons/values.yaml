@@ -61,7 +61,7 @@ csi:
       values: {}
   # Indicates if the NFS CSI driver should be enabled
   csiNfs:
-    enabled: true
+    enabled: false
     chart:
       repo: https://kubernetes-csi.github.io/csi-driver-nfs
       name: csi-driver-nfs

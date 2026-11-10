@@ -579,43 +579,6 @@ templated manifests should match snapshot:
       releaseName: csi-cinder-storageclass
       targetNamespace: openstack-system
   22: |
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      labels:
-        addons.stackhpc.com/watch: ""
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: csi-nfs
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-csi-nfs-config
-    stringData:
-      defaults: |
-        {}
-  23: |
-    apiVersion: addons.stackhpc.com/v1alpha1
-    kind: HelmRelease
-    metadata:
-      labels:
-        capi.stackhpc.com/cluster: RELEASE-NAME
-        capi.stackhpc.com/component: csi-nfs
-        capi.stackhpc.com/managed-by: Helm
-        helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-csi-nfs
-    spec:
-      bootstrap: true
-      chart:
-        name: csi-driver-nfs
-        repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-        version: 4.13.4
-      clusterName: RELEASE-NAME
-      releaseName: csi-nfs
-      targetNamespace: csi-nfs
-      valuesSources:
-        - secret:
-            key: defaults
-            name: RELEASE-NAME-csi-nfs-config
-  24: |
     raw: |
       DEPRECATION NOTICE:
 
@@ -636,7 +599,7 @@ templated manifests should match snapshot:
           process for capi-helm-charts.
         - Setting .Values.addons.ingress.enabled=true therefore no longer guarantees to install
           a functioning NGINX Ingress controller.
-  25: |
+  23: |
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -703,7 +666,7 @@ templated manifests should match snapshot:
             - name: kubeconfig
               secret:
                 secretName: RELEASE-NAME-kubeconfig
-  26: |
+  24: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -735,7 +698,7 @@ templated manifests should match snapshot:
           - get
           - patch
           - update
-  27: |
+  25: |
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
@@ -754,7 +717,7 @@ templated manifests should match snapshot:
       - kind: ServiceAccount
         name: RELEASE-NAME-autoscaler
         namespace: NAMESPACE
-  28: |
+  26: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -765,7 +728,7 @@ templated manifests should match snapshot:
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: openstack-cluster-0.1.0
       name: RELEASE-NAME-autoscaler
-  29: |
+  27: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackCluster
     metadata:
@@ -813,7 +776,7 @@ templated manifests should match snapshot:
             remoteIPPrefix: 0.0.0.0/0
       managedSubnets:
         - cidr: 192.168.3.0/24
-  30: |
+  28: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: Cluster
     metadata:
@@ -843,7 +806,7 @@ templated manifests should match snapshot:
         kind: OpenStackCluster
         name: RELEASE-NAME
         namespace: NAMESPACE
-  31: |
+  29: |
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     metadata:
@@ -1001,7 +964,7 @@ templated manifests should match snapshot:
           maxSurge: 1
         type: RollingUpdate
       version: v1.36.2
-  32: |
+  30: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1027,7 +990,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  33: |
+  31: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1051,7 +1014,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-noble-kube-v1.36.2
-  34: |
+  32: |
     apiVersion: v1
     kind: Secret
     metadata:
@@ -1067,7 +1030,7 @@ templated manifests should match snapshot:
         apiVersion: apiserver.config.k8s.io/v1
         kind: AdmissionConfiguration
         plugins: []
-  35: |
+  33: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1157,7 +1120,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  36: |
+  34: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1247,7 +1210,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  37: |
+  35: |
     apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
     kind: KubeadmConfigTemplate
     metadata:
@@ -1337,7 +1300,7 @@ templated manifests should match snapshot:
               CONTENT
               systemctl restart containerd
               EOF
-  38: |
+  36: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1386,7 +1349,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.36.2
-  39: |
+  37: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1436,7 +1399,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.36.2
-  40: |
+  38: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineDeployment
     metadata:
@@ -1486,7 +1449,7 @@ templated manifests should match snapshot:
           nodeDrainTimeout: 5m0s
           nodeVolumeDetachTimeout: 5m0s
           version: v1.36.2
-  41: |
+  39: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1514,7 +1477,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  42: |
+  40: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1542,7 +1505,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  43: |
+  41: |
     apiVersion: cluster.x-k8s.io/v1beta1
     kind: MachineHealthCheck
     metadata:
@@ -1570,7 +1533,7 @@ templated manifests should match snapshot:
         - status: "False"
           timeout: 5m0s
           type: Ready
-  44: |
+  42: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1595,7 +1558,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-noble-kube-v1.36.2
-  45: |
+  43: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1620,7 +1583,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-noble-kube-v1.36.2
-  46: |
+  44: |
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: OpenStackMachineTemplate
     metadata:
@@ -1645,7 +1608,7 @@ templated manifests should match snapshot:
           image:
             filter:
               name: ubuntu-noble-kube-v1.36.2
-  47: |
+  45: |
     apiVersion: v1
     kind: Secret
     metadata:
