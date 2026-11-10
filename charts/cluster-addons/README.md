@@ -50,13 +50,30 @@ cni:
   enabled: false
 ```
 
-When using Calico there is a one off `Job` deployed to the tenant cluster to install the necessary CRDs.
-This is defined as a `Manifest` in the management cluster and can be found in `calico.yaml`.
-The container image that installs the CRDs is `scripts/Dockerfile.calico` and the script itself is
-`scripts/install-calico-crds.sh`.
-The container image should use the same tag as the Calico CRD chart version it installs eg
-`quay.io/azimuth/install-calico-crds:v3.33.0`.
-The image is built and pushed manually because CRD updates are rare and must be managed carefully.
+Calico normally manages its CRDs through the Tigera operator.
+`cni.calico.release.values.manageCRDs` defaults to `true`.
+For operator charts from Calico v3.32, `cni.calico.crdBootstrap.enabled` defaults to `true` and deploys a Job that creates missing v1 CRDs and waits for them to become `Established`.
+Bootstrap never updates existing CRD schemas.
+The operator remains responsible for those updates.
+It does not migrate a cluster to Calico's native v3 CRDs.
+
+Keep `cni.calico.crdChartVersion` equal to `cni.calico.chart.version` when bootstrap is used.
+The Job downloads the official manifest for that version and uses `cni.calico.crdImage`.
+Choose an image whose kubectl version is compatible with the tenant API server.
+Keep bootstrap enabled for new clusters.
+The Calico `HelmRelease` remains unpaused, so initial installation relies on addon-provider retries if CRD APIs are not ready.
+When using the `openstack-cluster` parent chart, prefix these values with `addons.`.
+
+A completed Job is reused while its settings are unchanged.
+Changing the CRD version, installer script, image or Job settings changes its name and creates a new Job.
+Bootstrap retries after partial creation still leave existing CRDs unchanged.
+Disabling bootstrap removes the chart-owned installer Job and RBAC through the addon provider.
+Installed CRDs remain.
+
+Calico upgrades roll network components even when Cluster API Machines stay unchanged.
+Bootstrap does not guarantee uninterrupted traffic or Kubernetes and Calico API access during an upgrade.
+Unit tests cover chart rendering and installer failures, and the fresh-install CI workflow checks Job completion and target CRDs becoming `Established`.
+These checks do not validate an existing tenant's upgrade or network configuration.
 
 Additional configuration options are available for each - see [values.yaml](./values.yaml).
 

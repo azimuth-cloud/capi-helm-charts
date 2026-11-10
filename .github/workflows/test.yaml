@@ -16,11 +16,10 @@ on:
         type: boolean
         description: Indicates whether to run the full test suite or just a sanity check
         required: true
-        default: false
       gpu-tests:
         type: boolean
         description: GPU-specific tests in case of changes to the GPU operator template or values
-        required: true
+        required: false
         default: false
 
 jobs:
@@ -79,6 +78,22 @@ jobs:
           overrides-path: ./.github/values/${{ vars.TARGET_CLOUD }}/latest${{ inputs.tests-full && '-full' || '' }}.yaml
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
+
+      - name: Verify fresh Calico CRD bootstrap completed
+        shell: bash
+        run: |-
+          set -euo pipefail
+          job=$(kubectl --kubeconfig ./kubeconfig -n tigera-operator get jobs -o json |
+            jq -ce '[.items[] | select(.metadata.name | startswith("install-calico-crds-"))] |
+              if length == 1 then .[0] else error("Expected exactly one Calico CRD bootstrap Job") end')
+          name=$(jq -r '.metadata.name' <<< "$job")
+          version=$(jq -er '.spec.template.spec.containers[0].env[] |
+            select(.name == "CALICO_CRD_VERSION") | .value' <<< "$job")
+          kubectl --kubeconfig ./kubeconfig -n tigera-operator wait "job/$name" \
+            --for=condition=Complete --timeout 10m
+          kubectl --kubeconfig ./kubeconfig wait --for=condition=Established \
+            -f "https://raw.githubusercontent.com/projectcalico/calico/$version/manifests/v1_crd_projectcalico_org.yaml" \
+            --timeout 5m
 
       - name: Collect workload cluster diagnostics
         uses: ./.github/actions/collect-diagnostics

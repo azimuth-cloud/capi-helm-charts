@@ -1,0 +1,77 @@
+suite: Calico CRD bootstrap
+templates:
+- templates/cni/calico.yaml
+tests:
+- it: bootstraps missing CRDs without pausing the operator by default
+  asserts:
+  - hasDocuments:
+      count: 4
+  - notExists:
+      path: spec.paused
+    documentSelector:
+      path: kind
+      value: HelmRelease
+  - matchRegex:
+      path: stringData.overrides
+      pattern: 'manageCRDs: true'
+    documentSelector:
+      path: kind
+      value: Secret
+  - notMatchRegex:
+      path: spec.manifestSources[0].template
+      pattern: verbs:.*"update"|verbs:.*"patch"|verbs:.*"delete"
+    documentSelector:
+      path: metadata.name
+      value: RELEASE-NAME-cni-calico-crds
+- it: removes installer resources when bootstrap is disabled
+  set:
+    cni.calico.crdBootstrap.enabled: false
+  asserts:
+  - hasDocuments:
+      count: 3
+  - notExists:
+      path: spec.paused
+    documentSelector:
+      path: kind
+      value: HelmRelease
+- it: refuses bootstrap with a different desired operator version
+  set:
+    cni.calico.crdChartVersion: v3.32.0
+  asserts:
+  - failedTemplate:
+      errorMessage: Calico CRD installer requires cni.calico.crdChartVersion to match
+        cni.calico.chart.version
+- it: does not install CRDs for operator charts before v3.32
+  set:
+    cni.calico.chart.version: v3.31.5
+  asserts:
+  - hasDocuments:
+      count: 3
+  - equal:
+      path: spec.chart.version
+      value: v3.31.5
+    documentSelector:
+      path: kind
+      value: HelmRelease
+- it: uses the shared installer image override
+  set:
+    cni.calico.crdImage: example.invalid/kubectl:v1.36.2
+  asserts:
+  - matchRegex:
+      path: spec.manifestSources[0].template
+      pattern: 'image: "example.invalid/kubectl:v1.36.2"'
+    documentSelector:
+      path: metadata.name
+      value: RELEASE-NAME-cni-calico-crds
+- it: does not render a CRD installer for Cilium
+  set:
+    cni.type: cilium
+  asserts:
+  - hasDocuments:
+      count: 0
+- it: does not render a CRD installer when CNI installation is disabled
+  set:
+    cni.enabled: false
+  asserts:
+  - hasDocuments:
+      count: 0

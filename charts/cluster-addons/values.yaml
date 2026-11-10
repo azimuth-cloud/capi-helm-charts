@@ -13,8 +13,14 @@ cni:
   # Settings for the calico CNI
   # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
   calico:
-    crdImage: alpine/k8s:1.35.9
+    # Image used by the CRD installer Job.
+    # Use a kubectl version compatible with the tenant API server.
+    crdImage: alpine/k8s:1.36.6
     crdChartVersion: v3.32.2
+    # New installs need CRDs before Helm can install the operator's custom resources.
+    # Bootstrap only creates missing CRDs; it never updates existing schemas.
+    crdBootstrap:
+      enabled: true
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
@@ -22,6 +28,8 @@ cni:
     release:
       namespace: tigera-operator
       values:
+        # The operator manages CRDs after bootstrap and during upgrades.
+        manageCRDs: true
         nodeSelector:
           node-role.kubernetes.io/control-plane: ""
     # Nova metadata service

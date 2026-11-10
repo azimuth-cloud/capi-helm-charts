@@ -15,9 +15,21 @@ is to run the helm unittest command inside a docker container from the repo root
 
 ```
 helm dependency update charts/openstack-cluster
-docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
+docker run -i --rm --user "$(id -u):$(id -g)" \
+  -v "$PWD:/apps" --tmpfs /.cache \
+  helmunittest/helm-unittest charts/cluster-addons charts/openstack-cluster -u
 ```
 
-where the `-u` option is used to update the existing snapshots. If you receive
-permissions errors when trying to update snapshots, ensure that you are using
-the latest version of the `helmunittest/helm-unittest` image.
+The `-u` option updates the existing snapshots.
+The container runs as your user so it can create snapshot directories and update their files.
+
+### Calico CRD tests
+
+The lint workflow also runs installer and dependency tests without contacting a cluster.
+Run them locally with Helm and Python:
+
+```sh
+python3 -m venv /tmp/capi-helm-tests
+/tmp/capi-helm-tests/bin/pip install -r scripts/requirements-calico.txt
+/tmp/capi-helm-tests/bin/python -m unittest discover -s scripts/tests -p 'test_calico_*.py' -v
+```

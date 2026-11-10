@@ -17,19 +17,7 @@ jobs:
         include:
           - key: calico
             path: cni.calico.chart
-            # Because of the way the Calico chart and CRDs are written, it is very
-            # difficult to infer the images (other than the operator image)
-            # Instead, we must list them here
-            # This string is formatted with the chart version
-            additional-images: |-
-              docker.io/calico/apiserver:{0}
-              docker.io/calico/cni:{0}
-              docker.io/calico/csi:{0}
-              docker.io/calico/kube-controllers:{0}
-              docker.io/calico/node-driver-registrar:{0}
-              docker.io/calico/node:{0}
-              docker.io/calico/pod2daemon-flexvol:{0}
-              docker.io/calico/typha:{0}
+            constraints: '>=3.32.0'
 
           - key: cilium
             path: cni.cilium.chart
@@ -144,7 +132,32 @@ jobs:
           chart: ${{ steps.chart-info.outputs.name }}
           constraints: ${{ matrix.constraints || '>=0.0.0' }}
 
+      - name: Set up Helm for Calico updates
+        if: ${{ matrix.key == 'calico' }}
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
+        with:
+          version: v3.15.3
+
+      - name: Verify the Calico CRD manifest is available
+        if: ${{ matrix.key == 'calico' }}
+        env:
+          CALICO_TARGET_VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          curl --fail --silent --show-error \
+            "https://raw.githubusercontent.com/projectcalico/calico/$CALICO_TARGET_VERSION/manifests/v1_crd_projectcalico_org.yaml" \
+            --output /dev/null
+
+      - name: Update Calico operator and CRD versions together
+        if: ${{ matrix.key == 'calico' }}
+        uses: azimuth-cloud/github-actions/config-update@master
+        with:
+          path: ./charts/cluster-addons/values.yaml
+          updates: |
+            cni.calico.chart.version=${{ steps.next.outputs.version }}
+            cni.calico.crdChartVersion=${{ steps.next.outputs.version }}
+
       - name: Update chart version in values.yaml
+        if: ${{ matrix.key != 'calico' }}
         uses: azimuth-cloud/github-actions/config-update@master
         with:
           path: ./charts/cluster-addons/values.yaml
@@ -169,12 +182,38 @@ jobs:
       - name: Ensure manifests directory exists
         run: mkdir -p ./skopeo-manifests
 
+      - name: Select Calico runtime images
+        id: calico-images
+        if: ${{ matrix.key == 'calico' }}
+        shell: bash
+        env:
+          CALICO_TARGET_VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          # These workloads are created by the operator, not the Helm chart.
+          IFS=. read -r major minor _ <<< "${CALICO_TARGET_VERSION#v}"
+          if (( major > 3 || (major == 3 && minor >= 33) )); then
+            components=(calico node third-party-cni-plugins whisker)
+          else
+            components=(
+              apiserver cni csi kube-controllers node node-driver-registrar
+              pod2daemon-flexvol typha goldmane whisker whisker-backend
+            )
+          fi
+          {
+            echo 'images<<EOF'
+            for component in "${components[@]}"; do
+              printf 'quay.io/calico/%s:%s\n' "$component" "$CALICO_TARGET_VERSION"
+            done
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
       - name: Write Skopeo manifest
         uses: azimuth-cloud/github-actions/skopeo-manifest@master
         with:
           manifest-file: ./skopeo-manifests/${{ matrix.key }}.yaml
           images: |
             ${{ steps.extract-images.outputs.images }}
+            ${{ steps.calico-images.outputs.images }}
             ${{
               format(
                 matrix.additional-images || '',
