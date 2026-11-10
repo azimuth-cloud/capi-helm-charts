@@ -69,6 +69,9 @@ csi:
     release:
       namespace: csi-nfs
     values: {}
+    # CIDR block for addresses which have access to the share. See the nfs-shareClient option in
+    # https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters
+    shareClient:
 # Settings for the OpenStack integrations
 openstack:
   # Indicates if the OpenStack integrations should be enabled
@@ -170,6 +173,10 @@ openstack:
       volumeBindingMode: WaitForFirstConsumer
       # The allowed topologies for the storage class
       allowedTopologies:
+      # If enabled, will assume the project has a Manila share type that's name is the Openstack project's ID. This is useful if the cloud's storage
+      # network segmentation means that private, unique, per-project share types are required, meaning .Values.openstack.csiManila.defaultStorageClass.parameters.type can't be
+      # set globally when deploying clusters through the azimuth-capi-operator.
+      projectIdShareType: false
       # The parameters for the storage class
       # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md#controller-service-volume-parameters
       parameters:

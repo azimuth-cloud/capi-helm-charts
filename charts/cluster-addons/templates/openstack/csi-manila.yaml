@@ -13,6 +13,8 @@ metadata:
 provisioner: {{ $sc.provisioner }}
 {{- else if $ctx.Values.csi.cephfs.enabled }}
 provisioner: cephfs.manila.csi.openstack.org
+{{- else if $ctx.Values.csi.csiNfs.enabled }}
+provisioner: nfs.manila.csi.openstack.org
 {{- else }}
 {{- printf "Unable to determine provisioner for storage class - %s" $sc.name | fail }}
 {{- end }}
@@ -25,9 +27,14 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace: {{ $ctx.Values.openstack.targetNamespace }}
   csi.storage.k8s.io/node-publish-secret-name: csi-manila-credentials
   csi.storage.k8s.io/node-publish-secret-namespace: {{ $ctx.Values.openstack.targetNamespace }}
+  {{- if and $ctx.Values.csi.csiNfs.enabled $ctx.Values.csi.csiNfs.shareClient }}
+  nfs-shareClient: {{ $ctx.Values.csi.csiNfs.shareClient }}
+  {{- end }}
   {{- $parameters := default dict $sc.parameters }}
   {{- if $parameters.type }}
   type: {{ $parameters.type }}
+  {{- else if $ctx.Values.openstack.csiManila.defaultStorageClass.projectIdShareType }}
+  type: {{ "{{" }} cloud_data.auth.project_id {{ "}}" }}
   {{- else if $ctx.Values.csi.cephfs.enabled }}
   type: cephfs
   {{- else }}
