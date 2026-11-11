@@ -12,13 +12,10 @@ spec:
       pod: "$.kubernetes.pod_name"
       container: "$.kubernetes.container_name"
       app: "$.kubernetes.labels.app"
+    {{- with .Values.monitoring.loggingOperator.bufferParams }}
     buffer:
-      timekey: 30s
-      timekey_wait: 1s
-      timekey_use_utc: true
-      chunk_limit_size: 16M
-      queued_chunks_limit_size: 16
-      overflow_action: drop_oldest_chunk
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
 ---
 apiVersion: logging.banzaicloud.io/v1beta1
 kind: ClusterOutput
@@ -35,10 +32,7 @@ spec:
       - _SYSTEMD_UNIT
       - _HOSTNAME
     drop_single_key: true
+    {{- with .Values.monitoring.loggingOperator.bufferParams }}
     buffer:
-      timekey: 30s
-      timekey_wait: 1s
-      timekey_use_utc: true
-      chunk_limit_size: 16M
-      queued_chunks_limit_size: 16
-      overflow_action: drop_oldest_chunk
+      {{- toYaml . | nindent 6 }}
+    {{- end }}

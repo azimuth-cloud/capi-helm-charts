@@ -325,6 +325,22 @@ monitoring:
     release:
       namespace: monitoring-system
       values: {}
+    bufferParams:
+      timekey: 30s
+      timekey_wait: 1s
+      timekey_use_utc: true
+      chunk_limit_size: 16M
+      queued_chunks_limit_size: 8
+      flush_thread_count: 2
+      overflow_action: drop_oldest_chunk
+    bufferParamsSystemd:
+      timekey: 30s
+      timekey_wait: 1s
+      timekey_use_utc: true
+      chunk_limit_size: 16M
+      queued_chunks_limit_size: 8
+      flush_thread_count: 2
+      overflow_action: drop_oldest_chunk
     fluentbit:
       resources:
         limits:
