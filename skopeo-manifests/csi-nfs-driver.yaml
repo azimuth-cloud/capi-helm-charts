@@ -1,0 +1,14 @@
+registry.k8s.io:
+  images:
+    sig-storage/csi-node-driver-registrar:
+    - v2.17.0
+    sig-storage/csi-provisioner:
+    - v6.3.0
+    sig-storage/csi-resizer:
+    - v2.2.1
+    sig-storage/csi-snapshotter:
+    - v8.6.0
+    sig-storage/livenessprobe:
+    - v2.19.0
+    sig-storage/nfsplugin:
+    - v4.13.6
