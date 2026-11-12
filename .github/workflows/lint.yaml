@@ -33,6 +33,15 @@ jobs:
             --all \
             --validate-maintainers=false
 
+      - name: Install Calico test dependencies
+        run: |-
+          python3 -m venv "$RUNNER_TEMP/calico-tests"
+          "$RUNNER_TEMP/calico-tests/bin/python" -m pip install -r scripts/requirements-calico.txt
+
+      - name: Test Calico installer and dependency synchronization
+        run: >-
+          "$RUNNER_TEMP/calico-tests/bin/python" -B -m unittest discover -s scripts/tests -p 'test_calico_*.py' -v
+
       - name: Run template validation (current values)
         run: |
           set -eo pipefail
@@ -67,10 +76,12 @@ jobs:
             --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
 
-      # NOTE: Run the following command locally to generate updated snapshots:
-      # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
+      # See CONTRIBUTING.md for the command to update snapshots locally.
       - name: Run manifest snapshot test (current values)
-        run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
+        run: |-
+          docker run -i --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/apps" --tmpfs /.cache \
+            helmunittest/helm-unittest charts/cluster-addons charts/openstack-cluster
       - name: Get latest tag
         id: latest-tag
         run: |
@@ -95,7 +106,8 @@ jobs:
             --schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             --skip HelmRelease,Manifests,OpenStackCluster,OpenStackMachineTemplate
 
-      # NOTE: Run the following command locally to generate updated snapshots:
-      # docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster -u
       - name: Run manifest snapshot test (values from latest tag)
-        run: docker run -i --rm -v $(pwd):/apps helmunittest/helm-unittest charts/openstack-cluster
+        run: |-
+          docker run -i --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/apps" --tmpfs /.cache \
+            helmunittest/helm-unittest charts/cluster-addons charts/openstack-cluster

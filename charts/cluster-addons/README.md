@@ -1,4 +1,4 @@
-# cluster-addons chart  <!-- omit in toc -->
+# cluster-addons chart <!-- omit in toc -->
 
 This [Helm chart](https://helm.sh/) manages the deployment of addons for a
 [Kubernetes](https://kubernetes.io) cluster deployed using
@@ -10,7 +10,7 @@ Addons are managed using custom resources provided by the
 which must be installed. Please also read the documentation for the addon provider to
 see how addons are defined.
 
-## Contents  <!-- omit in toc -->
+## Contents <!-- omit in toc -->
 
 - [Container Network Interface (CNI) plugins](#container-network-interface-cni-plugins)
 - [OpenStack integrations](#openstack-integrations)
@@ -38,7 +38,7 @@ cni:
 ```
 
 > **NOTE**
-> 
+>
 > When Cilium is used, the
 > [Cilium kube-proxy replacement](https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/)
 > is configured by default with no further action required.
@@ -50,6 +50,31 @@ cni:
   enabled: false
 ```
 
+Calico normally manages its CRDs through the Tigera operator.
+`cni.calico.release.values.manageCRDs` defaults to `true`.
+For operator charts from Calico v3.32, `cni.calico.crdBootstrap.enabled` defaults to `true` and deploys a Job that creates missing v1 CRDs and waits for them to become `Established`.
+Bootstrap never updates existing CRD schemas.
+The operator remains responsible for those updates.
+It does not migrate a cluster to Calico's native v3 CRDs.
+
+Keep `cni.calico.crdChartVersion` equal to `cni.calico.chart.version` when bootstrap is used.
+The Job downloads the official manifest for that version and uses `cni.calico.crdImage`.
+Choose an image whose kubectl version is compatible with the tenant API server.
+Keep bootstrap enabled for new clusters.
+The Calico `HelmRelease` remains unpaused, so initial installation relies on addon-provider retries if CRD APIs are not ready.
+When using the `openstack-cluster` parent chart, prefix these values with `addons.`.
+
+A completed Job is reused while its settings are unchanged.
+Changing the CRD version, installer script, image or Job settings changes its name and creates a new Job.
+Bootstrap retries after partial creation still leave existing CRDs unchanged.
+Disabling bootstrap removes the chart-owned installer Job and RBAC through the addon provider.
+Installed CRDs remain.
+
+Calico upgrades roll network components even when Cluster API Machines stay unchanged.
+Bootstrap does not guarantee uninterrupted traffic or Kubernetes and Calico API access during an upgrade.
+Unit tests cover chart rendering and installer failures, and the fresh-install CI workflow checks Job completion and target CRDs becoming `Established`.
+These checks do not validate an existing tenant's upgrade or network configuration.
+
 Additional configuration options are available for each - see [values.yaml](./values.yaml).
 
 ## OpenStack integrations
@@ -58,7 +83,7 @@ Kubernetes allows cloud providers to provide various plugins to integrate with t
 underlying infrastructure, for example
 [Cloud Controller Managers (CCMs)](https://kubernetes.io/docs/concepts/architecture/cloud-controller/),
 [Container Storage Interface (CSI) implementations](https://kubernetes-csi.github.io/docs/)
-and [authenticating webhooks](https://kubernetes.io/docs/reference/access-authn-authz/webhook/).    
+and [authenticating webhooks](https://kubernetes.io/docs/reference/access-authn-authz/webhook/).
 
 This chart is able to deploy the CCM, the Cinder and Manila CSI plugins and the Keystone
 authenticating webbook from the
@@ -185,7 +210,7 @@ openstack:
 
 ### Keystone authenticating webhook
 
-The  [k8s-keystone-auth](https://github.com/heytrav/helm-charts/tree/main/charts/k8s-keystone-auth) 
+The [k8s-keystone-auth](https://github.com/heytrav/helm-charts/tree/main/charts/k8s-keystone-auth)
 webhook can be installed by enabling the `k8sKeystoneAuth` subchart. Note that you will need to provide
 the **auth url** and **project id** for the Openstack tenant where you are deploying your cluster.
 
@@ -283,7 +308,7 @@ This chart is able to deploy a monitoring and logging stack using
 The monitoring stack is installed using the
 [kube-prometheus-stack chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack),
 which makes sure many useful exporters are installed and dashboards available for them.
-It also configures alerts for the cluster, *but does not configure any alert sinks by default*.
+It also configures alerts for the cluster, _but does not configure any alert sinks by default_.
 
 Loki is installed using the
 [loki-stack](https://github.com/grafana/helm-charts/tree/main/charts/loki-stack) chart,
@@ -308,12 +333,12 @@ kubectl -n monitoring-system port-forward svc/kube-prometheus-stack-grafana 3000
 ## Intel Device Plugin
 
 Deploys in the Intel Device Plugin operator for managing Intel devices,
-alongside GPU plugin CRDs for the operator to add Intel GPU resources to nodes. 
-[Upstream GPU options](https://github.com/intel/helm-charts/tree/main/charts/gpu-device-plugin#configuration) 
-can be modified by overriding the defaults in `intelDevicePlugin.gpuPlugin.release.values`. 
-Prometheus exporters and service monitors are also provided by Intel XPU Manager, which is 
+alongside GPU plugin CRDs for the operator to add Intel GPU resources to nodes.
+[Upstream GPU options](https://github.com/intel/helm-charts/tree/main/charts/gpu-device-plugin#configuration)
+can be modified by overriding the defaults in `intelDevicePlugin.gpuPlugin.release.values`.
+Prometheus exporters and service monitors are also provided by Intel XPU Manager, which is
 managed by FluxCD resources on the CAPI management cluster. Note that if XPU monitoring is enabled,
-a Flux controller must be installed on the management cluster. See the upstream 
+a Flux controller must be installed on the management cluster. See the upstream
 [installation docs.](https://fluxcd.io/flux/installation/)
 
 ## AMD GPU Operator

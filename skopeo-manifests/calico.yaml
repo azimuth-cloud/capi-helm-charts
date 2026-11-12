@@ -1,22 +1,26 @@
-docker.io:
-  images:
-    calico/apiserver:
-    - v3.31.5
-    calico/cni:
-    - v3.31.5
-    calico/csi:
-    - v3.31.5
-    calico/kube-controllers:
-    - v3.31.5
-    calico/node:
-    - v3.31.5
-    calico/node-driver-registrar:
-    - v3.31.5
-    calico/pod2daemon-flexvol:
-    - v3.31.5
-    calico/typha:
-    - v3.31.5
 quay.io:
   images:
+    calico/apiserver:
+    - v3.32.2
+    calico/cni:
+    - v3.32.2
+    calico/csi:
+    - v3.32.2
+    calico/goldmane:
+    - v3.32.2
+    calico/kube-controllers:
+    - v3.32.2
+    calico/node:
+    - v3.32.2
+    calico/node-driver-registrar:
+    - v3.32.2
+    calico/pod2daemon-flexvol:
+    - v3.32.2
+    calico/typha:
+    - v3.32.2
+    calico/whisker:
+    - v3.32.2
+    calico/whisker-backend:
+    - v3.32.2
     tigera/operator:
-    - v1.40.8
+    - v1.42.6

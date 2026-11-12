@@ -1,10 +1,16 @@
 name: publish artifacts
 on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        description: The Git ref to build.
+        required: false
   workflow_call:
     inputs:
       ref:
         type: string
-        description: The Git ref under test.
+        description: The Git ref to build.
         required: true
     outputs:
       chart-version:
@@ -22,7 +28,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref }}
           # This is important for the semver action to work correctly
           # when determining the number of commits since the last tag
           fetch-depth: 0
