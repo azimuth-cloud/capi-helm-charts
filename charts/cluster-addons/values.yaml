@@ -392,7 +392,7 @@ monitoring:
         deploymentMode: SingleBinary
         monitoring:
           dashboards:
-            enabled: true
+            enabled: false
         # The components for this microservices-first architecture
         # are thus disabled as overrides.
         backend:
