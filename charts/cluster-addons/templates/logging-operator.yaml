@@ -1,0 +1,69 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.loggingOperator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "logging-operator") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "logging-operator") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+stringData:
+  defaults: |
+    monitoring:
+      serviceMonitor:
+        enabled: true
+  overrides: |
+    {{- toYaml .Values.monitoring.loggingOperator.release.values | nindent 4 }}
+
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "logging-operator") }}
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "logging-operator") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  chart:
+    {{- toYaml .Values.monitoring.loggingOperator.chart | nindent 4 }}
+  targetNamespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
+  releaseName: logging-operator
+  valuesSources:
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "logging-operator") }}-config
+        key: defaults
+    - secret:
+        name: {{ include "cluster-addons.componentName" (list . "logging-operator") }}-config
+        key: overrides
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "logging-configuration") }}-config
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "logging-configuration") | nindent 4 }}
+    addons.stackhpc.com/watch: ""
+data:
+{{- range $path, $content := .Files.Glob "logging/*.yaml" }}
+  {{ base $path }}: |
+{{ tpl ($content | toString) $ | indent 4 }}
+{{- end }}
+
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "logging-configuration") }}
+  labels:
+    {{- include "cluster-addons.componentLabels" (list . "logging-configuration") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
+  releaseName: logging-configuration
+  manifestSources:
+    - configMap:
+        name: {{ include "cluster-addons.componentName" (list . "logging-configuration") }}-config
+{{- end }}
