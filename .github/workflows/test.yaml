@@ -80,6 +80,21 @@ jobs:
           sonobuoy-mode: ${{ inputs.tests-full && 'certified-conformance' || 'quick' }}
           sonobuoy-upload: ${{ inputs.tests-full && 'yes' || 'no' }}
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+
+      - name: Prepare Janitor cleanup verification
+        id: prepare-janitor-cleanup
+        run: >-
+          uv run --python 3.12 --script scripts/janitor-cleanup.py prepare
+          --cluster-name ci-${{ github.run_id }}-${{ github.job }}
+          --workload-kubeconfig ./kubeconfig
+          --state-file ./janitor-cleanup-state.json
+          --timeout 600
+        env:
+          OS_CLIENT_CONFIG_FILE: ./clouds.yaml
+          OS_CLOUD: ${{ vars.TARGET_CLOUD }}
+
       - name: Collect workload cluster diagnostics
         uses: ./.github/actions/collect-diagnostics
         with:
@@ -89,8 +104,35 @@ jobs:
         if: ${{ always() }}
 
       - name: Delete Kubernetes 1.37 deployment
-        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait
+        run: helm delete ci-${{ github.run_id }}-${{ github.job }} --wait --timeout 30m
+        timeout-minutes: 35
         if: ${{ always() }}
+
+      # The OpenStackCluster has Helm's keep policy, so Helm does not wait for it.
+      - name: Wait for OpenStackCluster deletion
+        run: >-
+          kubectl wait --for=delete
+          openstackclusters.infrastructure.cluster.x-k8s.io/ci-${{ github.run_id }}-${{ github.job }}
+          --namespace default --timeout 10m
+        timeout-minutes: 11
+        if: ${{ always() && steps.prepare-janitor-cleanup.outcome == 'success' }}
+
+      - name: Verify Janitor deleted the load balancer, floating IP and volume
+        run: >-
+          uv run --python 3.12 --script scripts/janitor-cleanup.py verify
+          --state-file ./janitor-cleanup-state.json
+          --timeout 600
+        env:
+          OS_CLIENT_CONFIG_FILE: ./clouds.yaml
+          OS_CLOUD: ${{ vars.TARGET_CLOUD }}
+        if: ${{ always() && steps.prepare-janitor-cleanup.outcome == 'success' }}
+
+      - name: Upload Janitor cleanup evidence
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: janitor-cleanup-${{ github.job }}
+          path: ./janitor-cleanup-state.json
+        if: ${{ always() && hashFiles('janitor-cleanup-state.json') != '' }}
 
       - name: Upload logs
         uses: ./.github/actions/upload-logs
