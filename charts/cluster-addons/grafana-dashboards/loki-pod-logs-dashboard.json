@@ -102,7 +102,7 @@
       "targets": [
         {
           "datasource": "Loki",
-          "expr": "sum(count_over_time({namespace=\"$namespace\", pod=~\"$pod\"} |~ \"$search\"[$__interval]))",
+          "expr": "sum(count_over_time({namespace=~\"${namespace:regex}\", pod=~\"${pod:regex}\"} |~ \"$search\"[$__interval]))",
           "refId": "A"
         }
       ],
@@ -131,7 +131,7 @@
       "targets": [
         {
           "datasource": "Loki",
-          "expr": "{namespace=\"$namespace\", pod=~\"$pod\"} |~ \"$search\"",
+          "expr": "{namespace=~\"${namespace:regex}\", pod=~\"${pod:regex}\"} |~ \"$search\"",
           "refId": "A"
         }
       ],
@@ -150,15 +150,15 @@
           "text": "ingress-nginx",
           "value": "ingress-nginx"
         },
-        "datasource": "Loki",
-        "definition": "label_values(namespace)",
+        "datasource": "Prometheus",
+        "definition": "label_values(kube_namespace_status_phase, namespace)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "namespace",
         "options": [],
-        "query": "label_values(namespace)",
-        "refresh": 1,
+        "query": "label_values(kube_namespace_status_phase, namespace)",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -181,7 +181,7 @@
         "multi": true,
         "name": "pod",
         "options": [],
-        "query": "label_values({namespace=~\"$namespace\"}, pod)",
+        "query": "label_values({namespace=~\"${namespace:regex}\"}, pod)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
