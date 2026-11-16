@@ -1,0 +1,64 @@
+# Sveltos ClusterProfiles that install Calico on workload clusters.
+# Apply them on the management cluster, where Sveltos runs.
+#
+# They select the CAPI Clusters labelled by charts/openstack-cluster/templates/cluster.yaml,
+# and read the Secrets and ConfigMaps rendered by
+# charts/cluster-addons/templates/cni/calico.yaml in the namespace of the Cluster.
+# The references have no namespace, so Sveltos looks them up in the namespace of the Cluster.
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: deploy-calico
+spec:
+  clusterSelector:
+    matchLabels:
+      addons.stackhpc.com/cni: calico
+  helmCharts:
+    - repositoryURL: https://projectcalico.docs.tigera.io/charts
+      repositoryName: tigera-operator
+      chartName: tigera-operator/tigera-operator
+      # Must match cni.calico.chart.version in charts/cluster-addons/values.yaml
+      chartVersion: v3.31.5
+      # Same release name as the former addon-provider HelmRelease
+      releaseName: cni-calico
+      releaseNamespace: tigera-operator
+      helmChartAction: Install
+      # Later sources take precedence, so the overrides come after the defaults
+      valuesFrom:
+        - kind: Secret
+          name: "{{ .Cluster.metadata.name }}-cni-calico-config"
+        - kind: Secret
+          name: "{{ .Cluster.metadata.name }}-cni-calico-overrides"
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: calico-global-network-policies
+spec:
+  clusterSelector:
+    matchLabels:
+      addons.stackhpc.com/cni: calico
+  # The GlobalNetworkPolicy CRD is installed by the Tigera operator
+  dependsOn:
+    - deploy-calico
+  policyRefs:
+    - kind: ConfigMap
+      name: "{{ .Cluster.metadata.name }}-cni-calico-global-network-policies"
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: calico-monitoring
+spec:
+  clusterSelector:
+    matchLabels:
+      addons.stackhpc.com/cni: calico
+      addons.stackhpc.com/monitoring: "true"
+  # The ServiceMonitor CRD comes from kube-prometheus-stack, which is still deployed
+  # by cluster-api-addon-provider: Sveltos retries until it exists
+  dependsOn:
+    - deploy-calico
+  policyRefs:
+    - kind: ConfigMap
+      name: "{{ .Cluster.metadata.name }}-cni-calico-monitoring"

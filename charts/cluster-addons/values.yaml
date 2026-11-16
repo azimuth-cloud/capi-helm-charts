@@ -13,6 +13,9 @@ cni:
   # Settings for the calico CNI
   # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
   calico:
+    # Calico is installed by a Sveltos ClusterProfile on the management cluster,
+    # so this chart is not read by the templates. It is kept for the automated
+    # version bumps and image mirroring, and must match the ClusterProfile chartVersion.
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
