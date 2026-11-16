@@ -34,7 +34,8 @@ parameters:
   {{- if $parameters.type }}
   type: {{ $parameters.type }}
   {{- else if $ctx.Values.openstack.csiManila.defaultStorageClass.projectIdShareType }}
-  type: {{ "{{" }} cloud_data.auth.project_id {{ "}}" }}
+  {%- set clouds_data = cloud_identity.data["clouds.yaml"] | b64decode | fromyaml -%}
+  type: {{ "{{" }} cloud_datas.clouds.openstack.auth.project_id {{ "}}" }}
   {{- else if $ctx.Values.csi.cephfs.enabled }}
   type: cephfs
   {{- else }}
