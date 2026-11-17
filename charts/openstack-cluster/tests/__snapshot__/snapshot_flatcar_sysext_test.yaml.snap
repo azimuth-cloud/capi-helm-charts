@@ -3,15 +3,16 @@ templated manifests should match snapshot:
     apiVersion: v1
     kind: Secret
     metadata:
+      annotations:
+        projectsveltos.io/template: ok
       labels:
-        addons.stackhpc.com/watch: ""
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: addons-0.1.0
       name: RELEASE-NAME-cni-calico-config
     stringData:
-      defaults: |
+      values.yaml: |
         installation:
           nodeMetricsPort: 9091
           typhaMetricsPort: 9093
@@ -20,60 +21,40 @@ templated manifests should match snapshot:
             nodeAddressAutodetectionV4:
               kubernetes: NodeInternalIP
             ipPools:
-        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+        {{- range .Cluster.spec.clusterNetwork.pods.cidrBlocks }}
               - blockSize: 26
-                cidr: {{ cidr }}
+                cidr: {{ . }}
                 disableBGPExport: false
                 encapsulation: VXLAN
                 natOutgoing: Enabled
                 nodeSelector: all()
-        {% endfor %}
-      overrides: |
-        nodeSelector:
-          node-role.kubernetes.io/control-plane: ""
+        {{- end }}
   2: |
-    apiVersion: addons.stackhpc.com/v1alpha1
-    kind: HelmRelease
+    apiVersion: v1
+    kind: Secret
     metadata:
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-cni-calico
-    spec:
-      bootstrap: true
-      chart:
-        name: tigera-operator
-        repo: https://projectcalico.docs.tigera.io/charts
-        version: v3.31.5
-      clusterName: RELEASE-NAME
-      releaseName: cni-calico
-      targetNamespace: tigera-operator
-      valuesSources:
-        - secret:
-            key: defaults
-            name: RELEASE-NAME-cni-calico-config
-        - secret:
-            key: overrides
-            name: RELEASE-NAME-cni-calico-config
+      name: RELEASE-NAME-cni-calico-overrides
+    stringData:
+      values.yaml: |
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: ""
   3: |
-    apiVersion: addons.stackhpc.com/v1alpha1
-    kind: Manifests
+    apiVersion: v1
+    data:
+      policies.yaml: "---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-deny-egress\nspec:\n  order: 10\n  namespaceSelector: kubernetes.io/metadata.name != 'openstack-system'\n  types:\n    - Egress\n  egress:\n    - action: Deny\n      ipVersion: 4\n      destination:\n        nets:\n          - 169.254.169.254/32\n        \n    - action: Deny\n      ipVersion: 6\n      destination:\n        nets:\n          - fe80::a9fe:a9fe/128\n        \n---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-allow-global-egress\nspec:\n  order: 20\n  types:\n    - Egress\n  egress:\n    - action: Allow\n      ipVersion: 4\n      destination:\n        nets:\n          - 0.0.0.0/0\n        \n    - action: Allow\n      ipVersion: 6\n      destination:\n        nets:\n          - ::/0\n        \n"
+    kind: ConfigMap
     metadata:
       labels:
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/component: cni-calico-globalnetpolicy
         capi.stackhpc.com/managed-by: Helm
         helm.sh/chart: addons-0.1.0
-      name: RELEASE-NAME-cni-calico-globalnetpolicy
-    spec:
-      bootstrap: true
-      clusterName: RELEASE-NAME
-      manifestSources:
-        - template: "---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-deny-egress\nspec:\n  order: 10\n  namespaceSelector: kubernetes.io/metadata.name != 'openstack-system'\n  types:\n    - Egress\n  egress:\n    - action: Deny\n      ipVersion: 4\n      destination:\n        nets:\n          - 169.254.169.254/32\n        \n    - action: Deny\n      ipVersion: 6\n      destination:\n        nets:\n          - fe80::a9fe:a9fe/128\n        \n---\napiVersion: projectcalico.org/v3\nkind: GlobalNetworkPolicy\nmetadata:\n  name: default.RELEASE-NAME-allow-global-egress\nspec:\n  order: 20\n  types:\n    - Egress\n  egress:\n    - action: Allow\n      ipVersion: 4\n      destination:\n        nets:\n          - 0.0.0.0/0\n        \n    - action: Allow\n      ipVersion: 6\n      destination:\n        nets:\n          - ::/0\n        \n"
-      releaseName: cni-calico-metadata-global-netpolicy
-      targetNamespace: tigera-operator
+      name: RELEASE-NAME-cni-calico-global-network-policies
   4: |
     apiVersion: v1
     kind: Secret
@@ -759,6 +740,7 @@ templated manifests should match snapshot:
     metadata:
       annotations: {}
       labels:
+        addons.stackhpc.com/cni: calico
         capi.stackhpc.com/cluster: RELEASE-NAME
         capi.stackhpc.com/infrastructure-provider: openstack
         capi.stackhpc.com/managed-by: Helm
