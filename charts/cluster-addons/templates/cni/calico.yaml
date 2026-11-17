@@ -7,6 +7,7 @@
 # This is a Sveltos template, instantiated using the CAPI Cluster object
 apiVersion: v1
 kind: Secret
+type: addons.projectsveltos.io/cluster-profile
 metadata:
   name: {{ $clusterName }}-cni-calico-config
   labels:
@@ -35,6 +36,7 @@ stringData:
 # User-supplied values for the tigera-operator chart, applied after the defaults
 apiVersion: v1
 kind: Secret
+type: addons.projectsveltos.io/cluster-profile
 metadata:
   name: {{ $clusterName }}-cni-calico-overrides
   labels:
