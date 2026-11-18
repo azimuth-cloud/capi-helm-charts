@@ -43,6 +43,83 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "traefik") }}-config
         key: overrides
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "traefik") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "traefik") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.ingress.traefik.release.namespace }}
+  releaseName: gateway-api-crds
+  manifestSources:
+    - template: |
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: install-gateway-crds
+        rules:
+          - apiGroups: ["apiextensions.k8s.io"]
+            resources: ["customresourcedefinitions"]
+            verbs: ["create", "get", "list", "watch", "update", "patch"]
+          - apiGroups: ["rbac.authorization.k8s.io"]
+            resources: ["clusterroles"]
+            verbs: ["get", "list", "delete"]
+          - apiGroups: ["admissionregistration.k8s.io"]
+            resources: ["validatingadmissionpolicies", "validatingadmissionpolicybindings"]
+            verbs: ["create", "get", "list", "patch"]
+        ---
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: install-gateway-crds
+        automountServiceAccountToken: true
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: install-gateway-crds
+        subjects:
+          - kind: ServiceAccount
+            name: install-gateway-crds
+            namespace: {{ .Values.ingress.traefik.release.namespace }}
+        roleRef:
+          kind: ClusterRole
+          name: install-gateway-crds
+          apiGroup: rbac.authorization.k8s.io
+        ---
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: install-gateway-crds
+        spec:
+          template:
+            spec:
+              serviceAccount: install-gateway-crds
+              hostNetwork: true
+              containers:
+              - name: install
+                image: {{ .Values.ingress.gateway.crdImage }}
+                imagePullPolicy: Always
+                command:
+                  - bash
+                  - -c
+                  - |
+                      set -o pipefail
+                      kubectl apply --server-side -f \
+                        https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ .Values.ingress.gateway.crdVersion }}/standard-install.yaml
+              nodeSelector:
+                node-role.kubernetes.io/control-plane: ""
+              tolerations:
+                - operator: Exists
+                  effect: NoSchedule
+                - operator: Exists
+                  effect: NoExecute
+              restartPolicy: Never
+          backoffLimit: 4
 {{- if .Values.monitoring.enabled }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1

@@ -260,6 +260,9 @@ ingress:
     release:
       namespace: traefik
       values: {}
+  gateway:
+    crdImage: alpine/k8s:1.35.9
+    crdVersion: v1.7.0
 
 # Settings for cluster monitoring
 monitoring:
