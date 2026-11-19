@@ -238,7 +238,9 @@ ingress:
 ```
 
 > **Note:** Nginx and Traefik are mutually exclusive. Enabling both simultaneously will cause the
-> Helm chart to fail with an explicit error.
+> Helm chart to fail with an explicit error, unless `ingress.allowNginxAndTraefik` is `true`.
+> That is only intended for migrating from Nginx to Traefik.
+> The release values must stop the two controllers from conflicting.
 
 To customise the chart version or release values for either controller, use the nested
 `chart` and `release` keys. For example, to pin a specific Traefik version and set a
