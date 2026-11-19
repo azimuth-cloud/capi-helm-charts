@@ -149,9 +149,12 @@ openstack:
     enabled: true
 ```
 
-Manila supports multiple backends, but currently only the [CephFS](https://docs.ceph.com/en/latest/cephfs/)
-backend is supported in the CAPI Helm charts. To utilise the CephFS support in the Manila CSI,
-the CephFS CSI plugin must also be enabled:
+The Openstack Manila CSI driver currently supports [CephFS](https://docs.ceph.com/en/latest/cephfs/) and NFS backends.
+
+#### CephFS
+
+To utilise the CephFS support in the Manila CSI, the CephFS CSI plugin must
+also be enabled:
 
 ```yaml
 csi:
@@ -171,7 +174,7 @@ openstack:
 ```
 
 Any of the storage class parameters
-[specified in the Manila CSI docs](https://docs.ceph.com/en/latest/cephfs/) can be given under
+[specified in the Manila CSI docs](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md) can be given under
 `openstack.csiManila.defaultStorageClass.parameters`. For example, to use the `kernel` mounter
 rather than the default `fuse` mounter, which can help performance, use the following:
 
@@ -182,6 +185,49 @@ openstack:
       parameters:
         cephfs-mounter: kernel
 ```
+
+#### NFS
+
+If the NFS backend is enabled with
+
+```
+csi:
+  csiNfs:
+    enabled: true
+```
+
+the Manila addon's StorageClass will default to using it as a provisioner.
+
+As with the CephFS backend, any of the storage class parameters
+[specified in the Manila CSI docs](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/manila-csi-plugin/using-manila-csi-plugin.md) can be given under
+`openstack.csiManila.defaultStorageClass.parameters`.
+
+To set access rules for the share, the CIDR block of allowed clients can be set
+with e.g
+
+```
+csi:
+  csiNfs:
+    shareClient: 0.0.0.0/0
+```
+
+Unlike the CephFS backend, the Manila share type is not set by default, as due
+to the network segementation required to control access to NFS backed Manila
+shares, there is unlikely to be a single public share type for all users. In
+order to deploy the NFS backend into clusters across projects with
+(Azimuth,)[https://github.com/azimuth-cloud/azimuth-config] which assumes
+homogenous capi-helm-charts values for clusters across all projects, the option
+to set
+
+```
+openstack:
+  csiManila:
+    defaultStorageClass:
+      projectIdShareType: true
+```
+
+has been included. This will assume that each project has a share type that's
+name is the project's ID.
 
 ### Keystone authenticating webhook
 
