@@ -118,6 +118,18 @@ jobs:
       - name: Set up test environment
         uses: ./.github/actions/setup
 
+      # Temporary test of https://github.com/azimuth-cloud/cluster-api-addon-provider/pull/447
+      - name: Use addon-provider deletion fix
+        run: |
+          helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
+            --repo https://azimuth-cloud.github.io/cluster-api-addon-provider \
+            --version "$(jq -r '.["addon-provider"]' dependencies.json)" \
+            --namespace capi-addon-system \
+            --reuse-values \
+            --set-string image.tag=daec53d \
+            --wait \
+            --timeout 10m
+
       - name: Write cloud credential
         run: echo "$OS_CLOUDS" > ./clouds.yaml
         env:
@@ -186,6 +198,18 @@ jobs:
 
       - name: Set up test environment
         uses: ./.github/actions/setup
+
+      # Temporary test of https://github.com/azimuth-cloud/cluster-api-addon-provider/pull/447
+      - name: Use addon-provider deletion fix
+        run: |
+          helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
+            --repo https://azimuth-cloud.github.io/cluster-api-addon-provider \
+            --version "$(jq -r '.["addon-provider"]' dependencies.json)" \
+            --namespace capi-addon-system \
+            --reuse-values \
+            --set-string image.tag=daec53d \
+            --wait \
+            --timeout 10m
 
       - name: Write cloud credential
         run: echo "$OS_CLOUDS" > ./clouds.yaml
