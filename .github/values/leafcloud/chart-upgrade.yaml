@@ -1,3 +1,5 @@
 addons:
   monitoring:
     enabled: true
+  ingress:
+    enabled: true

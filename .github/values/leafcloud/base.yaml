@@ -23,3 +23,5 @@ addons:
       defaultStorageClass:
         availabilityZone: europe-nl-ams1
         volumeType: unencrypted
+  ingress:
+    enabled: true
