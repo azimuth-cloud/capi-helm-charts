@@ -1,0 +1,20 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: FluentdConfig
+metadata:
+  name: logging-configuration
+  namespace: {{ .Values.monitoring.loggingOperator.release.namespace }}
+spec:
+  logLevel: warn
+  metrics:
+    enabled: true
+    serviceMonitor: true
+  image:
+    pullPolicy: IfNotPresent
+  scaling:
+    replicas: {{ .Values.monitoring.loggingOperator.fluentd.replicas }}
+  livenessDefaultCheck: true
+  disablePvc: true
+  bufferStorageVolume:
+    emptyDir: {}
+  resources:
+{{ toYaml .Values.monitoring.loggingOperator.fluentd.resources | indent 4 }}
