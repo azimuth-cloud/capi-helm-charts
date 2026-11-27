@@ -26,6 +26,7 @@ templates for more details.
 - [OpenStack images](#openstack-images)
 - [OpenStack credentials](#openstack-credentials)
 - [Managing a workload cluster](#managing-a-workload-cluster)
+- [Node labels and taints](#node-labels-and-taints)
 - [Multiple external networks](#multiple-external-networks)
 - [Volume-backed instances](#volume-backed-instances)
 - [Etcd configuration](#etcd-configuration)
@@ -192,6 +193,47 @@ command again. Some examples of updates that can be performed are:
   * Changing the image to update system packages or upgrade Kubernetes.
     Once a new image is available, change the machine image and Kubernetes version
     as required to trigger a rolling upgrade of the cluster nodes.
+
+## Node labels and taints
+
+Kubernetes labels and taints can be applied to the nodes of each worker node group using
+`nodeLabels` and `nodeTaints`, either in `nodeGroupDefaults` or for an individual node group:
+
+```yaml
+nodeGroupDefaults:
+  nodeTaints:
+    - key: my.company.org/default
+      value: "true"
+      effect: PreferNoSchedule
+
+nodeGroups:
+  - name: gpu
+    machineFlavor: gpu.large
+    machineCount: 2
+    nodeLabels:
+      my.company.org/workload: gpu
+    nodeTaints:
+      - key: nvidia.com/gpu
+        effect: NoSchedule
+  - name: general
+    machineFlavor: vm.large
+    machineCount: 3
+    # Opt out of the default taints
+    nodeTaints: []
+```
+
+- `nodeLabels` is a map that is merged over `nodeGroupDefaults.nodeLabels`. Every node also
+  gets the label `capi.stackhpc.com/node-group=<node group name>`.
+- `nodeTaints` is a list of `{key, value, effect}` objects, where `value` is optional and
+  `effect` is one of `NoSchedule`, `PreferNoSchedule` or `NoExecute`. A `nodeTaints` set on a
+  node group **replaces** `nodeGroupDefaults.nodeTaints`; set it to `[]` to remove the defaults.
+- Taints from `nodeTaints` are combined with any taints set in
+  `kubeadmConfigSpec.joinConfiguration.nodeRegistration.taints`. When both define the same
+  key and effect, the entry from `nodeTaints` is kept.
+
+Labels and taints are applied when a node registers with the cluster. Changing them for a node
+group creates a new `KubeadmConfigTemplate`, which triggers a rolling replacement of the
+machines in that node group.
 
 ## Multiple external networks
 

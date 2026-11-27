@@ -46,6 +46,85 @@ spec:
     - secret:
         name: {{ include "cluster-addons.componentName" (list . "cni-calico") }}-config
         key: overrides
+---
+apiVersion: addons.stackhpc.com/v1alpha1
+kind: Manifests
+metadata:
+  name: {{ include "cluster-addons.componentName" (list . "cni-calico-crds") }}
+  labels: {{ include "cluster-addons.componentLabels" (list . "cni-calico-crds") | nindent 4 }}
+spec:
+  clusterName: {{ include "cluster-addons.clusterName" . }}
+  bootstrap: true
+  targetNamespace: {{ .Values.cni.calico.release.namespace }}
+  releaseName: cni-calico-crds
+  manifestSources:
+    - template: |
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: install-calico-crds
+        rules:
+          - apiGroups: ["apiextensions.k8s.io"]
+            resources: ["customresourcedefinitions"]
+            verbs: ["create", "get", "list", "watch", "update", "patch"]
+          - apiGroups: ["rbac.authorization.k8s.io"]
+            resources: ["clusterroles"]
+            verbs: ["get", "list", "delete"]
+        ---
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: install-calico-crds
+        automountServiceAccountToken: true
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: install-calico-crds
+        subjects:
+          - kind: ServiceAccount
+            name: install-calico-crds
+            namespace: {{ .Values.cni.calico.release.namespace }}
+        roleRef:
+          kind: ClusterRole
+          name: install-calico-crds
+          apiGroup: rbac.authorization.k8s.io
+        ---
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: install-calico-crds
+        spec:
+          template:
+            spec:
+              serviceAccount: install-calico-crds
+              hostNetwork: true
+              containers:
+              - name: install
+                image: {{ .Values.cni.calico.crdImage }}
+                imagePullPolicy: Always
+                command:
+                  - bash
+                  - -c
+                  - |
+                      set -o pipefail
+                      helm repo add projectcalico \
+                        https://docs.tigera.io/calico/charts
+                      helm template calico-crds projectcalico/crd.projectcalico.org.v1 \
+                        --version {{ .Values.cni.calico.crdChartVersion }} | \
+                        kubectl apply \
+                        --server-side --force-conflicts \
+                        -f -
+              nodeSelector:
+                node-role.kubernetes.io/control-plane: ""
+              tolerations:
+                - operator: Exists
+                  effect: NoSchedule
+                - operator: Exists
+                  effect: NoExecute
+              restartPolicy: Never
+          backoffLimit: 4
 {{- if .Values.cni.calico.globalNetworkPolicy }}
 ---
 apiVersion: addons.stackhpc.com/v1alpha1
