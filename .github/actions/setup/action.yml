@@ -17,7 +17,7 @@ runs:
       run: |
         echo "addon-provider=$(jq -r '.["addon-provider"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cluster-api=$(jq -r '.["cluster-api"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
-        echo "cluster-api-janitor-openstack=$(jq -r '.["cluster-api-janitor-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
+        echo "capi-janitor-openstack-go=$(jq -r '.["capi-janitor-openstack-go"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cluster-api-provider-openstack=$(jq -r '.["cluster-api-provider-openstack"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "cert-manager=$(jq -r '.["cert-manager"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
         echo "helm=$(jq -r '.["helm"]' "$DEPENDENCIES_PATH")" >> $GITHUB_OUTPUT
@@ -123,14 +123,32 @@ runs:
           --wait \
           --timeout 10m
 
-    - name: Install Cluster API janitor
+    - name: Install Go Janitor
       shell: bash
       run: |-
-        helm upgrade cluster-api-janitor-openstack cluster-api-janitor-openstack \
-          --repo https://azimuth-cloud.github.io/cluster-api-janitor-openstack \
-          --version ${{ steps.deps.outputs.cluster-api-janitor-openstack }} \
+        chart_dir=$(mktemp -d)
+        trap 'rm -rf "$chart_dir"' EXIT
+
+        for attempt in 1 2 3; do
+          echo "Downloading Go Janitor chart (attempt $attempt/3)"
+          if helm pull oci://quay.io/azimuth/cluster-api-janitor-openstack-charts/cluster-api-janitor-openstack \
+            --version "$JANITOR_CHART_VERSION" \
+            --destination "$chart_dir"; then
+            break
+          fi
+          if [ "$attempt" -eq 3 ]; then
+            echo "::error::Failed to download the Go Janitor chart after 3 attempts."
+            exit 1
+          fi
+          sleep 10
+        done
+
+        helm upgrade cluster-api-janitor-openstack \
+          "$chart_dir/cluster-api-janitor-openstack-${JANITOR_CHART_VERSION}.tgz" \
           --namespace capi-janitor-system \
           --create-namespace \
           --install \
           --wait \
           --timeout 10m
+      env:
+        JANITOR_CHART_VERSION: ${{ steps.deps.outputs.capi-janitor-openstack-go }}
