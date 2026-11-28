@@ -18,7 +18,7 @@ cni:
     chart:
       repo: https://projectcalico.docs.tigera.io/charts
       name: tigera-operator
-      version: v3.32.2
+      version: v3.33.1
     release:
       namespace: tigera-operator
       values:
