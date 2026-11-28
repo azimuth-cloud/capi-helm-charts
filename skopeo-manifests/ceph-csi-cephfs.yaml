@@ -1,7 +1,7 @@
 quay.io:
   images:
     cephcsi/cephcsi:
-    - v3.18.1
+    - v3.18.2
 registry.k8s.io:
   images:
     sig-storage/csi-attacher:
