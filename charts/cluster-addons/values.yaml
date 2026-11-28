@@ -556,7 +556,7 @@ intelDevicePlugin:
     chart:
       repo: https://intel.github.io/helm-charts
       name: intel-device-plugins-gpu
-      version: 0.37.1
+      version: 0.37.2
     release:
       namespace: intel
       values:

@@ -625,7 +625,7 @@ templated manifests should match snapshot:
       chart:
         name: intel-device-plugins-gpu
         repo: https://intel.github.io/helm-charts
-        version: 0.37.1
+        version: 0.37.2
       clusterName: RELEASE-NAME
       releaseName: intel-device-plugin-gpu
       targetNamespace: intel
